@@ -4,7 +4,9 @@ extends Control
 ## comes first and waits for the player to continue.
 
 const WARNING_TITLE := "Content Warning"
-const WARNING_TEXT := "SANGA is a work of fiction. It shows gun violence, death, physical abuse, and the abuse of power by police and clergy.\n\nSome scenes may be distressing. Please play with care."
+## Kept general on purpose: it names the kinds of content, not who does what, so it gives nothing
+## of the story away.
+const WARNING_TEXT := "SANGA is a work of fiction. It contains violence, death, abuse, and other mature themes.\n\nSome scenes may be distressing. Please play with care."
 const WARNING_FADE_SECONDS := 0.4
 const WARNING_WIDTH := 760.0
 const WARNING_TITLE_COLOR := Color(0.98, 0.93, 0.86)
