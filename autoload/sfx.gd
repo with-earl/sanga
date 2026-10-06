@@ -8,6 +8,8 @@ extends Node
 
 const CLICK := preload("res://assets/sounds/click.wav")
 const STRIKE := preload("res://assets/sounds/strike.wav")
+## Both sounds play well below full scale, so they stay faint under the music.
+const VOLUME_DB := -10.0
 ## A few clicks can overlap, for quick taps.
 const CLICK_VOICES := 3
 
@@ -21,10 +23,12 @@ func _ready() -> void:
 		var player := AudioStreamPlayer.new()
 		player.stream = CLICK
 		player.bus = Settings.SOUND_BUS
+		player.volume_db = VOLUME_DB
 		add_child(player)
 		_clicks.append(player)
 	_strike.stream = STRIKE
 	_strike.bus = Settings.SOUND_BUS
+	_strike.volume_db = VOLUME_DB
 	add_child(_strike)
 	get_tree().node_added.connect(_on_node_added)
 	for node in get_tree().root.find_children("*", "BaseButton", true, false):
