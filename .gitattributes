@@ -1,0 +1,9 @@
+# Normalize line endings for text, and keep binary art untouched.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ogv binary
+*.webm binary
+*.mp4 binary
+*.ttf binary
+*.otf binary

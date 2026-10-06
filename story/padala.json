@@ -1,0 +1,288 @@
+{
+	"intro": [
+		{
+			"image": "res://assets/cutscenes/padala_gloria_mercy.png",
+			"hold": 3.0
+		},
+		{
+			"image": "res://assets/cutscenes/padala_luggage.png",
+			"hold": 2.6
+		},
+		{
+			"image": "res://assets/cutscenes/padala_beaten.png",
+			"hold": 2.6
+		},
+		{
+			"image": "res://assets/cutscenes/padala_bath.png",
+			"hold": 3.0
+		}
+	],
+	"locked_door": "Naka-lock.",
+	"wrong_key": {
+		"main": [
+			{
+				"speaker": "Mercy",
+				"text": "Hindi ito."
+			}
+		],
+		"kumpisal": [
+			{
+				"speaker": "Father Eli",
+				"text": "Huwag mo na subukang tumakas, Mercy",
+				"offscreen": true
+			},
+			{
+				"speaker": "Father Eli",
+				"text": "Nakikita ka ng Diyos",
+				"offscreen": true
+			}
+		]
+	},
+	"no_number": "Wala akong numerong matatawagan.",
+	"variants": {
+		"main": {
+			"objectives": [
+				"Get the police calling card",
+				"Or find the right key"
+			],
+			"objectives_after_card": [
+				"Use the telephone",
+				"Or find the right key"
+			],
+			"cards": {
+				"PoliceCard": {
+					"objective": "Get the police calling card",
+					"call": "main_police"
+				}
+			},
+			"keys": true,
+			"escape": "main_key"
+		},
+		"kumpisal": {
+			"objectives": [
+				"Find the right key"
+			],
+			"objectives_after_card": [
+				"Find the right key"
+			],
+			"cards": {},
+			"keys": true,
+			"escape": "kumpisal_outside"
+		},
+		"padala": {
+			"intro_after": [
+				{
+					"image": "res://assets/cutscenes/padala_reveal_eli.png",
+					"caption": "Father Eli",
+					"hold": 3.4
+				}
+			],
+			"objectives": [
+				"Get the police calling card",
+				"Or the food delivery card"
+			],
+			"objectives_after_card": [
+				"Use the telephone"
+			],
+			"cards": {
+				"PoliceCard": {
+					"objective": "Get the police calling card",
+					"call": "padala_police"
+				},
+				"FoodDeliveryCard": {
+					"objective": "Get the food delivery card",
+					"call": "padala_food"
+				}
+			},
+			"keys": false
+		}
+	},
+	"endings": {
+		"main_key": {
+			"id": "padala_key",
+			"steps": [
+				{
+					"image": "res://assets/cutscenes/padala_escape.png",
+					"hold": 3.0
+				},
+				{
+					"card": "Key",
+					"line": "Mercy escapes."
+				}
+			]
+		},
+		"main_police": {
+			"id": "padala_police_card",
+			"steps": [
+				{
+					"image": "res://assets/cutscenes/padala_phone_call.png",
+					"lines": [
+						{
+							"speaker": "Mercy",
+							"text": "Pakiusap, tulungan mo ako..."
+						},
+						{
+							"speaker": "???",
+							"text": "Oh pare, ikaw pala!"
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/padala_eyes_widen.png",
+					"hold": 2.4
+				},
+				{
+					"image": "res://assets/cutscenes/padala_luggage_closed.png",
+					"hold": 2.6
+				},
+				{
+					"image": "res://assets/cutscenes/padala_police_car.png",
+					"hold": 2.6
+				},
+				{
+					"card": "Police Card",
+					"line": "Mercy dies."
+				},
+				{
+					"image": "res://assets/cutscenes/padala_dressing.png",
+					"lines": [
+						{
+							"speaker": "???",
+							"text": "Panginoon... patawarin Mo ako."
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/padala_reveal_eli.png",
+					"caption": "Father Eli",
+					"hold": 3.4
+				}
+			]
+		},
+		"kumpisal_outside": {
+			"steps": [
+				{
+					"image": "res://assets/cutscenes/padala_escape.png",
+					"hold": 2.4
+				},
+				{
+					"image": "res://assets/cutscenes/padala_still_manila.png",
+					"caption": "Still in Manila",
+					"choose": [
+						"Run",
+						"Ride Jeep"
+					]
+				}
+			],
+			"choices": [
+				"kumpisal_run",
+				"kumpisal_jeep"
+			]
+		},
+		"kumpisal_run": {
+			"id": "padala_run",
+			"steps": [
+				{
+					"image": "res://assets/cutscenes/padala_run.png",
+					"hold": 2.8
+				},
+				{
+					"image": "res://assets/cutscenes/padala_run_shot.png",
+					"gunshot": true,
+					"hold": 2.8
+				},
+				{
+					"card": "Run",
+					"line": "Batista accidentally shoots Mercy."
+				}
+			]
+		},
+		"kumpisal_jeep": {
+			"id": "padala_ride_jeep",
+			"steps": [
+				{
+					"image": "res://assets/cutscenes/padala_jeep.png",
+					"hold": 2.6
+				},
+				{
+					"image": "res://assets/cutscenes/padala_police_laugh.png",
+					"hold": 3.2
+				},
+				{
+					"card": "Ride Jeep",
+					"line": "Mercy reports him, but the police laugh."
+				}
+			]
+		},
+		"padala_police": {
+			"id": "padala_police",
+			"chain": "police",
+			"steps": [
+				{
+					"image": "res://assets/cutscenes/padala_phone_call.png",
+					"lines": [
+						{
+							"speaker": "Mercy",
+							"text": "Pakiusap, tulungan mo ako..."
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/padala_police_car.png",
+					"lines": [
+						{
+							"speaker": "Father Eli",
+							"text": "Oh pare, ikaw pala!"
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/padala_eyes_widen.png",
+					"hold": 2.4
+				},
+				{
+					"image": "res://assets/cutscenes/padala_eli_attacks.png",
+					"hold": 2.6
+				},
+				{
+					"image": "res://assets/cutscenes/padala_police_car_leaves.png",
+					"hold": 2.8
+				},
+				{
+					"card": "Police Card"
+				}
+			]
+		},
+		"padala_food": {
+			"id": "padala_food",
+			"chain": "food",
+			"steps": [
+				{
+					"image": "res://assets/cutscenes/padala_phone_call.png",
+					"hold": 2.4
+				},
+				{
+					"image": "res://assets/cutscenes/padala_peter_arrives.png",
+					"lines": [
+						{
+							"speaker": "Mercy",
+							"text": "Pakiusap, tulungan mo ako..."
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/padala_peter_fights.png",
+					"hold": 2.8
+				},
+				{
+					"image": "res://assets/cutscenes/padala_peter_stabbed.png",
+					"hold": 3.0
+				},
+				{
+					"card": "Food Delivery",
+					"line": "Peter is stabbed."
+				}
+			]
+		}
+	}
+}

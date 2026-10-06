@@ -1,0 +1,243 @@
+[gd_scene format=3 uid="uid://dehm8uqw72y8o"]
+
+[ext_resource type="Script" path="res://scripts/church_nave.gd" id="1_loc"]
+[ext_resource type="Script" uid="uid://doq3k301cbv55" path="res://scripts/art_slot.gd" id="2_art"]
+[ext_resource type="Shader" uid="uid://dbh256x8fdx7f" path="res://shaders/retro_image.gdshader" id="2_qc3r6"]
+[ext_resource type="PackedScene" path="res://scenes/components/dialogue_box.tscn" id="3_dlg"]
+[ext_resource type="Shader" uid="uid://2fjmd2hvrs7c" path="res://shaders/outline.gdshader" id="4_fmkk2"]
+[ext_resource type="PackedScene" path="res://scenes/components/objectives_panel.tscn" id="9_obj"]
+[ext_resource type="PackedScene" path="res://scenes/components/game_menu.tscn" id="10_menu"]
+[ext_resource type="Script" uid="uid://cdnt0kpn444jf" path="res://scripts/outline_group.gd" id="11_outline"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vbg8b"]
+shader = ExtResource("2_qc3r6")
+shader_parameter/softness = 1.0
+shader_parameter/glow = 0.22
+shader_parameter/color_bleed = 1.2
+shader_parameter/fade = 0.05
+shader_parameter/saturation = 0.9
+shader_parameter/tint = Vector3(1.03, 1, 0.97)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xxilm"]
+shader = ExtResource("4_fmkk2")
+shader_parameter/outline_color = Color(0, 0, 0, 1)
+shader_parameter/outline_width = 3.0
+shader_parameter/edge_softness = 1.8
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hhu2j"]
+shader = ExtResource("2_qc3r6")
+shader_parameter/softness = 1.2
+shader_parameter/glow = 0.22
+shader_parameter/color_bleed = 1.2
+shader_parameter/fade = 0.05
+shader_parameter/saturation = 0.9
+shader_parameter/tint = Vector3(1.03, 1, 0.97)
+
+[node name="ChurchNave" type="Control" unique_id=764358398]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_loc")
+location_key = "church_nave"
+left_character = "Father Eli"
+exits = {
+"confessional_booth": "confessional"
+}
+metadata/_edit_horizontal_guides_ = [436.0]
+
+[node name="Background" type="Control" parent="." unique_id=1725199074]
+texture_filter = 2
+material = SubResource("ShaderMaterial_vbg8b")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_art")
+asset_id = "church_nave"
+category = "backgrounds"
+display_name = "Church Nave"
+stretch_to_fit = true
+
+[node name="ConfessionalBooth" type="Control" parent="." unique_id=2128859328]
+texture_filter = 2
+layout_mode = 1
+anchors_preset = 0
+offset_left = -102.0
+offset_top = 74.23358
+offset_right = 210.0
+offset_bottom = 661.7891
+mouse_filter = 2
+script = ExtResource("2_art")
+asset_id = "confessional_booth"
+display_name = "Confessional Booth"
+interactive = true
+shape_hit_test = true
+
+[node name="NaveVase" type="Control" parent="." unique_id=2043732708]
+texture_filter = 2
+layout_mode = 1
+anchors_preset = 0
+offset_left = -41.0
+offset_top = 437.0
+offset_right = 216.0
+offset_bottom = 748.8219
+mouse_filter = 2
+script = ExtResource("2_art")
+asset_id = "nave_vase"
+display_name = "Nave Vase"
+block_taps = true
+shape_hit_test = true
+
+[node name="Characters" type="Control" parent="." unique_id=1011985211]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.9498597, 0.9994066)
+mouse_filter = 2
+
+[node name="BatistaOutline" type="CanvasGroup" parent="Characters" unique_id=931713236]
+material = SubResource("ShaderMaterial_xxilm")
+fit_margin = 6.0
+clear_margin = 6.0
+script = ExtResource("11_outline")
+outline_width = 3.0
+
+[node name="Batista" type="Control" parent="Characters/BatistaOutline" unique_id=730107212]
+texture_filter = 2
+material = SubResource("ShaderMaterial_hhu2j")
+layout_mode = 3
+anchors_preset = 0
+offset_left = 766.429
+offset_top = 304.1805
+offset_right = 886.7205
+offset_bottom = 416.64822
+mouse_filter = 2
+script = ExtResource("2_art")
+asset_id = "batista_praying"
+category = "characters"
+display_name = "Batista"
+interactive = true
+shape_hit_test = true
+
+[node name="GwenBenOutline" type="CanvasGroup" parent="Characters" unique_id=703693249]
+material = SubResource("ShaderMaterial_xxilm")
+fit_margin = 6.0
+clear_margin = 6.0
+script = ExtResource("11_outline")
+outline_width = 3.0
+
+[node name="Ben" type="Control" parent="Characters/GwenBenOutline" unique_id=1836800094]
+texture_filter = 2
+material = SubResource("ShaderMaterial_hhu2j")
+layout_mode = 3
+anchors_preset = 0
+offset_left = 359.0004
+offset_top = 353.2096
+offset_right = 383.21448
+offset_bottom = 387.86078
+mouse_filter = 2
+script = ExtResource("2_art")
+asset_id = "ben_praying"
+category = "characters"
+display_name = "Ben"
+interactive = true
+shape_hit_test = true
+
+[node name="Gwen" type="Control" parent="Characters/GwenBenOutline" unique_id=2132685400]
+texture_filter = 2
+material = SubResource("ShaderMaterial_hhu2j")
+layout_mode = 3
+anchors_preset = 0
+offset_left = 379.00333
+offset_top = 329.19534
+offset_right = 420.06204
+offset_bottom = 388.14102
+mouse_filter = 2
+script = ExtResource("2_art")
+asset_id = "gwen_praying"
+category = "characters"
+display_name = "Gwen"
+interactive = true
+shape_hit_test = true
+
+[node name="Kulas" type="Control" parent="Characters" unique_id=162193289]
+texture_filter = 2
+material = SubResource("ShaderMaterial_hhu2j")
+anchors_preset = 0
+offset_left = 635.9384
+offset_top = 331.1966
+offset_right = 684.2566
+offset_bottom = 382.4883
+mouse_filter = 2
+script = ExtResource("2_art")
+asset_id = "kulas_praying"
+category = "characters"
+display_name = "Kulas"
+shape_hit_test = true
+
+[node name="GloriaOutline" type="CanvasGroup" parent="Characters" unique_id=1013959265]
+material = SubResource("ShaderMaterial_xxilm")
+fit_margin = 6.0
+clear_margin = 6.0
+script = ExtResource("11_outline")
+outline_width = 3.0
+
+[node name="Gloria" type="Control" parent="Characters/GloriaOutline" unique_id=826818866]
+texture_filter = 2
+material = SubResource("ShaderMaterial_hhu2j")
+layout_mode = 3
+anchors_preset = 0
+offset_left = 696.94507
+offset_top = 321.08286
+offset_right = 750.63727
+offset_bottom = 394.80945
+mouse_filter = 2
+script = ExtResource("2_art")
+asset_id = "gloria_praying"
+category = "characters"
+display_name = "Gloria"
+interactive = true
+shape_hit_test = true
+
+[node name="MercyOutline" type="CanvasGroup" parent="Characters" unique_id=1903018814]
+material = SubResource("ShaderMaterial_xxilm")
+fit_margin = 6.0
+clear_margin = 6.0
+script = ExtResource("11_outline")
+outline_width = 3.0
+
+[node name="Mercy" type="Control" parent="Characters/MercyOutline" unique_id=1613692146]
+texture_filter = 2
+material = SubResource("ShaderMaterial_hhu2j")
+layout_mode = 3
+anchors_preset = 0
+offset_left = 260.0384
+offset_top = 318.1888
+offset_right = 337.05157
+offset_bottom = 416.59445
+mouse_filter = 2
+script = ExtResource("2_art")
+asset_id = "mercy_praying"
+category = "characters"
+display_name = "Mercy"
+interactive = true
+shape_hit_test = true
+flip_horizontal = true
+
+[node name="Hud" type="CanvasLayer" parent="." unique_id=392541656]
+layer = 20
+
+[node name="ObjectivesPanel" parent="Hud" unique_id=1066889951 instance=ExtResource("9_obj")]
+
+[node name="DialogueBox" parent="Hud" unique_id=99959781 instance=ExtResource("3_dlg")]
+
+[node name="GameMenu" parent="." unique_id=826747905 instance=ExtResource("10_menu")]

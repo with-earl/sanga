@@ -1,0 +1,225 @@
+{
+	"intro": [
+		{
+			"image": "res://assets/cutscenes/tokhang_rider.png",
+			"lines": [
+				{
+					"speaker": "Peter",
+					"text": "Ako si Peter."
+				},
+				{
+					"speaker": "Peter",
+					"text": "Bilang food delivery rider, araw-araw kong kaharap ang mainit at mausok na daan."
+				}
+			]
+		},
+		{
+			"image": "res://assets/cutscenes/tokhang_tv_news.png",
+			"lines": [
+				{
+					"speaker": "Peter",
+					"text": "Kahit delikado na ang panahon, wala naman akong choice."
+				}
+			]
+		}
+	],
+	"phone": [
+		{
+			"speaker": "Peter",
+			"text": "Mahal, ano na nga ulit yung pinapabili ni Ben?"
+		},
+		{
+			"speaker": "Gwen",
+			"text": "Hay naku! Ewan ko ba dito at biglang gustong magkaroon ng laruang baril."
+		}
+	],
+	"choices": [
+		{
+			"id": "peter",
+			"text": "Sige, titingnan ko sa palengke.",
+			"after_first_run_only": false,
+			"buyer": "Peter",
+			"after": [
+				{
+					"speaker": "Ben",
+					"text": "Thank you, Kuya Peter!"
+				},
+				{
+					"speaker": "Gwen",
+					"text": "Pag hindi ka kumain ng gulay, hindi bibilhin ni Kuya Peter yung baril mo!"
+				},
+				{
+					"speaker": "Peter",
+					"text": "O sige siya. Bye, mahal!"
+				}
+			]
+		},
+		{
+			"id": "gwen",
+			"text": "Ikaw na lang bumili. May i-de-deliver pa ako eh.",
+			"after_first_run_only": true,
+			"buyer": "Gwen",
+			"after": [
+				{
+					"speaker": "Gwen",
+					"text": "O sige siya. Bye, mahal!"
+				}
+			]
+		},
+		{
+			"id": "kulas",
+			"text": "Tayong dalawa na lang mamaya. May i-de-deliver pa ako eh.",
+			"after_first_run_only": true,
+			"buyer": "",
+			"after": [
+				{
+					"speaker": "Gwen",
+					"text": "O sige siya. Bye, mahal!"
+				}
+			]
+		}
+	],
+	"objectives": [
+		"Talk to Gloria",
+		"Choose a realistic toy gun",
+		"Talk to Gloria"
+	],
+	"ask_gloria": [
+		{
+			"speaker": "$buyer",
+			"text": "Excuse me po, meron po ba kayong laruang baril?"
+		},
+		{
+			"speaker": "Gloria",
+			"text": "Ay, oo. Ayun sa bandang harapan. Pumili ka na lang at dalhin mo dito sa akin."
+		}
+	],
+	"guns": {
+		"pink_toy_gun": {
+			"text": "Bilhan ko rin ba si Gwen? (laugh)",
+			"buyers": [
+				"Peter"
+			]
+		},
+		"water_gun": {
+			"text": "Baka magtampo sa akin si Ben. (laugh)",
+			"buyers": [
+				"Peter",
+				"Gwen"
+			]
+		},
+		"realistic_toy_gun": {
+			"text": "Matutuwa nito si Ben.",
+			"buyers": [
+				"Peter",
+				"Gwen"
+			],
+			"chosen": true
+		}
+	},
+	"talk_first": "I must talk to Gloria first.",
+	"endings": {
+		"peter": {
+			"id": "tokhang_peter",
+			"steps": [
+				{
+					"image": "res://assets/cutscenes/tokhang_peter_holding.png",
+					"lines": [
+						{
+							"speaker": "???",
+							"text": "Pigilan niyo yan!"
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/tokhang_peter_shot.png",
+					"gunshot": true,
+					"hold": 2.6
+				},
+				{
+					"card": "Peter",
+					"line": "Peter dies."
+				}
+			]
+		},
+		"gwen": {
+			"id": "tokhang_gwen",
+			"steps": [
+				{
+					"image": "res://assets/cutscenes/tokhang_gwen_holding.png",
+					"lines": [
+						{
+							"speaker": "???",
+							"text": "Pigilan niyo yan!"
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/tokhang_gwen_shot.png",
+					"gunshot": true,
+					"hold": 2.6
+				},
+				{
+					"card": "Gwen",
+					"line": "Peter survives, but Gwen dies."
+				},
+				{
+					"image": "res://assets/cutscenes/tokhang_flashback_ben.png",
+					"caption": "Flashback",
+					"hold": 3.2
+				}
+			]
+		},
+		"kulas": {
+			"id": "tokhang_kulas",
+			"steps": [
+				{
+					"image": "res://assets/cutscenes/tokhang_kulas_runs.png",
+					"lines": [
+						{
+							"speaker": "???",
+							"text": "Pigilan niyo yan!"
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/tokhang_kulas_shot.png",
+					"gunshot": true,
+					"hold": 2.6
+				},
+				{
+					"card": "Kulas",
+					"line": "Peter and Gwen survive, but Kulas dies."
+				}
+			]
+		},
+		"trade": {
+			"id": "tokhang_trade",
+			"steps": [
+				{
+					"image": "res://assets/cutscenes/tokhang_trade.png",
+					"hold": 3.2
+				},
+				{
+					"image": "res://assets/cutscenes/tokhang_peter_holding.png",
+					"lines": [
+						{
+							"speaker": "???",
+							"text": "Pigilan niyo yan!"
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/tokhang_peter_shot.png",
+					"gunshot": true,
+					"hold": 2.6
+				},
+				{
+					"card": "Trade",
+					"line": "Peter dies."
+				}
+			]
+		}
+	},
+	"_comment_trade": "In the Padala timeline (police chain), Tokhang skips the choice and plays 'trade' after the phone call."
+}

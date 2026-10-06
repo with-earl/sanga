@@ -1,0 +1,236 @@
+[gd_resource type="Theme" format=3 uid="uid://bxr4gwcleh8k5"]
+
+[ext_resource type="FontFile" uid="uid://h8yh067b8sm3" path="res://assets/fonts/Lora.ttf" id="1_serif"]
+
+[sub_resource type="StyleBoxFlat" id="dialog_body"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.29, 0.184, 0.153, 0.98)
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[sub_resource type="FontVariation" id="font_semibold"]
+base_font = ExtResource("1_serif")
+variation_opentype = {
+2003265652: 400.0
+}
+
+[sub_resource type="StyleBoxFlat" id="btn_disabled"]
+content_margin_left = 24.0
+content_margin_top = 12.0
+content_margin_right = 24.0
+content_margin_bottom = 12.0
+bg_color = Color(0.913, 0.635, 0.478, 0.4)
+border_width_bottom = 5
+border_color = Color(0.62, 0.38, 0.27, 0.4)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="btn_normal"]
+content_margin_left = 24.0
+content_margin_top = 12.0
+content_margin_right = 24.0
+content_margin_bottom = 12.0
+bg_color = Color(0.913, 0.635, 0.478, 1)
+border_width_bottom = 5
+border_color = Color(0.62, 0.38, 0.27, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="btn_pressed"]
+content_margin_left = 24.0
+content_margin_top = 14.0
+content_margin_right = 24.0
+content_margin_bottom = 10.0
+bg_color = Color(0.82, 0.55, 0.4, 1)
+border_width_bottom = 2
+border_color = Color(0.62, 0.38, 0.27, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="Gradient" id="knob_gradient"]
+interpolation_mode = 1
+offsets = PackedFloat32Array(0, 0.68, 0.9)
+colors = PackedColorArray(0.965, 0.906, 0.796, 1, 0.29, 0.184, 0.153, 1, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="slider_knob"]
+gradient = SubResource("knob_gradient")
+width = 44
+height = 44
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="StyleBoxFlat" id="slider_fill"]
+content_margin_top = 5.0
+content_margin_bottom = 5.0
+bg_color = Color(0.913, 0.635, 0.478, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="slider_track"]
+content_margin_top = 5.0
+content_margin_bottom = 5.0
+bg_color = Color(0.29, 0.184, 0.153, 0.25)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="FontVariation" id="font_bold"]
+base_font = ExtResource("1_serif")
+variation_opentype = {
+2003265652: 400.0
+}
+
+[sub_resource type="FontVariation" id="font_title"]
+base_font = ExtResource("1_serif")
+variation_opentype = {
+2003265652: 400.0
+}
+spacing_glyph = -1
+
+[sub_resource type="FontVariation" id="font_medium"]
+base_font = ExtResource("1_serif")
+variation_opentype = {
+2003265652: 500.0
+}
+
+[sub_resource type="StyleBoxFlat" id="panel_cozy"]
+content_margin_left = 24.0
+content_margin_top = 16.0
+content_margin_right = 24.0
+content_margin_bottom = 16.0
+bg_color = Color(0.965, 0.906, 0.796, 0.96)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.29, 0.184, 0.153, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[sub_resource type="StyleBoxEmpty" id="btn_empty"]
+
+[sub_resource type="StyleBoxFlat" id="dialog_panel"]
+bg_color = Color(0.29, 0.184, 0.153, 0.98)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.965, 0.906, 0.796, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+expand_margin_left = 4.0
+expand_margin_top = 56.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_size = 18
+
+[sub_resource type="FontVariation" id="font_regular"]
+base_font = ExtResource("1_serif")
+variation_opentype = {
+2003265652: 400.0
+}
+
+[resource]
+default_font = SubResource("font_regular")
+default_font_size = 26
+AcceptDialog/styles/panel = SubResource("dialog_body")
+Body/base_type = &"Label"
+Body/colors/font_color = Color(0.29, 0.184, 0.153, 1)
+Body/colors/font_outline_color = Color(0, 0, 0, 0)
+Body/constants/line_spacing = 6
+Body/constants/outline_size = 0
+Body/font_sizes/font_size = 26
+Button/colors/font_color = Color(0.29, 0.184, 0.153, 1)
+Button/colors/font_disabled_color = Color(0.29, 0.184, 0.153, 0.45)
+Button/colors/font_hover_color = Color(0.29, 0.184, 0.153, 1)
+Button/colors/font_pressed_color = Color(0.2, 0.12, 0.1, 1)
+Button/fonts/font = SubResource("font_semibold")
+Button/styles/disabled = SubResource("btn_disabled")
+Button/styles/hover = SubResource("btn_normal")
+Button/styles/normal = SubResource("btn_normal")
+Button/styles/pressed = SubResource("btn_pressed")
+HSlider/icons/grabber = SubResource("slider_knob")
+HSlider/icons/grabber_disabled = SubResource("slider_knob")
+HSlider/icons/grabber_highlight = SubResource("slider_knob")
+HSlider/styles/grabber_area = SubResource("slider_fill")
+HSlider/styles/grabber_area_highlight = SubResource("slider_fill")
+HSlider/styles/slider = SubResource("slider_track")
+Headline/base_type = &"Label"
+Headline/colors/font_color = Color(0.62, 0.38, 0.27, 1)
+Headline/colors/font_outline_color = Color(0, 0, 0, 0)
+Headline/constants/outline_size = 0
+Headline/font_sizes/font_size = 30
+Headline/fonts/font = SubResource("font_bold")
+HudBody/base_type = &"Label"
+HudBody/colors/font_color = Color(0.965, 0.906, 0.796, 1)
+HudBody/colors/font_outline_color = Color(0.2, 0.12, 0.1, 1)
+HudBody/constants/outline_size = 4
+HudBody/font_sizes/font_size = 19
+HudHeading/base_type = &"Label"
+HudHeading/colors/font_color = Color(0.965, 0.906, 0.796, 1)
+HudHeading/colors/font_outline_color = Color(0.2, 0.12, 0.1, 1)
+HudHeading/constants/outline_size = 4
+HudHeading/font_sizes/font_size = 22
+Label/colors/font_color = Color(0.965, 0.906, 0.796, 1)
+Label/colors/font_outline_color = Color(0.2, 0.12, 0.1, 1)
+Label/constants/outline_size = 6
+LargeTitle/base_type = &"Label"
+LargeTitle/colors/font_color = Color(1, 1, 1, 1)
+LargeTitle/colors/font_outline_color = Color(0.1, 0.18, 0.4, 1)
+LargeTitle/constants/outline_size = 10
+LargeTitle/font_sizes/font_size = 56
+LargeTitle/fonts/font = SubResource("font_title")
+MenuPrompt/base_type = &"Label"
+MenuPrompt/colors/font_color = Color(0.965, 0.906, 0.796, 1)
+MenuPrompt/colors/font_outline_color = Color(0.1, 0.18, 0.4, 1)
+MenuPrompt/constants/outline_size = 6
+MenuPrompt/font_sizes/font_size = 26
+MenuPrompt/fonts/font = SubResource("font_medium")
+PanelContainer/styles/panel = SubResource("panel_cozy")
+StoryTitle/base_type = &"Label"
+StoryTitle/colors/font_color = Color(0.965, 0.906, 0.796, 1)
+StoryTitle/colors/font_outline_color = Color(0, 0, 0, 0)
+StoryTitle/constants/outline_size = 0
+StoryTitle/font_sizes/font_size = 44
+TextButton/base_type = &"Button"
+TextButton/colors/font_color = Color(0.965, 0.906, 0.796, 1)
+TextButton/colors/font_disabled_color = Color(0.965, 0.906, 0.796, 0.5)
+TextButton/colors/font_focus_color = Color(0.965, 0.906, 0.796, 1)
+TextButton/colors/font_hover_color = Color(0.965, 0.906, 0.796, 1)
+TextButton/colors/font_hover_pressed_color = Color(0.965, 0.906, 0.796, 1)
+TextButton/colors/font_outline_color = Color(0.1, 0.18, 0.4, 1)
+TextButton/colors/font_pressed_color = Color(0.965, 0.906, 0.796, 1)
+TextButton/constants/outline_size = 6
+TextButton/font_sizes/font_size = 26
+TextButton/fonts/font = SubResource("font_medium")
+TextButton/styles/disabled = SubResource("btn_empty")
+TextButton/styles/focus = SubResource("btn_empty")
+TextButton/styles/hover = SubResource("btn_empty")
+TextButton/styles/normal = SubResource("btn_empty")
+TextButton/styles/pressed = SubResource("btn_empty")
+Window/colors/title_color = Color(0.965, 0.906, 0.796, 1)
+Window/colors/title_outline_modulate = Color(0, 0, 0, 0)
+Window/constants/title_height = 56
+Window/constants/title_outline_size = 0
+Window/font_sizes/title_font_size = 30
+Window/fonts/title_font = SubResource("font_bold")
+Window/styles/embedded_border = SubResource("dialog_panel")
+Window/styles/embedded_unfocused_border = SubResource("dialog_panel")

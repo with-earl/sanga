@@ -1,0 +1,20 @@
+# Godot 4 cache and generated files
+.godot/
+/android/
+
+# Export builds and temporary files
+/build/
+/export/
+*.tmp
+*.apk
+*.aab
+
+# Signing keys and local export settings stay off the repository
+*.keystore
+*.jks
+export_credentials.cfg
+
+# OS clutter
+.DS_Store
+Thumbs.db
+desktop.ini

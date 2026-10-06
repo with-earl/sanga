@@ -1,0 +1,318 @@
+{
+	"_comment": "Kumpisal in each timeline. 'cast' lists who is in the church. 'objectives' and 'targets' are the route in the nave (the last target is the confessional booth). 'confessions' lists who confesses, in order. 'ending' plays after the confessions; with 'end_run' the whole run ends there.",
+	"conversations": {
+		"Gloria": [
+			{
+				"speaker": "Gloria",
+				"text": "Paminsan-minsan. Kailangan din naman natin humingi ng gabay, Father."
+			}
+		],
+		"Gwen|Ben": [
+			{
+				"speaker": "Ben",
+				"text": "Father, pwede po ba akong maglaro dito?"
+			},
+			{
+				"speaker": "Gwen",
+				"text": "Ben, huwag kang tatakbo dito. Simbahan ito."
+			}
+		],
+		"Mercy": [
+			{
+				"speaker": "Mercy",
+				"text": "Hindi ko na po alam kung kanino ako lalapit."
+			}
+		],
+		"Batista": [
+			{
+				"speaker": "Batista",
+				"text": "Pare! Kita mo nga naman natupad mo ang kagustuhan mong maging pari"
+			},
+			{
+				"speaker": "Father Eli",
+				"text": "Bilis ng panahon 'no? Dati nangangarap lang tayo maging pari kung di ka lang sana naging sunud-sunuran sa tatay mo"
+			},
+			{
+				"speaker": "Batista",
+				"text": "(laugh) Ikaw talaga pare, pero kahit anong mangyari tayo pa rin ang 'Eli-tista' (Eli at Batista)"
+			},
+			{
+				"speaker": "Father Eli",
+				"text": "(laugh) Nung highschool pa 'yang tambalan nating 'yan ah"
+			}
+		]
+	},
+	"confessions": {
+		"Gwen": {
+			"title": "Gwen's Confession",
+			"who": "Gwen",
+			"lines": [
+				{
+					"speaker": "Gwen",
+					"text": "Father... may kasalanan po ako."
+				},
+				{
+					"speaker": "Father Eli",
+					"text": "Sabihin mo lang. Nandito ako para makinig."
+				},
+				{
+					"speaker": "Gwen",
+					"text": "May kinakasama po ako. Hindi pa po kami kasal at buntis ako."
+				},
+				{
+					"speaker": "Father Eli",
+					"text": "Hindi pa tapos ang buhay dahil sa isang pagkakamali. Ang mahalaga ay harapin ninyo ang mga responsibilidad ninyo."
+				},
+				{
+					"speaker": "Gwen",
+					"text": "Salamat po, Father."
+				}
+			]
+		},
+		"Batista": {
+			"title": "Batista's Confession",
+			"who": "Batista",
+			"lines": [
+				{
+					"speaker": "Batista",
+					"text": "Father... sa linya ng trabaho ko may mga tao na akong napatay."
+				},
+				{
+					"speaker": "Father Eli",
+					"text": "Humingi ka ng tawad sa ama at ipagdasal mo ang mga taong napatay mo at ang pamilya nila"
+				},
+				{
+					"speaker": "Batista",
+					"text": "Salamat, Father"
+				}
+			]
+		},
+		"Gloria": {
+			"title": "Gloria's Confession",
+			"who": "Gloria",
+			"lines": [
+				{
+					"speaker": "Gloria",
+					"text": "Father, nanloloko ako ng tao kapalit ng pera, lubos kong pinagsisisihan"
+				},
+				{
+					"speaker": "Father Eli",
+					"text": "Tandaan mo na walang kasalanang di niya kayang patawarin"
+				}
+			]
+		},
+		"Kulas": {
+			"title": "Kulas' Confession",
+			"who": "Kulas",
+			"lines": [
+				{
+					"speaker": "Kulas",
+					"text": "Father... gusto ko nang tumigil sa droga"
+				},
+				{
+					"speaker": "Kulas",
+					"text": "Pagod na ako. Ayoko nang ganito ang buhay ko."
+				},
+				{
+					"speaker": "Father Eli",
+					"text": "Ang pagbabago ay hindi madali. Pero kung tunay ang hangarin mo, kailangan mong magsimula."
+				}
+			]
+		}
+	},
+	"variants": {
+		"main": {
+			"cast": [
+				"Gloria",
+				"Gwen",
+				"Ben",
+				"Mercy",
+				"Batista",
+				"Kulas"
+			],
+			"objectives": [
+				"Talk to Gloria",
+				"Talk to Gwen and Ben",
+				"Talk to Mercy",
+				"Talk to Batista",
+				"Go to confessional booth"
+			],
+			"targets": [
+				"Gloria",
+				"Gwen|Ben",
+				"Mercy",
+				"Batista",
+				"Confessional Booth"
+			],
+			"confessions": [
+				"Gwen",
+				"Batista",
+				"Gloria",
+				"Kulas"
+			],
+			"ending": [
+				{
+					"image": "res://assets/cutscenes/tokhang_kulas_runs.png",
+					"lines": [
+						{
+							"speaker": "Batista",
+							"text": "Pigilan niyo yan!"
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/kumpisal_gunshot.png",
+					"gunshot": true,
+					"hold": 2.2
+				},
+				{
+					"image": "res://assets/cutscenes/kumpisal_eli_hears.png",
+					"lines": [
+						{
+							"speaker": "Father Eli",
+							"text": "Panginoon... patawarin Mo ako."
+						}
+					]
+				}
+			]
+		},
+		"kumpisal": {
+			"cast": [
+				"Gloria",
+				"Gwen",
+				"Ben",
+				"Mercy",
+				"Batista",
+				"Kulas"
+			],
+			"objectives": [
+				"Talk to Gloria",
+				"Talk to Gwen and Ben",
+				"Talk to Mercy",
+				"Talk to Batista",
+				"Go to confessional booth"
+			],
+			"targets": [
+				"Gloria",
+				"Gwen|Ben",
+				"Mercy",
+				"Batista",
+				"Confessional Booth"
+			],
+			"confessions": [
+				"Gwen",
+				"Batista",
+				"Gloria",
+				"Kulas"
+			],
+			"ending": [
+				{
+					"image": "res://assets/cutscenes/kumpisal_eli_forgiveness.png",
+					"lines": [
+						{
+							"speaker": "Father Eli",
+							"text": "Panginoon... patawarin Mo ako."
+						}
+					]
+				}
+			]
+		},
+		"padala_police": {
+			"cast": [
+				"Gloria",
+				"Gwen",
+				"Ben",
+				"Kulas"
+			],
+			"objectives": [
+				"Talk to Gloria",
+				"Talk to Gwen and Ben",
+				"Go to confessional booth"
+			],
+			"targets": [
+				"Gloria",
+				"Gwen|Ben",
+				"Confessional Booth"
+			],
+			"confessions": [
+				"Gwen",
+				"Gloria",
+				"Kulas"
+			],
+			"ending": [
+				{
+					"image": "res://assets/cutscenes/kumpisal_eli_forgiveness.png",
+					"lines": [
+						{
+							"speaker": "Father Eli",
+							"text": "Panginoon... patawarin Mo ako."
+						}
+					]
+				}
+			]
+		},
+		"padala_food": {
+			"opening": [
+				{
+					"image": "res://assets/cutscenes/kumpisal_eli_forgiveness.png",
+					"lines": [
+						{
+							"speaker": "Father Eli",
+							"text": "Panginoon... patawarin Mo ako."
+						}
+					]
+				}
+			],
+			"cast": [
+				"Gloria",
+				"Gwen",
+				"Ben",
+				"Batista",
+				"Kulas"
+			],
+			"objectives": [
+				"Talk to Gloria",
+				"Talk to Gwen and Ben",
+				"Talk to Batista",
+				"Go to confessional booth"
+			],
+			"targets": [
+				"Gloria",
+				"Gwen|Ben",
+				"Batista",
+				"Confessional Booth"
+			],
+			"confessions": [
+				"Gwen",
+				"Batista",
+				"Gloria",
+				"Kulas"
+			],
+			"ending": [
+				{
+					"image": "res://assets/cutscenes/tokhang_kulas_runs.png",
+					"lines": [
+						{
+							"speaker": "Batista",
+							"text": "Pigilan niyo yan!"
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/kumpisal_gunshot.png",
+					"gunshot": true,
+					"hold": 2.2
+				},
+				{
+					"image": "res://assets/cutscenes/kumpisal_eli_sacrifice.png",
+					"hold": 3.2
+				},
+				{
+					"card": "Sacrifice",
+					"line": "Father Eli died."
+				}
+			],
+			"end_run": "kumpisal_sacrifice"
+		}
+	}
+}

@@ -1,0 +1,49 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="SANGA"
+config/description="A 2D psychological decision-based horror game wrapped in a cozy aesthetic. Every decision creates a new branch."
+run/main_scene="res://scenes/boot.tscn"
+config/quit_on_go_back=false
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/icon="res://icon.png"
+
+[autoload]
+
+GameState="*res://autoload/game_state.gd"
+Settings="*res://autoload/settings.gd"
+SceneRouter="*res://autoload/scene_router.gd"
+StoryDirector="*res://autoload/story_director.gd"
+SaveNote="*res://autoload/save_note.gd"
+RetroText="*res://autoload/retro_text.gd"
+MenuVideo="*res://autoload/menu_video.gd"
+SceneVignette="*res://autoload/scene_vignette.gd"
+AssetPreloader="*res://autoload/asset_preloader.gd"
+StoryCard="*res://autoload/story_card.gd"
+Cutscene="*res://autoload/cutscene.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+
+[gui]
+
+theme/custom="res://themes/sanga_theme.tres"
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true

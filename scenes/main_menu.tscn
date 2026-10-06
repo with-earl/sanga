@@ -1,0 +1,202 @@
+[gd_scene format=3 uid="uid://cj6j21rdf3hmm"]
+
+[ext_resource type="Script" uid="uid://bs7krdv78o6nh" path="res://scripts/main_menu.gd" id="1_menu"]
+
+[node name="MainMenu" type="Control" unique_id=1556130932]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Buttons" type="VBoxContainer" parent="." unique_id=1254193415]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -440.0
+offset_top = -400.0
+offset_right = -140.0
+offset_bottom = -84.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/separation = 20
+alignment = 2
+
+[node name="ContinueButton" type="Button" parent="Buttons"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(300, 64)
+layout_mode = 2
+theme_type_variation = &"TextButton"
+text = "Continue"
+alignment = 2
+focus_mode = 0
+
+[node name="NewButton" type="Button" parent="Buttons" unique_id=1318555377]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 64)
+layout_mode = 2
+theme_type_variation = &"TextButton"
+text = "New Game"
+alignment = 2
+focus_mode = 0
+
+[node name="LoadButton" type="Button" parent="Buttons" unique_id=1975006900]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 64)
+layout_mode = 2
+theme_type_variation = &"TextButton"
+text = "Load Game"
+alignment = 2
+focus_mode = 0
+
+[node name="QuitButton" type="Button" parent="Buttons" unique_id=303759184]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 64)
+layout_mode = 2
+theme_type_variation = &"TextButton"
+text = "Quit"
+alignment = 2
+focus_mode = 0
+
+[node name="QuitConfirm" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -440.0
+offset_top = -316.0
+offset_right = -140.0
+offset_bottom = -84.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/separation = 20
+
+[node name="Question" type="Label" parent="QuitConfirm"]
+custom_minimum_size = Vector2(300, 64)
+layout_mode = 2
+theme_type_variation = &"MenuPrompt"
+text = "Quit the game?"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="YesButton" type="Button" parent="QuitConfirm"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 64)
+layout_mode = 2
+theme_type_variation = &"TextButton"
+text = "Yes"
+alignment = 2
+focus_mode = 0
+
+[node name="NoButton" type="Button" parent="QuitConfirm"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 64)
+layout_mode = 2
+theme_type_variation = &"TextButton"
+text = "No"
+alignment = 2
+focus_mode = 0
+
+[node name="SavePanel" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -440.0
+offset_top = -316.0
+offset_right = -140.0
+offset_bottom = -84.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/separation = 10
+
+[node name="DevStories" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 140.0
+offset_top = -316.0
+offset_right = 440.0
+offset_bottom = -84.0
+grow_vertical = 0
+theme_override_constants/separation = 20
+
+[node name="Tokhang" type="Button" parent="DevStories"]
+custom_minimum_size = Vector2(300, 64)
+layout_mode = 2
+theme_type_variation = &"TextButton"
+text = "Tokhang"
+alignment = 0
+focus_mode = 0
+
+[node name="Kumpisal" type="Button" parent="DevStories"]
+custom_minimum_size = Vector2(300, 64)
+layout_mode = 2
+theme_type_variation = &"TextButton"
+text = "Kumpisal"
+alignment = 0
+focus_mode = 0
+
+[node name="Padala" type="Button" parent="DevStories"]
+custom_minimum_size = Vector2(300, 64)
+layout_mode = 2
+theme_type_variation = &"TextButton"
+text = "Padala"
+alignment = 0
+focus_mode = 0
+
+[node name="DevConfirm" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 140.0
+offset_top = -316.0
+offset_right = 440.0
+offset_bottom = -84.0
+grow_vertical = 0
+theme_override_constants/separation = 20
+
+[node name="DevQuestion" type="Label" parent="DevConfirm"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 64)
+layout_mode = 2
+theme_type_variation = &"MenuPrompt"
+text = "Start with this story?"
+vertical_alignment = 1
+
+[node name="DevYes" type="Button" parent="DevConfirm"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 64)
+layout_mode = 2
+theme_type_variation = &"TextButton"
+text = "Yes"
+alignment = 0
+focus_mode = 0
+
+[node name="DevNo" type="Button" parent="DevConfirm"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 64)
+layout_mode = 2
+theme_type_variation = &"TextButton"
+text = "No"
+alignment = 0
+focus_mode = 0

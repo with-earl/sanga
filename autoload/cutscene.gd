@@ -1,0 +1,216 @@
+extends CanvasLayer
+## Plays a cutscene: a list of steps, each a full-screen picture with optional dialogue, or a card
+## on black. Tapping anywhere moves the dialogue on, and skips a picture's hold after a moment.
+##
+## A step is a dictionary:
+##   {"image": path, "lines": [{"speaker": ..., "text": ...}]}   a picture with dialogue
+##   {"image": path, "hold": seconds}                             a picture on its own
+##   {"image": path, "gunshot": true, ...}                        with a flash, shake and buzz
+##   {"image": path, "caption": "Flashback", ...}                 with a small caption
+##   {"card": "Peter", "line": "Peter dies."}                     a title card on black
+##   {"image": path, "choose": ["Run", "Ride Jeep"]}              a picture with a choice;
+##                                                                the answer is in `last_choice`
+##
+## `play` leaves the screen black at the end. Call `release` to fade back to the scene, or
+## `hand_over` when a title card from the StoryCard follows.
+
+const FADE_SECONDS := 0.4
+const ZOOM_FROM := 1.0
+const ZOOM_TO := 1.06
+const DEFAULT_HOLD := 2.5
+## A hold can be tapped away once it has been up this long.
+const MIN_HOLD_BEFORE_TAP := 0.6
+const CARD_HOLD := 3.0
+const SHAKE_PIXELS := 14.0
+const VIBRATE_MS := 220
+const SCREEN_SIZE := Vector2(1280, 720)
+
+var _black := ColorRect.new()
+var _picture := TextureRect.new()
+var _flash := ColorRect.new()
+var _caption := Label.new()
+var _card_title := Label.new()
+var _card_line := Label.new()
+var _tap_catcher := Control.new()
+var _dialogue: DialogueBox
+var _tapped := false
+var _playing := false
+## The option picked in the last choice step, counted from 0, or -1.
+var last_choice := -1
+
+
+func _ready() -> void:
+	layer = 90
+	visible = false
+	var base := ColorRect.new()
+	base.color = Color.BLACK
+	_fill(base)
+	add_child(base)
+	_picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_picture.size = SCREEN_SIZE
+	_picture.pivot_offset = SCREEN_SIZE / 2.0
+	_picture.material = ArtSlot.retro_material()
+	_picture.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_picture)
+	var vignette := ColorRect.new()
+	vignette.material = SceneVignette.make_material()
+	_fill(vignette)
+	add_child(vignette)
+	_caption.theme_type_variation = &"HudHeading"
+	_caption.position = Vector2(40, 32)
+	_caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_caption.modulate.a = 0.0
+	add_child(_caption)
+	_flash.color = Color(1, 1, 1, 1)
+	_flash.modulate.a = 0.0
+	_fill(_flash)
+	add_child(_flash)
+	_black.color = Color.BLACK
+	_fill(_black)
+	add_child(_black)
+	_card_title.theme_type_variation = &"StoryTitle"
+	_card_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_card_title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_fill(_card_title)
+	_card_title.modulate.a = 0.0
+	add_child(_card_title)
+	_card_line.theme_type_variation = &"HudBody"
+	_card_line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_card_line.position = Vector2(0, SCREEN_SIZE.y / 2.0 + 46.0)
+	_card_line.size = Vector2(SCREEN_SIZE.x, 44)
+	_card_line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_card_line.modulate.a = 0.0
+	add_child(_card_line)
+	# Catches every tap, so the scene underneath cannot be touched while a cutscene plays.
+	_fill(_tap_catcher)
+	_tap_catcher.mouse_filter = Control.MOUSE_FILTER_STOP
+	_tap_catcher.gui_input.connect(_on_tap)
+	add_child(_tap_catcher)
+	_dialogue = (load("res://scenes/components/dialogue_box.tscn") as PackedScene).instantiate()
+	_fill(_dialogue)
+	add_child(_dialogue)
+
+
+func is_playing() -> bool:
+	return _playing
+
+
+## Plays the steps in order and returns when they are done, leaving the screen black.
+func play(steps: Array) -> void:
+	_playing = true
+	visible = true
+	_black.modulate.a = 0.0
+	await _tween_alpha(_black, 1.0, FADE_SECONDS)
+	for step in steps:
+		var data := step as Dictionary
+		if data.has("card"):
+			await _play_card(str(data["card"]), str(data.get("line", "")))
+		elif data.has("image"):
+			await _play_picture(data)
+	_playing = false
+
+
+## Fades from the black end of a cutscene back to the scene underneath.
+func release() -> void:
+	await _tween_alpha(_black, 0.0, FADE_SECONDS)
+	visible = false
+
+
+## Stays black until the StoryCard's own black screen has taken over, then steps aside.
+func hand_over() -> void:
+	while not (StoryCard.visible and StoryCard.is_screen_covered()):
+		await get_tree().process_frame
+	visible = false
+
+
+func _play_picture(data: Dictionary) -> void:
+	var texture := load(str(data["image"])) as Texture2D
+	if texture == null:
+		push_error("Missing cutscene picture: %s" % data["image"])
+		return
+	_picture.texture = texture
+	_picture.scale = Vector2.ONE * ZOOM_FROM
+	_picture.position = Vector2.ZERO
+	var lines: Array = data.get("lines", [])
+	var hold: float = float(data.get("hold", DEFAULT_HOLD))
+	var zoom := create_tween()
+	zoom.tween_property(_picture, "scale", Vector2.ONE * ZOOM_TO, maxf(hold, 4.0) + 6.0)
+	if data.has("caption"):
+		_caption.text = str(data["caption"])
+		_tween_alpha(_caption, 1.0, FADE_SECONDS)
+	await _tween_alpha(_black, 0.0, FADE_SECONDS)
+	if data.get("gunshot", false):
+		_gunshot()
+	if not lines.is_empty():
+		_dialogue.set_cast("", null, "", null)
+		_dialogue.say_lines(str((lines[0] as Dictionary).get("speaker", "")), lines)
+		await _dialogue.lines_finished
+	elif data.has("choose"):
+		await _hold(MIN_HOLD_BEFORE_TAP)
+		_dialogue.set_cast("", null, "", null)
+		last_choice = await _dialogue.choose(data["choose"])
+	else:
+		await _hold(hold)
+	if data.has("caption"):
+		_tween_alpha(_caption, 0.0, FADE_SECONDS)
+	await _tween_alpha(_black, 1.0, FADE_SECONDS)
+	zoom.kill()
+
+
+func _play_card(title: String, line: String) -> void:
+	_card_title.text = title
+	_card_line.text = line
+	await _tween_alpha(_card_title, 1.0, FADE_SECONDS * 1.5)
+	if line != "":
+		await _tween_alpha(_card_line, 1.0, FADE_SECONDS * 1.5)
+	await _hold(CARD_HOLD)
+	var out := create_tween().set_parallel(true)
+	out.tween_property(_card_title, "modulate:a", 0.0, FADE_SECONDS)
+	out.tween_property(_card_line, "modulate:a", 0.0, FADE_SECONDS)
+	await out.finished
+
+
+## A white flash, a quick shake of the picture, and a short vibration on phones.
+func _gunshot() -> void:
+	_flash.modulate.a = 0.9
+	create_tween().tween_property(_flash, "modulate:a", 0.0, 0.35).set_ease(Tween.EASE_OUT)
+	var shake := create_tween()
+	for i in 6:
+		var reach := SHAKE_PIXELS * (1.0 - float(i) / 6.0)
+		shake.tween_property(_picture, "position", Vector2(randf_range(-reach, reach), randf_range(-reach, reach)), 0.04)
+	shake.tween_property(_picture, "position", Vector2.ZERO, 0.05)
+	Settings.vibrate(VIBRATE_MS)
+
+
+## Waits `seconds`, or less if the player taps after a short moment.
+func _hold(seconds: float) -> void:
+	_tapped = false
+	var elapsed := 0.0
+	while elapsed < seconds:
+		await get_tree().process_frame
+		elapsed += get_process_delta_time()
+		if _tapped and elapsed >= MIN_HOLD_BEFORE_TAP:
+			break
+		_tapped = false
+
+
+func _on_tap(event: InputEvent) -> void:
+	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
+		return
+	if _dialogue.visible:
+		_dialogue.advance()
+	else:
+		_tapped = true
+
+
+func _tween_alpha(item: CanvasItem, alpha: float, seconds: float) -> void:
+	var tween := create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(item, "modulate:a", alpha, seconds)
+	await tween.finished
+
+
+func _fill(control: Control) -> void:
+	control.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	control.mouse_filter = Control.MOUSE_FILTER_IGNORE

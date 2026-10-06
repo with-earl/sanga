@@ -1,0 +1,159 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/padala.gd" id="1_loc"]
+[ext_resource type="Script" path="res://scripts/art_slot.gd" id="2_art"]
+[ext_resource type="PackedScene" path="res://scenes/components/dialogue_box.tscn" id="3_dlg"]
+[ext_resource type="PackedScene" path="res://scenes/components/objectives_panel.tscn" id="9_obj"]
+[ext_resource type="PackedScene" path="res://scenes/components/game_menu.tscn" id="10_menu"]
+
+[node name="ApartmentRoom" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_loc")
+location_key = "apartment_room"
+
+[node name="Background" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_art")
+asset_id = "apartment_room"
+category = "backgrounds"
+display_name = "Apartment Room"
+stretch_to_fit = true
+
+[node name="Props" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Door" type="Control" parent="Props"]
+layout_mode = 0
+offset_left = 65.0
+offset_top = 122.0
+offset_right = 268.0
+offset_bottom = 655.0
+script = ExtResource("2_art")
+asset_id = "door"
+category = "props"
+display_name = "Door"
+interactive = true
+hotspot = true
+
+[node name="Telephone" type="Control" parent="Props"]
+layout_mode = 0
+offset_left = 1000.0
+offset_top = 392.0
+offset_right = 1096.0
+offset_bottom = 462.0
+script = ExtResource("2_art")
+asset_id = "telephone"
+category = "props"
+display_name = "Telephone"
+interactive = true
+hotspot = true
+
+[node name="Keys1" type="Control" parent="Props"]
+layout_mode = 0
+offset_left = 400.0
+offset_top = 300.0
+offset_right = 470.0
+offset_bottom = 356.0
+script = ExtResource("2_art")
+asset_id = "keys"
+category = "props"
+display_name = "Keys"
+interactive = true
+
+[node name="Keys2" type="Control" parent="Props"]
+layout_mode = 0
+offset_left = 858.0
+offset_top = 218.0
+offset_right = 928.0
+offset_bottom = 274.0
+script = ExtResource("2_art")
+asset_id = "keys"
+category = "props"
+display_name = "Keys"
+interactive = true
+
+[node name="Keys3" type="Control" parent="Props"]
+layout_mode = 0
+offset_left = 640.0
+offset_top = 440.0
+offset_right = 710.0
+offset_bottom = 496.0
+script = ExtResource("2_art")
+asset_id = "keys"
+category = "props"
+display_name = "Keys"
+interactive = true
+
+[node name="Keys4" type="Control" parent="Props"]
+layout_mode = 0
+offset_left = 520.0
+offset_top = 610.0
+offset_right = 590.0
+offset_bottom = 666.0
+script = ExtResource("2_art")
+asset_id = "keys"
+category = "props"
+display_name = "Keys"
+interactive = true
+
+[node name="Keys5" type="Control" parent="Props"]
+layout_mode = 0
+offset_left = 1010.0
+offset_top = 496.0
+offset_right = 1080.0
+offset_bottom = 552.0
+script = ExtResource("2_art")
+asset_id = "keys"
+category = "props"
+display_name = "Keys"
+interactive = true
+
+[node name="PoliceCard" type="Control" parent="Props"]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 300.0
+offset_right = 570.0
+offset_bottom = 356.0
+script = ExtResource("2_art")
+asset_id = "police_card"
+category = "props"
+display_name = "Police Card"
+interactive = true
+
+[node name="FoodDeliveryCard" type="Control" parent="Props"]
+layout_mode = 0
+offset_left = 280.0
+offset_top = 610.0
+offset_right = 350.0
+offset_bottom = 666.0
+script = ExtResource("2_art")
+asset_id = "food_delivery_card"
+category = "props"
+display_name = "Food Delivery Card"
+interactive = true
+
+[node name="Hud" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="ObjectivesPanel" parent="Hud" instance=ExtResource("9_obj")]
+
+[node name="DialogueBox" parent="Hud" instance=ExtResource("3_dlg")]
+
+[node name="GameMenu" parent="." instance=ExtResource("10_menu")]

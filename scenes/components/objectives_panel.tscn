@@ -1,0 +1,59 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/objectives_panel.gd" id="1_obj"]
+
+[sub_resource type="Gradient" id="line_gradient"]
+interpolation_mode = 1
+offsets = PackedFloat32Array(0, 0.34, 0.67)
+colors = PackedColorArray(0.5, 0.4, 0.35, 1, 0.965, 0.906, 0.796, 1, 0.5, 0.4, 0.35, 1)
+
+[sub_resource type="GradientTexture2D" id="line_texture"]
+gradient = SubResource("line_gradient")
+width = 180
+height = 3
+fill_from = Vector2(0, 0)
+fill_to = Vector2(0, 1)
+
+[node name="ObjectivesPanel" type="Control"]
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -290.0
+offset_top = 20.0
+offset_right = -32.0
+offset_bottom = 90.0
+grow_horizontal = 0
+mouse_filter = 2
+script = ExtResource("1_obj")
+
+[node name="Box" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 70.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/separation = 5
+
+[node name="Heading" type="Label" parent="Box"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"HudHeading"
+text = "Objective/s"
+horizontal_alignment = 2
+
+[node name="Line" type="TextureRect" parent="Box" groups=["retro_blur"]]
+modulate = Color(1, 1, 1, 0.75)
+custom_minimum_size = Vector2(180, 3)
+layout_mode = 2
+size_flags_horizontal = 8
+mouse_filter = 2
+texture = SubResource("line_texture")
+expand_mode = 1
+
+[node name="List" type="VBoxContainer" parent="Box"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 2

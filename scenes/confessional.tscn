@@ -1,0 +1,118 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/confessional.gd" id="1_loc"]
+[ext_resource type="Script" path="res://scripts/art_slot.gd" id="2_art"]
+[ext_resource type="PackedScene" path="res://scenes/components/dialogue_box.tscn" id="3_dlg"]
+[ext_resource type="PackedScene" path="res://scenes/components/objectives_panel.tscn" id="9_obj"]
+[ext_resource type="PackedScene" path="res://scenes/components/game_menu.tscn" id="10_menu"]
+[ext_resource type="Script" path="res://scripts/outline_group.gd" id="11_outline"]
+[ext_resource type="Script" path="res://scripts/back_link.gd" id="12_back"]
+
+[node name="Confessional" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_loc")
+location_key = "confessional"
+left_character = "Father Eli"
+back_to = "church_nave"
+back_label = "Church Nave"
+
+[node name="Background" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_art")
+asset_id = "confessional"
+category = "backgrounds"
+display_name = "Confessional"
+stretch_to_fit = true
+
+[node name="Characters" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="GloriaOutline" type="CanvasGroup" parent="Characters"]
+script = ExtResource("11_outline")
+
+[node name="Gloria" type="Control" parent="Characters/GloriaOutline"]
+layout_mode = 0
+offset_left = 140.0
+offset_top = 240.0
+offset_right = 300.0
+offset_bottom = 640.0
+script = ExtResource("2_art")
+asset_id = "gloria"
+category = "characters"
+display_name = "Gloria"
+
+[node name="BatistaOutline" type="CanvasGroup" parent="Characters"]
+script = ExtResource("11_outline")
+
+[node name="Batista" type="Control" parent="Characters/BatistaOutline"]
+layout_mode = 0
+offset_left = 400.0
+offset_top = 240.0
+offset_right = 560.0
+offset_bottom = 640.0
+script = ExtResource("2_art")
+asset_id = "batista"
+category = "characters"
+display_name = "Batista"
+
+[node name="GwenOutline" type="CanvasGroup" parent="Characters"]
+script = ExtResource("11_outline")
+
+[node name="Gwen" type="Control" parent="Characters/GwenOutline"]
+layout_mode = 0
+offset_left = 660.0
+offset_top = 240.0
+offset_right = 820.0
+offset_bottom = 640.0
+script = ExtResource("2_art")
+asset_id = "gwen"
+category = "characters"
+display_name = "Gwen"
+
+[node name="Kulas" type="Control" parent="Characters"]
+layout_mode = 0
+offset_left = 920.0
+offset_top = 240.0
+offset_right = 1080.0
+offset_bottom = 640.0
+script = ExtResource("2_art")
+asset_id = "kulas"
+category = "characters"
+display_name = "Kulas"
+
+[node name="Hud" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="BackButton" type="Button" parent="Hud"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 32.0
+offset_top = 58.0
+offset_right = 232.0
+offset_bottom = 96.0
+focus_mode = 0
+text = "Church Nave"
+script = ExtResource("12_back")
+
+[node name="ObjectivesPanel" parent="Hud" instance=ExtResource("9_obj")]
+
+[node name="DialogueBox" parent="Hud" instance=ExtResource("3_dlg")]
+
+[node name="GameMenu" parent="." instance=ExtResource("10_menu")]

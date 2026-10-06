@@ -1,0 +1,140 @@
+[gd_scene format=3 uid="uid://dhyp4ou3trg8j"]
+
+[ext_resource type="Script" path="res://scripts/tokhang.gd" id="1_loc"]
+[ext_resource type="Script" uid="uid://doq3k301cbv55" path="res://scripts/art_slot.gd" id="2_art"]
+[ext_resource type="Shader" uid="uid://dbh256x8fdx7f" path="res://shaders/retro_image.gdshader" id="2_mjy6a"]
+[ext_resource type="PackedScene" path="res://scenes/components/dialogue_box.tscn" id="3_dlg"]
+[ext_resource type="PackedScene" path="res://scenes/components/objectives_panel.tscn" id="9_obj"]
+[ext_resource type="PackedScene" path="res://scenes/components/game_menu.tscn" id="10_menu"]
+[ext_resource type="Script" path="res://scripts/outline_group.gd" id="11_outline"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vbg8b"]
+shader = ExtResource("2_mjy6a")
+shader_parameter/softness = 1.0
+shader_parameter/glow = 0.22
+shader_parameter/color_bleed = 1.2
+shader_parameter/fade = 0.05
+shader_parameter/saturation = 0.9
+shader_parameter/tint = Vector3(1.03, 1, 0.97)
+
+[node name="PublicMarket" type="Control" unique_id=1483343704]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_loc")
+location_key = "public_market"
+
+[node name="Background" type="Control" parent="." unique_id=390676187]
+texture_filter = 2
+material = SubResource("ShaderMaterial_vbg8b")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_art")
+asset_id = "public_market"
+category = "backgrounds"
+display_name = "Public Market"
+stretch_to_fit = true
+
+[node name="Characters" type="Control" parent="." unique_id=356139935]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="GloriaOutline" type="CanvasGroup" parent="Characters"]
+script = ExtResource("11_outline")
+
+[node name="Gloria" type="Control" parent="Characters/GloriaOutline" unique_id=190066661]
+texture_filter = 2
+material = SubResource("ShaderMaterial_vbg8b")
+anchors_preset = 0
+offset_left = 487.0
+offset_top = 258.0
+offset_right = 623.0
+offset_bottom = 720.61414
+mouse_filter = 2
+script = ExtResource("2_art")
+asset_id = "gloria_market"
+category = "characters"
+display_name = "Gloria"
+interactive = true
+shape_hit_test = true
+
+[node name="Props" type="Control" parent="." unique_id=666228509]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Motor" type="Control" parent="Props"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 470.0
+offset_right = 400.0
+offset_bottom = 720.0
+script = ExtResource("2_art")
+asset_id = "motor"
+category = "props"
+display_name = "Motor"
+
+[node name="PinkToyGun" type="Control" parent="Props" unique_id=1360515324]
+anchors_preset = 0
+offset_left = 880.0
+offset_top = 388.0
+offset_right = 988.0
+offset_bottom = 524.0
+mouse_filter = 2
+script = ExtResource("2_art")
+asset_id = "pink_toy_gun"
+display_name = "Pink Toy Gun"
+interactive = true
+hotspot = true
+
+[node name="WaterGun" type="Control" parent="Props" unique_id=72011640]
+anchors_preset = 0
+offset_left = 992.0
+offset_top = 388.0
+offset_right = 1104.0
+offset_bottom = 526.0
+mouse_filter = 2
+script = ExtResource("2_art")
+asset_id = "water_gun"
+display_name = "Water Gun"
+interactive = true
+hotspot = true
+
+[node name="RealisticToyGun" type="Control" parent="Props" unique_id=1084976968]
+anchors_preset = 0
+offset_left = 1114.0
+offset_top = 388.0
+offset_right = 1242.0
+offset_bottom = 526.0
+mouse_filter = 2
+script = ExtResource("2_art")
+asset_id = "realistic_toy_gun"
+display_name = "Realistic Toy Gun"
+interactive = true
+hotspot = true
+
+[node name="Hud" type="CanvasLayer" parent="." unique_id=1662670641]
+layer = 20
+
+[node name="ObjectivesPanel" parent="Hud" unique_id=739947426 instance=ExtResource("9_obj")]
+
+[node name="DialogueBox" parent="Hud" unique_id=1590261268 instance=ExtResource("3_dlg")]
+
+[node name="GameMenu" parent="." unique_id=563291929 instance=ExtResource("10_menu")]
