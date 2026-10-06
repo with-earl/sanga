@@ -4,8 +4,9 @@ extends Control
 
 const MONTHS := ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 const ROW_SIZE := Vector2(300, 52)
-## Development only: the story buttons on the left start a story's timeline without a save slot,
-## for quick testing. They only appear in debug builds.
+## Development only: the menu on the left, for quick testing without a save slot. "Stories" starts
+## a story's timeline; "Endings" shows the screen a timeline ends on (Main, Alternate 1, ...). It
+## only appears in debug builds.
 
 @onready var _menu: Control = $Buttons
 @onready var _quit_confirm: Control = %QuitConfirm
@@ -27,7 +28,9 @@ const ROW_SIZE := Vector2(300, 52)
 
 ## What the Android back button does while the save panel is showing.
 var _back_action := Callable()
-var _pending_story := ""
+## What Yes does in the development question on the left, and what No goes back to.
+var _dev_yes_action := Callable()
+var _dev_no_action := Callable()
 
 
 func _ready() -> void:
@@ -40,10 +43,9 @@ func _ready() -> void:
 	_yes_button.pressed.connect(get_tree().quit)
 	_no_button.pressed.connect(_show_quit_confirm.bind(false))
 	_dev_stories.visible = OS.is_debug_build()
-	for story_button in _dev_stories.get_children():
-		story_button.pressed.connect(_ask_dev_story.bind(story_button.text))
-	_dev_yes.pressed.connect(_start_dev_story)
-	_dev_no.pressed.connect(_show_dev_confirm.bind(false))
+	_show_dev_menu()
+	_dev_yes.pressed.connect(func() -> void: _dev_yes_action.call())
+	_dev_no.pressed.connect(func() -> void: _dev_no_action.call())
 
 
 ## Android back button steps back one level. From the main buttons it asks before leaving.
@@ -53,7 +55,7 @@ func _notification(what: int) -> void:
 	if _settings.is_open():
 		_settings.close()
 	elif _dev_confirm.visible:
-		_show_dev_confirm(false)
+		_dev_no_action.call()
 	elif _save_panel.visible:
 		_back_action.call()
 	else:
@@ -72,24 +74,75 @@ func _show_main() -> void:
 	_menu.visible = true
 
 
-## TEMPORARY, development only. The question takes the place of the story buttons, on the left.
-func _ask_dev_story(title: String) -> void:
-	_pending_story = title
-	_dev_question.text = "Start with %s?" % title
-	_show_dev_confirm(true)
+## Development only. The two choices on the left: Stories and Endings.
+func _show_dev_menu() -> void:
+	_open_dev_list()
+	_add_dev_row("Stories", _show_dev_stories)
+	_add_dev_row("Endings", _show_dev_endings)
 
 
-func _show_dev_confirm(asking: bool) -> void:
-	_dev_confirm.visible = asking
-	_dev_stories.visible = not asking and OS.is_debug_build()
+func _show_dev_stories() -> void:
+	_open_dev_list()
+	for story in StoryDirector.STORY_ORDER:
+		var title := StoryDirector.story_title(story)
+		_add_dev_row(title, _ask_dev("Start with %s?" % title, _start_dev_story.bind(story), _show_dev_stories))
+	_add_dev_row("Back", _show_dev_menu)
+
+
+## Main, then Alternate 1 to 5: one for each way a timeline can end.
+func _show_dev_endings() -> void:
+	_open_dev_list()
+	var endings := TimelineMap.endings()
+	for index in endings.size():
+		var ending_name := TimelineMap.ending_name(index)
+		_add_dev_row(ending_name, _ask_dev("Show the %s ending?" % ending_name, _show_dev_ending.bind(endings[index]), _show_dev_endings))
+	_add_dev_row("Back", _show_dev_menu)
+
+
+func _open_dev_list() -> void:
+	_dev_confirm.visible = false
+	_dev_stories.visible = OS.is_debug_build()
+	for child in _dev_stories.get_children():
+		_dev_stories.remove_child(child)
+		child.queue_free()
+
+
+func _add_dev_row(text: String, action: Callable) -> void:
+	var row := Button.new()
+	row.theme_type_variation = &"TextButton"
+	row.text = text
+	row.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	row.focus_mode = Control.FOCUS_NONE
+	row.custom_minimum_size = ROW_SIZE
+	row.pressed.connect(action)
+	_dev_stories.add_child(row)
+
+
+## A question in place of the list, on the left. Yes does `yes`; No goes back with `no`.
+func _ask_dev(question: String, yes: Callable, no: Callable) -> Callable:
+	return func() -> void:
+		_dev_question.text = question
+		_dev_yes_action = yes
+		_dev_no_action = no
+		_dev_stories.visible = false
+		_dev_confirm.visible = true
 
 
 ## Development only. Starts unsaved so test runs never fill the save slots.
-func _start_dev_story() -> void:
-	var title := _pending_story
-	_show_dev_confirm(false)
+func _start_dev_story(story: String) -> void:
+	_show_dev_menu()
 	GameState.start_unsaved_game()
-	StoryDirector.begin_with(title.to_lower())
+	StoryDirector.begin_with(story)
+
+
+## Development only. Ends an unsaved run as if it had reached this reality, so the timeline's
+## closing screen plays exactly as it does in the game.
+func _show_dev_ending(reality: Dictionary) -> void:
+	_show_dev_menu()
+	GameState.start_unsaved_game()
+	GameState.timeline = str(reality.get("timeline", ""))
+	GameState.run_outcomes = (reality.get("needs", []) as Array).duplicate()
+	StoryDirector.end_run("", "", "")
 
 
 ## Continue picks up the save played most recently.

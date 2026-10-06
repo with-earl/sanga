@@ -43,6 +43,26 @@ static func key_of(reality: Dictionary) -> String:
 	return "%s:%s" % [reality.get("timeline", ""), "+".join(PackedStringArray(reality.get("needs", [])))]
 
 
+## One reality for each way a timeline can end, in the chart's order: the first reality whose path
+## finishes on each last card. The first is the main ending (the main timeline, Mercy escapes); the
+## rest are the alternate endings.
+static func endings() -> Array:
+	var found: Array = []
+	var last_cards: Array = []
+	for reality in data().get("realities", []):
+		var path: Array = reality.get("path", [])
+		if path.is_empty() or path.back() in last_cards:
+			continue
+		last_cards.append(path.back())
+		found.append(reality)
+	return found
+
+
+## "Main" for the first ending, then "Alternate 1", "Alternate 2" and so on.
+static func ending_name(index: int) -> String:
+	return "Main" if index == 0 else "Alternate %d" % index
+
+
 ## The realities with these keys, in the chart's order.
 static func realities_with(keys: Array) -> Array:
 	var found: Array = []
