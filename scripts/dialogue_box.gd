@@ -32,7 +32,9 @@ const PORTRAIT_SIZE_FACTORS := {
 	"kulas_1": 0.96,
 	"peter_1": 1.0,
 }
-const PORTRAIT_MARGIN := 24.0
+## Space between a portrait and the side of the screen. Wider than the dialogue box's own margin,
+## so the characters stand a little in from the edges.
+const PORTRAIT_MARGIN := 64.0
 ## The box spans the whole screen. Its text starts at the top left, this far in from the edge.
 const TEXT_PADDING := 28.0
 ## The box: black at 40% opacity with a gray and silver gradient border.
