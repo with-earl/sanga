@@ -30,6 +30,7 @@ SceneVignette="*res://autoload/scene_vignette.gd"
 AssetPreloader="*res://autoload/asset_preloader.gd"
 StoryCard="*res://autoload/story_card.gd"
 Cutscene="*res://autoload/cutscene.gd"
+MusicDirector="*res://autoload/music_director.gd"
 
 [display]
 
