@@ -33,6 +33,12 @@ var run_outcomes: Array = []
 var realities: Array = []
 ## Seconds played in this save.
 var play_seconds := 0.0
+## Undo: the state after each step of the story being played, oldest first. The first entry is
+## where the story can be undone back to, at most: its start, after any opening.
+var history: Array = []
+## True when something changed since the last entry in `history`, such as a wrong key tried or one
+## of two people talked to, so undo first takes that back.
+var changed_since_checkpoint := false
 
 
 func _process(delta: float) -> void:
@@ -72,6 +78,8 @@ func _reset() -> void:
 	run_outcomes = []
 	realities = []
 	play_seconds = 0.0
+	history = []
+	changed_since_checkpoint = false
 
 
 func has_finished_first_run() -> bool:
@@ -83,12 +91,15 @@ func is_run_in_progress() -> bool:
 
 
 func set_location(key: String) -> void:
+	if key != location:
+		changed_since_checkpoint = true
 	location = key
 	save_current()
 
 
 func set_flag(flag_name: String, value: Variant = true) -> void:
 	flags[flag_name] = value
+	changed_since_checkpoint = true
 	state_changed.emit()
 
 
@@ -108,6 +119,7 @@ func clear_flags(prefix: String) -> void:
 func record_decision(decision_id: String, choice: String) -> void:
 	decisions.append({"id": decision_id, "choice": choice, "location": location})
 	flags[decision_id] = choice
+	changed_since_checkpoint = true
 	save_current(true)
 	state_changed.emit()
 
@@ -124,6 +136,38 @@ func record_ending(ending_id: String) -> void:
 func record_reality(key: String) -> void:
 	if key != "" and key not in realities:
 		realities.append(key)
+
+
+## Marks the end of a step of the story, so undo can come back to this point. With `fresh`, this
+## is where undo stops: the start of a story, or the moment its opening is over.
+func checkpoint(fresh := false) -> void:
+	if fresh or timeline == "":
+		history = []
+	if timeline != "":
+		history.append({"location": location, "flags": flags.duplicate(true), "decisions": decisions.duplicate(true)})
+	changed_since_checkpoint = false
+	state_changed.emit()
+
+
+func can_undo() -> bool:
+	return timeline != "" and not history.is_empty() and (changed_since_checkpoint or history.size() > 1)
+
+
+## Takes back the last step: anything done since the last checkpoint, or else the last checkpoint
+## itself. Saves the result. The caller then reopens `location`.
+func undo() -> bool:
+	if not can_undo():
+		return false
+	if not changed_since_checkpoint:
+		history.pop_back()
+	var point: Dictionary = history.back()
+	location = point["location"]
+	flags = point["flags"].duplicate(true)
+	decisions = point["decisions"].duplicate(true)
+	changed_since_checkpoint = false
+	save_current()
+	state_changed.emit()
+	return true
 
 
 ## Saves to the current slot. `noticed` shows the player a small "Progress saved" note.
@@ -149,6 +193,8 @@ func save_to_slot(slot: int) -> bool:
 		"run_outcomes": run_outcomes,
 		"realities": realities,
 		"play_seconds": play_seconds,
+		"history": history,
+		"changed_since_checkpoint": changed_since_checkpoint,
 	}
 	# Written to a temporary file first, so a crash mid-write never ruins the save.
 	var temp_path := slot_path(slot) + ".tmp"
@@ -177,6 +223,11 @@ func load_slot(slot: int) -> bool:
 	run_outcomes = data["run_outcomes"]
 	realities = data["realities"]
 	play_seconds = data["play_seconds"]
+	history = data["history"]
+	changed_since_checkpoint = data["changed_since_checkpoint"]
+	if history.is_empty():
+		# Saves from before undo existed can be undone back to where they were loaded.
+		checkpoint()
 	current_slot = slot
 	state_changed.emit()
 	return true
@@ -219,9 +270,15 @@ func read_slot(slot: int) -> Dictionary:
 	data["runs_finished"] = int(data.get("runs_finished", 0))
 	data["play_seconds"] = float(data.get("play_seconds", 0.0))
 	# Saves made before realities were recorded simply have none yet.
-	for list_key in ["run_outcomes", "realities"]:
+	for list_key in ["run_outcomes", "realities", "history"]:
 		if not data.get(list_key) is Array:
 			data[list_key] = []
+	# Undo points must each hold a whole state, or none are kept.
+	for point in data["history"]:
+		if not (point is Dictionary and point.get("location") is String and point.get("flags") is Dictionary and point.get("decisions") is Array):
+			data["history"] = []
+			break
+	data["changed_since_checkpoint"] = data.get("changed_since_checkpoint", false) == true
 	return data
 
 

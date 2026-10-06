@@ -41,5 +41,7 @@ func _leave_only_cast(cast: Array) -> void:
 func _play_opening(steps: Array) -> void:
 	await Cutscene.play(steps)
 	GameState.set_flag(OPENING_FLAG, true)
+	# Undo stops here: the opening is not played again.
+	GameState.checkpoint(true)
 	GameState.save_current()
 	await Cutscene.release()

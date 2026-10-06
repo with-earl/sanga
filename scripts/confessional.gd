@@ -54,6 +54,7 @@ func _play_confessions() -> void:
 	if _back_button != null:
 		_back_button.modulate.a = 0.0
 		_back_button.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_refresh_undo()
 	for confession in _variant.get("confessions", []):
 		await _show_caption(str(confession.get("title", "")))
 		var who := str(confession.get("who", ""))

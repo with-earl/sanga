@@ -93,6 +93,8 @@ func _play_opening() -> void:
 	await Cutscene.play(_story.get("intro", []) + _variant.get("intro_after", []))
 	await Cutscene.release()
 	GameState.set_flag(INTRO_FLAG, true)
+	# Undo stops here: the opening is not played again.
+	GameState.checkpoint(true)
 	GameState.save_current(true)
 	_show_padala_objectives(true)
 	_busy = false
@@ -129,6 +131,7 @@ func _hint_names() -> PackedStringArray:
 func _take_card(slot: ArtSlot) -> void:
 	GameState.set_flag(CARD_FLAG, str(slot.name))
 	_arrange_room()
+	GameState.checkpoint()
 	GameState.save_current(true)
 	_show_padala_objectives(true)
 
@@ -151,6 +154,7 @@ func _try_key(slot: ArtSlot) -> void:
 	var tried: Array = GameState.get_flag(TRIED_FLAG, [])
 	tried.append(str(slot.name))
 	GameState.set_flag(TRIED_FLAG, tried)
+	GameState.checkpoint()
 	GameState.save_current()
 	await _converse(_story.get("wrong_key", {}).get(_variant_name, []), false)
 

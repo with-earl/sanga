@@ -96,6 +96,7 @@ func end_run(ending_id: String, title: String, line: String, lead_in: Array = []
 	GameState.location = "main_menu"
 	GameState.clear_flags("objective_")
 	GameState.clear_flags(RUN_FLAG_PREFIX)
+	GameState.checkpoint(true)
 	GameState.save_current(true)
 	if Cutscene.visible:
 		Cutscene.hand_over()
@@ -115,5 +116,7 @@ func _enter_chapter(lead_in: Array) -> void:
 	# Each story starts fresh, even if it was played before in another run.
 	GameState.clear_flags("objective_")
 	GameState.location = info["scene"]
+	# Undo never reaches back into the story before.
+	GameState.checkpoint(true)
 	GameState.save_current(true)
 	StoryCard.start(info["title"], info["scene"], lead_in)

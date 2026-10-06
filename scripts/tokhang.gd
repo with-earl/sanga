@@ -89,6 +89,8 @@ func _play_opening() -> void:
 		await _play_outcome(str(picked["id"]))
 		return
 	GameState.set_flag(BUYER_FLAG, buyer)
+	# Undo stops here: the opening and the choice are not played again.
+	GameState.checkpoint(true)
 	GameState.save_current(true)
 	_set_buyer(buyer)
 

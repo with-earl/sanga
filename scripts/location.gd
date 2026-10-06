@@ -56,6 +56,10 @@ const SPARKLE_STAGGER_SECONDS := 0.3
 const SPARKLE_SECONDS := 0.9
 ## Above the scene and its vignette (layer 10), below the dialogue backdrop (layer 15).
 const SPARKLE_LAYER := 12
+## The undo link sits at the top left under the menu icon, or under the back link when there is one.
+const UNDO_POSITION := Vector2(32, 58)
+const UNDO_SIZE := Vector2(200, 38)
+const UNDO_GAP := 6.0
 
 @onready var _dialogue: DialogueBox = $Hud/DialogueBox
 @onready var _back_button: Button = get_node_or_null("Hud/BackButton")
@@ -80,6 +84,8 @@ var hud_locked := false
 var _idle_seconds := 0.0
 var _sparkle_layer := CanvasLayer.new()
 var _sparkle_texture: ImageTexture
+## Takes back the last step of the story. Only shown when there is a step to take back.
+var _undo_button := BackLink.new()
 
 
 func _ready() -> void:
@@ -98,11 +104,39 @@ func _ready() -> void:
 	if _back_button != null:
 		_back_button.text = back_label
 		_back_button.pressed.connect(_go_back)
+	_build_undo_button()
 	_build_backdrop()
 	_dialogue.portrait_source = _portrait_for
 	_dialogue.opened.connect(_focus_on_dialogue.bind(true))
 	_dialogue.dismissed.connect(_focus_on_dialogue.bind(false))
 	_dialogue.dismissed.connect(_count_conversation)
+
+
+func _build_undo_button() -> void:
+	_undo_button.name = "UndoButton"
+	_undo_button.text = "Undo"
+	_undo_button.position = UNDO_POSITION
+	if _back_button != null:
+		_undo_button.position.y = _back_button.position.y + _back_button.size.y + UNDO_GAP
+	_undo_button.size = UNDO_SIZE
+	$Hud.add_child(_undo_button)
+	_undo_button.pressed.connect(_undo)
+	GameState.state_changed.connect(_refresh_undo)
+	_refresh_undo()
+
+
+func _refresh_undo() -> void:
+	_undo_button.visible = GameState.can_undo() and not hud_locked
+
+
+## Takes back the last step and reopens the scene as it was then. Nothing happens while a
+## dialogue, cutscene, title card or the menu has the player's attention.
+func _undo() -> void:
+	if hud_locked or _dialogue.visible or _game_menu.is_open() or Cutscene.visible or StoryCard.visible:
+		return
+	if GameState.undo():
+		Settings.vibrate(Settings.HAPTIC_MEDIUM)
+		SceneRouter.go_to(GameState.location)
 
 
 func _build_backdrop() -> void:
@@ -146,6 +180,9 @@ func _focus_on_dialogue(focused: bool) -> void:
 	if _back_button != null:
 		_back_button.mouse_filter = Control.MOUSE_FILTER_STOP if show_hud else Control.MOUSE_FILTER_IGNORE
 		_focus_tween.tween_property(_back_button, "modulate:a", hud_alpha, seconds)
+	_undo_button.mouse_filter = Control.MOUSE_FILTER_STOP if show_hud else Control.MOUSE_FILTER_IGNORE
+	_focus_tween.tween_property(_undo_button, "modulate:a", hud_alpha, seconds)
+	_refresh_undo()
 	if not focused:
 		_restore_characters()
 		_focus_tween.chain().tween_callback(func() -> void: _backdrop_layer.visible = false)
@@ -265,6 +302,7 @@ func _advance_step() -> void:
 	Settings.vibrate(Settings.HAPTIC_MEDIUM)
 	_step += 1
 	GameState.set_flag(_step_flag(), _step)
+	GameState.checkpoint()
 	GameState.save_current(true)
 	_show_objectives(true)
 
