@@ -32,6 +32,7 @@ func set_objectives(lines: PackedStringArray, struck_count := 0, animate := fals
 		var is_new := index >= _shown_count
 		if animate and just_finished:
 			item.strike_amount = 0.0
+			Sfx.strike(delay)
 			create_tween().tween_property(item, "strike_amount", 1.0, STRIKE_SECONDS) \
 				.set_delay(delay).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 		elif finished:
