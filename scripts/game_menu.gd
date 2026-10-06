@@ -45,6 +45,7 @@ func _ready() -> void:
 	_dim.gui_input.connect(_on_dim_input)
 	_sound_toggle.toggled.connect(_switch_volume.bind(Settings.set_sound_volume))
 	_music_toggle.toggled.connect(_switch_volume.bind(Settings.set_music_volume))
+	$Modal/Center/Panel/MainView/VibrationRow.visible = Settings.can_vibrate()
 	_vibration_toggle.toggled.connect(func(on: bool) -> void:
 		Settings.set_vibration(on)
 		Settings.vibrate(Settings.HAPTIC_MEDIUM))

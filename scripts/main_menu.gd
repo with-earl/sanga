@@ -40,6 +40,8 @@ func _ready() -> void:
 	_load_button.pressed.connect(_show_slots.bind(false))
 	_settings_button.pressed.connect(_settings.open)
 	_quit_button.pressed.connect(_show_quit_confirm.bind(true))
+	# A web page cannot close itself, so the browser build has no Quit.
+	_quit_button.visible = not OS.has_feature("web")
 	_yes_button.pressed.connect(get_tree().quit)
 	_no_button.pressed.connect(_show_quit_confirm.bind(false))
 	_dev_stories.visible = OS.is_debug_build()

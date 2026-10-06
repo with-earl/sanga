@@ -32,8 +32,14 @@ func _ready() -> void:
 
 ## A short buzz on phones, unless the player turned vibration off.
 func vibrate(milliseconds: int) -> void:
-	if vibration:
+	if vibration and can_vibrate():
 		Input.vibrate_handheld(milliseconds)
+
+
+## Only the installed Android and iOS apps can vibrate. A browser cannot (iPhone Safari has no
+## vibration at all), so the web build has no vibration and no switch for it.
+func can_vibrate() -> bool:
+	return (OS.has_feature("android") or OS.has_feature("ios")) and not OS.has_feature("web")
 
 
 func set_vibration(enabled: bool) -> void:

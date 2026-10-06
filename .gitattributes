@@ -7,3 +7,6 @@
 *.mp4 binary
 *.ttf binary
 *.otf binary
+*.wav binary
+*.ogg binary
+*.tpz binary
