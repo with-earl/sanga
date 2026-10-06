@@ -18,9 +18,12 @@ const ROW_SIZE := Vector2(300, 52)
 @onready var _continue_button: Button = %ContinueButton
 @onready var _new_button: Button = %NewButton
 @onready var _load_button: Button = %LoadButton
+@onready var _settings_button: Button = %SettingsButton
 @onready var _quit_button: Button = %QuitButton
 @onready var _yes_button: Button = %YesButton
 @onready var _no_button: Button = %NoButton
+## The gear at the top left, opening the sound, music and vibration settings.
+@onready var _settings: GameMenu = $Settings
 
 ## What the Android back button does while the save panel is showing.
 var _back_action := Callable()
@@ -32,6 +35,7 @@ func _ready() -> void:
 	_continue_button.pressed.connect(_on_continue)
 	_new_button.pressed.connect(_show_new_game_slots)
 	_load_button.pressed.connect(_show_slots.bind(false))
+	_settings_button.pressed.connect(_settings.open)
 	_quit_button.pressed.connect(_show_quit_confirm.bind(true))
 	_yes_button.pressed.connect(get_tree().quit)
 	_no_button.pressed.connect(_show_quit_confirm.bind(false))
@@ -46,7 +50,9 @@ func _ready() -> void:
 func _notification(what: int) -> void:
 	if what != NOTIFICATION_WM_GO_BACK_REQUEST:
 		return
-	if _dev_confirm.visible:
+	if _settings.is_open():
+		_settings.close()
+	elif _dev_confirm.visible:
 		_show_dev_confirm(false)
 	elif _save_panel.visible:
 		_back_action.call()

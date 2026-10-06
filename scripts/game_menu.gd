@@ -12,6 +12,10 @@ const PANEL_PADDING := 24.0
 ## Disabled stepper buttons (at 0% or 100%) fade back.
 const DISABLED_ALPHA := 0.35
 
+## On the main screen the gear opens only the settings: no way back to the main menu, no story
+## skip, and no place name.
+@export var main_screen := false
+
 @onready var _modal: Control = %Modal
 @onready var _dim: ColorRect = %Dim
 @onready var _main_view: Control = %MainView
@@ -59,6 +63,12 @@ func _ready() -> void:
 		StoryDirector.finish_story())
 	_no_button.pressed.connect(_show_confirm.bind(false))
 	_yes_button.pressed.connect(SceneRouter.go_to.bind("main_menu"))
+	if main_screen:
+		$Modal/Center/Panel/MainView/Header/Title.text = "Settings"
+		$Modal/Center/Panel/MainView/Gap.visible = false
+		_main_menu_button.visible = false
+		_dev_skip_button.visible = false
+		_location_title.visible = false
 
 
 func _apply_dialog_look() -> void:
