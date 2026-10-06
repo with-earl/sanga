@@ -1,0 +1,67 @@
+# On every push to main: import the project, run the smoke test, export the Web build and
+# publish it to GitHub Pages, for playtesting in a phone browser.
+#
+# One-time setup: in the repository, Settings > Pages > Build and deployment > Source must be
+# "GitHub Actions".
+name: Web build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# A newer push replaces a build that is still running.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.7.2"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot and its web templates
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/opt/godot-${{ env.GODOT_VERSION }}
+            ~/.local/share/godot/export_templates/${{ env.GODOT_VERSION }}.stable
+          key: godot-${{ env.GODOT_VERSION }}-web-nothreads
+
+      - name: Install Godot and the web templates
+        run: bash tools/cloud_setup.sh
+
+      - name: Import the project
+        run: godot --headless --path . --import
+
+      - name: Smoke test
+        run: godot --headless --path . -s res://tests/smoke_test.gd
+
+      - name: Export the Web build
+        run: |
+          mkdir -p build/web
+          godot --headless --path . --export-release "Web" build/web/index.html
+          test -f build/web/index.pck
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

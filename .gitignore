@@ -12,9 +12,14 @@
 # Signing keys and local export settings stay off the repository
 *.keystore
 *.jks
+*.p12
+*.mobileprovision
 export_credentials.cfg
 
 # OS clutter
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Local tools: Claude Code launch configs
+/.claude/
