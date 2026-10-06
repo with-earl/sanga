@@ -15,7 +15,7 @@ extends Node
 const CROSSFADE_SECONDS := 2.0
 ## Well below full scale, so the soft piano stays in the background, under the dialogue and
 ## sound effects.
-const VOLUME_DB := -16.0
+const VOLUME_DB := -24.0
 const SILENT_DB := -60.0
 
 const MAIN_TRACK := "res://assets/music/menu.wav"
