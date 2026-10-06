@@ -105,36 +105,14 @@ theme_type_variation = &"Body"
 text = "Sound"
 vertical_alignment = 1
 
-[node name="SoundDown" type="Button" parent="Modal/Center/Panel/MainView/SoundRow"]
+[node name="SoundToggle" type="Button" parent="Modal/Center/Panel/MainView/SoundRow"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(44, 40)
 layout_mode = 2
 size_flags_vertical = 4
 focus_mode = 0
-script = ExtResource("2_icon")
-icon_kind = 2
-plain = true
-icon_scale = 0.5
-
-[node name="SoundValue" type="Label" parent="Modal/Center/Panel/MainView/SoundRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(60, 0)
-layout_mode = 2
-theme_type_variation = &"Body"
-text = "75%"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="SoundUp" type="Button" parent="Modal/Center/Panel/MainView/SoundRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(44, 40)
-layout_mode = 2
-size_flags_vertical = 4
-focus_mode = 0
-script = ExtResource("2_icon")
-icon_kind = 3
-plain = true
-icon_scale = 0.5
+toggle_mode = true
+button_pressed = true
+script = ExtResource("4_switch")
 
 [node name="MusicRow" type="HBoxContainer" parent="Modal/Center/Panel/MainView"]
 custom_minimum_size = Vector2(0, 44)
@@ -148,36 +126,14 @@ theme_type_variation = &"Body"
 text = "Music"
 vertical_alignment = 1
 
-[node name="MusicDown" type="Button" parent="Modal/Center/Panel/MainView/MusicRow"]
+[node name="MusicToggle" type="Button" parent="Modal/Center/Panel/MainView/MusicRow"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(44, 40)
 layout_mode = 2
 size_flags_vertical = 4
 focus_mode = 0
-script = ExtResource("2_icon")
-icon_kind = 2
-plain = true
-icon_scale = 0.5
-
-[node name="MusicValue" type="Label" parent="Modal/Center/Panel/MainView/MusicRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(60, 0)
-layout_mode = 2
-theme_type_variation = &"Body"
-text = "75%"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="MusicUp" type="Button" parent="Modal/Center/Panel/MainView/MusicRow"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(44, 40)
-layout_mode = 2
-size_flags_vertical = 4
-focus_mode = 0
-script = ExtResource("2_icon")
-icon_kind = 3
-plain = true
-icon_scale = 0.5
+toggle_mode = true
+button_pressed = true
+script = ExtResource("4_switch")
 
 [node name="VibrationRow" type="HBoxContainer" parent="Modal/Center/Panel/MainView"]
 custom_minimum_size = Vector2(0, 44)

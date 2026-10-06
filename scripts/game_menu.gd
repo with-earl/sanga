@@ -1,16 +1,14 @@
 class_name GameMenu
 extends CanvasLayer
 ## The in-game menu: the gear at the top left, with the place name beside it, opens a modal with
-## the sound and music volumes (in quarter steps), a vibration switch, and a way back to the main
-## menu. Tapping outside the modal closes it.
+## on and off switches for sound, music and vibration, and a way back to the main menu. Tapping
+## outside the modal closes it.
 ## The modal looks like the dialogue box: the same black box with a gray and silver border,
 ## golden ochre text with a brown outline, and buttons styled like the dialogue choices.
 
 const OPEN_SECONDS := 0.15
 const CLOSE_SECONDS := 0.12
 const PANEL_PADDING := 24.0
-## Disabled stepper buttons (at 0% or 100%) fade back.
-const DISABLED_ALPHA := 0.35
 
 ## On the main screen the gear opens only the settings: no way back to the main menu, no story
 ## skip, and no place name.
@@ -22,12 +20,8 @@ const DISABLED_ALPHA := 0.35
 @onready var _confirm_view: Control = %ConfirmView
 @onready var _menu_icon: Button = %MenuIcon
 @onready var _close_button: IconButton = %CloseButton
-@onready var _sound_down: IconButton = %SoundDown
-@onready var _sound_up: IconButton = %SoundUp
-@onready var _sound_value: Label = %SoundValue
-@onready var _music_down: IconButton = %MusicDown
-@onready var _music_up: IconButton = %MusicUp
-@onready var _music_value: Label = %MusicValue
+@onready var _sound_toggle: ToggleSwitch = %SoundToggle
+@onready var _music_toggle: ToggleSwitch = %MusicToggle
 @onready var _vibration_toggle: ToggleSwitch = %VibrationToggle
 @onready var _main_menu_button: Button = %MainMenuButton
 ## Development only: finishes the current story, for testing the story order before every story
@@ -49,10 +43,8 @@ func _ready() -> void:
 	_menu_icon.pressed.connect(open)
 	_close_button.pressed.connect(close)
 	_dim.gui_input.connect(_on_dim_input)
-	_sound_down.pressed.connect(_step_sound.bind(-1))
-	_sound_up.pressed.connect(_step_sound.bind(1))
-	_music_down.pressed.connect(_step_music.bind(-1))
-	_music_up.pressed.connect(_step_music.bind(1))
+	_sound_toggle.toggled.connect(_switch_volume.bind(Settings.set_sound_volume))
+	_music_toggle.toggled.connect(_switch_volume.bind(Settings.set_music_volume))
 	_vibration_toggle.toggled.connect(func(on: bool) -> void:
 		Settings.set_vibration(on)
 		Settings.vibrate(Settings.HAPTIC_MEDIUM))
@@ -81,7 +73,8 @@ func _apply_dialog_look() -> void:
 	retro.shader = DialogueBox.RETRO_TEXT_SHADER
 	retro.set_shader_parameter("alpha_boost", 1.0)
 	_panel.material = retro
-	_vibration_toggle.material = retro
+	for toggle in [_sound_toggle, _music_toggle, _vibration_toggle]:
+		toggle.material = retro
 	_panel.resized.connect(_redraw_panel)
 	var headings := [$Modal/Center/Panel/MainView/Header/Title, $Modal/Center/Panel/ConfirmView/Question]
 	for node in _modal.find_children("*", "Label", true, false):
@@ -89,9 +82,6 @@ func _apply_dialog_look() -> void:
 		UiSkin.style_label(label, UiSkin.HEADING_SIZE if label in headings else UiSkin.TEXT_SIZE)
 	for button in [_main_menu_button, _dev_skip_button, _yes_button, _no_button]:
 		UiSkin.style_button(button)
-	for stepper in [_sound_down, _sound_up, _music_down, _music_up]:
-		UiSkin.style_icon(stepper)
-		UiSkin.box_only(stepper)
 	# The close button: a plain golden ochre cross with a brown outline, like the text.
 	UiSkin.style_icon(_close_button)
 	for state in ["normal", "hover", "pressed", "hover_pressed", "focus"]:
@@ -149,32 +139,16 @@ func _show_confirm(asking: bool) -> void:
 
 
 func _sync_from_settings() -> void:
-	_show_volume(Settings.sound_volume, _sound_value, _sound_down, _sound_up)
-	_show_volume(Settings.music_volume, _music_value, _music_down, _music_up)
+	_sound_toggle.set_on_quietly(Settings.sound_volume > 0.0)
+	_music_toggle.set_on_quietly(Settings.music_volume > 0.0)
 	_vibration_toggle.set_on_quietly(Settings.vibration)
 
 
-func _step_sound(direction: int) -> void:
-	Settings.set_sound_volume(Settings.sound_volume + direction * Settings.VOLUME_STEP)
+## Sound and music are simply on or off: on plays at the default volume, off is silent.
+func _switch_volume(on: bool, set_volume: Callable) -> void:
+	set_volume.call(Settings.DEFAULT_VOLUME if on else 0.0)
 	Settings.save()
 	Settings.vibrate(Settings.HAPTIC_LIGHT)
-	_show_volume(Settings.sound_volume, _sound_value, _sound_down, _sound_up)
-
-
-func _step_music(direction: int) -> void:
-	Settings.set_music_volume(Settings.music_volume + direction * Settings.VOLUME_STEP)
-	Settings.save()
-	Settings.vibrate(Settings.HAPTIC_LIGHT)
-	_show_volume(Settings.music_volume, _music_value, _music_down, _music_up)
-
-
-## Shows a volume as a percentage, with the minus or plus faded out at either end.
-func _show_volume(value: float, label: Label, down: Button, up: Button) -> void:
-	label.text = "%d%%" % roundi(value * 100.0)
-	down.disabled = value <= 0.0
-	up.disabled = value >= 1.0
-	down.modulate.a = DISABLED_ALPHA if down.disabled else 1.0
-	up.modulate.a = DISABLED_ALPHA if up.disabled else 1.0
 
 
 func _fade(alpha: float, seconds: float) -> void:
