@@ -7,8 +7,9 @@ extends Node
 ## The tracks are made by tools/compose_music.py and live in assets/music.
 
 const CROSSFADE_SECONDS := 2.0
-## Quieter than full scale, so the music sits under the dialogue and sound effects.
-const VOLUME_DB := -6.0
+## Well below full scale, so the soft piano stays in the background, under the dialogue and
+## sound effects.
+const VOLUME_DB := -9.0
 const SILENT_DB := -60.0
 
 ## Scene to track. A scene not listed here fades the music out.
