@@ -53,8 +53,8 @@ const CHOICE_GAP := 12.0
 const CHOICE_FILL := Color(0.0, 0.0, 0.0, 0.72)
 const CHOICE_FILL_PRESSED := Color(0.24, 0.24, 0.24, 0.85)
 const CHOICE_BORDER := Color(0.87, 0.87, 0.87, 1.0)
-const CHOICE_TEXT := Color(1, 1, 1, 1)
-const CHOICE_OUTLINE := Color(0.0, 0.0, 0.0, 1)
+const CHOICE_TEXT := Color(0.851, 0.643, 0.255, 1.0)
+const CHOICE_OUTLINE := Color(0.29, 0.165, 0.071, 1.0)
 const CHOICE_FADE_SECONDS := 0.2
 ## The Continue button is at least this tall, for an easy tap.
 

@@ -4,7 +4,7 @@ extends CanvasLayer
 ## the sound and music volumes (in quarter steps), a vibration switch, and a way back to the main
 ## menu. Tapping outside the modal closes it.
 ## The modal looks like the dialogue box: the same black box with a gray and silver border,
-## white text with a black outline, and buttons styled like the dialogue choices.
+## golden ochre text with a brown outline, and buttons styled like the dialogue choices.
 
 const OPEN_SECONDS := 0.15
 const CLOSE_SECONDS := 0.12
@@ -92,7 +92,7 @@ func _apply_dialog_look() -> void:
 	for stepper in [_sound_down, _sound_up, _music_down, _music_up]:
 		UiSkin.style_icon(stepper)
 		UiSkin.box_only(stepper)
-	# The close button: a plain white cross with a black outline, like the text.
+	# The close button: a plain golden ochre cross with a brown outline, like the text.
 	UiSkin.style_icon(_close_button)
 	for state in ["normal", "hover", "pressed", "hover_pressed", "focus"]:
 		_close_button.add_theme_stylebox_override(state, StyleBoxEmpty.new())

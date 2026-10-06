@@ -1,7 +1,7 @@
 class_name BackLink
 extends Button
 ## A "back" link: a left chevron and the name of the place it leads to, drawn exactly like the
-## objectives text (cream with a dark outline, same size), with no button shape around it.
+## objectives text (golden ochre with a brown outline, same size), with no button shape around it.
 
 const CHEVRON_WIDTH := 6.0
 const CHEVRON_HEIGHT := 12.0

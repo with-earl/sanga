@@ -3,8 +3,8 @@ extends Button
 ## A button with a simple drawn icon, so no image files are needed. The icon is drawn into a
 ## small picture rather than as vector lines, so the retro text shader softens it like the text.
 ##
-## With `plain` on, there is no button box at all: just the icon, drawn in the text style (cream
-## with a dark outline) and getting the same soft look as the text. Taps still use the whole
+## With `plain` on, there is no button box at all: just the icon, drawn in the text style (golden
+## ochre with a brown outline) and getting the same soft look as the text. Taps still use the whole
 ## button area, so it stays easy to hit.
 
 enum Icon { MENU, CLOSE, MINUS, PLUS }
@@ -12,8 +12,8 @@ enum Icon { MENU, CLOSE, MINUS, PLUS }
 const INK := Color(0.29, 0.184, 0.153, 1.0)
 const STROKE := 4.0
 ## The text style, used by a plain icon.
-const PLAIN_FILL := Color(0.965, 0.906, 0.796, 1.0)
-const PLAIN_OUTLINE := Color(0.2, 0.12, 0.1, 1.0)
+const PLAIN_FILL := Color(0.851, 0.643, 0.255, 1.0)
+const PLAIN_OUTLINE := Color(0.29, 0.165, 0.071, 1.0)
 const PLAIN_STROKE := 5.0
 const PLAIN_OUTLINE_WIDTH := 2.5
 
@@ -75,7 +75,7 @@ func _draw() -> void:
 		Icon.PLUS:
 			segments.append(PackedVector2Array([center + Vector2(-9.0, 0.0) * scale_up, center + Vector2(9.0, 0.0) * scale_up]))
 			segments.append(PackedVector2Array([center + Vector2(0.0, -9.0) * scale_up, center + Vector2(0.0, 9.0) * scale_up]))
-	# A plain icon gets a dark outline underneath, like the text. The outline never gets thinner
+	# A plain icon gets a brown outline underneath, like the text. The outline never gets thinner
 	# than the HUD text's outline.
 	var stroke := (PLAIN_STROKE if plain else STROKE) * icon_scale
 	var outline := maxf(PLAIN_OUTLINE_WIDTH * icon_scale, 2.0) if plain else 0.0

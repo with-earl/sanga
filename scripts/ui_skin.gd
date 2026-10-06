@@ -1,7 +1,7 @@
 class_name UiSkin
 extends RefCounted
 ## The game's one button and text look, taken from the dialogue box: black boxes with a light gray
-## border, and white text with a black outline. Every box is drawn from a picture, so the retro
+## border, and golden ochre text with a brown outline. Every box is drawn from a picture, so the retro
 ## text shader softens it like the text.
 
 const TEXT_SIZE := 19
@@ -9,7 +9,7 @@ const HEADING_SIZE := 22
 const OUTLINE_SIZE := 6
 const BUTTON_HEIGHT := 48.0
 ## Pressed text and icons dim a little, so a tap is felt.
-const PRESSED_TEXT := Color(0.78, 0.78, 0.78, 1)
+const PRESSED_TEXT := Color(0.68, 0.514, 0.204, 1)
 
 
 ## Gives a button the dialogue-choice look: a black box with a gray border and white text.
@@ -21,7 +21,7 @@ static func style_button(button: Button, font_size := TEXT_SIZE) -> void:
 		button.add_theme_color_override(color_name, DialogueBox.CHOICE_TEXT)
 	for color_name in ["font_pressed_color", "font_hover_pressed_color"]:
 		button.add_theme_color_override(color_name, PRESSED_TEXT)
-	button.add_theme_color_override("font_disabled_color", Color(1, 1, 1, 0.4))
+	button.add_theme_color_override("font_disabled_color", Color(0.851, 0.643, 0.255, 0.4))
 	button.add_theme_color_override("font_outline_color", DialogueBox.CHOICE_OUTLINE)
 	button.add_theme_constant_override("outline_size", OUTLINE_SIZE)
 
@@ -36,7 +36,7 @@ static func box_only(button: Button) -> void:
 		button.add_theme_stylebox_override(state, pressed)
 
 
-## Gives a label the dialogue text look: white with a black outline.
+## Gives a label the dialogue text look: golden ochre with a brown outline.
 static func style_label(label: Label, font_size := TEXT_SIZE) -> void:
 	label.add_theme_color_override("font_color", DialogueBox.CHOICE_TEXT)
 	label.add_theme_color_override("font_outline_color", DialogueBox.CHOICE_OUTLINE)
@@ -44,7 +44,7 @@ static func style_label(label: Label, font_size := TEXT_SIZE) -> void:
 	label.add_theme_font_size_override("font_size", font_size)
 
 
-## A plain icon in the same white with a black outline.
+## A plain icon in the same golden ochre with a brown outline.
 static func style_icon(icon: IconButton) -> void:
 	icon.plain = true
 	icon.plain_fill = DialogueBox.CHOICE_TEXT

@@ -3,8 +3,8 @@ extends Label
 ## One line in the objectives list. When finished it gets a line struck through its text, which
 ## can be drawn in from left to right.
 
-const LINE_COLOR := Color(0.965, 0.906, 0.796, 1.0)
-const LINE_OUTLINE := Color(0.2, 0.12, 0.1, 1.0)
+const LINE_COLOR := Color(0.851, 0.643, 0.255, 1.0)
+const LINE_OUTLINE := Color(0.29, 0.165, 0.071, 1.0)
 const LINE_WIDTH := 2.0
 const LINE_OUTLINE_WIDTH := 4.0
 
