@@ -32,8 +32,9 @@ func _ready() -> void:
 	_fill_screen(still)
 	if ResourceLoader.exists(VIDEO_PATH):
 		video.stream = load(VIDEO_PATH)
-	# The video carries the main screen audio, so the Music volume controls it.
+	# The video's own soundtrack is muted: the main screen's music comes from MusicDirector.
 	video.bus = Settings.MUSIC_BUS
+	video.volume = 0.0
 	video.expand = true
 	video.loop = true
 	video.modulate.a = 0.0

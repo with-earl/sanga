@@ -1,26 +1,33 @@
 extends Node
-## Background music: each scene has its own looping track, and moving between scenes crossfades
-## from one to the next. Scenes that share a track (the boot and main screens) keep it playing
-## without a restart. The music plays on the Music bus, so the Music volume in Settings controls
-## it.
+## Background music: five looping tracks, crossfading as the player moves between them.
+##
+##   main            the title (boot) screen, the main screen, a story's ending card and the
+##                   timeline ending
+##   church nave     from the Kumpisal title card and its intro montage, through the nave
+##   confessional, apartment room, public market   each its own
+##
+## Places that share a track keep it playing without a restart. A story's title card starts the
+## music of the scene it opens, so a montage already has its scene's music. Anywhere else is
+## silent. The music plays on the Music bus, so the Music switch in the menu turns it off.
 ##
 ## The tracks are made by tools/compose_music.py and live in assets/music.
 
 const CROSSFADE_SECONDS := 2.0
 ## Well below full scale, so the soft piano stays in the background, under the dialogue and
 ## sound effects.
-const VOLUME_DB := -9.0
+const VOLUME_DB := -16.0
 const SILENT_DB := -60.0
 
+const MAIN_TRACK := "res://assets/music/menu.wav"
 ## Scene to track. A scene not listed here fades the music out.
 const TRACKS := {
-	"res://scenes/boot.tscn": "res://assets/music/menu.wav",
-	"res://scenes/main_menu.tscn": "res://assets/music/menu.wav",
+	"res://scenes/boot.tscn": MAIN_TRACK,
+	"res://scenes/main_menu.tscn": MAIN_TRACK,
+	"res://scenes/timeline_reveal.tscn": MAIN_TRACK,
 	"res://scenes/public_market.tscn": "res://assets/music/market.wav",
 	"res://scenes/church_nave.tscn": "res://assets/music/church.wav",
 	"res://scenes/confessional.tscn": "res://assets/music/confessional.wav",
 	"res://scenes/apartment_room.tscn": "res://assets/music/apartment.wav",
-	"res://scenes/timeline_reveal.tscn": "res://assets/music/reveal.wav",
 }
 
 ## Two players, so one track can fade out while the next fades in.
@@ -56,6 +63,17 @@ func _on_node_added(node: Node) -> void:
 ## Crossfades to the track for this scene, or out to silence if it has none.
 func play_for_scene(scene_path: String) -> void:
 	play(TRACKS.get(scene_path, ""))
+
+
+## Crossfades to the track of a scene by its SceneRouter key, for example "church_nave", before
+## the scene itself opens.
+func play_for_key(scene_key: String) -> void:
+	play_for_scene(SceneRouter.SCENES.get(scene_key, ""))
+
+
+## The main track, for the cards that close a story or a run.
+func play_main() -> void:
+	play(MAIN_TRACK)
 
 
 ## The path of the track playing now, or "" when the music is silent.

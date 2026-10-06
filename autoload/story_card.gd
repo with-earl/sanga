@@ -146,6 +146,7 @@ func start(title: String, scene_key: String, lead_in: Array = []) -> void:
 	if _running:
 		return
 	_running = true
+	MusicDirector.play_for_key(scene_key)
 	_title.text = title
 	_title.modulate.a = 0.0
 	_black.modulate.a = 0.0
@@ -275,6 +276,7 @@ func show_ending(title: String, line: String, lead_in: Array = [], next_scene :=
 		await fade_to_scene(next_scene, lead_in)
 		return
 	_running = true
+	MusicDirector.play_main()
 	_title.text = title if title != "" else "The End"
 	_title.modulate.a = 0.0
 	_ending_line.text = line
@@ -307,6 +309,7 @@ func show_time_order(lead_in: Array = []) -> void:
 	if _running:
 		return
 	_running = true
+	MusicDirector.play_main()
 	_title.modulate.a = 0.0
 	_black.modulate.a = 0.0
 	visible = true

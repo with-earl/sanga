@@ -2,8 +2,9 @@
 
 All of it is slow, quiet solo piano: one original waltz theme (whimsical and nostalgic, in the
 spirit of 90s Filipino pop ballads) arranged differently for each scene. A different key, mode,
-register, tempo and accompaniment give each place its own colour, from the warm main screen to
-the fragmented, out of tune version in the apartment.
+register, tempo and accompaniment give each place its own colour, from the warm main screen (also
+heard on the title screen and at every ending) to the fragmented, out of tune version in the
+apartment.
 
 The theme and every arrangement are original, and the piano is synthesised here (no samples), so
 there is nothing to license. Each track is a seamless loop: notes and reverb that run past the
@@ -242,19 +243,12 @@ def apartment():
                    keep={0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13}, humanise=0.3)
 
 
-def reveal():
-    """Timeline ending: the whole theme, high and reflective. E major, rolled chords, the melody
-    doubled an octave up."""
-    return arrange(52, MAJOR, 58, "rolled", melody_octave=1, seed=6, room=3.8, wet=0.45, velocity=0.3, double_octave=True)
-
-
 TRACKS = {
     "menu": menu,
     "market": market,
     "church": church,
     "confessional": confessional,
     "apartment": apartment,
-    "reveal": reveal,
 }
 
 
