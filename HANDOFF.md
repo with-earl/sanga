@@ -263,7 +263,10 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   a break whenever you need one." (`boot.gd` `WARNING_TEXT`).
 - **Confessions show the sad pictures** (`_2`: Gloria, Batista, Gwen) of whoever is confessing
   (`Location._sad_portrait_for`, `SAD_PORTRAIT_SUFFIX`). Kulas has no sad picture yet, so he
-  keeps his usual one until `kulas_2.png` is added.
+  keeps his usual one until `kulas_2.png` is added. The sad pictures of Gloria and Batista look
+  the other way from their usual ones, so `DialogueBox` takes per-picture facing entries
+  (`PORTRAITS_FACING_LEFT` = gloria_2, `batista_2` in `PORTRAITS_FACING_RIGHT`); all four
+  confessors were checked facing Father Eli.
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions
