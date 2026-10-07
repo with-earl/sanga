@@ -25,7 +25,6 @@ const MENU_WINDOW_MARGIN := Vector2(26.0, 18.0)
 @onready var _save_panel: VBoxContainer = %SavePanel
 @onready var _continue_button: Button = %ContinueButton
 @onready var _new_button: Button = %NewButton
-@onready var _load_button: Button = %LoadButton
 @onready var _quit_button: Button = %QuitButton
 @onready var _yes_button: Button = %YesButton
 @onready var _no_button: Button = %NoButton
@@ -44,7 +43,6 @@ func _ready() -> void:
 	_continue_button.visible = GameState.latest_slot() >= 0
 	_continue_button.pressed.connect(_on_continue)
 	_new_button.pressed.connect(_show_new_game_slots)
-	_load_button.pressed.connect(_show_slots.bind(false))
 	_quit_button.pressed.connect(_show_quit_confirm.bind(true))
 	# A web page cannot close itself, so the browser build has no Quit.
 	_quit_button.visible = not OS.has_feature("web")
@@ -178,11 +176,10 @@ func _show_dev_ending(reality: Dictionary) -> void:
 	StoryDirector.end_run("", "", "")
 
 
-## Continue picks up the save played most recently.
+## Continue shows the saves, and the one tapped picks up where it left off. It is the only way to
+## load a save, so there is no separate Load Game button.
 func _on_continue() -> void:
-	var slot := GameState.latest_slot()
-	if slot >= 0 and GameState.load_slot(slot):
-		_enter_save()
+	_show_slots(false)
 
 
 ## Goes into the loaded save: back into the story in progress, or, between runs, to the choice of
@@ -241,10 +238,11 @@ func _show_slots(delete_mode: bool) -> void:
 	if not any_saves:
 		_show_message("No saved games yet")
 		return
-	_open_panel("Delete which save?" if delete_mode else "Load which save?")
+	_open_panel("Delete which save?" if delete_mode else "Continue which save?")
 	for slot in GameState.SLOT_COUNT:
 		var filled := GameState.has_slot(slot)
-		_add_row(_describe(slot), filled, _ask.bind(slot, delete_mode))
+		# Continuing a save happens straight away; deleting one asks first.
+		_add_row(_describe(slot), filled, _ask.bind(slot, true) if delete_mode else _load_slot.bind(slot))
 	if delete_mode:
 		_add_row("Back", true, _show_slots.bind(false))
 	else:
