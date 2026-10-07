@@ -47,15 +47,6 @@ text = "New Game"
 alignment = 2
 focus_mode = 0
 
-[node name="LoadButton" type="Button" parent="Buttons" unique_id=1975006900]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 52)
-layout_mode = 2
-theme_type_variation = &"TextButton"
-text = "Load Game"
-alignment = 2
-focus_mode = 0
-
 [node name="QuitButton" type="Button" parent="Buttons" unique_id=303759184]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(300, 52)

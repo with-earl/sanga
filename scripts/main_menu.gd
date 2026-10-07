@@ -1,9 +1,12 @@
 extends Control
-## Main screen. Quit, loading a save, and deleting a save all happen in place: the three menu
-## buttons are swapped for a short list or a question with Yes and No, in the same spot.
+## Main screen: Continue (when there is a save), New Game and Quit. Choosing a save, how to go on
+## with it, and deleting a save all happen in place: the menu buttons are swapped for a short list
+## or a question, in the same spot. Anything that would lose progress asks first and says so.
 
 const MONTHS := ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 const ROW_SIZE := Vector2(300, 52)
+## The size of the note under a question.
+const NOTE_SIZE := 20
 ## The main buttons, the save list and the quit question each sit on a soft window, hugging their
 ## contents above the bottom right corner.
 const MENU_WINDOW_MARGIN := Vector2(40.0, 24.0)
@@ -13,7 +16,6 @@ const MENU_WINDOW_MARGIN := Vector2(40.0, 24.0)
 @onready var _save_panel: VBoxContainer = %SavePanel
 @onready var _continue_button: Button = %ContinueButton
 @onready var _new_button: Button = %NewButton
-@onready var _load_button: Button = %LoadButton
 @onready var _quit_button: Button = %QuitButton
 @onready var _yes_button: Button = %YesButton
 @onready var _no_button: Button = %NoButton
@@ -26,9 +28,8 @@ var _back_action := Callable()
 
 func _ready() -> void:
 	_continue_button.visible = GameState.latest_slot() >= 0
-	_continue_button.pressed.connect(_on_continue)
+	_continue_button.pressed.connect(_show_slots.bind(false))
 	_new_button.pressed.connect(_show_new_game_slots)
-	_load_button.pressed.connect(_show_slots.bind(false))
 	_quit_button.pressed.connect(_show_quit_confirm.bind(true))
 	# A web page cannot close itself, so the browser build has no Quit.
 	_quit_button.visible = not OS.has_feature("web")
@@ -77,34 +78,63 @@ func _show_main() -> void:
 	_menu.visible = true
 
 
-## Continue picks up the save played most recently.
-func _on_continue() -> void:
-	var slot := GameState.latest_slot()
-	if slot >= 0 and GameState.load_slot(slot):
-		_enter_save()
+## Continue lists the saves. Picking one opens it, and asks how to go on.
+## In delete mode, picking a save asks to delete it instead.
+func _show_slots(delete_mode: bool) -> void:
+	var any_saves := false
+	for slot in GameState.SLOT_COUNT:
+		any_saves = any_saves or GameState.has_slot(slot)
+	if not any_saves:
+		_show_message("No saved games yet")
+		return
+	_open_panel("Delete which save?" if delete_mode else "Choose a save")
+	for slot in GameState.SLOT_COUNT:
+		var filled := GameState.has_slot(slot)
+		var action := _ask_delete.bind(slot) if delete_mode else _open_save.bind(slot)
+		_add_row(_describe(slot), filled, action)
+	if delete_mode:
+		_add_row("Back", true, _show_slots.bind(false))
+	else:
+		_add_row("Delete a Save", true, _show_slots.bind(true))
+		_add_row("Back", true, _show_main)
+	_back_action = _show_slots.bind(false) if delete_mode else _show_main
 
 
-## Goes into the loaded save: back into the story in progress, or, between runs, to the choice of
-## where the next run begins.
-func _enter_save() -> void:
-	if not StoryDirector.resume():
-		_show_story_choice()
+## A save's two ways on: carry on where the player left off, or start a run from a chosen story.
+## Between runs there is nothing to carry on, so only the starting point is offered.
+func _open_save(slot: int) -> void:
+	if not GameState.load_slot(slot):
+		_show_message("That save can’t be opened")
+		return
+	_open_panel(_describe(slot))
+	if GameState.is_run_in_progress():
+		_add_row("Continue Progress", true, StoryDirector.resume)
+	_add_row("Choose Starting Point", true, _show_story_choice.bind(slot))
+	_add_row("Back", true, _show_slots.bind(false))
+	_back_action = _show_slots.bind(false)
 
 
-## Between runs the player chooses which story to begin with.
-func _show_story_choice() -> void:
+## The stories a run can begin with.
+func _show_story_choice(slot: int) -> void:
 	_open_panel("Where does it begin?")
 	for story in StoryDirector.STORY_ORDER:
-		_add_row(StoryDirector.story_title(story), true, _ask_story.bind(story))
-	_add_row("Back", true, _show_main)
-	_back_action = _show_main
+		_add_row(StoryDirector.story_title(story), true, _ask_story.bind(slot, story))
+	_add_row("Back", true, _open_save.bind(slot))
+	_back_action = _open_save.bind(slot)
 
 
-func _ask_story(story: String) -> void:
-	_open_panel("Begin with %s?" % StoryDirector.story_title(story))
-	_add_row("Yes", true, StoryDirector.begin_with.bind(story))
-	_add_row("No", true, _show_story_choice)
-	_back_action = _show_story_choice
+## Starting from a story ends the run in progress, so this asks first and says what will be lost.
+func _ask_story(slot: int, story: String) -> void:
+	var title := StoryDirector.story_title(story)
+	if GameState.is_run_in_progress():
+		_open_panel("Start from %s?" % title)
+		_add_note("Your current progress in Slot %d will be lost." % (slot + 1))
+		_add_row("Start Over", true, StoryDirector.begin_with.bind(story))
+	else:
+		_open_panel("Begin with %s?" % title)
+		_add_row("Begin", true, StoryDirector.begin_with.bind(story))
+	_add_row("Cancel", true, _show_story_choice.bind(slot))
+	_back_action = _show_story_choice.bind(slot)
 
 
 ## New Game asks where to save progress. Picking a slot that already has a save asks first.
@@ -118,9 +148,10 @@ func _show_new_game_slots() -> void:
 
 func _pick_new_game_slot(slot: int) -> void:
 	if GameState.has_slot(slot):
-		_open_panel("Overwrite Slot %d?" % (slot + 1))
-		_add_row("Yes", true, _start_new_game.bind(slot))
-		_add_row("No", true, _show_new_game_slots)
+		_open_panel("Replace Slot %d?" % (slot + 1))
+		_add_note("The save already in this slot will be lost.")
+		_add_row("Replace", true, _start_new_game.bind(slot))
+		_add_row("Cancel", true, _show_new_game_slots)
 		_back_action = _show_new_game_slots
 	else:
 		_start_new_game(slot)
@@ -132,39 +163,12 @@ func _start_new_game(slot: int) -> void:
 	StoryDirector.begin_with("tokhang")
 
 
-## The list of saves. In delete mode, picking a save asks to delete it instead of loading it.
-func _show_slots(delete_mode: bool) -> void:
-	var any_saves := false
-	for slot in GameState.SLOT_COUNT:
-		any_saves = any_saves or GameState.has_slot(slot)
-	if not any_saves:
-		_show_message("No saved games yet")
-		return
-	_open_panel("Delete which save?" if delete_mode else "Load which save?")
-	for slot in GameState.SLOT_COUNT:
-		var filled := GameState.has_slot(slot)
-		_add_row(_describe(slot), filled, _ask.bind(slot, delete_mode))
-	if delete_mode:
-		_add_row("Back", true, _show_slots.bind(false))
-	else:
-		_add_row("Delete", true, _show_slots.bind(true))
-		_add_row("Back", true, _show_main)
-	_back_action = _show_slots.bind(false) if delete_mode else _show_main
-
-
-## Asks before loading or deleting a save: "Load Slot 1?" with Yes and No.
-func _ask(slot: int, delete_mode: bool) -> void:
-	_open_panel("%s Slot %d?" % ["Delete" if delete_mode else "Load", slot + 1])
-	_add_row("Yes", true, _delete_slot.bind(slot) if delete_mode else _load_slot.bind(slot))
-	_add_row("No", true, _show_slots.bind(delete_mode))
-	_back_action = _show_slots.bind(delete_mode)
-
-
-func _load_slot(slot: int) -> void:
-	if GameState.load_slot(slot):
-		_enter_save()
-	else:
-		_show_message("That save can’t be loaded")
+func _ask_delete(slot: int) -> void:
+	_open_panel("Delete Slot %d?" % (slot + 1))
+	_add_note("This can’t be undone.")
+	_add_row("Delete", true, _delete_slot.bind(slot))
+	_add_row("Cancel", true, _show_slots.bind(true))
+	_back_action = _show_slots.bind(true)
 
 
 func _delete_slot(slot: int) -> void:
@@ -193,6 +197,19 @@ func _open_panel(prompt: String) -> void:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_save_panel.add_child(label)
+
+
+## A smaller line under the question, saying what the choice will do.
+func _add_note(text: String) -> void:
+	var note := Label.new()
+	note.theme_type_variation = &"MenuPrompt"
+	note.text = text
+	note.add_theme_font_size_override("font_size", NOTE_SIZE)
+	note.modulate.a = 0.8
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.custom_minimum_size.x = ROW_SIZE.x
+	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_save_panel.add_child(note)
 
 
 func _add_row(text: String, enabled: bool, action: Callable) -> void:
