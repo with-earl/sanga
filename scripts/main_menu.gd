@@ -4,9 +4,6 @@ extends Control
 
 const MONTHS := ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 const ROW_SIZE := Vector2(300, 52)
-## While the game is being made, a quiet note at the bottom left says it is still being improved.
-const PREVIEW_NOTE := "Continuous improvement in progress"
-const PREVIEW_MARGIN := Vector2(40.0, 28.0)
 ## The main buttons, the save list and the quit question each sit on a soft window, hugging their
 ## contents above the bottom right corner.
 const MENU_WINDOW_MARGIN := Vector2(40.0, 26.0)
@@ -39,8 +36,6 @@ func _ready() -> void:
 	_no_button.pressed.connect(_show_quit_confirm.bind(false))
 	for panel in [_menu, _quit_confirm, _save_panel]:
 		_put_on_window(panel)
-	if DevTools.enabled():
-		_add_preview_note()
 
 
 ## Android back button steps back one level. From the main buttons it asks before leaving.
@@ -80,17 +75,6 @@ func _show_main() -> void:
 	_save_panel.visible = false
 	_quit_confirm.visible = false
 	_menu.visible = true
-
-
-## The note at the bottom left, in the developer tools' colours, on a small rounded box.
-func _add_preview_note() -> void:
-	var note := Label.new()
-	note.text = PREVIEW_NOTE
-	DevTools.style_text(note, DevTools.NOTE_SIZE, DevTools.TEXT)
-	note.add_theme_stylebox_override("normal", DevTools.box(Color(0.07, 0.12, 0.16, 0.85), Color(DevTools.ACCENT, 0.6)))
-	add_child(note)
-	note.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT, Control.PRESET_MODE_MINSIZE)
-	note.position += Vector2(PREVIEW_MARGIN.x, -PREVIEW_MARGIN.y)
 
 
 ## Continue picks up the save played most recently.

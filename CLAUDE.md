@@ -50,7 +50,7 @@ picture. Delete the temporary script afterwards. The `--headless` runs print RID
 | `scenes/` | `boot`, `main_menu`, the four locations (`public_market`, `church_nave`, `confessional`, `apartment_room`), `timeline_reveal`. `components/` holds `dialogue_box`, `game_menu`, `objectives_panel` |
 | `scripts/` | `location.gd` is the base of every playable place (objectives route, conversations, hints). Each story has its own subclass: `tokhang.gd`, `church_nave.gd`/`confessional.gd` (with `kumpisal_story.gd`), `padala.gd` |
 | `story/*.json` | All story text, conversations and choices. `timelines.json` is the timelines chart: cards, sections and realities |
-| `assets/` | Art (see `assets/README.md`), `music/`, `sounds/`, `fonts/Lora.ttf`, `videos/main_screen.ogv` |
+| `assets/` | Art (see `assets/README.md`), `music/`, `sounds/`, `fonts/Lora.ttf` (and DejaVu Sans Mono for the developer tools), `videos/main_screen.ogv` |
 | `tools/` | `next_version.sh`, `compose_music.py`, `compose_sounds.py`, `draw_props.py`, `cloud_setup.sh`. Has a `.gdignore`, so Godot skips it |
 | `tests/smoke_test.gd` | Headless smoke test |
 
@@ -70,7 +70,8 @@ picture. Delete the temporary script afterwards. The `--headless` runs print RID
   The "Developer tools" window (`scripts/dev_tools.gd`, points in `scripts/dev_jump.gd`, plus
   the endings) opens from the terminal icon beside the gear, on the main screen and in every
   place. It shows in every build during development (`DevTools.SHOW_IN_ALL_BUILDS`); set it to
-  false before release. Developer UI uses its own slate blue and mint, never the game's colours.
+  false before release. It looks like a terminal (black screen, green DejaVu Sans Mono text,
+  crisp: the `crisp_text` group skips the retro blur), never like the game's own windows.
 - **Versioning:** follow [VERSIONING.md](VERSIONING.md).
   1. Make **every change** a Conventional Commit (`feat`, `fix`, `style`, `docs`, `chore`, …,
      with `!` or a `BREAKING CHANGE:` footer when something breaks).

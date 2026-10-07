@@ -20,9 +20,9 @@ const TERMINAL_PICTURE := preload("res://assets/ui/terminal.png")
 const ICON_SIZE := 64.0
 ## Room between the last icon and the place name's plate.
 const TITLE_GAP := 22.0
-## The terminal is a wider, shorter shape than the gear, so it is drawn a little larger to look
-## the same size.
-const TERMINAL_PICTURE_SIZE := 38.0
+## The terminal is a little wider than it is tall, so it is drawn a touch larger than the gear to
+## look the same size.
+const TERMINAL_PICTURE_SIZE := 36.0
 
 ## On the main screen the gear opens only the settings: no way back to the main menu, no story
 ## skip, and no place name.

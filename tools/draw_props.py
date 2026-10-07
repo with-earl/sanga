@@ -273,30 +273,23 @@ def gradient_fill(mask: Image.Image, fill_top, fill_bottom) -> Image.Image:
 
 
 def draw_terminal_icon() -> None:
-    """The developer tools icon: a small computer terminal window showing a prompt, drawn in the
-    same style as the settings gear beside it (light grey with a darker shade at the bottom
-    right, a thick near-black outline and a white shine), so the two read as a pair."""
+    """The developer tools icon: a plain terminal screen with a prompt, in the same style as the
+    settings gear beside it (a thick near-black outline, a white shine) and filling the picture
+    as fully as the gear does, so the two look the same size."""
     big = 8
     n = 128 * big
-    ink, light, shade, screen = (24, 24, 28, 255), (196, 199, 205, 255), (150, 153, 162, 255), (46, 50, 58, 255)
+    ink, prompt, screen, low = (24, 24, 28, 255), (196, 199, 205, 255), (64, 68, 78, 255), (44, 47, 55, 255)
     icon = Image.new("RGBA", (n, n), (0, 0, 0, 0))
     d = ImageDraw.Draw(icon)
     s = big
-    # The window: an outline, the grey frame with its shade, then the dark screen.
-    d.rounded_rectangle((6 * s, 16 * s, 122 * s, 112 * s), radius=20 * s, fill=ink)
-    d.rounded_rectangle((14 * s, 24 * s, 114 * s, 104 * s), radius=13 * s, fill=shade)
-    d.rounded_rectangle((14 * s, 24 * s, 108 * s, 98 * s), radius=13 * s, fill=light)
-    d.rounded_rectangle((24 * s, 40 * s, 104 * s, 94 * s), radius=7 * s, fill=ink)
-    d.rounded_rectangle((29 * s, 45 * s, 99 * s, 89 * s), radius=4 * s, fill=screen)
-    # Three small dots along the frame's top, like a window's buttons.
-    for i in range(3):
-        cx = (28 + i * 11) * s
-        d.ellipse((cx - 3 * s, 29 * s, cx + 3 * s, 35 * s), fill=ink)
+    d.rounded_rectangle((3 * s, 12 * s, 125 * s, 116 * s), radius=20 * s, fill=ink)
+    d.rounded_rectangle((12 * s, 21 * s, 116 * s, 107 * s), radius=12 * s, fill=low)
+    d.rounded_rectangle((12 * s, 21 * s, 110 * s, 101 * s), radius=12 * s, fill=screen)
     # The prompt: a chevron and a cursor line.
-    d.line([(40 * s, 55 * s), (52 * s, 66 * s), (40 * s, 77 * s)], fill=light, width=7 * s, joint="curve")
-    d.line([(58 * s, 78 * s), (78 * s, 78 * s)], fill=light, width=7 * s)
-    # The shine along the top left of the frame.
-    d.arc((18 * s, 27 * s, 54 * s, 63 * s), 185, 255, fill=(255, 255, 255, 255), width=4 * s)
+    d.line([(32 * s, 42 * s), (52 * s, 61 * s), (32 * s, 80 * s)], fill=prompt, width=11 * s, joint="curve")
+    d.line([(62 * s, 82 * s), (92 * s, 82 * s)], fill=prompt, width=11 * s)
+    # The shine along the top left.
+    d.arc((18 * s, 27 * s, 58 * s, 67 * s), 185, 255, fill=(255, 255, 255, 255), width=5 * s)
     icon.resize((128, 128), Image.LANCZOS).save(ROOT / "assets" / "ui" / "terminal.png")
 
 
