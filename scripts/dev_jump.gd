@@ -5,51 +5,35 @@ extends RefCounted
 ## (the timeline, the story, the outcomes reached before, and the flags a place reads, such as who
 ## bought the toy gun), then opens the place. Runs started here are never saved to a slot.
 
-## Each group is one timeline. A point names its story's place ("scene"), which story of the
-## timeline it is ("chapter", from 0), the outcomes reached before it, and flags to set. A point
-## with "confessions" opens the confessional with the confessions about to play.
+## Each group is one timeline, shown as one section of the developer tools. A point names its
+## story's place ("scene"), which story of the timeline it is ("chapter", from 0), the outcomes
+## reached before it, and flags to set. A point with "confessions" opens the confessional with the
+## confessions about to play. Only the start of each story is listed, plus the confessions (the
+## longest walk to reach by playing); smaller steps are a few taps from there.
 const GROUPS := [
-	{"title": "Main timeline", "points": [
-		{"label": "Tokhang: start", "timeline": "main", "chapter": 0, "scene": "public_market"},
-		{"label": "Tokhang: Peter is buying", "timeline": "main", "chapter": 0, "scene": "public_market",
-			"flags": {"objective_tokhang_buyer": "Peter"}},
-		{"label": "Tokhang: Gwen is buying", "timeline": "main", "chapter": 0, "scene": "public_market",
-			"flags": {"objective_tokhang_buyer": "Gwen"}},
-		{"label": "Kumpisal: start", "timeline": "main", "chapter": 1, "scene": "church_nave",
+	{"title": "Main Timeline", "points": [
+		{"label": "Tokhang", "timeline": "main", "chapter": 0, "scene": "public_market"},
+		{"label": "Kumpisal", "timeline": "main", "chapter": 1, "scene": "church_nave",
 			"outcomes": ["tokhang_peter"]},
-		{"label": "Kumpisal: in the church", "timeline": "main", "chapter": 1, "scene": "church_nave",
-			"outcomes": ["tokhang_peter"], "flags": {"objective_kumpisal_opening_seen": true}},
-		{"label": "Kumpisal: confessions", "timeline": "main", "chapter": 1, "scene": "confessional",
+		{"label": "Kumpisal Confessions", "timeline": "main", "chapter": 1, "scene": "confessional",
 			"outcomes": ["tokhang_peter"], "confessions": true},
-		{"label": "Padala: start", "timeline": "main", "chapter": 2, "scene": "apartment_room",
+		{"label": "Padala", "timeline": "main", "chapter": 2, "scene": "apartment_room",
 			"outcomes": ["tokhang_peter", "kumpisal_main"]},
-		{"label": "Padala: in the room", "timeline": "main", "chapter": 2, "scene": "apartment_room",
-			"outcomes": ["tokhang_peter", "kumpisal_main"], "flags": {"objective_padala_intro_seen": true}},
 	]},
-	{"title": "Kumpisal timeline", "points": [
-		{"label": "Kumpisal: start", "timeline": "kumpisal", "chapter": 0, "scene": "church_nave"},
-		{"label": "Kumpisal: in the church", "timeline": "kumpisal", "chapter": 0, "scene": "church_nave",
-			"flags": {"objective_kumpisal_opening_seen": true}},
-		{"label": "Kumpisal: confessions", "timeline": "kumpisal", "chapter": 0, "scene": "confessional",
+	{"title": "Kumpisal Timeline", "points": [
+		{"label": "Kumpisal", "timeline": "kumpisal", "chapter": 0, "scene": "church_nave"},
+		{"label": "Kumpisal Confessions", "timeline": "kumpisal", "chapter": 0, "scene": "confessional",
 			"confessions": true},
-		{"label": "Padala: start", "timeline": "kumpisal", "chapter": 1, "scene": "apartment_room",
+		{"label": "Padala", "timeline": "kumpisal", "chapter": 1, "scene": "apartment_room",
 			"outcomes": ["kumpisal_kumpisal"]},
-		{"label": "Padala: in the room", "timeline": "kumpisal", "chapter": 1, "scene": "apartment_room",
-			"outcomes": ["kumpisal_kumpisal"], "flags": {"objective_padala_intro_seen": true}},
 	]},
-	{"title": "Padala timeline", "points": [
-		{"label": "Padala: start", "timeline": "padala", "chapter": 0, "scene": "apartment_room"},
-		{"label": "Padala: in the room", "timeline": "padala", "chapter": 0, "scene": "apartment_room",
-			"flags": {"objective_padala_intro_seen": true}},
-		{"label": "Kumpisal after Police: start", "timeline": "padala", "chapter": 1, "scene": "church_nave",
+	{"title": "Padala Timeline", "points": [
+		{"label": "Padala", "timeline": "padala", "chapter": 0, "scene": "apartment_room"},
+		{"label": "Kumpisal After Police Call", "timeline": "padala", "chapter": 1, "scene": "church_nave",
 			"outcomes": ["padala_police"], "flags": {"run_padala_chain": "police"}},
-		{"label": "Kumpisal after Police: confessions", "timeline": "padala", "chapter": 1, "scene": "confessional",
-			"outcomes": ["padala_police"], "flags": {"run_padala_chain": "police"}, "confessions": true},
-		{"label": "Kumpisal after Food: start", "timeline": "padala", "chapter": 1, "scene": "church_nave",
+		{"label": "Kumpisal After Food Delivery", "timeline": "padala", "chapter": 1, "scene": "church_nave",
 			"outcomes": ["padala_food"], "flags": {"run_padala_chain": "food"}},
-		{"label": "Kumpisal after Food: confessions", "timeline": "padala", "chapter": 1, "scene": "confessional",
-			"outcomes": ["padala_food"], "flags": {"run_padala_chain": "food"}, "confessions": true},
-		{"label": "Tokhang after Police: start", "timeline": "padala", "chapter": 2, "scene": "public_market",
+		{"label": "Tokhang", "timeline": "padala", "chapter": 2, "scene": "public_market",
 			"outcomes": ["padala_police", "kumpisal_padala_police"], "flags": {"run_padala_chain": "police"}},
 	]},
 ]

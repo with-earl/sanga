@@ -241,6 +241,14 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   the main screen. Developer tools layout: header "Developer tools" left, plain "Close" text
   right; body heading "Jump into specific parts", the rows, then a footer line "Developer Note:
   Continuous improvement in progress. Some parts may appear as placeholder."
+- PR #14 (user's request: simpler black and white, rounded, strictly Apple design language,
+  fewer jump buttons, better copy): the developer tools are now one Apple-style sheet with no
+  drill-in. Title "Developer Tools" and "Done"; sections Main / Kumpisal / Padala Timeline and
+  Endings on rounded cards (Apple dark greys, 50 px rows, inset dividers, grey chevrons); the
+  footnote "This build is still in development, so some parts may use placeholder art or text."
+  sits under the first section (the user had "Progress from these shortcuts isn't saved" removed). `DevJump.GROUPS` now
+  holds only each story's start plus the Kumpisal confessions (the in-church, in-room and
+  Peter/Gwen-buying points were removed).
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions
