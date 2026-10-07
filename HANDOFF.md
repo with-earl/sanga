@@ -311,6 +311,12 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 - **Every choice is one short line** (user's rule). All choices in the story files and the bible
   were shortened (for example "Sasamahan kita.", "Ipagdasal mo sila.", "Magsama po siya ng
   tanod."). The smoke test fails if any choice is wider than 560 px at size 26 with the ✦.
+- **Script pass (user's rules, also in the bible):** choices never hint at their outcome (the
+  water gun is now "Ito na lang ang bilhin ko." / "Titingin pa ako."); Father Eli speaks as a
+  priest in every line and choice (only his secret calls and the door keep "pare", as the
+  reveal); stage directions are Tagalog between asterisks (*Tumawa*). The Main Timeline has no
+  prologue. Story time is Kumpisal (past), Padala (present), Tokhang (future); the Main Timeline
+  already plays them future, past, present (Tokhang, Kumpisal, Padala).
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions

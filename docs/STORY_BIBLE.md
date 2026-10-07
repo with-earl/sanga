@@ -39,7 +39,8 @@ The player learns this in pieces. Nobody in the game ever says all of it.
 | **Gwen** | Peter's girlfriend. Sharp, protective. | Pregnant, and hasn't told Peter yet. |
 | **Ben** | Gwen's little brother. Wants a toy gun "'yung mukhang totoo". | Innocent. The wish that starts everything. |
 
-**The frame (the last twist):** every run begins with an unseen voice in a dark confessional:
+**The frame (the last twist):** every run after the first (all but the Main Timeline) begins
+with an unseen voice in a dark confessional:
 *"Basbasan n'yo po ako, Padre, dahil nagkasala ako."* The player assumes it's a stranger, or
 the story itself. Only in the true ending does it turn out to be **Father Eli**, confessing,
 and the one he is confessing to is **the player**. The player has heard every confession in
@@ -48,6 +49,10 @@ the game and remembered all of them. That is what the Alaala are.
 ---
 
 ## 3. The deception, layer by layer
+
+**Story time:** Kumpisal is the past, Padala the present, Tokhang the future. The Main
+Timeline plays them as **future, past, present** (Tokhang, Kumpisal, Padala), so each story
+recasts the one before it, and only its closing card puts them in order.
 
 What the player believes after each stage, if they start with New Game (which always begins
 with the Main Timeline):
@@ -83,6 +88,11 @@ These are the planted lines. Write them so both readings are fully natural.
 ---
 
 ## 4. The Alaala mechanic (final rules)
+
+**Writing choices:** a choice never hints at what it leads to. Both options read as things the
+character would plausibly say, and none sounds like the safe or the dangerous one. Every
+choice fits on one line. Stage directions inside a line are Tagalog, between asterisks:
+*Tumawa*, *Mahina, sa cellphone*.
 
 - **R1.** Three kinds of choices: **branch** (existing: Tokhang phone call, Padala poster /
   flyer / key, Run / Ride Jeep), **Alaala** (new, need a memory, change the ending),
@@ -131,7 +141,7 @@ run to learn who is behind the door.
 
 | Character | How they talk | Never |
 |---|---|---|
-| **Father Eli** | Calm, warm, unhurried. Calls people *anak*. Short, quotable sentences. Never raises his voice, even at the end. | Sermons longer than two lines. Slang. |
+| **Father Eli** | Always a priest, in every line and every choice: calm, warm, unhurried, calls people *anak*, speaks of God, prayer and forgiveness. Short, quotable sentences. Never raises his voice. The only exception is in secret (his phone calls, the door with Batista), where he says *pare*: that slip is the reveal. | Sermons longer than two lines. Slang in public. |
 | **Peter** | Pagod pero pabiro. Taglish of a rider: *delivery, traffic, joke lang*. Calls Gwen *mahal*. | Self-pity. |
 | **Gwen** | Mabilis magsalita, matapang, makulit kay Ben. Soft only when scared. | Being helpless. |
 | **Ben** | Bata: simple, excited, one idea at a time. | Long sentences. |
@@ -142,7 +152,9 @@ run to learn who is behind the door.
 
 ---
 
-## 6. Prologue (new, before every run)
+## 6. Prologue (new, before every run except the Main Timeline)
+
+The Main Timeline starts cold in the market, with no hint of what comes after it.
 
 Black screen. The sound of a confessional's small door sliding open. Text only, no name plate.
 
@@ -206,7 +218,7 @@ Objectives (unchanged): Talk to Gloria → Choose a realistic toy gun → Talk t
 
 **Revelation lines (Alaala 1 held):** as the buyer walks away.
 
-> **Gloria** *(mahina, sa cellphone)*: ...Oo. Kakaalis lang. Naka-jacket. May dalang baril.
+> **Gloria** **Mahina, sa cellphone**: ...Oo. Kakaalis lang. Naka-jacket. May dalang baril.
 
 ### 7.4 The guns (existing objects)
 
@@ -220,8 +232,8 @@ Objectives (unchanged): Talk to Gloria → Choose a realistic toy gun → Talk t
 
 | Choice | Effect |
 |---|---|
-| Ito na lang. Baka mapagkamalan. | ✦ Buys the water gun. Ending: **Ligtas**. |
-| Huwag na. | Back to browsing. |
+| Ito na lang ang bilhin ko. | ✦ Buys the water gun. Ending: **Ligtas**. |
+| Titingin pa ako. | Back to browsing. |
 
 ### 7.5 Endings
 
@@ -259,7 +271,7 @@ Then Peter holding → shot. Card: **Trade** — *Peter dies.* → Alaala 1.
 
 `tokhang_safe_home.png` *(new)*: Ben squirting Peter at the door, Gwen laughing.
 > **Ben:** Bang! Patay ka na, Kuya!
-> **Peter:** Ay, tinamaan ako. *(tawa)*
+> **Peter:** Ay, tinamaan ako. *Tumawa*
 > **Gwen:** Mahal... may sasabihin ako sa'yo.
 
 Card: **Ligtas** — *Nobody is shot at the market.*
@@ -296,23 +308,23 @@ Card: **Ligtas** — *Nobody is shot at the market.*
 
 | Choice | After |
 |---|---|
-| May trabaho ako para sa'yo. | **Mercy:** Talaga po? Salamat po, Father! Kahit ano po, kakayanin ko. |
-| Ano'ng trabaho ang hanap mo? | **Mercy:** Kahit ano po. Kasambahay, tindera... basta po makapagpadala ako kay Nanay. / **Father Eli:** Padala. Naiintindihan ko. |
+| Huwag kang mag-alala, anak. | **Mercy:** Salamat po, Father. Kahit ano pong trabaho, kakayanin ko. |
+| Ano'ng maitutulong ko, anak? | **Mercy:** Kahit ano po. Kasambahay, tindera... basta po makapagpadala ako kay Nanay. / **Father Eli:** Padala. Naiintindihan ko. |
 
 Both end with:
 > **Father Eli:** Mamaya, pagkatapos ng kumpisal. Sasamahan kita.
 
 **Batista** (ordinary choice)
 > **Batista:** Pare! Ang ganda ng sermon mo kanina, ah. Muntik na 'kong maiyak.
-> **Father Eli:** Muntik lang? Kailangan ko pang galingan.
-> **Batista:** *(tawa)* Eli-tista pa rin tayo, pare. Kahit naka-sutana ka na.
+> **Father Eli:** Salamat. Ang Espiritu Santo ang nagsalita, hindi ako.
+> **Batista:** *Tumawa* Eli-tista pa rin tayo, pare. Kahit naka-sutana ka na.
 > **Father Eli:** Mula high school. Ikaw ang kamay, ako ang dasal.
 > **Batista:** May operasyon kami mamaya, diyan lang sa malapit. 'Yung usapan natin, ha?
 
 | Choice | After |
 |---|---|
-| Mag-ingat ka. | **Batista:** Ako pa. Ikaw ang mag-ingat, pare. Ikaw ang maraming alam. |
-| Huwag dito sa simbahan. | **Batista:** Siyempre naman. Respeto. Sa labas lang. |
+| Ingatan ka nawa ng Diyos. | **Batista:** Ako pa. Ikaw ang mag-ingat, pare. Ikaw ang maraming alam. |
+| Igalang mo ang bahay ng Diyos. | **Batista:** Siyempre naman. Respeto. Sa labas lang. |
 
 ### 8.3 The confessions (in the booth, sad portraits)
 
@@ -325,8 +337,8 @@ Order in the Main and Kumpisal timelines: Gwen, Batista, Gloria, Kulas.
 
 | Choice | After |
 |---|---|
-| Sabihin mo sa kanya ngayong gabi. | **Gwen:** Ngayong gabi po... Sige po. Kakayanin ko. |
-| Huwag kang magmadali. | **Gwen:** Opo, Father. |
+| Ipagtapat mo sa kanya, anak. | **Gwen:** Ngayong gabi po... Sige po. Kakayanin ko. |
+| Ipagdasal mo muna, anak. | **Gwen:** Opo, Father. |
 
 > **Father Eli:** Ang bata, hindi kasalanan. Biyaya 'yan.
 > **Father Eli:** Si Peter... 'yung rider, 'di ba? Saan siya madalas mag-deliver?
@@ -341,8 +353,8 @@ Order in the Main and Kumpisal timelines: Gwen, Batista, Gloria, Kulas.
 
 | Choice | After |
 |---|---|
-| Ipagdasal mo sila. | **Batista:** Ipagdasal... Sige. |
-| Alam ko kung bakit. | **Batista:** Oo. Dahil sa'yo. / **Batista:** ...Joke lang, pare. |
+| Ipagdasal mo ang kanilang kaluluwa. | **Batista:** Ipagdasal... Sige. |
+| Alam ng Diyos ang dahilan mo. | **Batista:** Oo. Dahil sa'yo. / **Batista:** ...Joke lang, pare. |
 
 > **Father Eli:** Pinapatawad ka na. Pero hindi pa tapos ang trabaho mo.
 
@@ -353,8 +365,8 @@ Order in the Main and Kumpisal timelines: Gwen, Batista, Gloria, Kulas.
 
 | Choice | After |
 |---|---|
-| Itigil mo na 'yan, Gloria. | **Gloria:** Gusto ko po, Father. Pero sino po'ng magpapakain sa'kin? |
-| Diyos lang ang huhusga sa'yo. | **Gloria:** Salamat po, Father. Gumaan po ang loob ko. |
+| Talikuran mo na ang kasalanan. | **Gloria:** Gusto ko po, Father. Pero sino po'ng magpapakain sa'kin? |
+| Ang Diyos lang ang huhusga sa'yo. | **Gloria:** Salamat po, Father. Gumaan po ang loob ko. |
 
 > **Father Eli:** Walang kasalanang hindi kayang patawarin.
 > **Gloria:** Father... 'yung pamangkin ko. Kayo na po'ng bahala sa kanya.
@@ -374,8 +386,8 @@ Order in the Main and Kumpisal timelines: Gwen, Batista, Gloria, Kulas.
 
 | Choice | Effect |
 |---|---|
-| Umuwi ka na. Magpahinga ka. | The usual ending of this timeline. |
-| Sasamahan kita. | ✦ (Alaala 2) Ending: **Sinamahan**. |
+| Umuwi ka na, anak. Magpahinga ka. | The usual ending of this timeline. |
+| Sasamahan kita, anak. | ✦ (Alaala 2) Ending: **Sinamahan**. |
 
 ### 8.4 Eli's last prayer (Alaala choice, after the confessions)
 
@@ -384,13 +396,13 @@ Eli alone in the booth.
 | Choice | Effect |
 |---|---|
 | Panginoon... patawarin Mo ako. | The usual ending. |
-| Aaminin ko na ang lahat. | ✦ (Alaala 3) Eli moves to the penitent's side of his own booth: **Father Eli:** Basbasan Mo ako, Ama, dahil nagkasala ako. *(The prologue's words, in his voice.)* Sets the flag for Padala: **Pinalaya**. |
+| Ama, aaminin ko na ang lahat. | ✦ (Alaala 3) Eli moves to the penitent's side of his own booth: **Father Eli:** Basbasan Mo ako, Ama, dahil nagkasala ako. *(The prologue's words, in his voice.)* Sets the flag for Padala: **Pinalaya**. |
 
 ### 8.5 Endings
 
 **Main timeline (existing, revised)**
 **Revelation lines (Alaala 3 held), before the gunshot:** `kumpisal_eli_hears.png`
-> **Father Eli** *(sa cellphone, mahina)*: Pare. 'Yung naka-gray na jacket. Paglabas niya.
+> **Father Eli** **Mahina, sa cellphone**: Pare. 'Yung naka-gray na jacket. Paglabas niya.
 
 `tokhang_kulas_runs.png` — **Batista:** Pigilan n'yo 'yan!
 `kumpisal_gunshot.png` — gunshot.
@@ -401,7 +413,7 @@ Eli alone in the booth.
 
 **Padala timeline, food chain (existing, "Sacrifice"):** Eli steps in front of the gun.
 `kumpisal_eli_sacrifice.png`, before the card:
-> **Father Eli:** Hindi siya, pare. Ako.
+> **Father Eli:** Hindi siya, Batista. Ako.
 
 Card: **Sacrifice** — *Father Eli died.*
 
@@ -410,7 +422,7 @@ Card: **Sacrifice** — *Father Eli died.*
 > **Batista:** Pare. Ano 'to?
 > **Father Eli:** Hindi siya.
 > **Batista:** ...Sigurado ka?
-> **Father Eli:** Hindi siya, pare. Umuwi na kayo.
+> **Father Eli:** Hindi siya, Batista. Umuwi na kayo.
 
 Card: **Sinamahan** — *Kulas lives.*
 
@@ -473,7 +485,7 @@ Then `padala_eli_attacks.png`, `padala_police_car_leaves.png`. Card: **Police Po
 | Choice | Effect |
 |---|---|
 | 'Yun lang po. | The usual ending. |
-| Magsama po siya ng tanod. | ✦ Ending: **Tanod**. |
+| Isama po niya ang tanod. | ✦ Ending: **Tanod**. |
 
 Usual: `padala_peter_arrives.png` — **Peter:** Ma'am? Delivery po— *(sees her)* Teka. Ano'ng nangyayari dito?
 `padala_peter_fights.png`, `padala_peter_stabbed.png`. Card: **Food Delivery** — *Peter is stabbed.* → Alaala 5.
@@ -494,7 +506,7 @@ caption *Still in Manila*:
 | Choice | Effect |
 |---|---|
 | Tumakbo | Existing ending **Run**: `padala_run.png`, `padala_run_shot.png`. Card: *Batista accidentally shoots Mercy.* → Alaala 4. |
-| Sumakay ng jeep | Existing ending **Ride Jeep**: `padala_jeep.png`, `padala_police_laugh.png`. **Pulis:** Si Father Eli? *(tawanan)* Ineng, umuwi ka na. Card: *Mercy reports him, but the police laugh.* |
+| Sumakay ng jeep | Existing ending **Ride Jeep**: `padala_jeep.png`, `padala_police_laugh.png`. **Pulis:** Si Father Eli? *Nagtawanan* Ineng, umuwi ka na. Card: *Mercy reports him, but the police laugh.* |
 | Magtago hanggang umaga. | ✦ (Alaala 4) Ending **Nagtago**: `padala_hide_dawn.png` *(new)*: Mercy in a jeepney terminal at dawn, phone to her ear. **Mercy:** 'Nay? ...Uuwi na po ako. Card: *Mercy goes home.* |
 
 **Pinalaya (new, Alaala 3 choice made in Kumpisal this run, Main or Kumpisal timeline)** —
@@ -514,7 +526,7 @@ Card: **Pinalaya** — *Mercy is set free.*
 Plays instead of Pinalaya when the run also chose Ligtas and Sinamahan.
 
 `true_morning.png` *(new)*, one picture per line, slow fades:
-> Peter, Gwen and Ben at a carinderia. **Gwen:** Mahal... buntis ako. / **Peter:** ...Talaga?! *(tawa, iyak)*
+> Peter, Gwen and Ben at a carinderia. **Gwen:** Mahal... buntis ako. / **Peter:** ...Talaga?! *Tumawa at naiyak*
 > Kulas outside a rehab center, holding a rosary.
 > Mercy on a bus home, looking out the window.
 > Batista, badge on a desk, hands open.

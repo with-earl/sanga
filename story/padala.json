@@ -251,7 +251,7 @@
 					"lines": [
 						{
 							"speaker": "Pulis",
-							"text": "Si Father Eli? (tawanan)"
+							"text": "Si Father Eli? *Nagtawanan*"
 						},
 						{
 							"speaker": "Pulis",
@@ -337,7 +337,7 @@
 							"text": "'Yun lang po."
 						},
 						{
-							"text": "Magsama po siya ng tanod.",
+							"text": "Isama po niya ang tanod.",
 							"needs": "rider",
 							"flag": "run_tanod"
 						}
@@ -466,7 +466,7 @@
 						},
 						{
 							"speaker": "Peter",
-							"text": "...Talaga?! (tawa, iyak)"
+							"text": "...Talaga?! *Tumawa at naiyak*"
 						}
 					]
 				},

@@ -128,12 +128,12 @@
 				"needs": "laruang_baril",
 				"choices": [
 					{
-						"text": "Ito na lang. Baka mapagkamalan.",
+						"text": "Ito na lang ang bilhin ko.",
 						"needs": "laruang_baril",
 						"id": "water_gun"
 					},
 					{
-						"text": "Huwag na.",
+						"text": "Titingin pa ako.",
 						"id": "keep_looking"
 					}
 				]
@@ -310,7 +310,7 @@
 						},
 						{
 							"speaker": "Peter",
-							"text": "Ay, tinamaan ako. (tawa)"
+							"text": "Ay, tinamaan ako. *Tumawa*"
 						},
 						{
 							"speaker": "Gwen",
@@ -356,7 +356,7 @@
 		},
 		{
 			"speaker": "Gloria",
-			"text": "(mahina, sa cellphone) ...Oo. Kakaalis lang. Naka-jacket. May dalang baril.",
+			"text": "*Mahina, sa cellphone* ...Oo. Kakaalis lang. Naka-jacket. May dalang baril.",
 			"needs": "laruang_baril"
 		}
 	]

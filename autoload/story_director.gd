@@ -1,6 +1,10 @@
 extends Node
 ## Runs the stories in order.
 ##
+## In story time, Kumpisal comes first (the past), then Padala (the present), then Tokhang (the
+## future). The main timeline plays them as future, past, present: the market first, so the
+## truth about Kumpisal and Padala is revealed the way a player would piece it together.
+##
 ## A timeline is an ordered list of stories (chapters). The first run of a save is always the main
 ## timeline: Tokhang, then Kumpisal, then Padala. After that, the player chooses which story to
 ## begin with, and that choice picks the timeline. A timeline must be finished before another can
@@ -29,7 +33,8 @@ var last_reality: Dictionary = {}
 ## Story order shown to the player when choosing where to begin.
 const STORY_ORDER := ["tokhang", "kumpisal", "padala"]
 const RUN_FLAG_PREFIX := "run_"
-## The voice in the dark confessional that opens every run (see docs/STORY_BIBLE.md).
+## The voice in the dark confessional that opens a run (see docs/STORY_BIBLE.md). The main
+## timeline has none: it starts cold in the market, with no hint of what comes after.
 const PROLOGUE_FILE := "res://story/prologue.json"
 
 
@@ -58,7 +63,8 @@ func begin_with(story: String) -> void:
 	# Flags starting with "run_" remember choices that shape later stories of this run only.
 	GameState.clear_flags(RUN_FLAG_PREFIX)
 	GameState.run_outcomes = []
-	await Cutscene.play(_prologue_for(story))
+	if timeline != "main":
+		await Cutscene.play(_prologue_for(story))
 	_enter_chapter([])
 
 
