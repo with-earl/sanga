@@ -261,6 +261,13 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   "SANGA is a work of fiction intended for mature audiences. It explores dark themes and
   includes scenes some players may find disturbing. Please play at your own discretion, and take
   a break whenever you need one." (`boot.gd` `WARNING_TEXT`).
+- **Main screen is Continue / New Game / Quit** (the user found Continue plus Load Game
+  redundant; this replaces the never-merged PR #8). Continue lists the saves ("Choose a save",
+  plus "Delete a Save"); picking one opens it with **Continue Progress** (only while a run is in
+  progress) and **Choose Starting Point**. Choosing a story while a run is in progress asks
+  "Start from Kumpisal?" with the note "Your current progress in Slot 1 will be lost." and
+  "Start Over" / "Cancel". New Game over a used slot asks "Replace Slot 1?"; deleting asks
+  "Delete Slot 1?" with "This can't be undone."
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions
