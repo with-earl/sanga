@@ -184,9 +184,9 @@ Then the story's title card, as now.
 
 | Choice | Text | After |
 |---|---|---|
-| `peter` | Sige, ako na. Dadaan ako sa palengke. | **Ben:** Yehey! Thank you, Kuya Peter! / **Gwen:** Pero kakain ka muna ng gulay bago mo makuha 'yan, ha. / **Peter:** Sige na, mahal. Bye. |
-| `gwen` (from run 2) | Ikaw na lang muna. May delivery pa 'ko. | **Gwen:** Ay, ako na naman. O sige. Ingat ka, ha. |
-| `kulas` (from run 2) | Mamaya na lang. Sabay na tayo. | **Gwen:** Sige. Hintayin kita. |
+| `peter` | Sige, ako na'ng bibili. | **Ben:** Yehey! Thank you, Kuya Peter! / **Gwen:** Pero kakain ka muna ng gulay bago mo makuha 'yan, ha. / **Peter:** Sige na, mahal. Bye. |
+| `gwen` (from run 2) | Ikaw na lang. May delivery ako. | **Gwen:** Ay, ako na naman. O sige. Ingat ka, ha. |
+| `kulas` (from run 2) | Mamaya, sabay na tayo. | **Gwen:** Sige. Hintayin kita. |
 
 ### 7.3 Gloria's stall
 
@@ -201,8 +201,8 @@ Objectives (unchanged): Talk to Gloria → Choose a realistic toy gun → Talk t
 
 | Choice | After |
 |---|---|
-| Ang mahal naman, Ate. Two hundred na lang? | **Gloria:** Ay naku, lugi na 'ko niyan... O sige na nga. Basta ikaw. |
-| Sige po. Okay na 'yan. | **Gloria:** 'Yan ang gusto ko sa'yo. Hindi ka tumatawad. |
+| Two hundred na lang, Ate? | **Gloria:** Ay naku, lugi na 'ko niyan... O sige na nga. Basta ikaw. |
+| Sige po, okay na. | **Gloria:** 'Yan ang gusto ko sa'yo. Hindi ka tumatawad. |
 
 **Revelation lines (Alaala 1 held):** as the buyer walks away.
 
@@ -220,7 +220,7 @@ Objectives (unchanged): Talk to Gloria → Choose a realistic toy gun → Talk t
 
 | Choice | Effect |
 |---|---|
-| Ito na lang. Baka mapagkamalan pa 'yung mukhang totoo. | ✦ Buys the water gun. Ending: **Ligtas**. |
+| Ito na lang. Baka mapagkamalan. | ✦ Buys the water gun. Ending: **Ligtas**. |
 | Huwag na. | Back to browsing. |
 
 ### 7.5 Endings
@@ -296,8 +296,8 @@ Card: **Ligtas** — *Nobody is shot at the market.*
 
 | Choice | After |
 |---|---|
-| Huwag kang mag-alala. May trabaho ako para sa'yo. | **Mercy:** Talaga po? Salamat po, Father! Kahit ano po, kakayanin ko. |
-| Ano'ng klaseng trabaho ang hanap mo, anak? | **Mercy:** Kahit ano po. Kasambahay, tindera... basta po makapagpadala ako kay Nanay. / **Father Eli:** Padala. Naiintindihan ko. |
+| May trabaho ako para sa'yo. | **Mercy:** Talaga po? Salamat po, Father! Kahit ano po, kakayanin ko. |
+| Ano'ng trabaho ang hanap mo? | **Mercy:** Kahit ano po. Kasambahay, tindera... basta po makapagpadala ako kay Nanay. / **Father Eli:** Padala. Naiintindihan ko. |
 
 Both end with:
 > **Father Eli:** Mamaya, pagkatapos ng kumpisal. Sasamahan kita.
@@ -326,7 +326,7 @@ Order in the Main and Kumpisal timelines: Gwen, Batista, Gloria, Kulas.
 | Choice | After |
 |---|---|
 | Sabihin mo sa kanya ngayong gabi. | **Gwen:** Ngayong gabi po... Sige po. Kakayanin ko. |
-| Ipagdasal mo muna. Hindi mo kailangang magmadali. | **Gwen:** Opo, Father. |
+| Huwag kang magmadali. | **Gwen:** Opo, Father. |
 
 > **Father Eli:** Ang bata, hindi kasalanan. Biyaya 'yan.
 > **Father Eli:** Si Peter... 'yung rider, 'di ba? Saan siya madalas mag-deliver?
@@ -341,8 +341,8 @@ Order in the Main and Kumpisal timelines: Gwen, Batista, Gloria, Kulas.
 
 | Choice | After |
 |---|---|
-| Humingi ka ng tawad. Ipagdasal mo sila, at ang mga pamilya nila. | **Batista:** Ipagdasal... Sige. |
-| Alam ko kung bakit mo ginagawa 'yan. | **Batista:** Oo. Dahil sa'yo. / **Batista:** ...Joke lang, pare. |
+| Ipagdasal mo sila. | **Batista:** Ipagdasal... Sige. |
+| Alam ko kung bakit. | **Batista:** Oo. Dahil sa'yo. / **Batista:** ...Joke lang, pare. |
 
 > **Father Eli:** Pinapatawad ka na. Pero hindi pa tapos ang trabaho mo.
 
@@ -354,7 +354,7 @@ Order in the Main and Kumpisal timelines: Gwen, Batista, Gloria, Kulas.
 | Choice | After |
 |---|---|
 | Itigil mo na 'yan, Gloria. | **Gloria:** Gusto ko po, Father. Pero sino po'ng magpapakain sa'kin? |
-| Ang Diyos lang ang makakahusga sa'yo. | **Gloria:** Salamat po, Father. Gumaan po ang loob ko. |
+| Diyos lang ang huhusga sa'yo. | **Gloria:** Salamat po, Father. Gumaan po ang loob ko. |
 
 > **Father Eli:** Walang kasalanang hindi kayang patawarin.
 > **Gloria:** Father... 'yung pamangkin ko. Kayo na po'ng bahala sa kanya.
@@ -375,7 +375,7 @@ Order in the Main and Kumpisal timelines: Gwen, Batista, Gloria, Kulas.
 | Choice | Effect |
 |---|---|
 | Umuwi ka na. Magpahinga ka. | The usual ending of this timeline. |
-| Huwag kang tatakbo. Sasamahan kita. | ✦ (Alaala 2) Ending: **Sinamahan**. |
+| Sasamahan kita. | ✦ (Alaala 2) Ending: **Sinamahan**. |
 
 ### 8.4 Eli's last prayer (Alaala choice, after the confessions)
 
@@ -472,8 +472,8 @@ Then `padala_eli_attacks.png`, `padala_police_car_leaves.png`. Card: **Police Po
 
 | Choice | Effect |
 |---|---|
-| Wala na po. 'Yun lang po. | The usual ending. |
-| Pakisabi po sa rider, magsama siya ng tanod. | ✦ Ending: **Tanod**. |
+| 'Yun lang po. | The usual ending. |
+| Magsama po siya ng tanod. | ✦ Ending: **Tanod**. |
 
 Usual: `padala_peter_arrives.png` — **Peter:** Ma'am? Delivery po— *(sees her)* Teka. Ano'ng nangyayari dito?
 `padala_peter_fights.png`, `padala_peter_stabbed.png`. Card: **Food Delivery** — *Peter is stabbed.* → Alaala 5.
@@ -495,7 +495,7 @@ caption *Still in Manila*:
 |---|---|
 | Tumakbo | Existing ending **Run**: `padala_run.png`, `padala_run_shot.png`. Card: *Batista accidentally shoots Mercy.* → Alaala 4. |
 | Sumakay ng jeep | Existing ending **Ride Jeep**: `padala_jeep.png`, `padala_police_laugh.png`. **Pulis:** Si Father Eli? *(tawanan)* Ineng, umuwi ka na. Card: *Mercy reports him, but the police laugh.* |
-| Magtago muna. Hintayin ang umaga. | ✦ (Alaala 4) Ending **Nagtago**: `padala_hide_dawn.png` *(new)*: Mercy in a jeepney terminal at dawn, phone to her ear. **Mercy:** 'Nay? ...Uuwi na po ako. Card: *Mercy goes home.* |
+| Magtago hanggang umaga. | ✦ (Alaala 4) Ending **Nagtago**: `padala_hide_dawn.png` *(new)*: Mercy in a jeepney terminal at dawn, phone to her ear. **Mercy:** 'Nay? ...Uuwi na po ako. Card: *Mercy goes home.* |
 
 **Pinalaya (new, Alaala 3 choice made in Kumpisal this run, Main or Kumpisal timeline)** —
 plays as soon as Mercy has looked around the room (after the first objective), instead of

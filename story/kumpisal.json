@@ -57,7 +57,7 @@
 			{
 				"choices": [
 					{
-						"text": "Huwag kang mag-alala. May trabaho ako para sa'yo.",
+						"text": "May trabaho ako para sa'yo.",
 						"after": [
 							{
 								"speaker": "Mercy",
@@ -66,7 +66,7 @@
 						]
 					},
 					{
-						"text": "Ano'ng klaseng trabaho ang hanap mo, anak?",
+						"text": "Ano'ng trabaho ang hanap mo?",
 						"after": [
 							{
 								"speaker": "Mercy",
@@ -159,7 +159,7 @@
 							]
 						},
 						{
-							"text": "Ipagdasal mo muna. Hindi mo kailangang magmadali.",
+							"text": "Huwag kang magmadali.",
 							"after": [
 								{
 									"speaker": "Gwen",
@@ -210,7 +210,7 @@
 				{
 					"choices": [
 						{
-							"text": "Humingi ka ng tawad. Ipagdasal mo sila, at ang mga pamilya nila.",
+							"text": "Ipagdasal mo sila.",
 							"after": [
 								{
 									"speaker": "Batista",
@@ -219,7 +219,7 @@
 							]
 						},
 						{
-							"text": "Alam ko kung bakit mo ginagawa 'yan.",
+							"text": "Alam ko kung bakit.",
 							"after": [
 								{
 									"speaker": "Batista",
@@ -267,7 +267,7 @@
 							]
 						},
 						{
-							"text": "Ang Diyos lang ang makakahusga sa'yo.",
+							"text": "Diyos lang ang huhusga sa'yo.",
 							"after": [
 								{
 									"speaker": "Gloria",
@@ -337,7 +337,7 @@
 							"text": "Umuwi ka na. Magpahinga ka."
 						},
 						{
-							"text": "Huwag kang tatakbo. Sasamahan kita.",
+							"text": "Sasamahan kita.",
 							"needs": "pagtakbo_ni_kulas",
 							"flag": "run_kulas_safe"
 						}

@@ -308,6 +308,9 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   Godot's web (sample) playback never routed them. Fix: `default_bus_layout.tres` defines both
   buses. Measured after: peak about 0.015 on the main screen (music at -24 dB is very quiet on a
   phone speaker; raise `MusicDirector.VOLUME_DB` if the user finds it too soft).
+- **Every choice is one short line** (user's rule). All choices in the story files and the bible
+  were shortened (for example "Sasamahan kita.", "Ipagdasal mo sila.", "Magsama po siya ng
+  tanod."). The smoke test fails if any choice is wider than 560 px at size 26 with the ✦.
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions

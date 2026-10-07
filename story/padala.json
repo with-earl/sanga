@@ -209,7 +209,7 @@
 							"text": "Sumakay ng jeep"
 						},
 						{
-							"text": "Magtago muna. Hintayin ang umaga.",
+							"text": "Magtago hanggang umaga.",
 							"needs": "baril_ni_batista"
 						}
 					]
@@ -334,10 +334,10 @@
 					"needs": "rider",
 					"choose": [
 						{
-							"text": "Wala na po. 'Yun lang po."
+							"text": "'Yun lang po."
 						},
 						{
-							"text": "Pakisabi po sa rider, magsama siya ng tanod.",
+							"text": "Magsama po siya ng tanod.",
 							"needs": "rider",
 							"flag": "run_tanod"
 						}
