@@ -272,6 +272,34 @@ def gradient_fill(mask: Image.Image, fill_top, fill_bottom) -> Image.Image:
     return face
 
 
+def draw_terminal_icon() -> None:
+    """The developer tools icon: a small computer terminal window showing a prompt, drawn in the
+    same style as the settings gear beside it (light grey with a darker shade at the bottom
+    right, a thick near-black outline and a white shine), so the two read as a pair."""
+    big = 8
+    n = 128 * big
+    ink, light, shade, screen = (24, 24, 28, 255), (196, 199, 205, 255), (150, 153, 162, 255), (46, 50, 58, 255)
+    icon = Image.new("RGBA", (n, n), (0, 0, 0, 0))
+    d = ImageDraw.Draw(icon)
+    s = big
+    # The window: an outline, the grey frame with its shade, then the dark screen.
+    d.rounded_rectangle((6 * s, 16 * s, 122 * s, 112 * s), radius=20 * s, fill=ink)
+    d.rounded_rectangle((14 * s, 24 * s, 114 * s, 104 * s), radius=13 * s, fill=shade)
+    d.rounded_rectangle((14 * s, 24 * s, 108 * s, 98 * s), radius=13 * s, fill=light)
+    d.rounded_rectangle((24 * s, 40 * s, 104 * s, 94 * s), radius=7 * s, fill=ink)
+    d.rounded_rectangle((29 * s, 45 * s, 99 * s, 89 * s), radius=4 * s, fill=screen)
+    # Three small dots along the frame's top, like a window's buttons.
+    for i in range(3):
+        cx = (28 + i * 11) * s
+        d.ellipse((cx - 3 * s, 29 * s, cx + 3 * s, 35 * s), fill=ink)
+    # The prompt: a chevron and a cursor line.
+    d.line([(40 * s, 55 * s), (52 * s, 66 * s), (40 * s, 77 * s)], fill=light, width=7 * s, joint="curve")
+    d.line([(58 * s, 78 * s), (78 * s, 78 * s)], fill=light, width=7 * s)
+    # The shine along the top left of the frame.
+    d.arc((18 * s, 27 * s, 54 * s, 63 * s), 185, 255, fill=(255, 255, 255, 255), width=4 * s)
+    icon.resize((128, 128), Image.LANCZOS).save(ROOT / "assets" / "ui" / "terminal.png")
+
+
 class PhoneModel:
     """A very small 3D model of the desk telephone, so its faces have a true angle, depth and light.
     The phone is built from flat faces in the room's space (x to the right, y up, z away from the
@@ -488,6 +516,7 @@ def draw_telephone() -> None:
 
 
 if __name__ == "__main__":
+    draw_terminal_icon()
     draw_telephone()
     draw_key()
     draw_poster()

@@ -4,31 +4,12 @@ extends Control
 
 const MONTHS := ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 const ROW_SIZE := Vector2(300, 52)
-## Development only: the "Developer tools" window on the left, for opening any point of the game
-## without playing from the start (see DevJump), or the screen a timeline ends on. Runs started
-## there are never saved. While the game is still being made it shows in every build, the web
-## playtest build included, so coaches and testers can reach any part. It starts folded into one
-## clearly labelled button, in cool blue rather than the game's warm colours, with a note that
-## this is a development preview, so no one takes it for a bug. Set this to false before release,
-## and it shows only in debug builds again.
-const SHOW_DEV_MENU_IN_ALL_BUILDS := true
-const DEV_PANEL_LEFT := 40.0
-const DEV_PANEL_TOP := 96.0
-const DEV_PANEL_WIDTH := 420.0
-const DEV_PANEL_BOTTOM := 70.0
-const DEV_PANEL_PADDING := 20.0
-const DEV_ROW_HEIGHT := 48.0
-const DEV_FONT_SIZE := 21
-const DEV_NOTE_SIZE := 17
-const DEV_TEXT := Color(0.86, 0.98, 0.94, 1)
-const DEV_ACCENT := Color(0.45, 0.9, 0.78, 1)
-const DEV_OUTLINE := Color(0.03, 0.07, 0.09, 1)
-const DEV_BUTTON_SIZE := Vector2(330, 52)
-## The line at the bottom left saying this is a build still being made.
-const PREVIEW_NOTE := "DEVELOPMENT PREVIEW  ·  work in progress, not the final game"
+## While the game is being made, a quiet note at the bottom left says it is still being improved.
+const PREVIEW_NOTE := "Continuous improvement in progress"
+const PREVIEW_MARGIN := Vector2(40.0, 28.0)
 ## The main buttons, the save list and the quit question each sit on a soft window, hugging their
 ## contents above the bottom right corner.
-const MENU_WINDOW_MARGIN := Vector2(26.0, 18.0)
+const MENU_WINDOW_MARGIN := Vector2(40.0, 26.0)
 
 @onready var _menu: Control = $Buttons
 @onready var _quit_confirm: Control = %QuitConfirm
@@ -44,12 +25,6 @@ const MENU_WINDOW_MARGIN := Vector2(26.0, 18.0)
 
 ## What the Android back button does while the save panel is showing.
 var _back_action := Callable()
-var _dev_panel := PanelContainer.new()
-var _dev_title := Label.new()
-var _dev_list := VBoxContainer.new()
-var _dev_scroll := ScrollContainer.new()
-var _dev_note := Label.new()
-var _dev_open_button := Button.new()
 
 
 func _ready() -> void:
@@ -64,10 +39,8 @@ func _ready() -> void:
 	_no_button.pressed.connect(_show_quit_confirm.bind(false))
 	for panel in [_menu, _quit_confirm, _save_panel]:
 		_put_on_window(panel)
-	if SHOW_DEV_MENU_IN_ALL_BUILDS or OS.is_debug_build():
-		_build_dev_panel()
-		_show_dev_menu()
-		_show_dev_panel(false)
+	if DevTools.enabled():
+		_add_preview_note()
 
 
 ## Android back button steps back one level. From the main buttons it asks before leaving.
@@ -109,179 +82,15 @@ func _show_main() -> void:
 	_menu.visible = true
 
 
-## Development only. The folded button, the "Developer tools" window it opens (a title, a short
-## note saying what it is for, and a scrolling list of rows), and the preview note at the bottom.
-func _build_dev_panel() -> void:
-	_style_dev_button(_dev_open_button, "DEV  ·  Developer tools  ›", DEV_ACCENT)
-	_dev_open_button.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_dev_open_button.position = Vector2(DEV_PANEL_LEFT, DEV_PANEL_TOP)
-	_dev_open_button.size = DEV_BUTTON_SIZE
-	_dev_open_button.add_theme_stylebox_override("normal", _dev_box(Color(0.1, 0.17, 0.22, 0.94), DEV_ACCENT))
-	_dev_open_button.add_theme_stylebox_override("hover", _dev_box(Color(0.14, 0.24, 0.3, 0.96), DEV_ACCENT))
-	_dev_open_button.add_theme_stylebox_override("pressed", _dev_box(Color(0.18, 0.3, 0.36, 0.96), DEV_ACCENT))
-	_dev_open_button.pressed.connect(_show_dev_panel.bind(true))
-	add_child(_dev_open_button)
-
-	var style := StyleBoxEmpty.new()
-	for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
-		style.set_content_margin(side, DEV_PANEL_PADDING)
-	_dev_panel.add_theme_stylebox_override("panel", style)
-	SoftWindow.behind(_dev_panel, SoftWindow.Look.DEV)
-	_dev_panel.set_anchors_preset(Control.PRESET_LEFT_WIDE)
-	_dev_panel.offset_left = DEV_PANEL_LEFT
-	_dev_panel.offset_top = DEV_PANEL_TOP
-	_dev_panel.offset_right = DEV_PANEL_LEFT + DEV_PANEL_WIDTH
-	_dev_panel.offset_bottom = -DEV_PANEL_BOTTOM
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 8)
-	var header := HBoxContainer.new()
-	var badge := Label.new()
-	badge.text = "DEV"
-	_style_dev_text(badge, DEV_NOTE_SIZE, DEV_OUTLINE)
-	badge.add_theme_constant_override("outline_size", 0)
-	var badge_back := StyleBoxFlat.new()
-	badge_back.bg_color = DEV_ACCENT
-	badge_back.set_corner_radius_all(6)
-	badge_back.set_content_margin_all(4)
-	badge_back.content_margin_left = 10
-	badge_back.content_margin_right = 10
-	badge.add_theme_stylebox_override("normal", badge_back)
-	badge.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	header.add_child(badge)
-	header.add_theme_constant_override("separation", 12)
-	_style_dev_text(_dev_title, UiSkin.HEADING_SIZE, DEV_TEXT)
-	_dev_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header.add_child(_dev_title)
-	var close := Button.new()
-	_style_dev_button(close, "Hide ✕", DEV_ACCENT)
-	close.add_theme_font_size_override("font_size", DEV_NOTE_SIZE + 2)
-	close.pressed.connect(_show_dev_panel.bind(false))
-	header.add_child(close)
-	column.add_child(header)
-	_dev_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_style_dev_text(_dev_note, DEV_NOTE_SIZE, DEV_TEXT.darkened(0.12))
-	column.add_child(_dev_note)
-	var rule := ColorRect.new()
-	rule.color = Color(DEV_ACCENT, 0.4)
-	rule.custom_minimum_size.y = 2
-	column.add_child(rule)
-	_dev_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_dev_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_dev_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_dev_list.add_theme_constant_override("separation", 6)
-	_dev_scroll.add_child(_dev_list)
-	column.add_child(_dev_scroll)
-	_dev_panel.add_child(column)
-	add_child(_dev_panel)
-
-	var preview := Label.new()
-	preview.text = PREVIEW_NOTE
-	_style_dev_text(preview, DEV_NOTE_SIZE, DEV_TEXT)
-	var preview_box := _dev_box(Color(0.07, 0.12, 0.16, 0.85), Color(DEV_ACCENT, 0.6))
-	preview_box.content_margin_left = 14
-	preview_box.content_margin_right = 14
-	preview.add_theme_stylebox_override("normal", preview_box)
-	add_child(preview)
-	preview.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT, Control.PRESET_MODE_MINSIZE)
-	preview.position += Vector2(DEV_PANEL_LEFT, -16)
-
-
-## Shows the developer tools window, or folds it back into its button.
-func _show_dev_panel(open: bool) -> void:
-	_dev_panel.visible = open
-	_dev_open_button.visible = not open
-	if open:
-		_show_dev_menu()
-
-
-## A developer button: text only, in the developer colours, kept out of the game's own button look.
-func _style_dev_button(button: Button, text: String, color: Color) -> void:
-	button.theme_type_variation = &"TextButton"
-	button.text = text
-	button.focus_mode = Control.FOCUS_NONE
-	for state in ["normal", "hover", "pressed", "hover_pressed", "focus", "disabled"]:
-		button.add_theme_stylebox_override(state, StyleBoxEmpty.new())
-	_style_dev_text(button, DEV_FONT_SIZE, color)
-
-
-## A rounded slate box with a thin mint edge, the developer tools' own look.
-func _dev_box(fill: Color, edge: Color) -> StyleBoxFlat:
-	var box := StyleBoxFlat.new()
-	box.bg_color = fill
-	box.border_color = edge
-	box.set_border_width_all(2)
-	box.set_corner_radius_all(10)
-	box.set_content_margin_all(6)
-	box.content_margin_left = 16
-	box.content_margin_right = 16
-	return box
-
-
-func _style_dev_text(control: Control, font_size: int, color: Color) -> void:
-	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
-		control.add_theme_color_override(state, color)
-	control.add_theme_color_override("font_outline_color", DEV_OUTLINE)
-	control.add_theme_constant_override("outline_size", 4)
-	control.add_theme_font_size_override("font_size", font_size)
-
-
-## The first level: one row for each timeline, and one for the endings.
-func _show_dev_menu() -> void:
-	_open_dev_list("Developer tools", "Skip straight to any part of the game for testing while it is being made. These shortcuts are not part of the finished game, and nothing played from here is saved.")
-	for index in DevJump.GROUPS.size():
-		_add_dev_row(str(DevJump.GROUPS[index]["title"]) + "  ›", _show_dev_group.bind(index))
-	_add_dev_row("Endings  ›", _show_dev_endings)
-
-
-## The points of one timeline. A tap opens the point straight away.
-func _show_dev_group(index: int) -> void:
-	var group: Dictionary = DevJump.GROUPS[index]
-	_open_dev_list(str(group["title"]), "Tap a point to start there. Nothing played from here is saved.")
-	_add_dev_row("‹  Back", _show_dev_menu)
-	for point in group["points"]:
-		_add_dev_row(str(point["label"]), DevJump.jump.bind(point))
-
-
-## Main, then Alternate 1 to 5: one for each way a timeline can end.
-func _show_dev_endings() -> void:
-	_open_dev_list("Endings", "Tap one to see the screen a timeline ends on.")
-	_add_dev_row("‹  Back", _show_dev_menu)
-	var endings := TimelineMap.endings()
-	for index in endings.size():
-		_add_dev_row(TimelineMap.ending_name(index), _show_dev_ending.bind(endings[index]))
-
-
-func _open_dev_list(title: String, note: String) -> void:
-	_dev_title.text = title
-	_dev_note.text = note
-	_dev_scroll.scroll_vertical = 0
-	for child in _dev_list.get_children():
-		_dev_list.remove_child(child)
-		child.queue_free()
-
-
-func _add_dev_row(text: String, action: Callable) -> void:
-	var row := Button.new()
-	_style_dev_button(row, text, DEV_TEXT)
-	row.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	row.custom_minimum_size.y = DEV_ROW_HEIGHT
-	row.add_theme_stylebox_override("normal", _dev_box(Color(1, 1, 1, 0.04), Color(DEV_ACCENT, 0.18)))
-	row.add_theme_stylebox_override("hover", _dev_box(Color(DEV_ACCENT, 0.14), Color(DEV_ACCENT, 0.5)))
-	row.add_theme_stylebox_override("pressed", _dev_box(Color(DEV_ACCENT, 0.24), DEV_ACCENT))
-	row.add_theme_color_override("font_pressed_color", DEV_ACCENT)
-	row.add_theme_color_override("font_hover_color", DEV_ACCENT)
-	row.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	row.pressed.connect(action)
-	_dev_list.add_child(row)
-
-
-## Development only. Ends an unsaved run as if it had reached this reality, so the timeline's
-## closing screen plays exactly as it does in the game.
-func _show_dev_ending(reality: Dictionary) -> void:
-	GameState.start_unsaved_game()
-	GameState.timeline = str(reality.get("timeline", ""))
-	GameState.run_outcomes = (reality.get("needs", []) as Array).duplicate()
-	StoryDirector.end_run("", "", "")
+## The note at the bottom left, in the developer tools' colours, on a small rounded box.
+func _add_preview_note() -> void:
+	var note := Label.new()
+	note.text = PREVIEW_NOTE
+	DevTools.style_text(note, DevTools.NOTE_SIZE, DevTools.TEXT)
+	note.add_theme_stylebox_override("normal", DevTools.box(Color(0.07, 0.12, 0.16, 0.85), Color(DevTools.ACCENT, 0.6)))
+	add_child(note)
+	note.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT, Control.PRESET_MODE_MINSIZE)
+	note.position += Vector2(PREVIEW_MARGIN.x, -PREVIEW_MARGIN.y)
 
 
 ## Continue picks up the save played most recently.

@@ -71,7 +71,7 @@ layout_mode = 2
 [node name="MainView" type="VBoxContainer" parent="Modal/Center/Panel"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 16
 
 [node name="Header" type="HBoxContainer" parent="Modal/Center/Panel/MainView"]
 layout_mode = 2
@@ -96,7 +96,7 @@ icon_scale = 0.5
 [node name="SoundRow" type="HBoxContainer" parent="Modal/Center/Panel/MainView"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 12
 
 [node name="SoundLabel" type="Label" parent="Modal/Center/Panel/MainView/SoundRow"]
 layout_mode = 2
@@ -117,7 +117,7 @@ script = ExtResource("4_switch")
 [node name="MusicRow" type="HBoxContainer" parent="Modal/Center/Panel/MainView"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 12
 
 [node name="MusicLabel" type="Label" parent="Modal/Center/Panel/MainView/MusicRow"]
 layout_mode = 2

@@ -222,6 +222,13 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   base, bevelled handset, textured keypad face) at the painting's angle, fitted to cover the
   painted phone exactly; the painted coiled cord stays.
 - PR #8 (Continue picks the save slot, Load Game removed) was still open at this point.
+- **Top left is now: gear, terminal icon, place name** (user's request). The terminal icon
+  (`assets/ui/terminal.png`, drawn by `draw_props.py` in the gear's style) opens the centred
+  **Developer tools** modal (`scripts/dev_tools.gd`, `DevTools`), on the main screen and in
+  gameplay; it is a child of the gear so it fades and hides with it. The main screen's bottom-left
+  note now says only "Continuous improvement in progress" (the user disliked "not the final
+  game"). Paddings were widened: settings modal (34 px, more row spacing), main screen windows,
+  objectives window (moved in from the edge and level with the place name), place-name plate.
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions
