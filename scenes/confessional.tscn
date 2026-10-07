@@ -16,7 +16,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_loc")
-flipped_portraits = PackedStringArray("Gloria", "Ben", "Gwen")
 location_key = "confessional"
 left_character = "Father Eli"
 back_to = "church_nave"

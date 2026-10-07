@@ -34,6 +34,10 @@ const PORTRAIT_SIZE_FACTORS := {
 	"kulas_1": 0.96,
 	"peter_1": 1.0,
 }
+## Which way each portrait looks in its picture. Portraits not listed here look to the left. A
+## portrait is mirrored when needed so that people on the left of the box always face right and
+## people on the right always face left: everyone in a conversation faces each other.
+const PORTRAITS_FACING_RIGHT := ["father_eli", "ben", "gloria", "gwen", "peter"]
 ## How far a portrait stands in from the side of the box, so the characters are a little in from
 ## its edges.
 const PORTRAIT_INSET := 40.0
@@ -90,9 +94,6 @@ var _portrait_tween: Tween
 ## Looks up the picture for a character by name. The box uses it to bring in whoever speaks next
 ## on the right, when a conversation has more than one person speaking there.
 var portrait_source := Callable()
-## Characters whose portrait is shown mirrored, so they face the other way, for example to face
-## the person they are talking to. Set by the location.
-var flipped_portraits := PackedStringArray()
 var _plate := PanelContainer.new()
 var _next_cursor := TextureRect.new()
 var _next_tween: Tween
@@ -358,11 +359,11 @@ func _highlight(who: String) -> void:
 
 ## Shows the top part of a portrait standing on the bottom edge of the screen, at the left or right
 ## corner and underneath the box. Returns how wide it is drawn, or 0 if there is no picture.
-func _place_portrait(portrait: TextureRect, picture: Texture2D, on_left: bool, who := "") -> float:
+func _place_portrait(portrait: TextureRect, picture: Texture2D, on_left: bool, _who := "") -> float:
 	portrait.visible = picture != null
-	portrait.flip_h = who in flipped_portraits
 	if picture == null:
 		return 0.0
+	portrait.flip_h = faces_right(picture) != on_left
 	var full := picture.get_size()
 	var shown := AtlasTexture.new()
 	shown.atlas = picture
@@ -377,6 +378,16 @@ func _place_portrait(portrait: TextureRect, picture: Texture2D, on_left: bool, w
 	portrait.position = Vector2(x, size.y - drawn.y)
 	portrait.size = drawn
 	return drawn.x
+
+
+## True when the person in this portrait looks to the right in the picture itself.
+static func faces_right(picture: Texture2D) -> bool:
+	var base := picture.resource_path.get_file().get_basename()
+	# "gloria_2" is still Gloria.
+	var parts := base.rsplit("_", true, 1)
+	if parts.size() == 2 and parts[1].is_valid_int():
+		base = parts[0]
+	return base in PORTRAITS_FACING_RIGHT
 
 
 func _fade_portraits_in() -> void:
