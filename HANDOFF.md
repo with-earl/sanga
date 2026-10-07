@@ -257,6 +257,10 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   be changed), so touches stay real touches. Checked in Playwright as a 390x844 touch phone:
   taps on Tap to start, Continue and the terminal icon land, and a finger drag scrolls the
   developer tools list. Not yet checked on a real iPhone.
+- The **content warning** no longer lists kinds of content (the user felt that was a spoiler):
+  "SANGA is a work of fiction intended for mature audiences. It explores dark themes and
+  includes scenes some players may find disturbing. Please play at your own discretion, and take
+  a break whenever you need one." (`boot.gd` `WARNING_TEXT`).
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions

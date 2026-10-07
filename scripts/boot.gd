@@ -7,9 +7,9 @@ extends Control
 ## page silent until the player touches it, so this first tap is what lets the music be heard.
 
 const WARNING_TITLE := "Content Warning"
-## Kept general on purpose: it names the kinds of content, not who does what, so it gives nothing
-## of the story away.
-const WARNING_TEXT := "SANGA is a work of fiction. It contains violence, death, abuse, and other mature themes.\n\nSome scenes may be distressing. Please play with care."
+## Kept general on purpose: naming the kinds of content (violence, death and so on) would spoil
+## the story, so it only says the game is for mature players and may be disturbing.
+const WARNING_TEXT := "SANGA is a work of fiction intended for mature audiences.\n\nIt explores dark themes and includes scenes some players may find disturbing. Please play at your own discretion, and take a break whenever you need one."
 const WARNING_FADE_SECONDS := 0.4
 const WARNING_WIDTH := 760.0
 const WARNING_TITLE_COLOR := Color(0.98, 0.93, 0.86)
