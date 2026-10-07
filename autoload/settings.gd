@@ -91,6 +91,9 @@ func _read_volume(config: ConfigFile, key: String) -> float:
 	return DEFAULT_VOLUME
 
 
+## The buses are set up in default_bus_layout.tres, so they exist from the very start. The web
+## build plays sound through the browser, and buses added later never reached it (the game was
+## silent there). This only adds a bus if that file is ever missing one.
 func _ensure_bus(bus_name: StringName) -> void:
 	if AudioServer.get_bus_index(bus_name) != -1:
 		return
