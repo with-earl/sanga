@@ -290,6 +290,12 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   - **Not done yet (Phase 4):** `story/timelines.json` has no cards or realities for the new
     endings, so they don't show on the timelines chart, and a run mixing a new ending with old
     ones can match an old reality. Phase 5 is playtesting from a fresh save.
+- **No sound on iPhone** (user report). The game itself plays music (checked: player playing,
+  buses not muted). Fix in the Web preset's `html/head_include`: it wraps `AudioContext` to keep
+  every context the engine makes and resumes them on each `touchend`/`pointerup`/`click`
+  (Safari only unlocks sound on those, not on `touchstart`), and sets
+  `navigator.audioSession.type = 'playback'` so the iPhone's silent switch does not mute it.
+  Not yet confirmed on a real iPhone.
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions
