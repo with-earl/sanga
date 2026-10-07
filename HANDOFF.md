@@ -261,6 +261,9 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   "SANGA is a work of fiction intended for mature audiences. It explores dark themes and
   includes scenes some players may find disturbing. Please play at your own discretion, and take
   a break whenever you need one." (`boot.gd` `WARNING_TEXT`).
+- **Confessions show the sad pictures** (`_2`: Gloria, Batista, Gwen) of whoever is confessing
+  (`Location._sad_portrait_for`, `SAD_PORTRAIT_SUFFIX`). Kulas has no sad picture yet, so he
+  keeps his usual one until `kulas_2.png` is added.
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions
