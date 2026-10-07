@@ -78,8 +78,9 @@ func _ready() -> void:
 	add_child(_card_title)
 	_card_line.theme_type_variation = &"HudBody"
 	_card_line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_card_line.position = Vector2(0, SCREEN_SIZE.y / 2.0 + 46.0)
-	_card_line.size = Vector2(SCREEN_SIZE.x, 44)
+	_card_line.set_anchors_and_offsets_preset(Control.PRESET_HCENTER_WIDE)
+	_card_line.offset_top = 46.0
+	_card_line.offset_bottom = 90.0
 	_card_line.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_card_line.modulate.a = 0.0
 	add_child(_card_line)
@@ -131,6 +132,10 @@ func _play_picture(data: Dictionary) -> void:
 		push_error("Missing cutscene picture: %s" % data["image"])
 		return
 	_picture.texture = texture
+	# The picture covers the whole screen, whatever the phone's shape.
+	var screen := get_viewport().get_visible_rect().size
+	_picture.size = screen
+	_picture.pivot_offset = screen / 2.0
 	_picture.scale = Vector2.ONE * ZOOM_FROM
 	_picture.position = Vector2.ZERO
 	var lines: Array = data.get("lines", [])

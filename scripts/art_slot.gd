@@ -158,10 +158,17 @@ func _build_shape(texture: Texture2D) -> BitMap:
 	return shape
 
 
-## Where the art is drawn inside the slot: stretched over all of it, or fitted and bottom aligned.
+## The picture shown in this slot, or null while it still shows a placeholder.
+func get_art_texture() -> Texture2D:
+	return _texture
+
+
+## Where the art is drawn inside the slot: covering all of it (backgrounds), or fitted and bottom
+## aligned. A background in a slot of another shape, such as the main screen on a wide phone, is
+## enlarged to cover it rather than stretched out of shape.
 func _art_rect(rect: Rect2) -> Rect2:
 	if stretch_to_fit:
-		return rect
+		return ScreenFit.cover_rect(_texture.get_size(), rect.size)
 	var tex_size := _texture.get_size()
 	var factor := minf(rect.size.x / tex_size.x, rect.size.y / tex_size.y)
 	var fitted := tex_size * factor

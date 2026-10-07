@@ -4,10 +4,13 @@ extends RefCounted
 ## border, and golden ochre text with a brown outline. Every box is drawn from a picture, so the retro
 ## text shader softens it like the text.
 
-const TEXT_SIZE := 19
-const HEADING_SIZE := 22
+## Sizes chosen to read comfortably on a phone held sideways, where the 720-unit-high screen is
+## only about 7 cm tall.
+const TEXT_SIZE := 24
+const HEADING_SIZE := 28
 const OUTLINE_SIZE := 6
-const BUTTON_HEIGHT := 48.0
+## At least this tall, so every button is easy to tap with a thumb (about 9 mm on a phone).
+const BUTTON_HEIGHT := 64.0
 ## Every button, on every screen, uses these two colours: warm cream text with a near-black brown
 ## outline. That pairing has the strongest contrast against both the black button boxes and the busy
 ## picture and video behind the main screen. Change them here and all buttons follow.

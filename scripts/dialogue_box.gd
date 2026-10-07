@@ -32,10 +32,15 @@ const PORTRAIT_SIZE_FACTORS := {
 	"kulas_1": 0.96,
 	"peter_1": 1.0,
 }
-## Space between a portrait and the side of the screen. Wider than the dialogue box's own margin,
-## so the characters stand a little in from the edges.
-const PORTRAIT_MARGIN := 64.0
-## The box spans the whole screen. Its text starts at the top left, this far in from the edge.
+## How far a portrait stands in from the side of the box, so the characters are a little in from
+## its edges.
+const PORTRAIT_INSET := 40.0
+## The box spans the screen with this margin on the sides and bottom, but never grows wider than
+## the 1280 x 720 stage, so lines stay easy to read on very wide phones.
+const BOX_MARGIN := 24.0
+const BOX_HEIGHT := 196.0
+const MAX_BOX_WIDTH := 1232.0
+## The text starts at the top left of the box, this far in from its edge.
 const TEXT_PADDING := 28.0
 ## The box: black at 40% opacity with a gray and silver gradient border.
 const BOX_FILL := Color(0.0, 0.0, 0.0, 0.4)
@@ -79,10 +84,15 @@ var _box_size := Vector2i.ZERO
 var _keep_open := false
 var _choosing := false
 var _choices := VBoxContainer.new()
+## Extra room kept free at each edge for a phone's notch or rounded corners (left, top, right,
+## bottom), set by the location.
+var _insets := Vector4.ZERO
 
 
 func _ready() -> void:
 	hide()
+	_fit_panel()
+	resized.connect(_fit_panel)
 	# The box background is drawn from a picture made at the box's exact size (see _build_box),
 	# so the soft retro look affects it by about a pixel. It keeps its exact opacity.
 	_box_style.content_margin_top = TEXT_PADDING_VERTICAL
@@ -100,6 +110,23 @@ func _ready() -> void:
 	_choices.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_choices.visible = false
 	add_child(_choices)
+
+
+## Keeps the box clear of a phone's notch and rounded corners. See ScreenFit.safe_insets.
+func keep_clear(insets: Vector4) -> void:
+	_insets = insets
+	_fit_panel()
+
+
+## Places the box along the bottom of the screen, within the stage's width and clear of the notch.
+func _fit_panel() -> void:
+	var side := maxf(BOX_MARGIN + maxf(_insets.x, _insets.z), (size.x - MAX_BOX_WIDTH) / 2.0)
+	_panel.offset_left = side
+	_panel.offset_right = -side
+	_panel.offset_bottom = -(BOX_MARGIN + _insets.w)
+	_panel.offset_top = _panel.offset_bottom - BOX_HEIGHT
+	if visible:
+		_build_box()
 
 
 ## Sets who stands beside the box before it opens: a name and a picture for each side. Pass an
@@ -217,7 +244,7 @@ func _make_choice_button(text: String, index: int) -> Button:
 	var button := Button.new()
 	button.text = text
 	button.focus_mode = Control.FOCUS_NONE
-	button.custom_minimum_size = Vector2(CHOICE_WIDTH, 56.0)
+	button.custom_minimum_size = Vector2(CHOICE_WIDTH, UiSkin.BUTTON_HEIGHT)
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	for state in ["normal", "hover", "focus", "disabled"]:
 		button.add_theme_stylebox_override(state, choice_style(CHOICE_FILL))
@@ -309,7 +336,7 @@ func _place_portrait(portrait: TextureRect, picture: Texture2D, on_left: bool) -
 	portrait.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	var factor: float = PORTRAIT_SIZE_FACTORS.get(picture.resource_path.get_file().get_basename(), 1.0)
 	var drawn := shown.region.size * PORTRAIT_SCALE * factor
-	var x := PORTRAIT_MARGIN if on_left else size.x - PORTRAIT_MARGIN - drawn.x
+	var x := _panel.offset_left + PORTRAIT_INSET if on_left else size.x + _panel.offset_right - PORTRAIT_INSET - drawn.x
 	portrait.position = Vector2(x, size.y - drawn.y)
 	portrait.size = drawn
 	return drawn.x

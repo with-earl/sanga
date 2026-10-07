@@ -57,9 +57,11 @@ const SPARKLE_SECONDS := 0.9
 ## Above the scene and its vignette (layer 10), below the dialogue backdrop (layer 15).
 const SPARKLE_LAYER := 12
 ## The undo link sits at the top left under the menu icon, or under the back link when there is one.
-const UNDO_POSITION := Vector2(32, 58)
-const UNDO_SIZE := Vector2(200, 38)
-const UNDO_GAP := 6.0
+const UNDO_POSITION := Vector2(24, 70)
+const UNDO_SIZE := Vector2(220, 56)
+const UNDO_GAP := 4.0
+## The blurred background that fills the sides of a wide phone screen sits behind everything.
+const SIDE_FILL_LAYER := -20
 
 @onready var _dialogue: DialogueBox = $Hud/DialogueBox
 @onready var _back_button: Button = get_node_or_null("Hud/BackButton")
@@ -89,6 +91,7 @@ var _undo_button := BackLink.new()
 
 
 func _ready() -> void:
+	_fit_stage()
 	GameState.set_location(location_key)
 	_step = int(GameState.get_flag(_step_flag(), 0))
 	_show_objectives(false)
@@ -110,6 +113,64 @@ func _ready() -> void:
 	_dialogue.opened.connect(_focus_on_dialogue.bind(true))
 	_dialogue.dismissed.connect(_focus_on_dialogue.bind(false))
 	_dialogue.dismissed.connect(_count_conversation)
+	_build_side_fill.call_deferred()
+	_keep_clear_of_notch()
+
+
+## Keeps the place at its 1280 x 720 size in the middle of the screen, however wide the phone, so
+## every prop and character stays exactly where it was placed on the art.
+func _fit_stage() -> void:
+	var half := ScreenFit.DESIGN_SIZE / 2.0
+	anchor_left = 0.5
+	anchor_top = 0.5
+	anchor_right = 0.5
+	anchor_bottom = 0.5
+	offset_left = -half.x
+	offset_top = -half.y
+	offset_right = half.x
+	offset_bottom = half.y
+
+
+## Fills the space beside the stage on wide screens with a soft, dim blur of the background, so
+## the scene seems to carry on past the edges instead of ending in black bars. Built after the
+## story scripts have picked their background (Padala swaps it in its own `_ready`).
+func _build_side_fill() -> void:
+	var background := get_node_or_null("Background") as ArtSlot
+	if background == null:
+		return
+	var blurred := ScreenFit.blurred_copy(background.get_art_texture())
+	if blurred == null:
+		return
+	var layer := CanvasLayer.new()
+	layer.name = "SideFill"
+	layer.layer = SIDE_FILL_LAYER
+	var fill := TextureRect.new()
+	fill.texture = blurred
+	fill.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	fill.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	fill.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	fill.modulate = Color(ScreenFit.SIDE_FILL_BRIGHTNESS, ScreenFit.SIDE_FILL_BRIGHTNESS, ScreenFit.SIDE_FILL_BRIGHTNESS)
+	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fill.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	layer.add_child(fill)
+	add_child(layer)
+
+
+## Moves the HUD in from any edge where a phone's notch, camera or rounded corner would cover it.
+func _keep_clear_of_notch() -> void:
+	var insets := ScreenFit.safe_insets(get_viewport())
+	if insets == Vector4.ZERO:
+		return
+	var icon := _game_menu.get_icon()
+	icon.position += Vector2(insets.x, insets.y)
+	_undo_button.position += Vector2(insets.x, insets.y)
+	if _back_button != null:
+		_back_button.position += Vector2(insets.x, insets.y)
+	_objectives_panel.offset_left -= insets.z
+	_objectives_panel.offset_right -= insets.z
+	_objectives_panel.offset_top += insets.y
+	_objectives_panel.offset_bottom += insets.y
+	_dialogue.keep_clear(insets)
 
 
 func _build_undo_button() -> void:
