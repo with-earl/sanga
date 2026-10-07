@@ -234,6 +234,13 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   heading and note, and framed rows that turn white while held. Main screen lists now share one
   spacing (52 px rows, 12 px gaps, 24 px window margin top and bottom, centred text). The user disliked "not the final game" wording. Paddings were widened: settings modal (34 px, more row spacing), main screen windows,
   objectives window (moved in from the edge and level with the place name), place-name plate.
+- PR #13 (user's requests): the **gear and terminal icons are twice as big** (64 px pictures in
+  80 px buttons; the place name and the confessional's back link moved to match). Gameplay **no
+  longer moves the HUD in for the phone's safe area** (`Location._keep_clear_of_notch` removed):
+  the 16:9 box already sits inside the screen, and the extra side margins looked wrong next to
+  the main screen. Developer tools layout: header "Developer tools" left, plain "Close" text
+  right; body heading "Jump into specific parts", the rows, then a footer line "Developer Note:
+  Continuous improvement in progress. Some parts may appear as placeholder."
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions

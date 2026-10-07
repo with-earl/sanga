@@ -17,12 +17,12 @@ const TITLE_FADE_SECONDS := 0.9
 const TITLE_PLATE_MARGIN := Vector2(18.0, 5.0)
 ## The developer tools icon sits right after the gear, the same size and style.
 const TERMINAL_PICTURE := preload("res://assets/ui/terminal.png")
-const ICON_SIZE := 64.0
+const ICON_SIZE := 80.0
 ## Room between the last icon and the place name's plate.
 const TITLE_GAP := 22.0
 ## The terminal is a little wider than it is tall, so it is drawn a touch larger than the gear to
 ## look the same size.
-const TERMINAL_PICTURE_SIZE := 36.0
+const TERMINAL_PICTURE_SIZE := 72.0
 
 ## On the main screen the gear opens only the settings: no way back to the main menu, no story
 ## skip, and no place name.

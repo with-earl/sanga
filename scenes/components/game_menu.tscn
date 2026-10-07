@@ -12,25 +12,25 @@ script = ExtResource("1_menu")
 [node name="MenuIcon" type="Button" parent="."]
 unique_name_in_owner = true
 texture_filter = 2
-custom_minimum_size = Vector2(64, 64)
+custom_minimum_size = Vector2(80, 80)
 offset_left = 12.0
 offset_top = 4.0
-offset_right = 76.0
-offset_bottom = 68.0
+offset_right = 92.0
+offset_bottom = 84.0
 focus_mode = 0
 theme_type_variation = &"TextButton"
 script = ExtResource("2_icon")
 plain = true
 icon_scale = 0.62
 picture = ExtResource("3_gear")
-picture_size = 32.0
+picture_size = 64.0
 
 [node name="LocationTitle" type="Label" parent="MenuIcon"]
 unique_name_in_owner = true
-offset_left = 84.0
-offset_top = 13.0
-offset_right = 564.0
-offset_bottom = 51.0
+offset_left = 102.0
+offset_top = 21.0
+offset_right = 582.0
+offset_bottom = 59.0
 mouse_filter = 2
 theme_type_variation = &"HudHeading"
 

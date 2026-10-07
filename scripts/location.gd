@@ -120,7 +120,6 @@ func _ready() -> void:
 	_dialogue.dismissed.connect(_focus_on_dialogue.bind(false))
 	_dialogue.dismissed.connect(_count_conversation)
 	get_viewport().size_changed.connect(_fit_stage)
-	_keep_clear_of_notch()
 
 
 ## Shows the place at its 16:9 shape, enlarged to fill the screen's width. On a phone wider than
@@ -139,22 +138,6 @@ func _fit_stage() -> void:
 	offset_bottom = half.y
 	pivot_offset = half
 	scale = Vector2.ONE * ScreenFit.width_scale(get_viewport().get_visible_rect().size)
-
-
-## Moves the HUD in from any edge where a phone's notch, camera or rounded corner would cover it.
-func _keep_clear_of_notch() -> void:
-	var insets := ScreenFit.safe_insets(get_viewport())
-	if insets == Vector4.ZERO:
-		return
-	var icon := _game_menu.get_icon()
-	icon.position += Vector2(insets.x, insets.y)
-	if _back_button != null:
-		_back_button.position += Vector2(insets.x, insets.y)
-	_objectives_panel.offset_left -= insets.z
-	_objectives_panel.offset_right -= insets.z
-	_objectives_panel.offset_top += insets.y
-	_objectives_panel.offset_bottom += insets.y
-	_dialogue.keep_clear(insets)
 
 
 func _build_top_shade() -> void:
