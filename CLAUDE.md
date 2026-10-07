@@ -15,7 +15,7 @@ different timelines. Text is in English and Filipino.
   - [export_presets.cfg](export_presets.cfg) holds only the **Web** preset: threads off, so it
     runs on GitHub Pages without special headers. Its `html/head_include` script turns the game
     sideways on a phone or tablet held upright (canvas rotated 90°, `canvas_resize_policy=0` so
-    the page sets the canvas size, taps converted to rotated mouse events). There is no Android preset in the repo yet. If
+    the page sets the canvas size, touch and mouse positions turned before the game reads them). There is no Android preset in the repo yet. If
     one is added, keep the Web preset as it is.
   - Every push to `main` builds the Web export and deploys it to GitHub Pages
     ([.github/workflows/web.yml](.github/workflows/web.yml)).
