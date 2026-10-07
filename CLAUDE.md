@@ -13,7 +13,9 @@ different timelines. Text is in English and Filipino.
 - Viewport 1280x720, stretch mode `canvas_items`, landscape.
 - The targets are Android (the main platform) and Web, for playtesting on iPhone.
   - [export_presets.cfg](export_presets.cfg) holds only the **Web** preset: threads off, so it
-    runs on GitHub Pages without special headers. There is no Android preset in the repo yet. If
+    runs on GitHub Pages without special headers. Its `html/head_include` script turns the game
+    sideways on a phone or tablet held upright (canvas rotated 90°, `canvas_resize_policy=0` so
+    the page sets the canvas size, taps converted to rotated mouse events). There is no Android preset in the repo yet. If
     one is added, keep the Web preset as it is.
   - Every push to `main` builds the Web export and deploys it to GitHub Pages
     ([.github/workflows/web.yml](.github/workflows/web.yml)).
