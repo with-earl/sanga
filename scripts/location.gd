@@ -548,17 +548,29 @@ func _say_alone(text: String, slot: ArtSlot = null) -> void:
 
 
 ## Opens the dialogue with the scene's own character, if there is one, on the left and the first
-## person who is not them speaking on the right.
+## person who is not them speaking on the right. When a second person also speaks, such as Gwen
+## after Ben, they stand on the right too from the start, so both are there for the whole talk.
 func _open_dialogue(slot: ArtSlot, lines: Array) -> void:
+	var others := _right_speakers(lines)
 	var right_name := slot.display_name if slot.category == "characters" else ""
-	for line in lines:
-		var who := str((line as Dictionary).get("speaker", ""))
-		if who != "" and who != left_character:
-			right_name = who
-			break
+	if not others.is_empty():
+		right_name = others[0]
+	var companion := others[1] if others.size() > 1 else ""
 	var first_speaker := str((lines[0] as Dictionary).get("speaker", slot.display_name))
-	_dialogue.set_cast(left_character, _portrait_for(left_character), right_name, _portrait_for(right_name))
+	_dialogue.set_cast(left_character, _portrait_for(left_character), right_name, _portrait_for(right_name), companion, _portrait_for(companion) if companion != "" else null)
 	_dialogue.say_lines(first_speaker, lines)
+
+
+## Everyone who speaks in these lines apart from the scene's own character and voices from out of
+## sight, in the order they first speak.
+func _right_speakers(lines: Array) -> Array[String]:
+	var found: Array[String] = []
+	for line in lines:
+		var data := line as Dictionary
+		var who := str(data.get("speaker", ""))
+		if who != "" and who != left_character and not data.get("offscreen", false) and who not in found:
+			found.append(who)
+	return found
 
 
 ## Plays lines with the scene's own character on the left and whoever else speaks on the right,

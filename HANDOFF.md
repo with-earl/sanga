@@ -185,7 +185,9 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   **Stories/Endings show in every build** while in development; the market's **motorcycle is a
   large, out-of-focus foreground** at the bottom left, its top right in view (delivery box,
   rack, tail light and part of the seat; `ArtSlot.depth_blur` 5); **Gloria, Ben and Gwen's portraits are mirrored** in the
-  Kumpisal scenes (`Location.flipped_portraits`). Open question 4 (keep the gear) is answered.
+  Kumpisal scenes (`Location.flipped_portraits`). Tapping Ben or Gwen shows **both of them on the
+  right for the whole talk** (Ben in front, Gwen behind; `DialogueBox` companion portrait), in
+  script order, Ben first. Open question 4 (keep the gear) is answered.
 - Phases 1 to 4 of the GUI plan are done and checked in screenshots at 16:9, 19.5:9 and 4:3.
   Left from the plan: **Phase 5** (a lighter text blur that is the same on every screen, and the
   title/ending cards moved fully onto the window palette) and **Phase 6** polish (consistent
