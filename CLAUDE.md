@@ -48,7 +48,7 @@ picture. Delete the temporary script afterwards. The `--headless` runs print RID
 |---|---|
 | `autoload/` | Global singletons (order in `project.godot`): GameState (saves, flags, undo history), Settings (volumes, vibration, `settings.cfg`), SceneRouter, StoryDirector (story and timeline order, endings), SaveNote, RetroText, MenuVideo (main-screen video, audio muted), SceneVignette, AssetPreloader, StoryCard (title, ending and time-order cards), Cutscene, MusicDirector (music per scene, crossfades), Sfx (button click, objective strike) |
 | `scenes/` | `boot`, `main_menu`, the four locations (`public_market`, `church_nave`, `confessional`, `apartment_room`), `timeline_reveal`. `components/` holds `dialogue_box`, `game_menu`, `objectives_panel` |
-| `scripts/` | `location.gd` is the base of every playable place (objectives route, conversations, hints, Undo). Each story has its own subclass: `tokhang.gd`, `church_nave.gd`/`confessional.gd` (with `kumpisal_story.gd`), `padala.gd` |
+| `scripts/` | `location.gd` is the base of every playable place (objectives route, conversations, hints). Each story has its own subclass: `tokhang.gd`, `church_nave.gd`/`confessional.gd` (with `kumpisal_story.gd`), `padala.gd` |
 | `story/*.json` | All story text, conversations and choices. `timelines.json` is the timelines chart: cards, sections and realities |
 | `assets/` | Art (see `assets/README.md`), `music/`, `sounds/`, `fonts/Lora.ttf`, `videos/main_screen.ogv` |
 | `tools/` | `next_version.sh`, `compose_music.py`, `compose_sounds.py`, `draw_props.py`, `cloud_setup.sh`. Has a `.gdignore`, so Godot skips it |
@@ -67,7 +67,7 @@ picture. Delete the temporary script afterwards. The `--headless` runs print RID
   `MusicDirector.VOLUME_DB` (-24 dB) and must stay subtle. Effects play on the `Sound` bus at
   `Sfx.VOLUME_DB` (-10 dB).
 - **Debug-only features** are gated by `OS.is_debug_build()`, for example "Skip story (debug)".
-  The main screen's "Jump to (dev)" window (points in `scripts/dev_jump.gd`, plus the endings)
+  The main screen's "Developer tools" window (points in `scripts/dev_jump.gd`, plus the endings)
   shows in every build during development (`main_menu.gd` `SHOW_DEV_MENU_IN_ALL_BUILDS`); set
   it to false before release.
 - **Versioning:** follow [VERSIONING.md](VERSIONING.md).

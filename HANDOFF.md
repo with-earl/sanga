@@ -198,7 +198,7 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   - **Confessions start at once**; each confession's title shows at the top meanwhile.
   - **Objective hint** is now one fixed glint per target that breathes slowly (3.4 s), after
     8 s idle, God of War style (`Location._show_glints`).
-  - **Dev "Jump to" window** on the main screen (`scripts/dev_jump.gd`), replacing
+  - **Dev "Jump to" window** (now "Developer tools") on the main screen (`scripts/dev_jump.gd`), replacing
     Stories/Endings: every story of every timeline, the confessions, the room after Padala's
     intro, and the endings. Unsaved runs, no confirmation.
   - **Police card is now a police emergency poster** on the wall ("Read the police emergency
@@ -212,6 +212,16 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   Left from the plan: **Phase 5** (a lighter text blur that is the same on every screen, and the
   title/ending cards moved fully onto the window palette) and **Phase 6** polish (consistent
   easing, a small press bounce). Both are optional.
+- **Coaches now have the Pages link.** So (PR after #9): the main screen's dev window is folded into
+  one cool-blue "DEV · Developer tools" button (opens a window with a DEV badge, a note that the
+  shortcuts are for testing and save nothing, and a Hide button), with a "DEVELOPMENT PREVIEW"
+  note at the bottom left. Developer UI uses its own slate blue and mint (`SoftWindow.Look.DEV`,
+  `main_menu.gd` `_dev_box`), never the game's warm colours, so it can't be mistaken for the game.
+  **The in-game Undo button is removed** (GameState's undo history stays, unused by the HUD).
+- **Telephone** in the apartment is now drawn by `tools/draw_props.py` as a tiny 3D model (wedge
+  base, bevelled handset, textured keypad face) at the painting's angle, fitted to cover the
+  painted phone exactly; the painted coiled cord stays.
+- PR #8 (Continue picks the save slot, Load Game removed) was still open at this point.
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions

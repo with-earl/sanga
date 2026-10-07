@@ -8,7 +8,7 @@ extends ColorRect
 ## It sits behind another control (a panel or a button) and follows its size, so that control can
 ## stay see-through and only hold the text.
 
-enum Look { WINDOW, PLATE, BUTTON }
+enum Look { WINDOW, PLATE, BUTTON, DEV }
 
 const SHADER := preload("res://shaders/soft_window.gdshader")
 ## Room around the window for its soft shadow.
@@ -20,6 +20,11 @@ const FILL_BOTTOM := Color(0.118, 0.071, 0.098, 0.9)
 ## The name plate is a warmer brown, so the speaker's name stands apart from what they say.
 const PLATE_TOP := Color(0.38, 0.22, 0.13, 0.96)
 const PLATE_BOTTOM := Color(0.25, 0.13, 0.08, 0.96)
+## Developer tools use a cool slate blue with a mint line instead of the game's warm colours, so
+## no one mistakes them for part of the game.
+const DEV_TOP := Color(0.12, 0.2, 0.26, 0.93)
+const DEV_BOTTOM := Color(0.07, 0.12, 0.16, 0.95)
+const DEV_LINE := Color(0.45, 0.9, 0.78, 0.9)
 const OUTER_LINE := Color(1.0, 0.953, 0.839, 0.95)
 const INNER_LINE := Color(0.851, 0.643, 0.255, 0.85)
 ## Pressed buttons light up a little and settle back when let go.
@@ -86,6 +91,14 @@ func setup(look: Look) -> void:
 			shader_material.set_shader_parameter("outer_width", 1.5)
 			shader_material.set_shader_parameter("line_gap", 2.0)
 			shader_material.set_shader_parameter("inner_width", 1.0)
+			shader_material.set_shader_parameter("shadow_alpha", 0.3)
+		Look.DEV:
+			_set_fill(DEV_TOP, DEV_BOTTOM)
+			shader_material.set_shader_parameter("inner_line", DEV_LINE)
+			shader_material.set_shader_parameter("radius", 12.0)
+			shader_material.set_shader_parameter("outer_width", 1.5)
+			shader_material.set_shader_parameter("line_gap", 2.5)
+			shader_material.set_shader_parameter("inner_width", 1.5)
 			shader_material.set_shader_parameter("shadow_alpha", 0.3)
 		Look.BUTTON:
 			_set_fill(FILL_TOP, FILL_BOTTOM)

@@ -60,10 +60,6 @@ const HINT_TURN := 0.18
 const HINT_SPOT := Vector2(0.5, 0.68)
 ## Above the scene and its vignette (layer 10), below the dialogue backdrop (layer 15).
 const SPARKLE_LAYER := 12
-## The undo link sits at the top left under the menu icon, or under the back link when there is one.
-const UNDO_POSITION := Vector2(24, 70)
-const UNDO_SIZE := Vector2(220, 56)
-const UNDO_GAP := 4.0
 ## A soft dark fade along the top of the screen, behind the place name and objectives, so they
 ## read clearly over bright art. It hides with them during a dialogue.
 const TOP_SHADE_HEIGHT := 150.0
@@ -97,7 +93,6 @@ var _glints := {}
 var _glint_spots := {}
 var _hint_seconds := 0.0
 ## Takes back the last step of the story. Only shown when there is a step to take back.
-var _undo_button := BackLink.new()
 var _top_shade := TextureRect.new()
 
 
@@ -119,7 +114,6 @@ func _ready() -> void:
 		_back_button.text = back_label
 		_back_button.pressed.connect(_go_back)
 	_build_top_shade()
-	_build_undo_button()
 	_build_backdrop()
 	_dialogue.portrait_source = _portrait_for
 	_dialogue.opened.connect(_focus_on_dialogue.bind(true))
@@ -154,7 +148,6 @@ func _keep_clear_of_notch() -> void:
 		return
 	var icon := _game_menu.get_icon()
 	icon.position += Vector2(insets.x, insets.y)
-	_undo_button.position += Vector2(insets.x, insets.y)
 	if _back_button != null:
 		_back_button.position += Vector2(insets.x, insets.y)
 	_objectives_panel.offset_left -= insets.z
@@ -183,33 +176,6 @@ func _build_top_shade() -> void:
 	_top_shade.offset_bottom = TOP_SHADE_HEIGHT
 	$Hud.add_child(_top_shade)
 	$Hud.move_child(_top_shade, 0)
-
-
-func _build_undo_button() -> void:
-	_undo_button.name = "UndoButton"
-	_undo_button.text = "Undo"
-	_undo_button.position = UNDO_POSITION
-	if _back_button != null:
-		_undo_button.position.y = _back_button.position.y + _back_button.size.y + UNDO_GAP
-	_undo_button.size = UNDO_SIZE
-	$Hud.add_child(_undo_button)
-	_undo_button.pressed.connect(_undo)
-	GameState.state_changed.connect(_refresh_undo)
-	_refresh_undo()
-
-
-func _refresh_undo() -> void:
-	_undo_button.visible = GameState.can_undo() and not hud_locked
-
-
-## Takes back the last step and reopens the scene as it was then. Nothing happens while a
-## dialogue, cutscene, title card or the menu has the player's attention.
-func _undo() -> void:
-	if hud_locked or _dialogue.visible or _game_menu.is_open() or Cutscene.visible or StoryCard.visible:
-		return
-	if GameState.undo():
-		Settings.vibrate(Settings.HAPTIC_MEDIUM)
-		SceneRouter.go_to(GameState.location)
 
 
 func _build_backdrop() -> void:
@@ -254,9 +220,6 @@ func _focus_on_dialogue(focused: bool) -> void:
 	if _back_button != null:
 		_back_button.mouse_filter = Control.MOUSE_FILTER_STOP if show_hud else Control.MOUSE_FILTER_IGNORE
 		_focus_tween.tween_property(_back_button, "modulate:a", hud_alpha, seconds)
-	_undo_button.mouse_filter = Control.MOUSE_FILTER_STOP if show_hud else Control.MOUSE_FILTER_IGNORE
-	_focus_tween.tween_property(_undo_button, "modulate:a", hud_alpha, seconds)
-	_refresh_undo()
 	if not focused:
 		_restore_characters()
 		_focus_tween.chain().tween_callback(func() -> void: _backdrop_layer.visible = false)
