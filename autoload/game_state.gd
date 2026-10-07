@@ -31,6 +31,9 @@ var endings: Array = []
 var run_outcomes: Array = []
 ## Every reality (finished run) this save has made, by TimelineMap key, in the order made.
 var realities: Array = []
+## The Alaala (memories) this save holds, by id (see Alaala). Unlike flags, they are never reset
+## between runs: they are what the player carries from one life to the next.
+var alaala: Array = []
 ## Seconds played in this save.
 var play_seconds := 0.0
 ## Undo: the state after each step of the story being played, oldest first. The first entry is
@@ -77,6 +80,7 @@ func _reset() -> void:
 	endings = []
 	run_outcomes = []
 	realities = []
+	alaala = []
 	play_seconds = 0.0
 	history = []
 	changed_since_checkpoint = false
@@ -192,6 +196,7 @@ func save_to_slot(slot: int) -> bool:
 		"endings": endings,
 		"run_outcomes": run_outcomes,
 		"realities": realities,
+		"alaala": alaala,
 		"play_seconds": play_seconds,
 		"history": history,
 		"changed_since_checkpoint": changed_since_checkpoint,
@@ -222,6 +227,7 @@ func load_slot(slot: int) -> bool:
 	endings = data["endings"]
 	run_outcomes = data["run_outcomes"]
 	realities = data["realities"]
+	alaala = data["alaala"]
 	play_seconds = data["play_seconds"]
 	history = data["history"]
 	changed_since_checkpoint = data["changed_since_checkpoint"]
@@ -270,7 +276,7 @@ func read_slot(slot: int) -> Dictionary:
 	data["runs_finished"] = int(data.get("runs_finished", 0))
 	data["play_seconds"] = float(data.get("play_seconds", 0.0))
 	# Saves made before realities were recorded simply have none yet.
-	for list_key in ["run_outcomes", "realities", "history"]:
+	for list_key in ["run_outcomes", "realities", "alaala", "history"]:
 		if not data.get(list_key) is Array:
 			data[list_key] = []
 	# Undo points must each hold a whole state, or none are kept.

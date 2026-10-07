@@ -40,6 +40,9 @@ const SECONDARY := Color(0.557, 0.557, 0.576, 1)
 const DIM := Color(0.0, 0.0, 0.0, 0.5)
 const TITLE := "Developer Tools"
 const ENDINGS_TITLE := "Endings"
+## The Alaala (memories) a save holds open new choices. These rows give or take them all at once,
+## to test those choices without dying first.
+const MEMORIES_TITLE := "Memories"
 ## The footnote under the lists.
 const FOOTNOTE := "This build is still in development, so some parts may use placeholder art or text."
 
@@ -140,6 +143,10 @@ func _build_lists() -> ScrollContainer:
 		var name := "Main Ending" if index == 0 else "Alternate Ending %d" % index
 		endings.append([name, _show_ending.bind(realities[index])])
 	_add_section(sections, ENDINGS_TITLE, endings)
+	_add_section(sections, MEMORIES_TITLE, [
+		["Remember All Memories", _set_all_memories.bind(true)],
+		["Forget All Memories", _set_all_memories.bind(false)],
+	])
 	margin.add_child(sections)
 	scroll.add_child(margin)
 	return scroll
@@ -282,6 +289,15 @@ func _fade(alpha: float, seconds: float) -> void:
 	_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	_tween.tween_property(self, "modulate:a", alpha, seconds)
 	await _tween.finished
+
+
+func _set_all_memories(remember: bool) -> void:
+	GameState.alaala = []
+	if remember:
+		for item in Alaala.all():
+			GameState.alaala.append(str(item.get("id", "")))
+	GameState.save_current(true)
+	close()
 
 
 func _jump(point: Dictionary) -> void:

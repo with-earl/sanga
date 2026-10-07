@@ -1,0 +1,14 @@
+{
+	"_comment": "Plays before every run, on a dark confessional. The voice has no name plate. In the true ending it turns out to be Father Eli. See docs/STORY_BIBLE.md, section 6.",
+	"image": "res://assets/cutscenes/prologue_booth.png",
+	"lines": [
+		{"speaker": "", "text": "Basbasan n'yo po ako, Padre, dahil nagkasala ako."},
+		{"speaker": "", "text": "Matagal na po mula nung huli akong nangumpisal."},
+		{"speaker": "", "text": "Hindi ko po alam kung saan magsisimula."}
+	],
+	"last_line": {
+		"tokhang": {"speaker": "", "text": "Siguro... sa palengke."},
+		"kumpisal": {"speaker": "", "text": "Siguro... sa simbahan."},
+		"padala": {"speaker": "", "text": "Siguro... sa kwarto."}
+	}
+}

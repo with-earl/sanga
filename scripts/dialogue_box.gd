@@ -7,16 +7,27 @@ extends Control
 ## small ▼ bobs in the corner, and a tap moves to the next line. A tap after the last line closes
 ## the box. Characters can stand beside the box, one on each side, with whoever is speaking shown
 ## at full brightness and the other slightly dimmed.
+##
+## The lines are filtered by the Alaala the save holds (see Alaala), and a line can be a choice:
+##   {"choices": [{"text": "...", "after": [lines], "flag": "run_x", "needs": "alaala_id"}]}
+## The box stops there, shows the options (Alaala ones marked ✦), plays the picked option's
+## "after" lines, and carries on with the lines that follow.
 
 signal opened
 signal dismissed
 ## Emitted when the last line has been tapped through, whether or not the box then closes.
 signal lines_finished
 signal choice_made(index: int)
+## Emitted when the player picks an option of a choice written inside the lines, with its "id"
+## (or its text when it has none).
+signal line_choice_made(id: String)
 
 ## Portraits are drawn at this fraction of their picture size, and only the top part is shown.
 const PORTRAIT_SCALE := 1.1625
 const PORTRAIT_KEEP := 0.6
+## The story font has no ✦ (the mark of an Alaala choice); this one fills in what it lacks.
+const SERIF_FONT := preload("res://assets/fonts/Lora.ttf")
+const MARK_FONT := preload("res://assets/fonts/DejaVuSansMono.ttf")
 ## The pictures are not all drawn at the same size: measured from the top of the hair to the chin,
 ## Father Eli's head is 118 px tall in his picture but Mercy's is 142 px. These factors scale each
 ## picture so heads come out the same size as Father Eli's, so everyone looks equally close to the
@@ -113,6 +124,11 @@ var _insets := Vector4.ZERO
 
 func _ready() -> void:
 	hide()
+	var serif: FontFile = SERIF_FONT
+	if MARK_FONT not in serif.fallbacks:
+		var fallbacks := serif.fallbacks.duplicate()
+		fallbacks.append(MARK_FONT)
+		serif.fallbacks = fallbacks
 	_portrait_companion.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_portrait_companion.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_portrait_companion.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -235,6 +251,12 @@ func say(speaker: String, text: String) -> void:
 func say_lines(speaker: String, lines: Array, keep_open := false) -> void:
 	if lines.is_empty():
 		return
+	lines = Alaala.prepare_lines(lines)
+	if lines.is_empty():
+		# Every line needs a memory the save does not hold: nothing to read. Deferred, so whoever
+		# called can start waiting first.
+		lines_finished.emit.call_deferred()
+		return
 	_keep_open = keep_open
 	_pending_lines = lines.duplicate()
 	var was_open := visible
@@ -322,6 +344,9 @@ func _clear_choices() -> void:
 
 func _show_next_line(default_speaker: String) -> void:
 	var line: Variant = _pending_lines.pop_front()
+	if line is Dictionary and (line as Dictionary).has("choices"):
+		_play_line_choice(line as Dictionary, default_speaker)
+		return
 	var who := default_speaker
 	var text := ""
 	# A voice from out of sight, such as someone in the next room: nobody on screen speaks.
@@ -443,6 +468,35 @@ func _stop_typing() -> void:
 
 ## Moves to the next line, the same as tapping the box. A tap while a line is still typing shows
 ## the rest of it first.
+## A choice written inside the lines: the line before it stays on screen while the options show.
+## The picked option's lines play next, then the rest.
+func _play_line_choice(entry: Dictionary, default_speaker: String) -> void:
+	var options := Alaala.prepare_options(entry.get("choices", []))
+	if options.is_empty():
+		_continue_after_choice(default_speaker)
+		return
+	var labels: Array = []
+	for option in options:
+		labels.append(option["label"])
+	var picked: Dictionary = options[await choose(labels)]
+	Alaala.apply_option(picked)
+	line_choice_made.emit(str(picked.get("id", picked.get("text", ""))))
+	var after := Alaala.prepare_lines(picked.get("after", []))
+	_pending_lines = after + _pending_lines
+	_continue_after_choice(default_speaker)
+
+
+func _continue_after_choice(default_speaker: String) -> void:
+	if has_more_lines():
+		_show_next_line(default_speaker)
+	elif _keep_open:
+		_keep_open = false
+		lines_finished.emit()
+	else:
+		lines_finished.emit()
+		close()
+
+
 func advance() -> void:
 	if _choosing:
 		return
