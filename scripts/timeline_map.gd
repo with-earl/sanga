@@ -21,14 +21,22 @@ static func data() -> Dictionary:
 	return _map
 
 
-## The reality a run made, or an empty dictionary if its outcomes match none.
+## The reality a run made, or an empty dictionary if its outcomes match none. A reality lists every
+## outcome of its run, so the match is exact: the same outcomes, no more and no fewer.
 static func reality_for(timeline: String, outcomes: Array) -> Dictionary:
+	var reached := {}
+	for outcome in outcomes:
+		if str(outcome) != "":
+			reached[str(outcome)] = true
 	for reality in data().get("realities", []):
 		if reality.get("timeline", "") != timeline:
 			continue
+		var needs: Array = reality.get("needs", [])
+		if needs.size() != reached.size():
+			continue
 		var matched := true
-		for needed in reality.get("needs", []):
-			if needed not in outcomes:
+		for needed in needs:
+			if not reached.has(str(needed)):
 				matched = false
 				break
 		if matched:
@@ -63,10 +71,16 @@ static func ending_name(index: int) -> String:
 	return "Main" if index == 0 else "Alternate %d" % index
 
 
-## The realities with these keys, in the chart's order.
+## The realities with these keys, in the chart's order. Older saves named some realities
+## differently; those names are kept as the reality's "aliases".
 static func realities_with(keys: Array) -> Array:
 	var found: Array = []
 	for reality in data().get("realities", []):
 		if key_of(reality) in keys:
 			found.append(reality)
+			continue
+		for alias in reality.get("aliases", []):
+			if alias in keys:
+				found.append(reality)
+				break
 	return found

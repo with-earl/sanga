@@ -3,8 +3,9 @@ extends Control
 ## first card, and a glowing green line travels the path this run took, card to card, with the
 ## view following it. Then the view pulls back to show every reality this save has made.
 ##
-## Only finished realities are shown: a timeline or branch the player has not finished never
-## appears, so the diagram never gives away what else is possible. The layout follows the
+## Only timelines the player has finished at least once are shown. Inside one, the branches not yet
+## reached show as dim "???" cards on faint lines: the player sees that more is possible, but not
+## what. The layout follows the
 ## timelines chart (story/timelines.json). A tap afterwards returns to the main screen.
 ##
 ## The diagram is built from nodes, not drawn into a picture: each card is a Panel with a flat
@@ -36,6 +37,11 @@ const BACKGROUND_BOTTOM := Color(0.03, 0.02, 0.035, 1)
 const CARD_FILL := Color(0.17, 0.1, 0.14, 0.95)
 const PAST_LINE := Color(1, 1, 1, 0.32)
 const PAST_LINE_WIDTH := 2.0
+## A branch not reached yet: a fainter line, and a dim card that only says "???".
+const UNKNOWN_LINE := Color(1, 1, 1, 0.1)
+const UNKNOWN_TITLE := "???"
+const UNKNOWN_BORDER := Color(0.55, 0.55, 0.55, 0.45)
+const UNKNOWN_TEXT := Color(1, 1, 1, 0.38)
 const GLOW_CORE := Color(0.62, 1.0, 0.66, 1)
 const GLOW_INNER := Color(0.3, 0.95, 0.42, 0.35)
 const GLOW_OUTER := Color(0.2, 0.9, 0.35, 0.14)
@@ -69,6 +75,8 @@ const TRAVEL_SPEED := 300.0
 const ARRIVAL_HOLD_SECONDS := 0.8
 const ZOOM_OUT_SECONDS := 2.2
 const FIT_MARGIN := 44.0
+## Room kept free under the diagram for the "Tap anywhere to continue" note.
+const HINT_ROOM := 84.0
 ## When everything fits with room to spare, the pulled-back view may stay this much larger, so a
 ## save with only one or two endings still reads comfortably.
 const MAX_FIT_ZOOM := 1.5
@@ -89,6 +97,9 @@ var _sections: Dictionary = {}
 var _centers: Dictionary = {}
 ## Card id to its Panel, for the cards being shown.
 var _cards: Dictionary = {}
+## The cards and connections of finished realities, as opposed to "???" ones.
+var _known: Dictionary = {}
+var _drawn_edges: Dictionary = {}
 var _shown_sections: Array = []
 ## Where each shown timeline starts, in rows. Shown timelines are stacked with no gap for the ones
 ## not finished yet.
@@ -169,14 +180,25 @@ func _build() -> void:
 	for reality in realities:
 		var path: Array = reality.get("path", [])
 		for id in path:
+			_known[id] = true
 			if not _centers.has(id):
 				_centers[id] = _center_of(id)
 		for index in range(path.size() - 1):
-			_add_line(_edge_layer, _edge(path[index], path[index + 1]), PAST_LINE, PAST_LINE_WIDTH)
+			_add_edge(path[index], path[index + 1], PAST_LINE)
+	# The branches not reached yet, in the timelines already shown, faintly behind the rest.
+	for reality in map.get("realities", []):
+		var path: Array = reality.get("path", [])
+		if reality in realities or path.is_empty() or str(_nodes[path[0]].get("section", "")) not in _shown_sections:
+			continue
+		for id in path:
+			if not _centers.has(id):
+				_centers[id] = _center_of(id)
+		for index in range(path.size() - 1):
+			_add_edge(path[index], path[index + 1], UNKNOWN_LINE)
 	for section in _shown_sections:
 		_add_section_title(section)
 	for id in _centers:
-		_add_card(id)
+		_add_card(id, _known.has(id))
 	_new_path = StoryDirector.last_reality.get("path", [])
 	if TimelineMap.key_of(StoryDirector.last_reality) not in GameState.realities:
 		_new_path = []
@@ -224,6 +246,17 @@ func _edge(from_id: String, to_id: String) -> PackedVector2Array:
 	return PackedVector2Array([start, Vector2(bend, start.y), Vector2(bend, end.y), end])
 
 
+## A connection between two cards, drawn once even when several realities share it.
+func _add_edge(from_id: String, to_id: String, color: Color) -> void:
+	var key := from_id + ">" + to_id
+	if _drawn_edges.has(key):
+		return
+	_drawn_edges[key] = true
+	var line := _add_line(_edge_layer, _edge(from_id, to_id), color, PAST_LINE_WIDTH)
+	if color == UNKNOWN_LINE:
+		_edge_layer.move_child(line, 0)
+
+
 func _add_line(layer: Node2D, points: PackedVector2Array, color: Color, width: float) -> Line2D:
 	var line := Line2D.new()
 	line.points = points
@@ -257,12 +290,28 @@ func _add_section_title(section: String) -> void:
 	_card_layer.add_child(title)
 
 
-## A card: a rounded box in the colour of its kind, its title, and a short line under it.
-func _add_card(id: String) -> void:
+## A card: a rounded box in the colour of its kind, its title, and a short line under it. A card no
+## finished reality reaches is dim and says only "???".
+func _add_card(id: String, known := true) -> void:
 	var card: Dictionary = _nodes[id]
 	var kind := str(card.get("kind", "story"))
 	if not KIND_COLORS.has(kind):
 		kind = "story"
+	if not known:
+		var hidden := Panel.new()
+		hidden.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		hidden.size = CARD_SIZE
+		hidden.position = (_centers[id] as Vector2) - CARD_SIZE / 2.0
+		var dim := _card_style(kind, false)
+		dim.border_color = UNKNOWN_BORDER
+		dim.bg_color = Color(CARD_FILL, 0.6)
+		hidden.add_theme_stylebox_override("panel", dim)
+		var mark := _label(UNKNOWN_TITLE, _title_font, TITLE_SIZE, UNKNOWN_TEXT, CARD_SIZE.x - CARD_PADDING * 2.0)
+		mark.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		mark.position = Vector2(CARD_PADDING, (CARD_SIZE.y - _title_font.get_height(TITLE_SIZE)) / 2.0)
+		hidden.add_child(mark)
+		_card_layer.add_child(hidden)
+		return
 	var panel := Panel.new()
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.size = CARD_SIZE
@@ -402,9 +451,10 @@ func _view_all(seconds: float) -> void:
 		first = false
 	for section in _shown_sections:
 		bounds = bounds.expand(_section_title_position(section) + Vector2(0, -SECTION_SIZE))
-	var fit := minf((size.x - FIT_MARGIN * 2.0) / bounds.size.x, (size.y - FIT_MARGIN * 2.0) / bounds.size.y)
+	var room := Vector2(size.x, size.y - HINT_ROOM)
+	var fit := minf((room.x - FIT_MARGIN * 2.0) / bounds.size.x, (room.y - FIT_MARGIN * 2.0) / bounds.size.y)
 	var zoom := minf(fit, MAX_FIT_ZOOM)
-	var target_position := size / 2.0 - bounds.get_center() * zoom
+	var target_position := room / 2.0 - bounds.get_center() * zoom
 	if seconds <= 0.0:
 		_diagram.scale = Vector2(zoom, zoom)
 		_diagram.position = target_position

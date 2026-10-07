@@ -15,6 +15,7 @@ func _initialize() -> void:
 	_test_save_upgrade()
 	_test_story_order()
 	_test_choices_fit_one_line()
+	_test_timelines_chart()
 	await _test_asset_preloader()
 	if _failures.is_empty():
 		print("SMOKE TEST PASSED")
@@ -29,6 +30,27 @@ func _initialize() -> void:
 ## short and the screen stays balanced.
 const CHOICE_ROOM := 560.0
 const CHOICE_FONT_SIZE := 26
+
+
+## The timelines chart: every path uses real cards, every reality has its own name, and runs land
+## on exactly the reality they made (not on one that only shares some of its outcomes).
+func _test_timelines_chart() -> void:
+	var map_script: GDScript = load("res://scripts/timeline_map.gd")
+	var map: Dictionary = map_script.call("data")
+	var nodes: Dictionary = map.get("nodes", {})
+	var keys := {}
+	for reality in map.get("realities", []):
+		for id in reality.get("path", []):
+			_check(nodes.has(id), "timelines chart: unknown card %s" % id)
+		var key: String = map_script.call("key_of", reality)
+		_check(not keys.has(key), "timelines chart: two realities named %s" % key)
+		keys[key] = true
+		var found: Dictionary = map_script.call("reality_for", reality["timeline"], reality["needs"])
+		_check(found == reality, "timelines chart: %s matches another reality" % key)
+	var mixed: Dictionary = map_script.call("reality_for", "main", ["tokhang_peter", "kumpisal_sinamahan", "padala_key"])
+	_check(mixed.get("path", []).has("m_sinamahan"), "timelines chart: a saved Kulas shows on the chart")
+	var old: Array = map_script.call("realities_with", ["main:tokhang_peter+padala_key"])
+	_check(old.size() == 1, "timelines chart: an older save's reality is still found")
 
 
 func _test_choices_fit_one_line() -> void:

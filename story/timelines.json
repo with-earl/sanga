@@ -1,44 +1,778 @@
 {
-	"_comment": "Every reality the stories can make, from the timelines chart. 'nodes' are the cards of the diagram: 'col' and 'row' place them in their section's grid, and 'kind' colours them (story, lives, suffers, dies, someone_dies). 'realities' list, for each finished run, the outcomes it needs and the cards its line passes through. Only realities a save has finished are ever shown.",
+	"_comment": "Every reality the stories can make, from the timelines chart. 'nodes' are the cards of the diagram: 'col' and 'row' place them in their section's grid, and 'kind' colours them (story, lives, suffers, dies, someone_dies). 'realities' list, for each finished run, every outcome it records ('needs', matched exactly) and the cards its line passes through. 'aliases' are the names older saves gave the same reality. Finished realities are shown in full; in a shown timeline, the cards no save has reached yet show as '???'.",
 	"sections": {
-		"main": {"title": "Main timeline", "row": 0},
-		"kumpisal": {"title": "Kumpisal timeline", "row": 3.6},
-		"padala": {"title": "Padala timeline", "row": 6.2}
+		"main": {
+			"title": "Main timeline",
+			"row": 0
+		},
+		"kumpisal": {
+			"title": "Kumpisal timeline",
+			"row": 3.6
+		},
+		"padala": {
+			"title": "Padala timeline",
+			"row": 6.2
+		}
 	},
 	"nodes": {
-		"m_tokhang": {"section": "main", "col": 0, "row": 1, "kind": "story", "title": "1. Tokhang", "line": "Ben wants a toy gun"},
-		"m_peter": {"section": "main", "col": 1, "row": 0, "kind": "dies", "title": "Peter", "line": "Buys toy; Peter shot"},
-		"m_gwen": {"section": "main", "col": 1, "row": 1, "kind": "dies", "title": "Gwen", "line": "Buys toy; Gwen shot"},
-		"m_kulas": {"section": "main", "col": 1, "row": 2, "kind": "dies", "title": "Kulas", "line": "Buy later; Kulas shot"},
-		"m_kumpisal": {"section": "main", "col": 2, "row": 1, "kind": "story", "title": "2. Kumpisal", "line": "Church and confessions"},
-		"m_chased": {"section": "main", "col": 3, "row": 1, "kind": "someone_dies", "title": "Kulas", "line": "Chased; gunshot; Father Eli prays"},
-		"m_padala": {"section": "main", "col": 4, "row": 1, "kind": "story", "title": "3. Padala", "line": "Mercy held captive"},
-		"m_key": {"section": "main", "col": 5, "row": 0.5, "kind": "lives", "title": "Key", "line": "Mercy escapes"},
-		"m_police": {"section": "main", "col": 5, "row": 1.5, "kind": "dies", "title": "Police Poster", "line": "Mercy dies; the man is Father Eli"},
-		"k_kumpisal": {"section": "kumpisal", "col": 0, "row": 0.5, "kind": "story", "title": "2. Kumpisal", "line": "Church and confessions"},
-		"k_chased": {"section": "kumpisal", "col": 1, "row": 0.5, "kind": "someone_dies", "title": "Kulas", "line": "Chased; gunshot; Father Eli prays"},
-		"k_padala": {"section": "kumpisal", "col": 2, "row": 0.5, "kind": "story", "title": "3. Padala", "line": "Mercy held captive"},
-		"k_run": {"section": "kumpisal", "col": 3, "row": 0, "kind": "dies", "title": "Run", "line": "Batista accidentally shoots Mercy"},
-		"k_jeep": {"section": "kumpisal", "col": 3, "row": 1, "kind": "suffers", "title": "Ride Jeep", "line": "Mercy reports; police laugh"},
-		"p_padala": {"section": "padala", "col": 0, "row": 0.5, "kind": "story", "title": "3. Padala", "line": "Father Eli revealed as captor"},
-		"p_police": {"section": "padala", "col": 1, "row": 0, "kind": "suffers", "title": "Police", "line": "Father Eli attacks Mercy"},
-		"p_kumpisal_police": {"section": "padala", "col": 2, "row": 0, "kind": "story", "title": "2. Kumpisal", "line": "Church and confessions"},
-		"p_tokhang": {"section": "padala", "col": 3, "row": 0, "kind": "story", "title": "1. Tokhang", "line": "Ben wants a toy gun"},
-		"p_trade": {"section": "padala", "col": 4, "row": 0, "kind": "dies", "title": "Trade", "line": "Father Eli trades Kulas for Mercy; Peter dies"},
-		"p_food": {"section": "padala", "col": 1, "row": 1, "kind": "dies", "title": "Food Delivery", "line": "Peter fights Father Eli; stabbed, dies"},
-		"p_kumpisal_food": {"section": "padala", "col": 2, "row": 1, "kind": "story", "title": "2. Kumpisal", "line": "Church and confessions"},
-		"p_sacrifice": {"section": "padala", "col": 3, "row": 1, "kind": "dies", "title": "Sacrifice", "line": "Kulas chased; gunshot; Father Eli died"}
+		"m_tokhang": {
+			"section": "main",
+			"col": 0,
+			"row": 1,
+			"kind": "story",
+			"title": "1. Tokhang",
+			"line": "Ben wants a toy gun"
+		},
+		"m_peter": {
+			"section": "main",
+			"col": 1,
+			"row": 0,
+			"kind": "dies",
+			"title": "Peter",
+			"line": "Buys toy; Peter shot"
+		},
+		"m_gwen": {
+			"section": "main",
+			"col": 1,
+			"row": 1,
+			"kind": "dies",
+			"title": "Gwen",
+			"line": "Buys toy; Gwen shot"
+		},
+		"m_kulas": {
+			"section": "main",
+			"col": 1,
+			"row": 2,
+			"kind": "dies",
+			"title": "Kulas",
+			"line": "Buy later; Kulas shot"
+		},
+		"m_kumpisal": {
+			"section": "main",
+			"col": 2,
+			"row": 1,
+			"kind": "story",
+			"title": "2. Kumpisal",
+			"line": "Church and confessions"
+		},
+		"m_chased": {
+			"section": "main",
+			"col": 3,
+			"row": 1,
+			"kind": "someone_dies",
+			"title": "Kulas",
+			"line": "Chased; gunshot; Father Eli prays"
+		},
+		"m_padala": {
+			"section": "main",
+			"col": 4,
+			"row": 1,
+			"kind": "story",
+			"title": "3. Padala",
+			"line": "Mercy held captive"
+		},
+		"m_key": {
+			"section": "main",
+			"col": 5,
+			"row": 0,
+			"kind": "lives",
+			"title": "Key",
+			"line": "Mercy escapes"
+		},
+		"m_police": {
+			"section": "main",
+			"col": 5,
+			"row": 1,
+			"kind": "dies",
+			"title": "Police Poster",
+			"line": "Mercy dies; the man is Father Eli"
+		},
+		"k_kumpisal": {
+			"section": "kumpisal",
+			"col": 0,
+			"row": 1.5,
+			"kind": "story",
+			"title": "2. Kumpisal",
+			"line": "Church and confessions"
+		},
+		"k_chased": {
+			"section": "kumpisal",
+			"col": 1,
+			"row": 1.5,
+			"kind": "someone_dies",
+			"title": "Kulas",
+			"line": "Chased; gunshot; Father Eli prays"
+		},
+		"k_padala": {
+			"section": "kumpisal",
+			"col": 2,
+			"row": 1.5,
+			"kind": "story",
+			"title": "3. Padala",
+			"line": "Mercy held captive"
+		},
+		"k_run": {
+			"section": "kumpisal",
+			"col": 3,
+			"row": 0,
+			"kind": "dies",
+			"title": "Run",
+			"line": "Batista accidentally shoots Mercy"
+		},
+		"k_jeep": {
+			"section": "kumpisal",
+			"col": 3,
+			"row": 1,
+			"kind": "suffers",
+			"title": "Ride Jeep",
+			"line": "Mercy reports; police laugh"
+		},
+		"p_padala": {
+			"section": "padala",
+			"col": 0,
+			"row": 1,
+			"kind": "story",
+			"title": "3. Padala",
+			"line": "Father Eli revealed as captor"
+		},
+		"p_police": {
+			"section": "padala",
+			"col": 1,
+			"row": 0,
+			"kind": "suffers",
+			"title": "Police",
+			"line": "Father Eli attacks Mercy"
+		},
+		"p_kumpisal_police": {
+			"section": "padala",
+			"col": 2,
+			"row": 0,
+			"kind": "story",
+			"title": "2. Kumpisal",
+			"line": "Church and confessions"
+		},
+		"p_tokhang": {
+			"section": "padala",
+			"col": 3,
+			"row": 0,
+			"kind": "story",
+			"title": "1. Tokhang",
+			"line": "Ben wants a toy gun"
+		},
+		"p_trade": {
+			"section": "padala",
+			"col": 4,
+			"row": 0,
+			"kind": "dies",
+			"title": "Trade",
+			"line": "Father Eli trades Kulas for Mercy; Peter dies"
+		},
+		"p_food": {
+			"section": "padala",
+			"col": 1,
+			"row": 1,
+			"kind": "dies",
+			"title": "Food Delivery",
+			"line": "Peter fights Father Eli; stabbed, dies"
+		},
+		"p_kumpisal_food": {
+			"section": "padala",
+			"col": 2,
+			"row": 1,
+			"kind": "story",
+			"title": "2. Kumpisal",
+			"line": "Church and confessions"
+		},
+		"p_sacrifice": {
+			"section": "padala",
+			"col": 3,
+			"row": 1,
+			"kind": "dies",
+			"title": "Sacrifice",
+			"line": "Kulas chased; gunshot; Father Eli died"
+		},
+		"m_safe": {
+			"section": "main",
+			"col": 1,
+			"row": 3,
+			"kind": "lives",
+			"title": "Ligtas",
+			"line": "Water gun; nobody is shot"
+		},
+		"m_sinamahan": {
+			"section": "main",
+			"col": 3,
+			"row": 2,
+			"kind": "lives",
+			"title": "Sinamahan",
+			"line": "Father Eli walks Kulas out; Kulas lives"
+		},
+		"m_pinalaya": {
+			"section": "main",
+			"col": 5,
+			"row": 2,
+			"kind": "lives",
+			"title": "Pinalaya",
+			"line": "Father Eli confesses and sets Mercy free"
+		},
+		"m_walang": {
+			"section": "main",
+			"col": 5,
+			"row": 3,
+			"kind": "lives",
+			"title": "Walang Namatay",
+			"line": "Nobody dies"
+		},
+		"k_nagtago": {
+			"section": "kumpisal",
+			"col": 3,
+			"row": 2,
+			"kind": "lives",
+			"title": "Nagtago",
+			"line": "Mercy hides until dawn and goes home"
+		},
+		"k_pinalaya": {
+			"section": "kumpisal",
+			"col": 3,
+			"row": 3,
+			"kind": "lives",
+			"title": "Pinalaya",
+			"line": "Father Eli confesses and sets Mercy free"
+		},
+		"p_tanod": {
+			"section": "padala",
+			"col": 1,
+			"row": 2,
+			"kind": "lives",
+			"title": "Tanod",
+			"line": "Peter brings tanods; Mercy is rescued"
+		},
+		"p_sinamahan": {
+			"section": "padala",
+			"col": 3,
+			"row": 2,
+			"kind": "lives",
+			"title": "Sinamahan",
+			"line": "Father Eli walks Kulas out; Kulas lives"
+		}
 	},
 	"realities": [
-		{"timeline": "main", "needs": ["tokhang_peter", "padala_key"], "path": ["m_tokhang", "m_peter", "m_kumpisal", "m_chased", "m_padala", "m_key"]},
-		{"timeline": "main", "needs": ["tokhang_peter", "padala_police_card"], "path": ["m_tokhang", "m_peter", "m_kumpisal", "m_chased", "m_padala", "m_police"]},
-		{"timeline": "main", "needs": ["tokhang_gwen", "padala_key"], "path": ["m_tokhang", "m_gwen", "m_kumpisal", "m_chased", "m_padala", "m_key"]},
-		{"timeline": "main", "needs": ["tokhang_gwen", "padala_police_card"], "path": ["m_tokhang", "m_gwen", "m_kumpisal", "m_chased", "m_padala", "m_police"]},
-		{"timeline": "main", "needs": ["tokhang_kulas", "padala_key"], "path": ["m_tokhang", "m_kulas", "m_kumpisal", "m_chased", "m_padala", "m_key"]},
-		{"timeline": "main", "needs": ["tokhang_kulas", "padala_police_card"], "path": ["m_tokhang", "m_kulas", "m_kumpisal", "m_chased", "m_padala", "m_police"]},
-		{"timeline": "kumpisal", "needs": ["padala_run"], "path": ["k_kumpisal", "k_chased", "k_padala", "k_run"]},
-		{"timeline": "kumpisal", "needs": ["padala_ride_jeep"], "path": ["k_kumpisal", "k_chased", "k_padala", "k_jeep"]},
-		{"timeline": "padala", "needs": ["padala_police", "tokhang_trade"], "path": ["p_padala", "p_police", "p_kumpisal_police", "p_tokhang", "p_trade"]},
-		{"timeline": "padala", "needs": ["padala_food", "kumpisal_sacrifice"], "path": ["p_padala", "p_food", "p_kumpisal_food", "p_sacrifice"]}
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_peter",
+				"kumpisal_main",
+				"padala_key"
+			],
+			"path": [
+				"m_tokhang",
+				"m_peter",
+				"m_kumpisal",
+				"m_chased",
+				"m_padala",
+				"m_key"
+			],
+			"aliases": [
+				"main:tokhang_peter+padala_key"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_peter",
+				"kumpisal_sinamahan",
+				"padala_key"
+			],
+			"path": [
+				"m_tokhang",
+				"m_peter",
+				"m_kumpisal",
+				"m_sinamahan",
+				"m_padala",
+				"m_key"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_gwen",
+				"kumpisal_main",
+				"padala_key"
+			],
+			"path": [
+				"m_tokhang",
+				"m_gwen",
+				"m_kumpisal",
+				"m_chased",
+				"m_padala",
+				"m_key"
+			],
+			"aliases": [
+				"main:tokhang_gwen+padala_key"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_gwen",
+				"kumpisal_sinamahan",
+				"padala_key"
+			],
+			"path": [
+				"m_tokhang",
+				"m_gwen",
+				"m_kumpisal",
+				"m_sinamahan",
+				"m_padala",
+				"m_key"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_kulas",
+				"kumpisal_main",
+				"padala_key"
+			],
+			"path": [
+				"m_tokhang",
+				"m_kulas",
+				"m_kumpisal",
+				"m_chased",
+				"m_padala",
+				"m_key"
+			],
+			"aliases": [
+				"main:tokhang_kulas+padala_key"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_kulas",
+				"kumpisal_sinamahan",
+				"padala_key"
+			],
+			"path": [
+				"m_tokhang",
+				"m_kulas",
+				"m_kumpisal",
+				"m_sinamahan",
+				"m_padala",
+				"m_key"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_safe",
+				"kumpisal_main",
+				"padala_key"
+			],
+			"path": [
+				"m_tokhang",
+				"m_safe",
+				"m_kumpisal",
+				"m_chased",
+				"m_padala",
+				"m_key"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_safe",
+				"kumpisal_sinamahan",
+				"padala_key"
+			],
+			"path": [
+				"m_tokhang",
+				"m_safe",
+				"m_kumpisal",
+				"m_sinamahan",
+				"m_padala",
+				"m_key"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_peter",
+				"kumpisal_main",
+				"padala_police_card"
+			],
+			"path": [
+				"m_tokhang",
+				"m_peter",
+				"m_kumpisal",
+				"m_chased",
+				"m_padala",
+				"m_police"
+			],
+			"aliases": [
+				"main:tokhang_peter+padala_police_card"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_peter",
+				"kumpisal_sinamahan",
+				"padala_police_card"
+			],
+			"path": [
+				"m_tokhang",
+				"m_peter",
+				"m_kumpisal",
+				"m_sinamahan",
+				"m_padala",
+				"m_police"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_gwen",
+				"kumpisal_main",
+				"padala_police_card"
+			],
+			"path": [
+				"m_tokhang",
+				"m_gwen",
+				"m_kumpisal",
+				"m_chased",
+				"m_padala",
+				"m_police"
+			],
+			"aliases": [
+				"main:tokhang_gwen+padala_police_card"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_gwen",
+				"kumpisal_sinamahan",
+				"padala_police_card"
+			],
+			"path": [
+				"m_tokhang",
+				"m_gwen",
+				"m_kumpisal",
+				"m_sinamahan",
+				"m_padala",
+				"m_police"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_kulas",
+				"kumpisal_main",
+				"padala_police_card"
+			],
+			"path": [
+				"m_tokhang",
+				"m_kulas",
+				"m_kumpisal",
+				"m_chased",
+				"m_padala",
+				"m_police"
+			],
+			"aliases": [
+				"main:tokhang_kulas+padala_police_card"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_kulas",
+				"kumpisal_sinamahan",
+				"padala_police_card"
+			],
+			"path": [
+				"m_tokhang",
+				"m_kulas",
+				"m_kumpisal",
+				"m_sinamahan",
+				"m_padala",
+				"m_police"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_safe",
+				"kumpisal_main",
+				"padala_police_card"
+			],
+			"path": [
+				"m_tokhang",
+				"m_safe",
+				"m_kumpisal",
+				"m_chased",
+				"m_padala",
+				"m_police"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_safe",
+				"kumpisal_sinamahan",
+				"padala_police_card"
+			],
+			"path": [
+				"m_tokhang",
+				"m_safe",
+				"m_kumpisal",
+				"m_sinamahan",
+				"m_padala",
+				"m_police"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_peter",
+				"kumpisal_main",
+				"padala_pinalaya"
+			],
+			"path": [
+				"m_tokhang",
+				"m_peter",
+				"m_kumpisal",
+				"m_chased",
+				"m_padala",
+				"m_pinalaya"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_peter",
+				"kumpisal_sinamahan",
+				"padala_pinalaya"
+			],
+			"path": [
+				"m_tokhang",
+				"m_peter",
+				"m_kumpisal",
+				"m_sinamahan",
+				"m_padala",
+				"m_pinalaya"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_gwen",
+				"kumpisal_main",
+				"padala_pinalaya"
+			],
+			"path": [
+				"m_tokhang",
+				"m_gwen",
+				"m_kumpisal",
+				"m_chased",
+				"m_padala",
+				"m_pinalaya"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_gwen",
+				"kumpisal_sinamahan",
+				"padala_pinalaya"
+			],
+			"path": [
+				"m_tokhang",
+				"m_gwen",
+				"m_kumpisal",
+				"m_sinamahan",
+				"m_padala",
+				"m_pinalaya"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_kulas",
+				"kumpisal_main",
+				"padala_pinalaya"
+			],
+			"path": [
+				"m_tokhang",
+				"m_kulas",
+				"m_kumpisal",
+				"m_chased",
+				"m_padala",
+				"m_pinalaya"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_kulas",
+				"kumpisal_sinamahan",
+				"padala_pinalaya"
+			],
+			"path": [
+				"m_tokhang",
+				"m_kulas",
+				"m_kumpisal",
+				"m_sinamahan",
+				"m_padala",
+				"m_pinalaya"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_safe",
+				"kumpisal_main",
+				"padala_pinalaya"
+			],
+			"path": [
+				"m_tokhang",
+				"m_safe",
+				"m_kumpisal",
+				"m_chased",
+				"m_padala",
+				"m_pinalaya"
+			]
+		},
+		{
+			"timeline": "main",
+			"needs": [
+				"tokhang_safe",
+				"kumpisal_sinamahan",
+				"padala_walang_namatay"
+			],
+			"path": [
+				"m_tokhang",
+				"m_safe",
+				"m_kumpisal",
+				"m_sinamahan",
+				"m_padala",
+				"m_walang"
+			]
+		},
+		{
+			"timeline": "kumpisal",
+			"needs": [
+				"kumpisal_kumpisal",
+				"padala_run"
+			],
+			"path": [
+				"k_kumpisal",
+				"k_chased",
+				"k_padala",
+				"k_run"
+			],
+			"aliases": [
+				"kumpisal:padala_run"
+			]
+		},
+		{
+			"timeline": "kumpisal",
+			"needs": [
+				"kumpisal_kumpisal",
+				"padala_ride_jeep"
+			],
+			"path": [
+				"k_kumpisal",
+				"k_chased",
+				"k_padala",
+				"k_jeep"
+			],
+			"aliases": [
+				"kumpisal:padala_ride_jeep"
+			]
+		},
+		{
+			"timeline": "kumpisal",
+			"needs": [
+				"kumpisal_kumpisal",
+				"padala_nagtago"
+			],
+			"path": [
+				"k_kumpisal",
+				"k_chased",
+				"k_padala",
+				"k_nagtago"
+			]
+		},
+		{
+			"timeline": "kumpisal",
+			"needs": [
+				"kumpisal_kumpisal",
+				"padala_pinalaya"
+			],
+			"path": [
+				"k_kumpisal",
+				"k_chased",
+				"k_padala",
+				"k_pinalaya"
+			]
+		},
+		{
+			"timeline": "padala",
+			"needs": [
+				"padala_police",
+				"kumpisal_padala_police",
+				"tokhang_trade"
+			],
+			"path": [
+				"p_padala",
+				"p_police",
+				"p_kumpisal_police",
+				"p_tokhang",
+				"p_trade"
+			],
+			"aliases": [
+				"padala:padala_police+tokhang_trade"
+			]
+		},
+		{
+			"timeline": "padala",
+			"needs": [
+				"padala_food",
+				"kumpisal_sacrifice"
+			],
+			"path": [
+				"p_padala",
+				"p_food",
+				"p_kumpisal_food",
+				"p_sacrifice"
+			],
+			"aliases": [
+				"padala:padala_food+kumpisal_sacrifice"
+			]
+		},
+		{
+			"timeline": "padala",
+			"needs": [
+				"padala_food",
+				"kumpisal_sinamahan"
+			],
+			"path": [
+				"p_padala",
+				"p_food",
+				"p_kumpisal_food",
+				"p_sinamahan"
+			]
+		},
+		{
+			"timeline": "padala",
+			"needs": [
+				"padala_tanod"
+			],
+			"path": [
+				"p_padala",
+				"p_tanod"
+			]
+		}
 	]
 }

@@ -294,9 +294,13 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
     Walang Namatay). Run flags: `run_kulas_safe`, `run_eli_confessed`, `run_tanod`.
   - Art: 13 placeholder cutscenes from `tools/draw_placeholders.py`
     (`assets/cutscenes/PLACEHOLDERS.txt` lists them). Painting them is the main art task.
-  - **Not done yet (Phase 4):** `story/timelines.json` has no cards or realities for the new
-    endings, so they don't show on the timelines chart, and a run mixing a new ending with old
-    ones can match an old reality. Phase 5 is playtesting from a fresh save.
+  - **Phase 4 done (timelines chart):** `story/timelines.json` has cards for every new ending
+    (main: Ligtas, Sinamahan, Pinalaya, Walang Namatay; kumpisal: Nagtago, Pinalaya; padala:
+    Tanod, Sinamahan) and 32 realities, each listing every outcome of its run. `TimelineMap
+    .reality_for` matches exactly (same outcomes, no more, no fewer). Older saves' reality names
+    are kept as `aliases`. In a shown timeline, branches not reached yet show as dim "???" cards on
+    faint lines. The smoke test checks the chart. The developer tools' Endings list grew to match.
+    **Next: Phase 5**, a full playthrough from a fresh save to the true ending.
 - **No sound on iPhone** (user report). The game itself plays music (checked: player playing,
   buses not muted). Fix in the Web preset's `html/head_include`: it wraps `AudioContext` to keep
   every context the engine makes and resumes them on each `touchend`/`pointerup`/`click`
