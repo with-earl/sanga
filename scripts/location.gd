@@ -28,6 +28,8 @@ extends Control
 ## A character who is always on the left of the dialogue box here, for example "Father Eli".
 ## Leave empty for none. Their picture is assets/portraits/<name in lowercase, spaces as _>_1.png.
 @export var left_character := ""
+## Characters whose portrait beside the dialogue box is mirrored here, so they face the other way.
+@export var flipped_portraits: PackedStringArray = []
 ## What each character says when tapped. A key is a character name, or names joined with "|" for
 ## one conversation shared by several characters, such as "Gwen|Ben". A value is a list of lines,
 ## each {"speaker": name, "text": words}. Everyone in the key leaves the scene while it plays.
@@ -114,6 +116,7 @@ func _ready() -> void:
 	_build_undo_button()
 	_build_backdrop()
 	_dialogue.portrait_source = _portrait_for
+	_dialogue.flipped_portraits = flipped_portraits
 	_dialogue.opened.connect(_focus_on_dialogue.bind(true))
 	_dialogue.dismissed.connect(_focus_on_dialogue.bind(false))
 	_dialogue.dismissed.connect(_count_conversation)

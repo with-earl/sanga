@@ -84,6 +84,9 @@ var _portrait_tween: Tween
 ## Looks up the picture for a character by name. The box uses it to bring in whoever speaks next
 ## on the right, when a conversation has more than one person speaking there.
 var portrait_source := Callable()
+## Characters whose portrait is shown mirrored, so they face the other way, for example to face
+## the person they are talking to. Set by the location.
+var flipped_portraits := PackedStringArray()
 var _plate := PanelContainer.new()
 var _next_cursor := TextureRect.new()
 var _next_tween: Tween
@@ -192,8 +195,8 @@ func _show_next_cursor(on: bool) -> void:
 func set_cast(left_name: String, left_picture: Texture2D, right_name: String, right_picture: Texture2D) -> void:
 	_left_name = left_name
 	_right_name = right_name
-	_place_portrait(_portrait_left, left_picture, true)
-	_place_portrait(_portrait_right, right_picture, false)
+	_place_portrait(_portrait_left, left_picture, true, left_name)
+	_place_portrait(_portrait_right, right_picture, false, right_name)
 
 
 ## Plays a single line.
@@ -323,7 +326,7 @@ func _bring_in_speaker(who: String) -> void:
 	if picture == null:
 		return
 	_right_name = who
-	_place_portrait(_portrait_right, picture, false)
+	_place_portrait(_portrait_right, picture, false, who)
 
 
 ## The speaker is shown at full brightness, the other side slightly dimmed.
@@ -334,8 +337,9 @@ func _highlight(who: String) -> void:
 
 ## Shows the top part of a portrait standing on the bottom edge of the screen, at the left or right
 ## corner and underneath the box. Returns how wide it is drawn, or 0 if there is no picture.
-func _place_portrait(portrait: TextureRect, picture: Texture2D, on_left: bool) -> float:
+func _place_portrait(portrait: TextureRect, picture: Texture2D, on_left: bool, who := "") -> float:
 	portrait.visible = picture != null
+	portrait.flip_h = who in flipped_portraits
 	if picture == null:
 		return 0.0
 	var full := picture.get_size()

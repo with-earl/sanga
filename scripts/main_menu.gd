@@ -5,8 +5,10 @@ extends Control
 const MONTHS := ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 const ROW_SIZE := Vector2(300, 52)
 ## Development only: the menu on the left, for quick testing without a save slot. "Stories" starts
-## a story's timeline; "Endings" shows the screen a timeline ends on (Main, Alternate 1, ...). It
-## only appears in debug builds.
+## a story's timeline; "Endings" shows the screen a timeline ends on (Main, Alternate 1, ...).
+## While the game is still being made it shows in every build, the web playtest build included.
+## Set this to false before release, and it shows only in debug builds again.
+const SHOW_DEV_MENU_IN_ALL_BUILDS := true
 
 @onready var _menu: Control = $Buttons
 @onready var _quit_confirm: Control = %QuitConfirm
@@ -19,7 +21,6 @@ const ROW_SIZE := Vector2(300, 52)
 @onready var _continue_button: Button = %ContinueButton
 @onready var _new_button: Button = %NewButton
 @onready var _load_button: Button = %LoadButton
-@onready var _settings_button: Button = %SettingsButton
 @onready var _quit_button: Button = %QuitButton
 @onready var _yes_button: Button = %YesButton
 @onready var _no_button: Button = %NoButton
@@ -38,13 +39,12 @@ func _ready() -> void:
 	_continue_button.pressed.connect(_on_continue)
 	_new_button.pressed.connect(_show_new_game_slots)
 	_load_button.pressed.connect(_show_slots.bind(false))
-	_settings_button.pressed.connect(_settings.open)
 	_quit_button.pressed.connect(_show_quit_confirm.bind(true))
 	# A web page cannot close itself, so the browser build has no Quit.
 	_quit_button.visible = not OS.has_feature("web")
 	_yes_button.pressed.connect(get_tree().quit)
 	_no_button.pressed.connect(_show_quit_confirm.bind(false))
-	_dev_stories.visible = OS.is_debug_build()
+	_dev_stories.visible = SHOW_DEV_MENU_IN_ALL_BUILDS or OS.is_debug_build()
 	_show_dev_menu()
 	_dev_yes.pressed.connect(func() -> void: _dev_yes_action.call())
 	_dev_no.pressed.connect(func() -> void: _dev_no_action.call())
@@ -103,7 +103,7 @@ func _show_dev_endings() -> void:
 
 func _open_dev_list() -> void:
 	_dev_confirm.visible = false
-	_dev_stories.visible = OS.is_debug_build()
+	_dev_stories.visible = SHOW_DEV_MENU_IN_ALL_BUILDS or OS.is_debug_build()
 	for child in _dev_stories.get_children():
 		_dev_stories.remove_child(child)
 		child.queue_free()

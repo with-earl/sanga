@@ -48,6 +48,13 @@ const CATEGORY_COLORS := {
 	set(value):
 		retro_look = value
 		_refresh()
+## Blurs the art as if it were out of focus, for things very close to the camera, so the eye
+## reads depth. 0 is sharp; higher is blurrier (the picture is shrunk by this factor and smoothly
+## enlarged back, which looks like a soft gaussian blur and costs nothing per frame).
+@export_range(0.0, 32.0, 0.5) var depth_blur := 0.0:
+	set(value):
+		depth_blur = value
+		_refresh()
 ## Mirrors the art left to right, and its tap shape with it. Kept on the node, so it stays
 ## flipped when the image file is replaced.
 @export var flip_horizontal := false:
@@ -135,6 +142,8 @@ func _refresh() -> void:
 	_shape = null
 	if asset_id != "" and ResourceLoader.exists(expected_path()):
 		_texture = load(expected_path()) as Texture2D
+	if _texture != null and depth_blur > 1.0:
+		_texture = _out_of_focus(_texture, depth_blur)
 	if _texture != null and shape_hit_test:
 		_shape = _build_shape(_texture)
 	var shaded := _texture != null and retro_look and category != "props"
@@ -145,6 +154,22 @@ func _refresh() -> void:
 	# Art is scaled to fit, so it always uses smooth sampling. The shader's blur needs it too.
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR if _texture != null else CanvasItem.TEXTURE_FILTER_PARENT_NODE
 	queue_redraw()
+
+
+## A soft, out-of-focus copy of a picture. See `depth_blur`.
+static func _out_of_focus(texture: Texture2D, amount: float) -> Texture2D:
+	var image := texture.get_image()
+	if image == null or image.is_empty():
+		return texture
+	image = image.duplicate()
+	if image.is_compressed():
+		image.decompress()
+	# Transparent pixels take their neighbours' colour first, so the soft edges do not go dark.
+	image.fix_alpha_edges()
+	var full := image.get_size()
+	image.resize(maxi(roundi(full.x / amount), 1), maxi(roundi(full.y / amount), 1), Image.INTERPOLATE_LANCZOS)
+	image.resize(full.x, full.y, Image.INTERPOLATE_CUBIC)
+	return ImageTexture.create_from_image(image)
 
 
 func _build_shape(texture: Texture2D) -> BitMap:

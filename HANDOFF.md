@@ -181,6 +181,11 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   1280) about its centre, so on a wide phone a thin strip at the top and bottom is cut off; on a
   taller screen black bars show above and below. The blurred side fill was removed. The HUD and
   dialogue are laid out on the real screen. Don't change this fit again without asking.
+- v0.8.3 (user's requests): the main screen's **Settings text row is removed** (the gear stays);
+  **Stories/Endings show in every build** while in development; the market's **motorcycle is a
+  large, out-of-focus foreground** at the bottom left, only its delivery box (its top right)
+  in view (`ArtSlot.depth_blur`); **Gloria, Ben and Gwen's portraits are mirrored** in the
+  Kumpisal scenes (`Location.flipped_portraits`). Open question 4 (keep the gear) is answered.
 - Phases 1 to 4 of the GUI plan are done and checked in screenshots at 16:9, 19.5:9 and 4:3.
   Left from the plan: **Phase 5** (a lighter text blur that is the same on every screen, and the
   title/ending cards moved fully onto the window palette) and **Phase 6** polish (consistent
