@@ -317,6 +317,25 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   reveal); stage directions are Tagalog between asterisks (*Tumawa*). The Main Timeline has no
   prologue. Story time is Kumpisal (past), Padala (present), Tokhang (future); the Main Timeline
   already plays them future, past, present (Tokhang, Kumpisal, Padala).
+- **Choices and objectives without boxes** (user: the boxes were too big for the layout).
+  Choices are plain golden ochre text with an outline (`DialogueBox._style_choice`), with a small
+  note above them: "Your choice may change the timeline." (`CHOICE_HINT`). The objectives list
+  has no soft window behind it any more; the top shade keeps it readable.
+- **Top-right HUD icons** (user's request): an old open book (opens the Alaala window: each
+  memory held by name and line, the rest "???", with "2 / 5") and a blue clipboard (opens the
+  objectives window, finished ones struck through). They replace the on-screen objectives list
+  (`ObjectivesPanel.SHOWN_ON_SCREEN = false`; it still tracks objectives, plays the strike sound
+  and feeds `GameMenu.set_objectives`). The clipboard swells briefly when objectives change.
+  Then (user): the clipboard is a realistic brown hardboard one with a steel clip and rivets,
+  and the gear was redrawn in the same detail (brushed steel, bevel, hub); `gear.png` is now made
+  by `tools/draw_props.py` too. Each icon's `picture_size` is set so it covers the same area as
+  the gear (gear 64, book 67, clipboard 59). Later (user): no ribbon on the book, and all three
+  were redrawn with more depth: the gear's thickness and bevel, the book's leather cover, stacked
+  page edges and gutter shadow, the clipboard's board thickness and lifted paper corner, plus a
+  soft drop shadow on each (`_finish` in `draw_props.py`). The book is drawn as if seen more from
+  above (`BOOK_HEIGHT` in `draw_props.py`) so it stands as tall as the clipboard on screen.
+  Icons drawn by `tools/draw_props.py` (`assets/ui/book.png`, `clipboard.png`), window in
+  `scripts/journal_modal.gd`. All HUD icons hide during dialogues (`GameMenu.get_hud_icons`).
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions

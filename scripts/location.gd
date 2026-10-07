@@ -122,6 +122,7 @@ func _ready() -> void:
 	_dialogue.dismissed.connect(_focus_on_dialogue.bind(false))
 	_dialogue.dismissed.connect(_count_conversation)
 	get_viewport().size_changed.connect(_fit_stage)
+	_objectives_panel.objectives_changed.connect(_game_menu.set_objectives)
 
 
 ## Shows the place at its 16:9 shape, enlarged to fill the screen's width. On a phone wider than
@@ -196,12 +197,12 @@ func _focus_on_dialogue(focused: bool) -> void:
 		_focus_tween.tween_property(group, "outline_opacity", 0.0 if focused else 1.0, OUTLINE_FADE_SECONDS)
 	var show_hud := not focused and not hud_locked
 	var hud_alpha := 1.0 if show_hud else 0.0
-	var icon := _game_menu.get_icon()
-	icon.visible = true
-	icon.mouse_filter = Control.MOUSE_FILTER_STOP if show_hud else Control.MOUSE_FILTER_IGNORE
+	for icon in _game_menu.get_hud_icons():
+		icon.visible = true
+		icon.mouse_filter = Control.MOUSE_FILTER_STOP if show_hud else Control.MOUSE_FILTER_IGNORE
+		_focus_tween.tween_property(icon, "modulate:a", hud_alpha, seconds)
 	_focus_tween.tween_property(_objectives_panel, "modulate:a", hud_alpha, seconds)
 	_focus_tween.tween_property(_top_shade, "modulate:a", hud_alpha, seconds)
-	_focus_tween.tween_property(icon, "modulate:a", hud_alpha, seconds)
 	if _back_button != null:
 		_back_button.mouse_filter = Control.MOUSE_FILTER_STOP if show_hud else Control.MOUSE_FILTER_IGNORE
 		_focus_tween.tween_property(_back_button, "modulate:a", hud_alpha, seconds)
