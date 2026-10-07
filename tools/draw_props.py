@@ -3,11 +3,14 @@
 - assets/props/keys.png: a brass key lying on a surface, seen from a low side angle, so it shows
   foreshortening and the thickness of the metal.
 - assets/props/police_poster.png: a police emergency poster taped to the wall, with the hotline.
+- assets/props/telephone.png: a desk phone built as a tiny 3D model at the room's angle, fitted
+  exactly over the phone painted on the nightstand.
 
 Everything is drawn four times larger and shrunk at the end, which gives smooth, soft edges.
 Run: python tools/draw_props.py
 """
 
+import math
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
@@ -18,6 +21,8 @@ SCALE = 4
 INK = (46, 26, 14, 255)
 FONT_BOLD = "/usr/share/fonts/opentype/inter/Inter-Bold.otf"
 FONT_BLACK = "/usr/share/fonts/opentype/inter/InterDisplay-Bold.otf"
+## Where the telephone is in the apartment's painting (pixels of apartment_room_bath.png).
+TELEPHONE_BOX = (1293, 503, 1443, 614)
 
 
 def font(path: str, size: int) -> ImageFont.FreeTypeFont:
@@ -257,8 +262,234 @@ def draw_card_on_floor() -> None:
     final.save(PROPS / "food_delivery_card_floor.png")
 
 
+def gradient_fill(mask: Image.Image, fill_top, fill_bottom) -> Image.Image:
+    """Fills the white part of `mask` with a top-to-bottom gradient, like the key's faces."""
+    size = mask.size
+    gradient = Image.linear_gradient("L").resize(size)
+    colored = Image.composite(Image.new("RGBA", size, fill_bottom), Image.new("RGBA", size, fill_top), gradient)
+    face = Image.new("RGBA", size, (0, 0, 0, 0))
+    face.paste(colored, (0, 0), mask)
+    return face
+
+
+class PhoneModel:
+    """A very small 3D model of the desk telephone, so its faces have a true angle, depth and light.
+    The phone is built from flat faces in the room's space (x to the right, y up, z away from the
+    viewer), seen by a camera a little above and to the right like the room's painting, lit from
+    the window side, and drawn back to front. The base is a wedge whose top leans back toward the
+    viewer; the handset lies on the left of that slope."""
+
+    TILT = math.radians(44)
+    SLOPE = 176.0
+    FRONT = 16.0
+    WIDTH = 196.0
+    CAMERA_YAW = math.radians(-9)
+    CAMERA_PITCH = math.radians(17)
+    LIGHT = (0.42, 0.78, -0.46)
+
+    def __init__(self) -> None:
+        self.faces = []
+
+    def on_slope(self, u: float, v: float, n: float):
+        """A point on the base's sloping top: `u` across, `v` up the slope, `n` raised off it."""
+        c, s = math.cos(self.TILT), math.sin(self.TILT)
+        return (u, self.FRONT + v * s + n * c, v * c - n * s)
+
+    def project(self, point):
+        x, y, z = point
+        x -= self.WIDTH / 2
+        cy, sy = math.cos(self.CAMERA_YAW), math.sin(self.CAMERA_YAW)
+        x, z = x * cy + z * sy, -x * sy + z * cy
+        cp, sp = math.cos(self.CAMERA_PITCH), math.sin(self.CAMERA_PITCH)
+        y, z = y * cp + z * sp, -y * sp + z * cp
+        distance = 1400.0
+        return (x * distance / (z + distance), -y * distance / (z + distance), z)
+
+    def add(self, points, color, layer: int, texture=None) -> None:
+        self.faces.append({"points": points, "color": color, "layer": layer, "texture": texture})
+
+    def shade(self, points) -> float:
+        import numpy as np
+
+        a, b, c = (np.array(p, dtype=float) for p in points[:3])
+        normal = np.cross(b - a, c - a)
+        normal /= np.linalg.norm(normal) + 1e-9
+        light = np.array(self.LIGHT) / np.linalg.norm(self.LIGHT)
+        return 0.66 + 0.5 * max(float(np.dot(normal, light)), 0.0)
+
+    def block(self, u0, u1, v0, v1, height, bevel, color, layer, texture=None, taper=0.0) -> None:
+        """A raised block on the slope with chamfered top edges, like moulded plastic."""
+        def ring(inset, n, shrink=0.0):
+            return [self.on_slope(u0 + inset + shrink, v0 + inset, n), self.on_slope(u1 - inset - shrink, v0 + inset, n),
+                    self.on_slope(u1 - inset - shrink, v1 - inset, n), self.on_slope(u0 + inset + shrink, v1 - inset, n)]
+        base, edge, top = ring(0, 0), ring(0, height - bevel, taper), ring(bevel, height, taper)
+        for low, high in ((base, edge), (edge, top)):
+            for i in range(4):
+                j = (i + 1) % 4
+                self.add([low[i], low[j], high[j], high[i]], color, layer)
+        self.add(top, color, layer, texture)
+
+    def wedge(self, color) -> None:
+        """The base: flat on the table, its top sloping up and away, with a bevelled rim."""
+        c, s = math.cos(self.TILT), math.sin(self.TILT)
+        depth, back = self.SLOPE * c, self.FRONT + self.SLOPE * s
+        w, b = self.WIDTH, 7.0
+        floor = [(0, 0, 0), (w, 0, 0), (w, 0, depth), (0, 0, depth)]
+        rim = [(0, self.FRONT, 0), (w, self.FRONT, 0), (w, back, depth), (0, back, depth)]
+        for i in range(4):
+            j = (i + 1) % 4
+            self.add([floor[i], floor[j], rim[j], rim[i]], color, 0)
+        top = [self.on_slope(b, b, b * 0.7), self.on_slope(w - b, b, b * 0.7),
+               self.on_slope(w - b, self.SLOPE - b, b * 0.7), self.on_slope(b, self.SLOPE - b, b * 0.7)]
+        for i in range(4):
+            j = (i + 1) % 4
+            self.add([rim[i], rim[j], top[j], top[i]], color, 0)
+        self.add(top, color, 0, "face")
+        return top
+
+
+def phone_face_texture(width: int, height: int) -> Image.Image:
+    """The base's sloping top, straight on: a plain cradle on the left (the handset hides most of
+    it), then the screen, a chrome strip and the keys, each key with a lit top and a dark rim."""
+    face = gradient_fill(Image.new("L", (width, height), 255), (92, 94, 98, 255), (66, 68, 72, 255))
+    d = ImageDraw.Draw(face)
+    left = int(width * 0.33)
+    d.rectangle((0, 0, left - 12, height), fill=(52, 54, 58, 255))
+    d.line((left - 12, 0, left - 12, height), fill=(36, 37, 40, 255), width=6)
+    # The image's top is the far (upper) end of the slope.
+    d.rounded_rectangle((left + 30, 40, width - 40, 200), radius=14, fill=(34, 36, 38, 255))
+    d.rounded_rectangle((left + 42, 52, width - 52, 188), radius=10, fill=(150, 170, 152, 255))
+    d.polygon([(left + 52, 62), (left + 230, 62), (left + 170, 122), (left + 52, 122)], fill=(190, 204, 188, 255))
+    d.rounded_rectangle((left + 30, 236, width - 40, 250), radius=7, fill=(176, 178, 182, 255))
+    # Three soft keys under the screen and a small red light.
+    soft = (width - 40 - (left + 30)) / 3
+    for i in range(3):
+        x = left + 30 + i * soft
+        d.rounded_rectangle((x + 14, 205, x + soft - 14, 226), radius=10, fill=(44, 46, 50, 255))
+    d.ellipse((width - 64, 24, width - 46, 42), fill=(214, 70, 56, 255))
+    # A speaker grille at the near end.
+    for row in range(3):
+        for col in range(9):
+            cx, cy = left + 60 + col * 26, height - 70 + row * 18
+            d.ellipse((cx - 5, cy - 5, cx + 5, cy + 5), fill=(36, 37, 40, 255))
+    def key(x0, y0, x1, y1, top):
+        d.rounded_rectangle((x0, y0 + 12, x1, y1 + 12), radius=18, fill=(24, 25, 28, 255))
+        d.rounded_rectangle((x0, y0, x1, y1), radius=18, fill=top)
+        d.rounded_rectangle((x0 + 12, y0 + 6, x1 - 12, y0 + 18), radius=6, fill=(176, 178, 184, 255))
+    columns = (width - 40 - (left + 30)) / 4
+    for row in range(4):
+        y = 286 + row * 98
+        for col in range(3):
+            x = left + 30 + col * columns
+            key(x + 8, y, x + columns - 16, y + 70, (120, 122, 128, 255))
+        x = left + 30 + 3 * columns
+        key(x + 18, y, x + columns - 4, y + 70, (178, 66, 52, 255) if row == 3 else (102, 104, 110, 255))
+    return face
+
+
+def handset_texture(width: int, height: int) -> Image.Image:
+    """The handset's top: a soft shine down its length and the earpiece holes at the far end."""
+    top = gradient_fill(Image.new("L", (width, height), 255), (108, 110, 116, 255), (64, 66, 70, 255))
+    d = ImageDraw.Draw(top)
+    d.rounded_rectangle((width * 0.62, height * 0.06, width * 0.78, height * 0.94), radius=10, fill=(150, 152, 158, 255))
+    return top
+
+
+def draw_telephone() -> None:
+    """A desk telephone, drawn like the keys, poster and flyer (soft gradients, a shine, the props'
+    dark outline), but built as a small 3D model so it sits in the room at the painting's angle.
+    It is then fitted over the phone painted on the nightstand so it hides it completely
+    (coordinates are pixels of that phone's box)."""
+    import numpy as np
+
+    k = 2 * SCALE
+    box_w, box_h = TELEPHONE_BOX[2] - TELEPHONE_BOX[0], TELEPHONE_BOX[3] - TELEPHONE_BOX[1]
+    model = PhoneModel()
+    body = (92, 94, 100)
+    model.wedge(body)
+    # The handset: earpiece and mouthpiece blocks joined by a slimmer grip, lying on the cradle.
+    grey = (98, 100, 106)
+    model.block(4, 62, 2, 52, 30, 10, grey, 1, taper=3)
+    model.block(4, 62, 126, 174, 30, 10, grey, 1, taper=3)
+    model.block(12, 54, 28, 152, 22, 8, grey, 1, "handset")
+    textures = {"face": phone_face_texture(600, 760), "handset": handset_texture(220, 760)}
+
+    projected = []
+    for face in model.faces:
+        pts = [model.project(p) for p in face["points"]]
+        flat = [(x, y) for x, y, _ in pts]
+        area = sum(flat[i][0] * flat[(i + 1) % len(flat)][1] - flat[(i + 1) % len(flat)][0] * flat[i][1] for i in range(len(flat)))
+        if area >= 0:
+            continue
+        depth = sum(z for _, _, z in pts) / len(pts)
+        projected.append((face["layer"], -depth, flat, face))
+    projected.sort(key=lambda item: (item[0], item[1]))
+
+    # Fit the drawing over the painted phone: its edge must be covered everywhere.
+    painted = [(49, 22), (58, 20), (70, 21), (75, 26), (79, 26), (125, 29), (128, 33), (127, 41), (126, 60),
+               (125, 79), (119, 88), (113, 95), (70, 94), (40, 90), (30, 85), (30, 74), (37, 56), (45, 31)]
+    xs = [x for _, _, flat, _ in projected for x, _ in flat]
+    ys = [y for _, _, flat, _ in projected for _, y in flat]
+    def silhouette(rect):
+        mask = Image.new("L", (box_w * 2, box_h * 2), 0)
+        md = ImageDraw.Draw(mask)
+        sx, sy = (rect[2] - rect[0]) / (max(xs) - min(xs)), (rect[3] - rect[1]) / (max(ys) - min(ys))
+        for _, _, flat, _ in projected:
+            md.polygon([((x - min(xs)) * sx * 2 + rect[0] * 2, (y - min(ys)) * sy * 2 + rect[1] * 2) for x, y in flat], fill=255)
+        return np.asarray(mask) > 0
+    target = Image.new("L", (box_w * 2, box_h * 2), 0)
+    ImageDraw.Draw(target).polygon([(x * 2, y * 2) for x, y in painted], fill=255)
+    target = np.asarray(target) > 0
+    px, py = [x for x, _ in painted], [y for _, y in painted]
+    rect = [min(px), min(py), max(px), max(py)]
+    for _ in range(40):
+        missed = target & ~silhouette(rect)
+        if not missed.any():
+            break
+        my, mx = np.nonzero(missed)
+        cx, cy = (rect[0] + rect[2]) / 2, (rect[1] + rect[3]) / 2
+        if (mx / 2 < cx).any(): rect[0] -= 0.5
+        if (mx / 2 >= cx).any(): rect[2] += 0.5
+        if (my / 2 < cy).any(): rect[1] -= 0.5
+        if (my / 2 >= cy).any(): rect[3] = min(rect[3] + 0.5, max(py) + 1.5)
+    sx, sy = (rect[2] - rect[0]) / (max(xs) - min(xs)), (rect[3] - rect[1]) / (max(ys) - min(ys))
+    to_canvas = lambda x, y: (((x - min(xs)) * sx + rect[0]) * k, ((y - min(ys)) * sy + rect[1]) * k)
+
+    size = (box_w * k, box_h * k)
+    layers = [Image.new("RGBA", size, (0, 0, 0, 0)) for _ in range(2)]
+    for layer, _, flat, face in projected:
+        phone = layers[layer]
+        corners = [to_canvas(x, y) for x, y in flat]
+        light = model.shade(face["points"])
+        if face["texture"] is None:
+            color = tuple(min(int(ch * light), 255) for ch in face["color"]) + (255,)
+            ImageDraw.Draw(phone).polygon(corners, fill=color)
+            continue
+        texture = textures[face["texture"]]
+        tw, th = texture.size
+        # Texture rows run from the far end of the slope (top) to the near end (bottom).
+        ordered = [corners[3], corners[2], corners[1], corners[0]]
+        square = [(0, 0), (tw, 0), (tw, th), (0, th)]
+        warped = texture.transform(size, Image.PERSPECTIVE, perspective_coeffs(square, ordered), Image.BICUBIC)
+        lit = Image.eval(warped.convert("RGB"), lambda v: min(int(v * light), 255)).convert("RGBA")
+        mask = Image.new("L", size, 0)
+        ImageDraw.Draw(mask).polygon(corners, fill=255)
+        phone.paste(lit, (0, 0), mask)
+    # The handset casts a soft shadow onto the base, away from the window, and has its own thin
+    # dark edge so it reads as a separate piece resting in the cradle.
+    phone, handset = layers
+    shadow = Image.new("RGBA", size, (10, 8, 8, 0))
+    shadow.putalpha(handset.getchannel("A").filter(ImageFilter.GaussianBlur(2 * k)).point(lambda a: int(a * 0.7)))
+    shadow = Image.composite(shadow, Image.new("RGBA", size), phone.getchannel("A"))
+    phone.alpha_composite(shadow, (-2 * k, k))
+    phone.alpha_composite(outline(handset, k // 2, (20, 16, 16, 255)))
+    phone = outline(phone, k, INK)
+    phone.resize((box_w, box_h), Image.LANCZOS).save(PROPS / "telephone.png")
+
+
 if __name__ == "__main__":
+    draw_telephone()
     draw_key()
     draw_poster()
     draw_card_on_floor()
-    print("Drew keys.png, police_poster.png and food_delivery_card_floor.png")
+    print("Drew telephone.png, keys.png, police_poster.png and food_delivery_card_floor.png")
