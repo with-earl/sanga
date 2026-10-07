@@ -11,6 +11,12 @@ const HEADING_SIZE := 28
 const OUTLINE_SIZE := 6
 ## At least this tall, so every button is easy to tap with a thumb (about 9 mm on a phone).
 const BUTTON_HEIGHT := 64.0
+## Room between a button's edge and its text.
+const BUTTON_PADDING := Vector2(40.0, 10.0)
+## The ▶ cursor beside a pressed button.
+const CURSOR_SIZE := Vector2i(14, 18)
+const CURSOR_INSET := 16.0
+const CURSOR_FADE_SECONDS := 0.1
 ## Every button, on every screen, uses these two colours: warm cream text with a near-black brown
 ## outline. That pairing has the strongest contrast against both the black button boxes and the busy
 ## picture and video behind the main screen. Change them here and all buttons follow.
@@ -20,7 +26,7 @@ const BUTTON_OUTLINE := Color(0.165, 0.086, 0.031, 1)
 const PRESSED_TEXT := Color(0.74, 0.70, 0.62, 1)
 
 
-## Gives a button the shared look: a black box with a gray border and cream text with a dark outline.
+## Gives a button the shared look: a soft 90s window with cream text and a dark outline.
 static func style_button(button: Button, font_size := TEXT_SIZE) -> void:
 	button.custom_minimum_size.y = maxf(button.custom_minimum_size.y, BUTTON_HEIGHT)
 	box_only(button)
@@ -34,14 +40,45 @@ static func style_button(button: Button, font_size := TEXT_SIZE) -> void:
 	button.add_theme_constant_override("outline_size", OUTLINE_SIZE)
 
 
-## Only the box, for buttons that draw their own content, such as an icon.
+## Only the window and the cursor, for buttons that draw their own content, such as an icon. Safe
+## to call more than once on the same button.
 static func box_only(button: Button) -> void:
-	var normal := DialogueBox.choice_style(DialogueBox.CHOICE_FILL)
-	var pressed := DialogueBox.choice_style(DialogueBox.CHOICE_FILL_PRESSED)
-	for state in ["normal", "hover", "focus", "disabled"]:
-		button.add_theme_stylebox_override(state, normal)
-	for state in ["pressed", "hover_pressed"]:
-		button.add_theme_stylebox_override(state, pressed)
+	if button.has_meta(&"soft_window"):
+		return
+	button.set_meta(&"soft_window", true)
+	var empty := StyleBoxEmpty.new()
+	empty.content_margin_left = BUTTON_PADDING.x
+	empty.content_margin_right = BUTTON_PADDING.x
+	empty.content_margin_top = BUTTON_PADDING.y
+	empty.content_margin_bottom = BUTTON_PADDING.y
+	for state in ["normal", "hover", "focus", "disabled", "pressed", "hover_pressed"]:
+		button.add_theme_stylebox_override(state, empty)
+	SoftWindow.behind_button(button)
+	_add_cursor(button)
+
+
+## A small ▶ at the left of the button while it is held down (or the mouse is over it), the way
+## 90s game menus pointed at the option about to be picked.
+static func _add_cursor(button: Button) -> void:
+	var cursor := TextureRect.new()
+	var w := float(CURSOR_SIZE.x)
+	var h := float(CURSOR_SIZE.y)
+	cursor.texture = SoftShapes.triangle(CURSOR_SIZE, PackedVector2Array([Vector2(2, 2), Vector2(w - 2, h / 2.0), Vector2(2, h - 2)]), DialogueBox.CHOICE_TEXT, DialogueBox.CHOICE_OUTLINE, 1.5)
+	cursor.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	cursor.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cursor.modulate.a = 0.0
+	button.add_child(cursor, false, Node.INTERNAL_MODE_BACK)
+	cursor.set_anchors_preset(Control.PRESET_CENTER_LEFT)
+	cursor.offset_left = CURSOR_INSET
+	cursor.offset_right = CURSOR_INSET + w
+	cursor.offset_top = -h / 2.0
+	cursor.offset_bottom = h / 2.0
+	var show_cursor := func(on: bool) -> void:
+		cursor.create_tween().tween_property(cursor, "modulate:a", 1.0 if on else 0.0, CURSOR_FADE_SECONDS)
+	button.button_down.connect(show_cursor.bind(true))
+	button.button_up.connect(show_cursor.bind(false))
+	button.mouse_entered.connect(show_cursor.bind(true))
+	button.mouse_exited.connect(show_cursor.bind(false))
 
 
 ## Gives a label the dialogue text look: golden ochre with a brown outline.

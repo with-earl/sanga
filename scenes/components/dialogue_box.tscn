@@ -68,7 +68,7 @@ theme_type_variation = &"Headline"
 theme_override_colors/font_color = Color(0.851, 0.643, 0.255, 1)
 theme_override_colors/font_outline_color = Color(0.29, 0.165, 0.071, 1)
 theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 24
 vertical_alignment = 0
 text = "Speaker"
 

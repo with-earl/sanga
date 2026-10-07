@@ -53,6 +53,27 @@ static func strokes(size: Vector2i, segments: Array, fill: Color, width: float, 
 	return ImageTexture.create_from_image(image)
 
 
+## A soft filled triangle with an outline, `size` pixels across, for the little cursors: the ▼
+## that says "tap to go on" and the ▶ beside a choice. `points` are the corners, in pixels.
+static func triangle(size: Vector2i, points: PackedVector2Array, fill: Color, outline: Color, outline_width: float) -> ImageTexture:
+	var image := Image.create(maxi(size.x, 1), maxi(size.y, 1), false, Image.FORMAT_RGBA8)
+	for y in image.get_height():
+		for x in image.get_width():
+			var point := Vector2(x + 0.5, y + 0.5)
+			var edge := INF
+			for index in points.size():
+				edge = minf(edge, _distance_to_segment(point, points[index], points[(index + 1) % points.size()]))
+			# Signed distance: positive inside the triangle, negative outside.
+			var inside := edge if Geometry2D.is_point_in_polygon(point, points) else -edge
+			var outer := clampf(inside + outline_width + 0.5, 0.0, 1.0)
+			if outer <= 0.0:
+				continue
+			var color := outline.lerp(fill, clampf(inside + 0.5, 0.0, 1.0))
+			color.a *= outer
+			image.set_pixel(x, y, color)
+	return ImageTexture.create_from_image(image)
+
+
 ## A small white four-pointed sparkle with a soft glow, `size` pixels across.
 static func sparkle(size: int) -> ImageTexture:
 	var image := Image.create(size, size, false, Image.FORMAT_RGBA8)
