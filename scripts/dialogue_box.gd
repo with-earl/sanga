@@ -224,8 +224,8 @@ func _make_choice_button(text: String, index: int) -> Button:
 	button.add_theme_stylebox_override("pressed", choice_style(CHOICE_FILL_PRESSED))
 	button.add_theme_stylebox_override("hover_pressed", choice_style(CHOICE_FILL_PRESSED))
 	for color_name in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color", "font_focus_color"]:
-		button.add_theme_color_override(color_name, CHOICE_TEXT)
-	button.add_theme_color_override("font_outline_color", CHOICE_OUTLINE)
+		button.add_theme_color_override(color_name, UiSkin.BUTTON_TEXT)
+	button.add_theme_color_override("font_outline_color", UiSkin.BUTTON_OUTLINE)
 	button.add_theme_constant_override("outline_size", 6)
 	button.add_theme_font_size_override("font_size", _text.get_theme_font_size("font_size"))
 	button.pressed.connect(func() -> void:

@@ -8,21 +8,26 @@ const TEXT_SIZE := 19
 const HEADING_SIZE := 22
 const OUTLINE_SIZE := 6
 const BUTTON_HEIGHT := 48.0
+## Every button, on every screen, uses these two colours: warm cream text with a near-black brown
+## outline. That pairing has the strongest contrast against both the black button boxes and the busy
+## picture and video behind the main screen. Change them here and all buttons follow.
+const BUTTON_TEXT := Color(1.0, 0.953, 0.839, 1)
+const BUTTON_OUTLINE := Color(0.165, 0.086, 0.031, 1)
 ## Pressed text and icons dim a little, so a tap is felt.
-const PRESSED_TEXT := Color(0.68, 0.514, 0.204, 1)
+const PRESSED_TEXT := Color(0.74, 0.70, 0.62, 1)
 
 
-## Gives a button the dialogue-choice look: a black box with a gray border and white text.
+## Gives a button the shared look: a black box with a gray border and cream text with a dark outline.
 static func style_button(button: Button, font_size := TEXT_SIZE) -> void:
 	button.custom_minimum_size.y = maxf(button.custom_minimum_size.y, BUTTON_HEIGHT)
 	box_only(button)
 	button.add_theme_font_size_override("font_size", font_size)
 	for color_name in ["font_color", "font_hover_color", "font_focus_color"]:
-		button.add_theme_color_override(color_name, DialogueBox.CHOICE_TEXT)
+		button.add_theme_color_override(color_name, BUTTON_TEXT)
 	for color_name in ["font_pressed_color", "font_hover_pressed_color"]:
 		button.add_theme_color_override(color_name, PRESSED_TEXT)
-	button.add_theme_color_override("font_disabled_color", Color(0.851, 0.643, 0.255, 0.4))
-	button.add_theme_color_override("font_outline_color", DialogueBox.CHOICE_OUTLINE)
+	button.add_theme_color_override("font_disabled_color", Color(BUTTON_TEXT, 0.4))
+	button.add_theme_color_override("font_outline_color", BUTTON_OUTLINE)
 	button.add_theme_constant_override("outline_size", OUTLINE_SIZE)
 
 
@@ -44,11 +49,11 @@ static func style_label(label: Label, font_size := TEXT_SIZE) -> void:
 	label.add_theme_font_size_override("font_size", font_size)
 
 
-## A plain icon in the same golden ochre with a brown outline.
+## A plain icon in the same cream with a dark outline as the button text.
 static func style_icon(icon: IconButton) -> void:
 	icon.plain = true
-	icon.plain_fill = DialogueBox.CHOICE_TEXT
-	icon.plain_outline = DialogueBox.CHOICE_OUTLINE
+	icon.plain_fill = BUTTON_TEXT
+	icon.plain_outline = BUTTON_OUTLINE
 
 
 ## True for a button that still has the theme's default look, so it should get this one. Text
