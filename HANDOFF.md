@@ -174,9 +174,13 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   `v0.8.0`, target the PR #1 merge commit `df91f23`).
 - After playtesting v0.8.0 on the iPhone the user said the game "should be rendering its right
   ratio": they want the **16:9 shape kept, with black bars**, not the window growing to fill the
-  phone. The `expand` stretch aspect was removed (v0.8.1). The stage and side-fill code in
-  `ScreenFit`/`Location` stays, but only acts if `expand` is ever turned back on. They also asked
-  for **"Progress saved" at the top centre** (it was bottom right).
+  phone. The `expand` stretch aspect was removed (v0.8.1), and they asked for **"Progress saved"
+  at the top centre** (it was bottom right). Then they said "it should be fit to screen" and,
+  asked, clarified: **"it fills the width of the screen while maintaining 16:9 ratio"**. So
+  (v0.8.2) `expand` is back, each place is scaled by `ScreenFit.width_scale` (screen width /
+  1280) about its centre, so on a wide phone a thin strip at the top and bottom is cut off; on a
+  taller screen black bars show above and below. The blurred side fill was removed. The HUD and
+  dialogue are laid out on the real screen. Don't change this fit again without asking.
 - Phases 1 to 4 of the GUI plan are done and checked in screenshots at 16:9, 19.5:9 and 4:3.
   Left from the plan: **Phase 5** (a lighter text blur that is the same on every screen, and the
   title/ending cards moved fully onto the window palette) and **Phase 6** polish (consistent

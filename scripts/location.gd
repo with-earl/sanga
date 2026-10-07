@@ -60,8 +60,6 @@ const SPARKLE_LAYER := 12
 const UNDO_POSITION := Vector2(24, 70)
 const UNDO_SIZE := Vector2(220, 56)
 const UNDO_GAP := 4.0
-## The blurred background that fills the sides of a wide phone screen sits behind everything.
-const SIDE_FILL_LAYER := -20
 ## A soft dark fade along the top of the screen, behind the place name and objectives, so they
 ## read clearly over bright art. It hides with them during a dialogue.
 const TOP_SHADE_HEIGHT := 150.0
@@ -119,12 +117,14 @@ func _ready() -> void:
 	_dialogue.opened.connect(_focus_on_dialogue.bind(true))
 	_dialogue.dismissed.connect(_focus_on_dialogue.bind(false))
 	_dialogue.dismissed.connect(_count_conversation)
-	_build_side_fill.call_deferred()
+	get_viewport().size_changed.connect(_fit_stage)
 	_keep_clear_of_notch()
 
 
-## Keeps the place at its 1280 x 720 size in the middle of the screen, however wide the phone, so
-## every prop and character stays exactly where it was placed on the art.
+## Shows the place at its 16:9 shape, enlarged to fill the screen's width. On a phone wider than
+## 16:9 a thin strip at the top and bottom is cut off; on a taller screen, such as a tablet, dark
+## bars show above and below. Nothing is ever stretched, and every prop and character keeps its
+## place on the art.
 func _fit_stage() -> void:
 	var half := ScreenFit.DESIGN_SIZE / 2.0
 	anchor_left = 0.5
@@ -135,31 +135,8 @@ func _fit_stage() -> void:
 	offset_top = -half.y
 	offset_right = half.x
 	offset_bottom = half.y
-
-
-## Fills the space beside the stage on wide screens with a soft, dim blur of the background, so
-## the scene seems to carry on past the edges instead of ending in black bars. Built after the
-## story scripts have picked their background (Padala swaps it in its own `_ready`).
-func _build_side_fill() -> void:
-	var background := get_node_or_null("Background") as ArtSlot
-	if background == null or get_viewport().get_visible_rect().size == ScreenFit.DESIGN_SIZE:
-		return
-	var blurred := ScreenFit.blurred_copy(background.get_art_texture())
-	if blurred == null:
-		return
-	var layer := CanvasLayer.new()
-	layer.name = "SideFill"
-	layer.layer = SIDE_FILL_LAYER
-	var fill := TextureRect.new()
-	fill.texture = blurred
-	fill.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	fill.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	fill.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	fill.modulate = Color(ScreenFit.SIDE_FILL_BRIGHTNESS, ScreenFit.SIDE_FILL_BRIGHTNESS, ScreenFit.SIDE_FILL_BRIGHTNESS)
-	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	fill.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	layer.add_child(fill)
-	add_child(layer)
+	pivot_offset = half
+	scale = Vector2.ONE * ScreenFit.width_scale(get_viewport().get_visible_rect().size)
 
 
 ## Moves the HUD in from any edge where a phone's notch, camera or rounded corner would cover it.
