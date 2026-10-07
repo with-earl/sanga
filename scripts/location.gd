@@ -46,14 +46,18 @@ const CHARACTER_FADE_IN_SECONDS := 0.2
 const OUTLINE_FADE_SECONDS := 0.2
 ## The objective is struck through this long after the dialogue closes, once the panel is back.
 const OBJECTIVE_STRIKE_DELAY := 0.3
-## When the player has not tapped anything for a while, tiny white sparkles twinkle now and then
-## on what the current objective needs, as a gentle hint.
+## When the player has not tapped anything for a while, a soft glint appears at one fixed spot on
+## each thing the current objective needs, and slowly brightens and fades, over and over, until
+## the next tap. Like the hint shine in God of War: calm, easy to miss at first, never in the way.
 const HINT_IDLE_SECONDS := 8.0
-const HINT_REPEAT_SECONDS := 3.5
-const SPARKLE_SIZE := 24
-const SPARKLES_PER_HINT := 3
-const SPARKLE_STAGGER_SECONDS := 0.3
-const SPARKLE_SECONDS := 0.9
+## One slow breath of the glint: fade in, glow, fade out.
+const HINT_PULSE_SECONDS := 3.4
+const HINT_GLINT_SIZE := 48
+## The glint grows a little as it brightens, and turns very slightly.
+const HINT_GROW := 0.25
+const HINT_TURN := 0.18
+## Where on the art the glint sits: the visible pixel nearest this point of the slot (0 to 1).
+const HINT_SPOT := Vector2(0.5, 0.68)
 ## Above the scene and its vignette (layer 10), below the dialogue backdrop (layer 15).
 const SPARKLE_LAYER := 12
 ## The undo link sits at the top left under the menu icon, or under the back link when there is one.
@@ -87,7 +91,11 @@ var _talked_names: Array[String] = []
 var hud_locked := false
 var _idle_seconds := 0.0
 var _sparkle_layer := CanvasLayer.new()
-var _sparkle_texture: ImageTexture
+var _glint_texture: ImageTexture
+## The glint shown on each hinted slot, and where on the slot it sits.
+var _glints := {}
+var _glint_spots := {}
+var _hint_seconds := 0.0
 ## Takes back the last step of the story. Only shown when there is a step to take back.
 var _undo_button := BackLink.new()
 var _top_shade := TextureRect.new()
@@ -376,11 +384,14 @@ func _advance_step() -> void:
 func _process(delta: float) -> void:
 	if not _can_hint():
 		_idle_seconds = 0.0
-		return
-	_idle_seconds += delta
+	else:
+		_idle_seconds += delta
 	if _idle_seconds >= HINT_IDLE_SECONDS:
-		_idle_seconds = HINT_IDLE_SECONDS - HINT_REPEAT_SECONDS
-		_sparkle(_hint_slots())
+		_hint_seconds += delta
+		_show_glints(_hint_slots())
+	else:
+		_hint_seconds = 0.0
+		_hide_glints()
 
 
 func _input(event: InputEvent) -> void:
@@ -411,47 +422,65 @@ func _hint_slots() -> Array[ArtSlot]:
 	return found
 
 
-## A few tiny sparkles twinkle, one after another, on each slot's visible art.
-func _sparkle(slots: Array[ArtSlot]) -> void:
-	if slots.is_empty():
-		return
-	if _sparkle_texture == null:
-		_sparkle_texture = SoftShapes.sparkle(SPARKLE_SIZE)
+## Keeps one glint on each hinted slot, at its fixed spot, breathing slowly in and out.
+func _show_glints(slots: Array[ArtSlot]) -> void:
+	if _glint_texture == null:
+		_glint_texture = SoftShapes.glint(HINT_GLINT_SIZE)
 		_sparkle_layer.layer = SPARKLE_LAYER
 		add_child(_sparkle_layer)
+	for slot in _glints.keys():
+		if slot not in slots:
+			(_glints[slot] as Node).queue_free()
+			_glints.erase(slot)
+	# Starts dark, so the first glint fades in rather than popping up.
+	var breath := 0.5 - 0.5 * cos(TAU * _hint_seconds / HINT_PULSE_SECONDS)
+	breath = breath * breath * (3.0 - 2.0 * breath)
 	for slot in slots:
-		for index in SPARKLES_PER_HINT:
-			var where := _point_on_art(slot)
-			if where != Vector2.INF:
-				_twinkle(where, index * SPARKLE_STAGGER_SECONDS)
+		if not _glints.has(slot):
+			var glint := TextureRect.new()
+			glint.texture = _glint_texture
+			glint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			glint.size = Vector2(HINT_GLINT_SIZE, HINT_GLINT_SIZE)
+			glint.pivot_offset = glint.size / 2.0
+			glint.material = ArtSlot.retro_material()
+			_sparkle_layer.add_child(glint)
+			_glints[slot] = glint
+		var shown := _glints[slot] as TextureRect
+		# Follows the slot, which the stage may have enlarged to fit the screen.
+		shown.position = slot.get_global_transform() * _glint_spot(slot) - shown.pivot_offset
+		shown.modulate.a = breath
+		shown.scale = Vector2.ONE * (1.0 - HINT_GROW + HINT_GROW * breath)
+		shown.rotation = HINT_TURN * sin(TAU * _hint_seconds / (HINT_PULSE_SECONDS * 2.0))
 
 
-## A random point on the visible pixels of a slot's art, in screen space, or Vector2.INF if none
-## was found.
-func _point_on_art(slot: ArtSlot) -> Vector2:
-	for attempt in 16:
-		var local := Vector2(randf() * slot.size.x, randf() * slot.size.y)
-		if slot._has_point(local):
-			return slot.get_global_transform() * local
-	return Vector2.INF
+func _hide_glints() -> void:
+	for glint in _glints.values():
+		(glint as Node).queue_free()
+	_glints.clear()
 
 
-func _twinkle(where: Vector2, delay: float) -> void:
-	var star := TextureRect.new()
-	star.texture = _sparkle_texture
-	star.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	star.size = Vector2(SPARKLE_SIZE, SPARKLE_SIZE)
-	star.pivot_offset = star.size / 2.0
-	star.position = where - star.pivot_offset
-	star.scale = Vector2.ZERO
-	star.material = ArtSlot.retro_material()
-	_sparkle_layer.add_child(star)
-	var grow := create_tween().set_trans(Tween.TRANS_SINE)
-	grow.tween_interval(delay)
-	grow.tween_property(star, "scale", Vector2.ONE, SPARKLE_SECONDS / 2.0).set_ease(Tween.EASE_OUT)
-	grow.parallel().tween_property(star, "rotation", PI / 4.0, SPARKLE_SECONDS)
-	grow.tween_property(star, "scale", Vector2.ZERO, SPARKLE_SECONDS / 2.0).set_ease(Tween.EASE_IN)
-	grow.tween_callback(star.queue_free)
+## The fixed spot on a slot where its glint sits: the visible pixel of its art nearest HINT_SPOT,
+## so it always lands on the thing itself. Worked out once per slot.
+func _glint_spot(slot: ArtSlot) -> Vector2:
+	if _glint_spots.has(slot):
+		return _glint_spots[slot]
+	var target := slot.size * HINT_SPOT
+	var best := target
+	var best_distance := INF
+	var step := maxf(minf(slot.size.x, slot.size.y) / 24.0, 2.0)
+	var y := 0.0
+	while y < slot.size.y:
+		var x := 0.0
+		while x < slot.size.x:
+			var point := Vector2(x, y)
+			var distance := point.distance_squared_to(target)
+			if distance < best_distance and slot._has_point(point):
+				best = point
+				best_distance = distance
+			x += step
+		y += step
+	_glint_spots[slot] = best
+	return best
 
 
 ## Android back button.
