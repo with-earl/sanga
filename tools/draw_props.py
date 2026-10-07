@@ -272,6 +272,27 @@ def gradient_fill(mask: Image.Image, fill_top, fill_bottom) -> Image.Image:
     return face
 
 
+def draw_terminal_icon() -> None:
+    """The developer tools icon: a plain terminal screen with a prompt, in the same style as the
+    settings gear beside it (a thick near-black outline, a white shine) and filling the picture
+    as fully as the gear does, so the two look the same size."""
+    big = 8
+    n = 128 * big
+    ink, prompt, screen, low = (24, 24, 28, 255), (196, 199, 205, 255), (64, 68, 78, 255), (44, 47, 55, 255)
+    icon = Image.new("RGBA", (n, n), (0, 0, 0, 0))
+    d = ImageDraw.Draw(icon)
+    s = big
+    d.rounded_rectangle((3 * s, 12 * s, 125 * s, 116 * s), radius=20 * s, fill=ink)
+    d.rounded_rectangle((12 * s, 21 * s, 116 * s, 107 * s), radius=12 * s, fill=low)
+    d.rounded_rectangle((12 * s, 21 * s, 110 * s, 101 * s), radius=12 * s, fill=screen)
+    # The prompt: a chevron and a cursor line.
+    d.line([(32 * s, 42 * s), (52 * s, 61 * s), (32 * s, 80 * s)], fill=prompt, width=11 * s, joint="curve")
+    d.line([(62 * s, 82 * s), (92 * s, 82 * s)], fill=prompt, width=11 * s)
+    # The shine along the top left.
+    d.arc((18 * s, 27 * s, 58 * s, 67 * s), 185, 255, fill=(255, 255, 255, 255), width=5 * s)
+    icon.resize((128, 128), Image.LANCZOS).save(ROOT / "assets" / "ui" / "terminal.png")
+
+
 class PhoneModel:
     """A very small 3D model of the desk telephone, so its faces have a true angle, depth and light.
     The phone is built from flat faces in the room's space (x to the right, y up, z away from the
@@ -488,6 +509,7 @@ def draw_telephone() -> None:
 
 
 if __name__ == "__main__":
+    draw_terminal_icon()
     draw_telephone()
     draw_key()
     draw_poster()

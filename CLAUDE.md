@@ -33,7 +33,7 @@ godot --headless --path . -s res://tests/smoke_test.gd               # smoke tes
 godot --headless --path . --export-release "Web" build/web/index.html  # web build
 python tools/compose_music.py [name]                                 # regenerate music (numpy, scipy)
 python tools/compose_sounds.py                                       # regenerate sound effects
-python tools/draw_props.py                                           # redraw keys, police poster, floor card (needs Pillow, numpy)
+python tools/draw_props.py                                           # redraw props, telephone, terminal icon (needs Pillow, numpy)
 tools/next_version.sh                                                # next version from the commits
 ```
 
@@ -50,7 +50,7 @@ picture. Delete the temporary script afterwards. The `--headless` runs print RID
 | `scenes/` | `boot`, `main_menu`, the four locations (`public_market`, `church_nave`, `confessional`, `apartment_room`), `timeline_reveal`. `components/` holds `dialogue_box`, `game_menu`, `objectives_panel` |
 | `scripts/` | `location.gd` is the base of every playable place (objectives route, conversations, hints). Each story has its own subclass: `tokhang.gd`, `church_nave.gd`/`confessional.gd` (with `kumpisal_story.gd`), `padala.gd` |
 | `story/*.json` | All story text, conversations and choices. `timelines.json` is the timelines chart: cards, sections and realities |
-| `assets/` | Art (see `assets/README.md`), `music/`, `sounds/`, `fonts/Lora.ttf`, `videos/main_screen.ogv` |
+| `assets/` | Art (see `assets/README.md`), `music/`, `sounds/`, `fonts/Lora.ttf` (and DejaVu Sans Mono for the developer tools), `videos/main_screen.ogv` |
 | `tools/` | `next_version.sh`, `compose_music.py`, `compose_sounds.py`, `draw_props.py`, `cloud_setup.sh`. Has a `.gdignore`, so Godot skips it |
 | `tests/smoke_test.gd` | Headless smoke test |
 
@@ -67,9 +67,11 @@ picture. Delete the temporary script afterwards. The `--headless` runs print RID
   `MusicDirector.VOLUME_DB` (-24 dB) and must stay subtle. Effects play on the `Sound` bus at
   `Sfx.VOLUME_DB` (-10 dB).
 - **Debug-only features** are gated by `OS.is_debug_build()`, for example "Skip story (debug)".
-  The main screen's "Developer tools" window (points in `scripts/dev_jump.gd`, plus the endings)
-  shows in every build during development (`main_menu.gd` `SHOW_DEV_MENU_IN_ALL_BUILDS`); set
-  it to false before release.
+  The "Developer tools" window (`scripts/dev_tools.gd`, points in `scripts/dev_jump.gd`, plus
+  the endings) opens from the terminal icon beside the gear, on the main screen and in every
+  place. It shows in every build during development (`DevTools.SHOW_IN_ALL_BUILDS`); set it to
+  false before release. It looks like a plain black and white terminal (DejaVu Sans Mono,
+  crisp: the `crisp_text` group skips the retro blur), never like the game's own windows.
 - **Versioning:** follow [VERSIONING.md](VERSIONING.md).
   1. Make **every change** a Conventional Commit (`feat`, `fix`, `style`, `docs`, `chore`, …,
      with `!` or a `BREAKING CHANGE:` footer when something breaks).

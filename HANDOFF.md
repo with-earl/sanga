@@ -222,6 +222,18 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   base, bevelled handset, textured keypad face) at the painting's angle, fitted to cover the
   painted phone exactly; the painted coiled cord stays.
 - PR #8 (Continue picks the save slot, Load Game removed) was still open at this point.
+- **Top left is now: gear, terminal icon, place name** (user's request). The terminal icon
+  (`assets/ui/terminal.png`, drawn by `draw_props.py` in the gear's style) opens the centred
+  **Developer tools** modal (`scripts/dev_tools.gd`, `DevTools`), on the main screen and in
+  gameplay; it is a child of the gear so it fades and hides with it. Then (same PR #12, user's
+  follow-up): the terminal icon is just a dark screen with a `>_` prompt (no grey frame), the
+  same visual size as the gear; the disclaimer "# Continuous improvement in progress." lives
+  inside the modal (nothing fixed at the bottom left any more); and the modal looks like a
+  simple **black and white** terminal (the user rejected green text, prompts and folder names as
+  too complicated): DejaVu Sans Mono, a title bar with "Close ✕", faint scan lines, a plain
+  heading and note, and framed rows that turn white while held. Main screen lists now share one
+  spacing (52 px rows, 12 px gaps, 24 px window margin top and bottom, centred text). The user disliked "not the final game" wording. Paddings were widened: settings modal (34 px, more row spacing), main screen windows,
+  objectives window (moved in from the edge and level with the place name), place-name plate.
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions

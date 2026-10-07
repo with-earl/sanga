@@ -12,7 +12,7 @@ const NEW_ITEM_GLOW_SECONDS := 1.2
 ## Finished objectives settle at this opacity once struck through.
 const FINISHED_ALPHA := 0.6
 ## Room between the text and the edge of its window.
-const WINDOW_MARGIN := Vector2(18.0, 12.0)
+const WINDOW_MARGIN := Vector2(26.0, 18.0)
 
 @onready var _list: VBoxContainer = %List
 @onready var _box: VBoxContainer = $Box

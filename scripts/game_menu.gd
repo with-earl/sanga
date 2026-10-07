@@ -1,6 +1,7 @@
 class_name GameMenu
 extends CanvasLayer
-## The in-game menu: the gear at the top left, with the place name beside it, opens a modal with
+## The in-game menu: the gear at the top left, then the developer tools' terminal icon while the
+## game is being made, then the place name. The gear opens a modal with
 ## on and off switches for sound, music and vibration, and a way back to the main menu. Tapping
 ## outside the modal closes it.
 ## The modal looks like the dialogue box: the same black box with a gray and silver border,
@@ -8,12 +9,20 @@ extends CanvasLayer
 
 const OPEN_SECONDS := 0.15
 const CLOSE_SECONDS := 0.12
-const PANEL_PADDING := 28.0
+const PANEL_PADDING := 34.0
 ## The place name fades in this long after a place opens, over this many seconds.
 const TITLE_FADE_DELAY := 0.35
 const TITLE_FADE_SECONDS := 0.9
 ## Room between the place name and the edge of its plate.
-const TITLE_PLATE_MARGIN := Vector2(14.0, 2.0)
+const TITLE_PLATE_MARGIN := Vector2(18.0, 5.0)
+## The developer tools icon sits right after the gear, the same size and style.
+const TERMINAL_PICTURE := preload("res://assets/ui/terminal.png")
+const ICON_SIZE := 64.0
+## Room between the last icon and the place name's plate.
+const TITLE_GAP := 22.0
+## The terminal is a little wider than it is tall, so it is drawn a touch larger than the gear to
+## look the same size.
+const TERMINAL_PICTURE_SIZE := 36.0
 
 ## On the main screen the gear opens only the settings: no way back to the main menu, no story
 ## skip, and no place name.
@@ -39,6 +48,8 @@ const TITLE_PLATE_MARGIN := Vector2(14.0, 2.0)
 
 var _tween: Tween
 var _panel_style := StyleBoxEmpty.new()
+var _dev_tools: DevTools
+var _terminal_icon: IconButton
 
 
 func _ready() -> void:
@@ -66,6 +77,38 @@ func _ready() -> void:
 		_main_menu_button.visible = false
 		_dev_skip_button.visible = false
 		_location_title.visible = false
+	if DevTools.enabled():
+		_add_dev_tools()
+
+
+## The terminal icon beside the gear, and the developer tools window it opens.
+func _add_dev_tools() -> void:
+	_terminal_icon = IconButton.new()
+	_terminal_icon.name = "DevToolsIcon"
+	_terminal_icon.theme_type_variation = &"TextButton"
+	_terminal_icon.focus_mode = Control.FOCUS_NONE
+	_terminal_icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_terminal_icon.plain = true
+	_terminal_icon.picture = TERMINAL_PICTURE
+	_terminal_icon.picture_size = TERMINAL_PICTURE_SIZE
+	_terminal_icon.position = Vector2(ICON_SIZE, 0.0)
+	_terminal_icon.size = Vector2(ICON_SIZE, ICON_SIZE)
+	_terminal_icon.pressed.connect(_open_dev_tools)
+	# A child of the gear, so it moves, fades and hides with it during dialogues.
+	_menu_icon.add_child(_terminal_icon)
+	_location_title.position.x = ICON_SIZE * 2.0 + TITLE_GAP
+	_dev_tools = DevTools.new()
+	_dev_tools.name = "DevTools"
+	add_child(_dev_tools)
+
+
+## Opens the developer tools, unless the place has put the icons out of reach (during a dialogue,
+## for example, where the gear stops taking taps).
+func _open_dev_tools() -> void:
+	if _menu_icon.mouse_filter == Control.MOUSE_FILTER_IGNORE or _menu_icon.modulate.a < 0.5:
+		return
+	close()
+	_dev_tools.open()
 
 
 func _apply_dialog_look() -> void:
@@ -111,7 +154,7 @@ func get_icon() -> Button:
 
 
 func is_open() -> bool:
-	return _modal.visible
+	return _modal.visible or (_dev_tools != null and _dev_tools.is_open())
 
 
 func open() -> void:
@@ -122,6 +165,8 @@ func open() -> void:
 
 
 func close() -> void:
+	if _dev_tools != null:
+		_dev_tools.close()
 	if not _modal.visible:
 		return
 	await _fade(0.0, CLOSE_SECONDS)
