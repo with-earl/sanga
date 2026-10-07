@@ -497,6 +497,128 @@ def draw_gear_icon() -> None:
     _finish(icon, "gear.png", s)
 
 
+## The windows opened from the HUD icons each look like their icon, opened up: the memories on
+## an open book, the objectives on a clipboard, the settings on a steel plate. Sizes in pixels.
+BOOK_SPREAD = (1040, 660)
+CLIPBOARD_BOARD = (640, 720)
+STEEL_PLATE = 192
+
+
+def _wide_grid(w: int, h: int):
+    import numpy as np
+
+    return np.mgrid[0:h, 0:w] / np.array([h, w])[:, None, None]
+
+
+def draw_book_spread() -> None:
+    """An old book lying open, as the background of the memories window: a worn leather cover
+    around two yellowed pages that bow up from a shadowed spine, with the stacked page edges along
+    the bottom. The pages are left blank for the memories to be written on."""
+    import numpy as np
+
+    w, h = BOOK_SPREAD
+    yy, xx = _wide_grid(w, h)
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    def mask(shape):
+        m = Image.new("L", (w, h), 0)
+        shape(ImageDraw.Draw(m))
+        return m
+    def paint(m, rgb):
+        img.paste(Image.fromarray(np.clip(rgb, 0, 255).astype("uint8"), "RGB").convert("RGBA"), (0, 0), m)
+    # Shadow, outline and leather cover.
+    shadow = mask(lambda d: d.rounded_rectangle((16, 22, w - 6, h - 2), radius=26, fill=255)).filter(ImageFilter.GaussianBlur(10))
+    img.paste(Image.new("RGBA", (w, h), (0, 0, 0, 255)), (0, 0), shadow.point(lambda v: int(v * 0.55)))
+    paint(mask(lambda d: d.rounded_rectangle((4, 6, w - 10, h - 12), radius=24, fill=255)), np.full((h, w, 3), 24.0))
+    leather = np.array([112, 62, 32], float)[None, None, :] * (1.05 - 0.3 * yy[..., None]) * (1 + 0.07 * np.sin(xx * 900 + yy * 220)[..., None] * np.sin(yy * 150)[..., None])
+    paint(mask(lambda d: d.rounded_rectangle((12, 14, w - 18, h - 20), radius=18, fill=255)), leather)
+    # The stacked page edges at the bottom of each side.
+    for layer in range(4):
+        tone = [214, 188, 200, 176][layer]
+        y = h - 52 + layer * 6
+        paint(mask(lambda d, y=y: d.rectangle((40, 40, w - 46, y), fill=255)), np.full((h, w, 3), [tone, tone - 24, tone - 66], float))
+    # The pages: brighter at the outer edges, falling into shadow at the spine, with soft stains.
+    mid = w / 2
+    dist = np.abs(xx * w - mid) / mid
+    light = 0.55 + 0.45 * np.clip(dist * 1.4, 0, 1) ** 0.6
+    stains = 0.015 * np.sin(xx * 9 + 0.7) * np.sin(yy * 7) + 0.008 * np.sin(xx * 31 + yy * 19)
+    paper = np.array([244, 230, 194], float)[None, None, :] * (light + stains)[..., None]
+    paint(mask(lambda d: d.polygon([(40, 44), (mid - 120, 30), (mid, 50), (mid + 120, 30), (w - 46, 44), (w - 46, h - 60), (mid + 120, h - 70), (mid, h - 56), (mid - 120, h - 70), (40, h - 60)], fill=255)), paper)
+    d = ImageDraw.Draw(img)
+    d.line([(mid, 50), (mid, h - 56)], fill=(110, 78, 46, 255), width=3)
+    img.save(ROOT / "assets" / "ui" / "book_spread.png")
+
+
+def draw_clipboard_board() -> None:
+    """A brown hardboard clipboard holding a sheet of paper, as the background of the objectives
+    window, with its steel clip at the top. The paper is left blank for the objectives."""
+    import numpy as np
+
+    w, h = CLIPBOARD_BOARD
+    yy, xx = _wide_grid(w, h)
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    def mask(shape):
+        m = Image.new("L", (w, h), 0)
+        shape(ImageDraw.Draw(m))
+        return m
+    def paint(m, rgb):
+        img.paste(Image.fromarray(np.clip(rgb, 0, 255).astype("uint8"), "RGB").convert("RGBA"), (0, 0), m)
+    shadow = mask(lambda d: d.rounded_rectangle((14, 54, w - 4, h - 2), radius=26, fill=255)).filter(ImageFilter.GaussianBlur(10))
+    img.paste(Image.new("RGBA", (w, h), (0, 0, 0, 255)), (0, 0), shadow.point(lambda v: int(v * 0.55)))
+    paint(mask(lambda d: d.rounded_rectangle((4, 40, w - 12, h - 10), radius=24, fill=255)), np.full((h, w, 3), 24.0))
+    paint(mask(lambda d: d.rounded_rectangle((16, 52, w - 12, h - 10), radius=18, fill=255)), np.full((h, w, 3), [86, 50, 24], float))
+    grain = 0.05 * np.sin(yy * 900 + np.sin(xx * 12) * 5) + 0.025 * np.sin(yy * 2400 + xx * 40)
+    board = np.array([160, 104, 58], float)[None, None, :] * (1.06 - 0.3 * (xx * 0.4 + yy * 0.6) + grain)[..., None]
+    paint(mask(lambda d: d.rounded_rectangle((12, 48, w - 20, h - 18), radius=18, fill=255)), board)
+    # The paper and its shadow.
+    sh = mask(lambda d: d.rectangle((52, 112, w - 50, h - 50), fill=255)).filter(ImageFilter.GaussianBlur(6))
+    img.paste(Image.new("RGBA", (w, h), (40, 20, 8, 255)), (0, 0), sh.point(lambda v: int(v * 0.6)))
+    paint(mask(lambda d: d.rectangle((44, 104, w - 56, h - 58), fill=255)), np.array([248, 244, 232], float)[None, None, :] * (1.0 - 0.08 * yy[..., None]))
+    d = ImageDraw.Draw(img)
+    for y in range(170, h - 70, 46):
+        d.line([(64, y), (w - 76, y)], fill=(184, 202, 226, 255), width=2)
+    d.line([(108, 112), (108, h - 66)], fill=(232, 170, 170, 255), width=2)
+    # The steel clip.
+    cx = w // 2 - 4
+    d.rounded_rectangle((cx - 120, 4, cx + 120, 100), radius=20, fill=(24, 24, 28, 255))
+    paint(mask(lambda dd: dd.rounded_rectangle((cx - 108, 56, cx + 108, 92), radius=10, fill=255)), np.full((h, w, 3), [128, 132, 142], float))
+    band = np.cos((yy - 38 / h) * h / 12)
+    paint(mask(lambda dd: dd.rounded_rectangle((cx - 104, 14, cx + 104, 60), radius=16, fill=255)), np.stack([170 + 70 * band, 172 + 70 * band, 180 + 66 * band], axis=-1))
+    d.ellipse((cx - 16, 24, cx + 16, 46), fill=(24, 24, 28, 255))
+    d.line([(cx - 90, 22), (cx - 40, 22)], fill=(255, 255, 255, 255), width=4)
+    for x in (cx - 84, cx + 84):
+        d.ellipse((x - 9, 66, x + 9, 84), fill=(96, 98, 108, 255))
+        d.ellipse((x - 6, 69, x, 75), fill=(240, 240, 244, 255))
+    img.save(ROOT / "assets" / "ui" / "clipboard_board.png")
+
+
+def draw_steel_plate() -> None:
+    """A dark brushed-steel plate with bevelled edges and a rivet in each corner, as the background
+    of the settings window. It is stretched from its middle, so the corners stay sharp at any size."""
+    import numpy as np
+
+    n = STEEL_PLATE
+    yy, xx = _wide_grid(n, n)
+    img = Image.new("RGBA", (n, n), (0, 0, 0, 0))
+    def mask(shape):
+        m = Image.new("L", (n, n), 0)
+        shape(ImageDraw.Draw(m))
+        return m
+    def paint(m, rgb):
+        img.paste(Image.fromarray(np.clip(rgb, 0, 255).astype("uint8"), "RGB").convert("RGBA"), (0, 0), m)
+    paint(mask(lambda d: d.rounded_rectangle((0, 0, n - 1, n - 1), radius=22, fill=255)), np.full((n, n, 3), 18.0))
+    paint(mask(lambda d: d.rounded_rectangle((5, 5, n - 6, n - 6), radius=18, fill=255)), np.full((n, n, 3), [118, 122, 132], float))
+    paint(mask(lambda d: d.rounded_rectangle((9, 9, n - 6, n - 6), radius=16, fill=255)), np.full((n, n, 3), [30, 32, 38], float))
+    brushed = 0.04 * np.sin(yy * 600) + 0.02 * np.sin(yy * 1500 + xx * 3)
+    steel = np.array([58, 62, 72], float)[None, None, :] * (1.15 - 0.25 * yy + brushed)[..., None]
+    paint(mask(lambda d: d.rounded_rectangle((10, 10, n - 11, n - 11), radius=14, fill=255)), steel)
+    d = ImageDraw.Draw(img)
+    for x, y in ((24, 24), (n - 25, 24), (24, n - 25), (n - 25, n - 25)):
+        d.ellipse((x - 7, y - 7, x + 7, y + 7), fill=(20, 20, 24, 255))
+        d.ellipse((x - 6, y - 6, x + 6, y + 6), fill=(140, 144, 154, 255))
+        d.ellipse((x - 4, y - 5, x + 1, y - 1), fill=(236, 238, 242, 255))
+    img.save(ROOT / "assets" / "ui" / "steel_plate.png")
+
+
 class PhoneModel:
     """A very small 3D model of the desk telephone, so its faces have a true angle, depth and light.
     The phone is built from flat faces in the room's space (x to the right, y up, z away from the
@@ -717,6 +839,9 @@ if __name__ == "__main__":
     draw_book_icon()
     draw_clipboard_icon()
     draw_gear_icon()
+    draw_book_spread()
+    draw_clipboard_board()
+    draw_steel_plate()
     draw_telephone()
     draw_key()
     draw_poster()

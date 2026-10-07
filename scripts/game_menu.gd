@@ -5,12 +5,15 @@ extends CanvasLayer
 ## same style: the book opens the memories (Alaala), the clipboard opens the objectives. The gear opens a modal with
 ## on and off switches for sound, music and vibration, and a way back to the main menu. Tapping
 ## outside the modal closes it.
-## The modal looks like the dialogue box: the same black box with a gray and silver border,
-## golden ochre text with a brown outline, and buttons styled like the dialogue choices.
+## The modal is a dark steel plate, with golden ochre text with a brown outline, and buttons styled
+## like the dialogue choices.
 
 const OPEN_SECONDS := 0.15
 const CLOSE_SECONDS := 0.12
-const PANEL_PADDING := 34.0
+const PANEL_PADDING := 40.0
+const STEEL_PLATE := preload("res://assets/ui/steel_plate.png")
+## How much of each edge of the steel plate stays unstretched: the bevel and the corner rivets.
+const PLATE_EDGE := 40.0
 ## The place name fades in this long after a place opens, over this many seconds.
 const TITLE_FADE_DELAY := 0.35
 const TITLE_FADE_SECONDS := 0.9
@@ -59,7 +62,9 @@ const NUDGE_SECONDS := 0.35
 @onready var _location_title: Label = %LocationTitle
 
 var _tween: Tween
-var _panel_style := StyleBoxEmpty.new()
+## The settings window is a dark brushed-steel plate with a rivet in each corner, like the gear
+## that opens it. The picture is stretched from its middle, so its corners stay sharp.
+var _panel_style := StyleBoxTexture.new()
 var _dev_tools: DevTools
 var _journal: JournalModal
 var _right_icons := HBoxContainer.new()
@@ -74,7 +79,9 @@ func _ready() -> void:
 	_apply_dialog_look()
 	_modal.visible = false
 	_menu_icon.pressed.connect(open)
-	_close_button.pressed.connect(close)
+	# No close button: tapping outside closes the window, and a note at the bottom says so.
+	_close_button.visible = false
+	UiSkin.add_close_hint(_modal)
 	_dim.gui_input.connect(_on_dim_input)
 	_sound_toggle.toggled.connect(_switch_volume.bind(Settings.set_sound_volume))
 	_music_toggle.toggled.connect(_switch_volume.bind(Settings.set_music_volume))
@@ -201,11 +208,11 @@ func _open_dev_tools() -> void:
 
 
 func _apply_dialog_look() -> void:
+	_panel_style.texture = STEEL_PLATE
 	for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
+		_panel_style.set_texture_margin(side, PLATE_EDGE)
 		_panel_style.set_content_margin(side, PANEL_PADDING)
 	_panel.add_theme_stylebox_override("panel", _panel_style)
-	# The same soft 90s window as the dialogue box.
-	SoftWindow.behind(_panel)
 	# The switches get the soft retro look too, keeping their exact opacity.
 	var retro := ShaderMaterial.new()
 	retro.shader = DialogueBox.RETRO_TEXT_SHADER

@@ -89,6 +89,28 @@ static func style_label(label: Label, font_size := TEXT_SIZE) -> void:
 	label.add_theme_font_size_override("font_size", font_size)
 
 
+## Every window closes by tapping outside it. This note at the bottom centre of the screen says so.
+const CLOSE_HINT := "Tap outside to close"
+const CLOSE_HINT_SIZE := 22
+const CLOSE_HINT_BOTTOM := 28.0
+
+
+## Adds the "Tap outside to close" note to a full-screen window, at the bottom centre.
+static func add_close_hint(window: Control, color := Color(1.0, 0.953, 0.839, 0.85), outline := Color(0.165, 0.086, 0.031, 1)) -> Label:
+	var hint := Label.new()
+	hint.text = CLOSE_HINT
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hint.add_theme_font_size_override("font_size", CLOSE_HINT_SIZE)
+	hint.add_theme_color_override("font_color", color)
+	hint.add_theme_color_override("font_outline_color", outline)
+	hint.add_theme_constant_override("outline_size", OUTLINE_SIZE if outline.a > 0.0 else 0)
+	window.add_child(hint)
+	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE)
+	hint.position.y -= CLOSE_HINT_BOTTOM
+	return hint
+
+
 ## A plain icon in the same cream with a dark outline as the button text.
 static func style_icon(icon: IconButton) -> void:
 	icon.plain = true

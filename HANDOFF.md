@@ -336,6 +336,14 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   above (`BOOK_HEIGHT` in `draw_props.py`) so it stands as tall as the clipboard on screen.
   Icons drawn by `tools/draw_props.py` (`assets/ui/book.png`, `clipboard.png`), window in
   `scripts/journal_modal.gd`. All HUD icons hide during dialogues (`GameMenu.get_hud_icons`).
+- **Windows look like their opened icon** (user's request): the memories are written across an
+  old open book (`assets/ui/book_spread.png`), the objectives are a checklist on the clipboard's
+  ruled paper (`clipboard_board.png`, each line on a rule, ☑ and struck when done), and the
+  settings sit on a dark riveted steel plate (`steel_plate.png`, a 9-slice `StyleBoxTexture`).
+  All drawn by `tools/draw_props.py`. Text on paper is dark ink without outline. **No window has
+  a close button any more** (settings ✕, journal ✕ and the developer tools' "Done" removed):
+  tapping outside closes, and "Tap outside to close" sits at the bottom centre
+  (`UiSkin.add_close_hint`).
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions

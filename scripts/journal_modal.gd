@@ -1,28 +1,45 @@
 class_name JournalModal
 extends Control
-## A window for reading, opened from the icons at the top right of a place: the objectives (the
-## clipboard) or the memories (the book). It looks like the settings window: the same soft 90s
-## window, a heading with a close cross, and golden ochre text with a brown outline. Tapping
-## outside it closes it.
+## The windows opened from the icons at the top right of a place. Each looks like its icon, opened
+## up: the memories (Alaala) are written across the two pages of an old open book, and the
+## objectives are a checklist on the paper of a clipboard. The words are dark ink, like handwriting
+## on paper. Tapping outside closes the window; a note at the bottom of the screen says so.
 
 const OPEN_SECONDS := 0.15
 const CLOSE_SECONDS := 0.12
-const PADDING := 34.0
-const WIDTH := 640.0
-const DIM := Color(0.0, 0.0, 0.0, 0.45)
-## Finished objectives stay listed, struck through and faded, so the player sees how far they are.
-const FINISHED_ALPHA := 0.55
+const DIM := Color(0.0, 0.0, 0.0, 0.5)
+const BOOK_PICTURE := preload("res://assets/ui/book_spread.png")
+const CLIPBOARD_PICTURE := preload("res://assets/ui/clipboard_board.png")
+## Where the words go on each picture, in its own pixels: the two pages, and the clipboard's paper.
+const LEFT_PAGE := Rect2(78, 70, 380, 510)
+const RIGHT_PAGE := Rect2(582, 70, 380, 510)
+const PAPER := Rect2(126, 124, 440, 520)
+## The paper's ruled lines are this far apart (see draw_props.py), and each line of writing sits
+## on one of them.
+const RULE_GAP := 46.0
+## The book and clipboard are drawn a little smaller, so they fit above the note at the bottom.
+const BOOK_SCALE := 0.9
+const CLIPBOARD_SCALE := 0.86
+## Room kept free at the bottom of the screen for the "Tap outside to close" note.
+const NOTE_ROOM := 64.0
+## Pen ink on paper, and the same ink faded for what is done or not yet known.
+const INK := Color(0.2, 0.12, 0.07, 1.0)
+const FADED_INK := Color(0.2, 0.12, 0.07, 0.45)
+const TITLE_SIZE := 34
+const TEXT_SIZE := 24
+const SMALL_SIZE := 20
+## The checkbox before each objective, drawn a little larger than the words so it reads as a box.
+const BOX_SIZE := 36
 const NOTHING_YET := "Wala pang layunin."
 const OBJECTIVES_TITLE := "Objectives"
 const MEMORIES_TITLE := "Alaala"
 ## A memory the save does not hold yet keeps its place, unnamed, so the player knows there is more.
 const UNKNOWN_NAME := "???"
 const UNKNOWN_MEMORY := "Hindi mo pa ito naaalala."
-const MEMORY_GAP := 18
+## How many memories are written on the left page; the rest go on the right.
+const LEFT_PAGE_MEMORIES := 2
 
-var _title := Label.new()
-var _count := Label.new()
-var _list := VBoxContainer.new()
+var _holder := Control.new()
 var _tween: Tween
 
 
@@ -35,85 +52,71 @@ func _ready() -> void:
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	dim.gui_input.connect(_on_dim_input)
 	add_child(dim)
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(center)
-	var panel := PanelContainer.new()
-	var padding := StyleBoxEmpty.new()
-	padding.set_content_margin_all(PADDING)
-	panel.add_theme_stylebox_override("panel", padding)
-	panel.custom_minimum_size.x = WIDTH
-	SoftWindow.behind(panel)
-	center.add_child(panel)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 16)
-	panel.add_child(column)
-	var header := HBoxContainer.new()
-	header.add_theme_constant_override("separation", 12)
-	UiSkin.style_label(_title, UiSkin.HEADING_SIZE)
-	_title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	header.add_child(_title)
-	UiSkin.style_label(_count, UiSkin.TEXT_SIZE - 4)
-	_count.modulate.a = 0.75
-	_count.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_count.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	header.add_child(_count)
-	var close_button := IconButton.new()
-	close_button.icon_kind = IconButton.Icon.CLOSE
-	close_button.plain = true
-	close_button.icon_scale = 0.5
-	close_button.custom_minimum_size = Vector2(44, 44)
-	close_button.focus_mode = Control.FOCUS_NONE
-	close_button.theme_type_variation = &"TextButton"
-	UiSkin.style_icon(close_button)
-	for state in ["normal", "hover", "pressed", "hover_pressed", "focus"]:
-		close_button.add_theme_stylebox_override(state, StyleBoxEmpty.new())
-	close_button.pressed.connect(close)
-	header.add_child(close_button)
-	column.add_child(header)
-	_list.add_theme_constant_override("separation", 10)
-	column.add_child(_list)
+	_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_holder)
+	UiSkin.add_close_hint(self)
 
 
-## Lists the objectives, the first `struck_count` of them struck through.
+## The objectives as a checklist on the clipboard, finished ones ticked and struck through.
 func open_objectives(lines: PackedStringArray, struck_count: int) -> void:
-	_start(OBJECTIVES_TITLE, "")
+	var board := _start(CLIPBOARD_PICTURE, CLIPBOARD_SCALE)
+	var paper := _area(board, PAPER)
+	paper.add_theme_constant_override("separation", 0)
+	var title := _ink(OBJECTIVES_TITLE, TITLE_SIZE, INK)
+	_sit_on_rule(title)
+	paper.add_child(title)
 	if lines.is_empty():
-		_list.add_child(_line(NOTHING_YET, UiSkin.TEXT_SIZE))
+		var nothing := _ink(NOTHING_YET, TEXT_SIZE, FADED_INK)
+		_sit_on_rule(nothing)
+		paper.add_child(nothing)
 	for index in lines.size():
+		var done := index < struck_count
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 12)
+		var box := _ink("☑" if done else "☐", BOX_SIZE, FADED_INK if done else INK)
+		_sit_on_rule(box)
+		row.add_child(box)
 		var item := ObjectiveItem.new()
-		UiSkin.style_label(item, UiSkin.TEXT_SIZE)
+		_style_ink(item, TEXT_SIZE, FADED_INK if done else INK)
 		item.text = lines[index]
-		item.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		if index < struck_count:
-			item.strike_amount = 1.0
-			item.modulate.a = FINISHED_ALPHA
-		_list.add_child(item)
+		item.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_sit_on_rule(item)
+		item.line_color = FADED_INK
+		item.line_outline = Color.TRANSPARENT
+		item.strike_amount = 1.0 if done else 0.0
+		row.add_child(item)
+		paper.add_child(row)
 	_show()
 
 
-## Lists every memory: the ones this save holds by name with their line, the rest unnamed.
+## Every memory across the two pages of the open book: the ones this save holds by name with their
+## line, the rest unnamed.
 func open_memories() -> void:
+	var book := _start(BOOK_PICTURE, BOOK_SCALE)
+	var left := _area(book, LEFT_PAGE)
+	var right := _area(book, RIGHT_PAGE)
 	var all := Alaala.all()
 	var held := 0
 	for item in all:
 		if Alaala.has(str(item.get("id", ""))):
 			held += 1
-	_start(MEMORIES_TITLE, "%d / %d" % [held, all.size()])
-	_list.add_theme_constant_override("separation", MEMORY_GAP)
-	for item in all:
+	var heading := HBoxContainer.new()
+	heading.add_theme_constant_override("separation", 14)
+	heading.add_child(_ink(MEMORIES_TITLE, TITLE_SIZE, INK))
+	var count := _ink("%d / %d" % [held, all.size()], SMALL_SIZE, FADED_INK)
+	count.size_flags_vertical = Control.SIZE_SHRINK_END
+	heading.add_child(count)
+	left.add_child(heading)
+	for index in all.size():
+		var item: Dictionary = all[index]
 		var known := Alaala.has(str(item.get("id", "")))
 		var entry := VBoxContainer.new()
 		entry.add_theme_constant_override("separation", 2)
-		var name_label := _line(str(item.get("name", "")) if known else UNKNOWN_NAME, UiSkin.TEXT_SIZE)
-		entry.add_child(name_label)
-		var memory := _line(str(item.get("memory", "")) if known else UNKNOWN_MEMORY, UiSkin.TEXT_SIZE - 4)
-		memory.modulate.a = 0.8 if known else 0.5
+		entry.add_child(_ink(str(item.get("name", "")) if known else UNKNOWN_NAME, TEXT_SIZE, INK if known else FADED_INK))
+		var memory := _ink(str(item.get("memory", "")) if known else UNKNOWN_MEMORY, SMALL_SIZE, INK if known else FADED_INK)
+		memory.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		entry.add_child(memory)
-		if not known:
-			name_label.modulate.a = 0.5
-		_list.add_child(entry)
+		(left if index < LEFT_PAGE_MEMORIES else right).add_child(entry)
 	_show()
 
 
@@ -128,26 +131,59 @@ func close() -> void:
 	visible = false
 
 
-func _start(title: String, count: String) -> void:
-	_title.text = title
-	_count.text = count
-	_list.add_theme_constant_override("separation", 10)
-	for child in _list.get_children():
-		_list.remove_child(child)
+## Clears the window and lays down the picture it is written on, centred on the screen.
+func _start(picture: Texture2D, scale_by: float) -> TextureRect:
+	for child in _holder.get_children():
+		_holder.remove_child(child)
 		child.queue_free()
+	var screen := get_viewport_rect().size
+	var shown := TextureRect.new()
+	shown.texture = picture
+	shown.mouse_filter = Control.MOUSE_FILTER_STOP
+	shown.size = picture.get_size()
+	shown.scale = Vector2.ONE * scale_by
+	var room := Vector2(screen.x, screen.y - NOTE_ROOM)
+	shown.position = (room - picture.get_size() * scale_by) / 2.0
+	_holder.add_child(shown)
+	return shown
+
+
+## A column for words over part of the picture.
+func _area(picture: TextureRect, rect: Rect2) -> VBoxContainer:
+	var column := VBoxContainer.new()
+	column.position = rect.position
+	column.size = rect.size
+	column.add_theme_constant_override("separation", 14)
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	picture.add_child(column)
+	return column
+
+
+## Makes a line of writing exactly one ruled line tall, resting on the line below it.
+func _sit_on_rule(label: Label) -> void:
+	label.custom_minimum_size.y = RULE_GAP
+	label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+
+
+func _ink(text: String, font_size: int, color: Color) -> Label:
+	var label := Label.new()
+	_style_ink(label, font_size, color)
+	label.text = text
+	return label
+
+
+## Dark ink on paper: no outline, and none of the retro blur the HUD text has.
+func _style_ink(label: Label, font_size: int, color: Color) -> void:
+	label.add_to_group(&"crisp_text")
+	label.add_theme_color_override("font_color", color)
+	label.add_theme_constant_override("outline_size", 0)
+	label.add_theme_font_size_override("font_size", font_size)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
 func _show() -> void:
 	visible = true
 	_fade(1.0, OPEN_SECONDS)
-
-
-func _line(text: String, font_size: int) -> Label:
-	var label := Label.new()
-	UiSkin.style_label(label, font_size)
-	label.text = text
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	return label
 
 
 func _on_dim_input(event: InputEvent) -> void:
