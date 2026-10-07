@@ -300,140 +300,191 @@ ICON_LIGHT = (196, 199, 205, 255)
 ICON_SHADE = (150, 153, 162, 255)
 
 
+def _grid(n: int):
+    """Coordinates from 0 to 1 across a square picture n pixels wide, for shading."""
+    import numpy as np
+
+    return np.mgrid[0:n, 0:n] / n
+
+
+def _paint(icon: Image.Image, mask: Image.Image, rgb) -> None:
+    """Paints `rgb` (a numpy picture, height x width x 3) through the white part of `mask`."""
+    import numpy as np
+
+    layer = Image.fromarray(np.clip(rgb, 0, 255).astype("uint8"), "RGB").convert("RGBA")
+    icon.paste(layer, (0, 0), mask)
+
+
+def _mask(n: int, draw_shape) -> Image.Image:
+    mask = Image.new("L", (n, n), 0)
+    draw_shape(ImageDraw.Draw(mask))
+    return mask
+
+
+def _finish(icon: Image.Image, name: str, s: int) -> None:
+    """Adds the shared thick dark outline and a soft drop shadow, then saves the icon at 128 px."""
+    alpha = icon.getchannel("A").point(lambda v: 255 if v > 20 else 0)
+    ring = alpha.filter(ImageFilter.MaxFilter(7 * s + 1))
+    shadow = ring.filter(ImageFilter.GaussianBlur(3 * s)).point(lambda v: int(v * 0.45))
+    out = Image.new("RGBA", icon.size, (0, 0, 0, 0))
+    out.paste(Image.new("RGBA", icon.size, (0, 0, 0, 255)), (2 * s, 3 * s), shadow)
+    out.paste(Image.new("RGBA", icon.size, ICON_INK), (0, 0), ring)
+    out.alpha_composite(icon)
+    out.resize((128, 128), Image.LANCZOS).save(ROOT / "assets" / "ui" / name)
+
+
 def draw_book_icon() -> None:
-    """The memories (Alaala) icon: an old book lying open, its yellowed pages curving up from the
-    spine, on a worn brown leather cover, with a red ribbon marking the page."""
-    s = 8
-    icon = Image.new("RGBA", (128 * s, 128 * s), (0, 0, 0, 0))
-    d = ImageDraw.Draw(icon)
-    leather, leather_dark = (122, 74, 42, 255), (84, 48, 26, 255)
-    page, page_shade, page_edge = (238, 222, 184, 255), (214, 192, 146, 255), (190, 164, 118, 255)
-    # The outline of the whole open book, then the cover peeking out below the pages.
-    d.polygon([(2 * s, 30 * s), (40 * s, 22 * s), (64 * s, 32 * s), (88 * s, 22 * s), (126 * s, 30 * s),
-               (126 * s, 104 * s), (88 * s, 98 * s), (64 * s, 110 * s), (40 * s, 98 * s), (2 * s, 104 * s)], fill=ICON_INK)
-    d.polygon([(10 * s, 38 * s), (40 * s, 32 * s), (64 * s, 40 * s), (88 * s, 32 * s), (118 * s, 38 * s),
-               (118 * s, 98 * s), (88 * s, 92 * s), (64 * s, 102 * s), (40 * s, 92 * s), (10 * s, 98 * s)], fill=leather_dark)
-    d.polygon([(10 * s, 38 * s), (40 * s, 32 * s), (64 * s, 40 * s), (64 * s, 96 * s), (40 * s, 88 * s), (10 * s, 92 * s)], fill=leather)
-    # The two pages, each curving up from the spine, with the stacked edges below them.
-    for side in (-1, 1):
-        x0, x1 = 64, 64 + side * 50
-        top = [(x0, 34), (64 + side * 22, 26), (x1, 30), (x1, 86), (64 + side * 22, 82), (x0, 90)]
-        d.polygon([(x * s, (y + 4) * s) for x, y in top], fill=page_edge)
-        d.polygon([(x * s, y * s) for x, y in top], fill=page if side < 0 else page_shade)
-        # Faded lines of old writing.
-        for row in range(5):
-            y = 42 + row * 8
-            d.line([((64 + side * 10) * s, (y + 1) * s), ((64 + side * 42) * s, (y - 3) * s)], fill=(150, 120, 80, 255), width=2 * s)
-    # The spine's crease and the ribbon hanging out of the book.
-    d.line([(64 * s, 34 * s), (64 * s, 92 * s)], fill=(120, 92, 56, 255), width=3 * s)
-    d.polygon([(70 * s, 88 * s), (78 * s, 88 * s), (78 * s, 122 * s), (74 * s, 117 * s), (70 * s, 122 * s)], fill=(178, 46, 40, 255))
-    d.arc((16 * s, 30 * s, 52 * s, 62 * s), 200, 260, fill=(255, 255, 255, 255), width=4 * s)
-    icon.resize((128, 128), Image.LANCZOS).save(ROOT / "assets" / "ui" / "book.png")
-
-
-def draw_clipboard_icon() -> None:
-    """The objectives icon: a real brown hardboard clipboard with a shiny steel clip and a sheet of
-    paper with a checklist, drawn with the same care as the book: grain, shading and highlights."""
+    """The memories (Alaala) icon: an old book lying open, seen a little from above. A worn leather
+    cover shows under the pages, the pages bow up from the spine with a deep shadow in the gutter,
+    the stacked page edges give it thickness, and the paper is yellowed with faded writing and a
+    few age spots."""
     import numpy as np
 
     s = 8
     n = 128 * s
+    yy, xx = _grid(n)
     icon = Image.new("RGBA", (n, n), (0, 0, 0, 0))
+    # The cover: dark worn leather with a grain, a little wider and lower than the pages.
+    cover = _mask(n, lambda d: d.polygon([(6 * s, 40 * s), (40 * s, 32 * s), (64 * s, 40 * s), (88 * s, 32 * s), (122 * s, 40 * s),
+                                          (122 * s, 106 * s), (88 * s, 100 * s), (64 * s, 110 * s), (40 * s, 100 * s), (6 * s, 106 * s)], fill=255))
+    leather = np.array([110, 62, 34], float)[None, None, :] * (1.0 - 0.35 * yy[..., None]) * (1 + 0.08 * np.sin(xx * 300 + yy * 90)[..., None])
+    _paint(icon, cover, leather)
+    # The stacked page edges under each page: thin cream lines, darker toward the bottom.
+    for side in (-1, 1):
+        for layer in range(5):
+            dy = 14 - layer * 3
+            edge = _mask(n, lambda d, side=side, dy=dy: d.polygon([((64) * s, (38 + dy) * s), ((64 + side * 24) * s, (30 + dy) * s), ((64 + side * 54) * s, (34 + dy) * s),
+                                                                   ((64 + side * 54) * s, (88 + dy) * s), ((64 + side * 24) * s, (84 + dy) * s), (64 * s, (92 + dy) * s)], fill=255))
+            tone = 200 - layer * 6 if layer % 2 == 0 else 176 - layer * 4
+            _paint(icon, edge, np.full((n, n, 3), [tone, tone - 22, tone - 62], float))
+    # The two pages: aged paper, brighter at the outer edge and shaded deep into the gutter.
+    for side in (-1, 1):
+        page = _mask(n, lambda d, side=side: d.polygon([(64 * s, 38 * s), ((64 + side * 24) * s, 28 * s), ((64 + side * 54) * s, 32 * s),
+                                                       ((64 + side * 54) * s, 86 * s), ((64 + side * 24) * s, 82 * s), (64 * s, 92 * s)], fill=255))
+        dist = np.abs(xx - 0.5) * 2
+        light = 0.62 + 0.38 * np.clip(dist * 1.6, 0, 1) - (0.06 if side > 0 else 0.0)
+        stains = 0.04 * np.sin(xx * 37 + 1.3) * np.sin(yy * 29) + 0.03 * np.sin(xx * 91 + yy * 53)
+        paper = np.array([240, 224, 186], float)[None, None, :] * (light + stains)[..., None]
+        _paint(icon, page, paper)
     d = ImageDraw.Draw(icon)
-    # The board: a dark outline, then brown hardboard shaded from light (top left) to dark.
-    d.rounded_rectangle((12 * s, 10 * s, 116 * s, 126 * s), radius=14 * s, fill=ICON_INK)
-    board_mask = Image.new("L", (n, n), 0)
-    ImageDraw.Draw(board_mask).rounded_rectangle((20 * s, 18 * s, 108 * s, 118 * s), radius=9 * s, fill=255)
-    yy, xx = np.mgrid[0:n, 0:n] / n
-    shade = 1.0 - 0.35 * (xx * 0.4 + yy * 0.6)
-    grain = 0.06 * np.sin(yy * 260 + np.sin(xx * 9) * 3) + 0.03 * np.sin(yy * 610)
-    base = np.array([150, 98, 56], dtype=float)
-    board = np.clip(base[None, None, :] * (shade + grain)[..., None], 0, 255).astype("uint8")
-    board_img = Image.fromarray(board, "RGB").convert("RGBA")
-    icon.paste(board_img, (0, 0), board_mask)
-    # A thin lighter bevel along the board's top and left edges.
-    d.rounded_rectangle((20 * s, 18 * s, 108 * s, 118 * s), radius=9 * s, outline=(196, 142, 92, 255), width=2 * s)
-    # The paper, with a soft shadow under it and faint blue lines.
-    d.rectangle((33 * s, 37 * s, 99 * s, 113 * s), fill=(70, 40, 20, 160))
-    d.rectangle((30 * s, 34 * s, 96 * s, 110 * s), fill=(246, 242, 230, 255))
+    # Faded handwriting, each line following the page's curve: up from the spine, then level.
+    for side in (-1, 1):
+        for row in range(6):
+            y0 = 44 + row * 7
+            length = 38 if row < 5 else 22
+            pts = [((64 + side * 8) * s, (y0 + 2) * s), ((64 + side * 24) * s, (y0 - 6) * s),
+                   ((64 + side * (8 + length)) * s, (y0 - 4) * s)]
+            d.line(pts, fill=(150, 116, 76, 255), width=int(1.5 * s), joint="curve")
+    # A few faint age spots, blended into the paper.
+    spots = Image.new("RGBA", (n, n), (0, 0, 0, 0))
+    sd = ImageDraw.Draw(spots)
+    for cx, cy, r in ((30, 72, 5), (98, 50, 4), (86, 76, 6)):
+        sd.ellipse(((cx - r) * s, (cy - r) * s, (cx + r) * s, (cy + r) * s), fill=(170, 130, 70, 60))
+    spots = spots.filter(ImageFilter.GaussianBlur(2 * s))
+    icon.alpha_composite(Image.composite(spots, Image.new("RGBA", (n, n)), icon.getchannel("A")))
+    # The gutter: a dark crease where the pages meet the spine.
+    d.line([(64 * s, 38 * s), (64 * s, 92 * s)], fill=(90, 62, 36, 255), width=3 * s)
+    # A soft shine on the upper left page.
+    d.arc((14 * s, 30 * s, 54 * s, 70 * s), 200, 255, fill=(255, 252, 240, 255), width=3 * s)
+    _finish(icon, "book.png", s)
+
+
+def draw_clipboard_icon() -> None:
+    """The objectives icon: a brown hardboard clipboard with real thickness, a sheet of paper whose
+    corner lifts a little, and a steel clip with a lever, a hole and rivets."""
+    import numpy as np
+
+    s = 8
+    n = 128 * s
+    yy, xx = _grid(n)
+    icon = Image.new("RGBA", (n, n), (0, 0, 0, 0))
+    # The board's thickness: a darker copy below and to the right of its face.
+    side = _mask(n, lambda d: d.rounded_rectangle((22 * s, 18 * s, 112 * s, 124 * s), radius=10 * s, fill=255))
+    _paint(icon, side, np.full((n, n, 3), [88, 52, 26], float))
+    face = _mask(n, lambda d: d.rounded_rectangle((16 * s, 12 * s, 106 * s, 118 * s), radius=10 * s, fill=255))
+    shade = 1.06 - 0.38 * (xx * 0.4 + yy * 0.6)
+    grain = 0.05 * np.sin(yy * 250 + np.sin(xx * 11) * 4) + 0.025 * np.sin(yy * 700 + xx * 20)
+    _paint(icon, face, np.array([156, 102, 58], float)[None, None, :] * (shade + grain)[..., None])
+    d = ImageDraw.Draw(icon)
+    d.rounded_rectangle((16 * s, 12 * s, 106 * s, 118 * s), radius=10 * s, outline=(204, 150, 98, 255), width=int(1.5 * s))
+    # The paper, with a soft shadow, faint lines, a checklist and a lifted bottom right corner.
+    shadow = _mask(n, lambda dd: dd.rectangle((29 * s, 35 * s, 97 * s, 113 * s), fill=255)).filter(ImageFilter.GaussianBlur(2 * s))
+    icon.paste(Image.new("RGBA", (n, n), (40, 20, 8, 255)), (0, 0), shadow.point(lambda v: int(v * 0.6)))
+    sheet = _mask(n, lambda dd: dd.polygon([(26 * s, 32 * s), (94 * s, 32 * s), (94 * s, 98 * s), (82 * s, 110 * s), (26 * s, 110 * s)], fill=255))
+    _paint(icon, sheet, np.array([248, 244, 232], float)[None, None, :] * (1.0 - 0.12 * yy[..., None]))
+    d.polygon([(94 * s, 98 * s), (82 * s, 110 * s), (84 * s, 99 * s)], fill=(214, 206, 188, 255))
     for row in range(6):
-        y = (50 + row * 10) * s
-        d.line([(36 * s, y), (90 * s, y)], fill=(176, 196, 220, 255), width=s)
-    # The checklist: a tick, a box, ink lines.
-    d.line([(37 * s, 54 * s), (42 * s, 59 * s), (50 * s, 48 * s)], fill=(40, 40, 46, 255), width=4 * s, joint="curve")
-    d.line([(56 * s, 55 * s), (86 * s, 55 * s)], fill=(60, 60, 68, 255), width=3 * s)
-    d.rectangle((37 * s, 68 * s, 47 * s, 78 * s), outline=(40, 40, 46, 255), width=3 * s)
-    d.line([(56 * s, 74 * s), (82 * s, 74 * s)], fill=(60, 60, 68, 255), width=3 * s)
-    d.rectangle((37 * s, 88 * s, 47 * s, 98 * s), outline=(40, 40, 46, 255), width=3 * s)
-    d.line([(56 * s, 94 * s), (78 * s, 94 * s)], fill=(60, 60, 68, 255), width=3 * s)
-    # The steel clip: outline, a brushed metal gradient, a fold, a hole and a bright highlight.
-    d.rounded_rectangle((36 * s, 2 * s, 92 * s, 40 * s), radius=8 * s, fill=ICON_INK)
-    clip_mask = Image.new("L", (n, n), 0)
-    ImageDraw.Draw(clip_mask).rounded_rectangle((42 * s, 8 * s, 86 * s, 34 * s), radius=5 * s, fill=255)
-    metal = np.clip(205 + 45 * np.cos(yy * 40) - 60 * (yy * 4 % 1.0) * 0, 120, 250)
-    steel = np.stack([metal, metal + 2, metal + 8], axis=-1).clip(0, 255).astype("uint8")
-    icon.paste(Image.fromarray(steel, "RGB").convert("RGBA"), (0, 0), clip_mask)
-    d.line([(44 * s, 24 * s), (84 * s, 24 * s)], fill=(120, 124, 132, 255), width=2 * s)
-    d.ellipse((58 * s, 11 * s, 70 * s, 20 * s), fill=ICON_INK)
-    d.line([(46 * s, 12 * s), (56 * s, 12 * s)], fill=(255, 255, 255, 255), width=2 * s)
-    # Two rivets holding the clip to the board.
-    for x in (48, 80):
-        d.ellipse(((x - 3) * s, 30 * s, (x + 3) * s, 36 * s), fill=(110, 112, 120, 255))
-        d.ellipse(((x - 2) * s, 31 * s, x * s, 33 * s), fill=(235, 236, 240, 255))
-    # The shine on the board's top left.
-    d.arc((24 * s, 22 * s, 52 * s, 50 * s), 190, 255, fill=(255, 236, 210, 255), width=3 * s)
-    icon.resize((128, 128), Image.LANCZOS).save(ROOT / "assets" / "ui" / "clipboard.png")
+        y = (48 + row * 10) * s
+        d.line([(32 * s, y), (88 * s, y)], fill=(170, 192, 220, 255), width=s)
+    d.line([(33 * s, 52 * s), (38 * s, 57 * s), (46 * s, 46 * s)], fill=(36, 36, 44, 255), width=4 * s, joint="curve")
+    d.line([(52 * s, 53 * s), (84 * s, 53 * s)], fill=(60, 60, 70, 255), width=3 * s)
+    for y in (66, 86):
+        d.rectangle((33 * s, y * s, 43 * s, (y + 10) * s), outline=(36, 36, 44, 255), width=3 * s)
+        d.line([(52 * s, (y + 6) * s), (80 * s, (y + 6) * s)], fill=(60, 60, 70, 255), width=3 * s)
+    # The steel clip: a dark back plate, a shaded lever bent toward the viewer, a hole and rivets.
+    d.rounded_rectangle((34 * s, 2 * s, 88 * s, 40 * s), radius=8 * s, fill=ICON_INK)
+    plate = _mask(n, lambda dd: dd.rounded_rectangle((39 * s, 22 * s, 83 * s, 36 * s), radius=4 * s, fill=255))
+    _paint(icon, plate, np.full((n, n, 3), [128, 132, 142], float))
+    lever = _mask(n, lambda dd: dd.rounded_rectangle((40 * s, 7 * s, 82 * s, 24 * s), radius=6 * s, fill=255))
+    band = np.cos((yy - 15 / 128) * 40)
+    _paint(icon, lever, np.stack([170 + 70 * band, 172 + 70 * band, 180 + 66 * band], axis=-1))
+    d.ellipse((56 * s, 10 * s, 66 * s, 18 * s), fill=ICON_INK)
+    d.line([(44 * s, 10 * s), (54 * s, 10 * s)], fill=(255, 255, 255, 255), width=2 * s)
+    for x in (46, 76):
+        d.ellipse(((x - 3) * s, 27 * s, (x + 3) * s, 33 * s), fill=(96, 98, 108, 255))
+        d.ellipse(((x - 2) * s, 28 * s, x * s, 30 * s), fill=(240, 240, 244, 255))
+    d.arc((20 * s, 16 * s, 48 * s, 44 * s), 190, 255, fill=(255, 236, 210, 255), width=3 * s)
+    _finish(icon, "clipboard.png", s)
 
 
 def draw_gear_icon() -> None:
-    """The settings icon: a steel cog drawn with the same care as the book: a thick dark outline,
-    brushed metal shaded by light from the top left, bevelled teeth, a raised hub with a bolt hole,
-    and a bright highlight."""
+    """The settings icon: a thick steel cog seen slightly from the front, so its side shows. The
+    face is brushed metal lit from the top left, each tooth has a bevelled edge, a raised hub ring
+    sits around a dark bolt hole, and a bright highlight runs along the top."""
     import math
 
     import numpy as np
 
     s = 8
     n = 128 * s
-    c = n / 2
-    teeth, r_out, r_in, r_hole = 8, 60 * s, 45 * s, 17 * s
+    c = 62 * s
+    teeth, r_out, r_in, r_hole = 8, 56 * s, 42 * s, 15 * s
+    yy, xx = _grid(n)
 
-    def cog(scale: float) -> list:
+    def cog(scale: float, dx: float = 0.0, dy: float = 0.0) -> list:
         points = []
-        for i in range(teeth * 4):
-            a = (i / (teeth * 4)) * 2 * math.pi - math.pi / 2
-            r = r_out if (i % 4) in (1, 2) else r_in
-            r *= scale
-            points.append((c + r * math.cos(a), c + r * math.sin(a)))
+        for i in range(teeth * 8):
+            a = (i / (teeth * 8)) * 2 * math.pi - math.pi / 2
+            phase = i % 8
+            r = r_out if 2 <= phase <= 5 else r_in
+            points.append((c + dx + r * scale * math.cos(a), c + dy + r * scale * math.sin(a)))
         return points
 
-    yy, xx = np.mgrid[0:n, 0:n] / n
-    lit = 1.0 - 0.45 * (xx * 0.5 + yy * 0.5)
-    brushed = 0.03 * np.sin((xx + yy) * 400)
-    metal = np.clip(205 * (lit + brushed), 0, 255)
-    steel = Image.fromarray(np.stack([metal, metal + 3, metal + 10], axis=-1).clip(0, 255).astype("uint8"), "RGB").convert("RGBA")
     icon = Image.new("RGBA", (n, n), (0, 0, 0, 0))
+    # The cog's thickness: darker steel shifted down and right.
+    for step in range(6, 0, -1):
+        side = _mask(n, lambda d, step=step: d.polygon(cog(1.0, step * s, step * s), fill=255))
+        _paint(icon, side, np.full((n, n, 3), 70 + step * 6, float))
+    # The bevel: a slightly smaller lighter ring around the face.
+    body = _mask(n, lambda d: d.polygon(cog(1.0), fill=255))
+    _paint(icon, body, np.full((n, n, 3), [128, 132, 142], float))
+    face = _mask(n, lambda d: d.polygon(cog(0.9, -s, -s), fill=255))
+    lit = 1.08 - 0.5 * (xx * 0.5 + yy * 0.5)
+    # Soft rings of brushed metal around the centre, wide enough to stay smooth when shrunk.
+    radius = np.hypot(xx - 0.48, yy - 0.48)
+    brushed = 0.04 * np.sin(radius * 70)
+    metal = 200 * (lit + brushed)
+    _paint(icon, face, np.stack([metal, metal + 4, metal + 12], axis=-1))
     d = ImageDraw.Draw(icon)
-    # Outline: the cog drawn larger in near-black.
-    outline = Image.new("L", (n, n), 0)
-    ImageDraw.Draw(outline).polygon(cog(1.0), fill=255)
-    outline = outline.filter(ImageFilter.MaxFilter(8 * s + 1))
-    icon.paste(Image.new("RGBA", (n, n), ICON_INK), (0, 0), outline)
-    # The body in shaded steel, with a darker lower right edge for thickness.
-    body = Image.new("L", (n, n), 0)
-    ImageDraw.Draw(body).polygon(cog(1.0), fill=255)
-    icon.paste(Image.new("RGBA", (n, n), (110, 114, 124, 255)), (0, 0), body)
-    face = Image.new("L", (n, n), 0)
-    ImageDraw.Draw(face).polygon([(x - 2 * s, y - 2 * s) for x, y in cog(0.96)], fill=255)
-    icon.paste(steel, (0, 0), face)
-    # A raised hub ring and the bolt hole.
-    d.ellipse((c - 30 * s, c - 30 * s, c + 30 * s, c + 30 * s), outline=(120, 124, 134, 255), width=4 * s)
-    d.ellipse((c - 26 * s, c - 26 * s, c + 26 * s, c + 26 * s), outline=(236, 238, 242, 255), width=2 * s)
-    d.ellipse((c - r_hole - 4 * s, c - r_hole - 4 * s, c + r_hole + 4 * s, c + r_hole + 4 * s), fill=ICON_INK)
-    d.ellipse((c - r_hole, c - r_hole, c + r_hole, c + r_hole), fill=(0, 0, 0, 0))
-    # Shine along the top left of the body.
-    d.arc((c - 50 * s, c - 50 * s, c + 50 * s, c + 50 * s), 200, 250, fill=(255, 255, 255, 255), width=5 * s)
-    icon.resize((128, 128), Image.LANCZOS).save(ROOT / "assets" / "ui" / "gear.png")
+    # The raised hub: a dark groove, a lit rim, and the bolt hole with its inner wall.
+    d.ellipse((c - 30 * s, c - 30 * s, c + 30 * s, c + 30 * s), outline=(96, 100, 110, 255), width=3 * s)
+    d.ellipse((c - 27 * s, c - 27 * s, c + 27 * s, c + 27 * s), outline=(240, 242, 246, 255), width=2 * s)
+    d.ellipse((c - r_hole - 4 * s, c - r_hole - 4 * s, c + r_hole + 4 * s, c + r_hole + 4 * s), fill=(150, 154, 164, 255))
+    d.ellipse((c - r_hole - 2 * s, c - r_hole - 2 * s, c + r_hole + 2 * s, c + r_hole + 2 * s), fill=ICON_INK)
+    # The hole's inner wall: a sliver of dark steel at the top, as the hole goes through the cog.
+    d.ellipse((c - r_hole + 2 * s, c - r_hole + 3 * s, c + r_hole - 2 * s, c + r_hole - 1 * s), fill=(0, 0, 0, 0))
+    d.arc((c - 46 * s, c - 46 * s, c + 46 * s, c + 46 * s), 200, 250, fill=(255, 255, 255, 255), width=4 * s)
+    _finish(icon, "gear.png", s)
 
 
 class PhoneModel:

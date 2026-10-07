@@ -29,8 +29,8 @@ const BOOK_PICTURE := preload("res://assets/ui/book.png")
 const CLIPBOARD_PICTURE := preload("res://assets/ui/clipboard.png")
 ## Drawn so each covers about as much of the screen as the gear (64): the book is wide and short,
 ## the clipboard tall and solid, so they get slightly different sizes to look the same.
-const BOOK_PICTURE_SIZE := 66.0
-const CLIPBOARD_PICTURE_SIZE := 58.0
+const BOOK_PICTURE_SIZE := 67.0
+const CLIPBOARD_PICTURE_SIZE := 59.0
 const EDGE_MARGIN := Vector2(12.0, 4.0)
 ## When the objectives change, the clipboard swells for a moment, so the player knows to look.
 const NUDGE_SCALE := 1.18
