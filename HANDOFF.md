@@ -308,6 +308,10 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   Godot's web (sample) playback never routed them. Fix: `default_bus_layout.tres` defines both
   buses. Measured after: peak about 0.015 on the main screen (music at -24 dB is very quiet on a
   phone speaker; raise `MusicDirector.VOLUME_DB` if the user finds it too soft).
+- **Choices and objectives without boxes** (user: the boxes were too big for the layout).
+  Choices are plain golden ochre text with an outline (`DialogueBox._style_choice`), with a small
+  note above them: "Your choice may change the timeline." (`CHOICE_HINT`). The objectives list
+  has no soft window behind it any more; the top shade keeps it readable.
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions
