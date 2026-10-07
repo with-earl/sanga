@@ -137,23 +137,115 @@ def draw_poster() -> None:
     stain = Image.new("RGBA", (w, h), (150, 110, 60, 255))
     stain.putalpha(Image.composite(aged, Image.new("L", (w, h), 0), paper.getchannel("A")))
     paper.alpha_composite(stain)
+    # Real paper: soft wrinkles from being handled, a little shading from the room's light falling
+    # from the top left, and the bottom right corner lifting off the wall.
+    paper = wrinkle(paper, strength=0.07, seed=3)
+    light = Image.linear_gradient("L").rotate(-35, expand=False).resize((w, h)).point(lambda v: int(v * 0.16))
+    shade = Image.new("RGBA", (w, h), (40, 30, 30, 255))
+    shade.putalpha(Image.composite(light, Image.new("L", (w, h), 0), paper.getchannel("A")))
+    paper.alpha_composite(shade)
+    curl = 46 * s
+    corner = ImageDraw.Draw(paper)
+    corner.polygon([(w, h - curl), (w - curl, h), (w, h)], fill=(0, 0, 0, 0))
+    corner.polygon([(w, h - curl), (w - curl, h), (w - curl * 0.82, h - curl * 0.82)], fill=(226, 218, 198, 255))
     # Two strips of tape at the top corners.
     canvas = Image.new("RGBA", (w + 60 * s, h + 60 * s), (0, 0, 0, 0))
     canvas.alpha_composite(paper, (30 * s, 30 * s))
     for x, angle in ((30 * s, 35), (w + 30 * s, -35)):
-        tape = Image.new("RGBA", (70 * s, 22 * s), (236, 226, 190, 175))
+        tape = Image.new("RGBA", (70 * s, 22 * s), (236, 226, 190, 150))
         tape = tape.rotate(angle, expand=True, resample=Image.BICUBIC)
         canvas.alpha_composite(tape, (x - tape.width // 2, 30 * s - tape.height // 2))
-    canvas = outline(canvas, 5, (70, 44, 24, 255))
+    canvas = outline(canvas, 2, (90, 66, 44, 200))
+    # On the room's left wall, which turns away toward a vanishing point far to the right: the right
+    # edge is a little shorter and narrower, the top slopes down and the bottom slopes up.
+    cw, ch = canvas.size
+    out_w, out_h = int(cw * 0.89), int(ch * 1.04)
+    square = [(0, 0), (cw, 0), (cw, ch), (0, ch)]
+    wall = [(0, 0), (out_w, int(ch * 0.106)), (out_w, out_h), (0, int(ch * 1.0))]
+    canvas = canvas.transform((out_w, out_h), Image.PERSPECTIVE, perspective_coeffs(square, wall), Image.BICUBIC)
+    canvas = canvas.crop(canvas.getbbox())
     final = canvas.resize((canvas.width // SCALE, canvas.height // SCALE), Image.LANCZOS)
     final.save(PROPS / "police_poster.png")
 
 
+def wrinkle(image: Image.Image, strength: float, seed: int) -> Image.Image:
+    """Soft, smooth light and dark patches across paper, like gentle wrinkles."""
+    import numpy as np
+
+    rng = np.random.default_rng(seed)
+    w, h = image.size
+    coarse = Image.fromarray((rng.random((9, 7)) * 255).astype("uint8"), "L").resize((w, h), Image.BICUBIC)
+    field = (np.asarray(coarse, dtype=float) / 255.0 - 0.5) * 2.0 * strength
+    rgba = np.asarray(image, dtype=float)
+    rgba[..., :3] = np.clip(rgba[..., :3] * (1.0 + field[..., None]), 0, 255)
+    return Image.fromarray(rgba.astype("uint8"), "RGBA")
+
+
+def _smooth(values, w: int, h: int):
+    """A small grid of numbers enlarged smoothly to w x h."""
+    import numpy as np
+
+    small = Image.fromarray(np.asarray(values, dtype="float32"), "F")
+    return np.asarray(small.resize((w, h), Image.BICUBIC), dtype=float)
+
+
+def _sample(channel, ys, xs):
+    """Reads a picture channel at fractional positions, blending the four nearest pixels."""
+    import numpy as np
+
+    h, w = channel.shape
+    x0 = np.clip(np.floor(xs).astype(int), 0, w - 2)
+    y0 = np.clip(np.floor(ys).astype(int), 0, h - 2)
+    fx = np.clip(xs - x0, 0, 1)
+    fy = np.clip(ys - y0, 0, 1)
+    top = channel[y0, x0] * (1 - fx) + channel[y0, x0 + 1] * fx
+    bottom = channel[y0 + 1, x0] * (1 - fx) + channel[y0 + 1, x0 + 1] * fx
+    out = top * (1 - fy) + bottom * fy
+    outside = (xs < 0) | (ys < 0) | (xs > w - 1) | (ys > h - 1)
+    out[outside] = 0
+    return out
+
+
+def crumple(image: Image.Image, seed: int) -> Image.Image:
+    """Paper that was crumpled and smoothed out again: flat facets each catching the light a bit
+    differently, darker creases between them, and slightly bent edges."""
+    import numpy as np
+
+    rng = np.random.default_rng(seed)
+    w, h = image.size
+    rgba = np.asarray(image, dtype=float)
+    # Facets: every pixel belongs to its nearest of a few random points.
+    points = rng.random((22, 2)) * [w, h]
+    ys, xs = np.mgrid[0:h:4, 0:w:4]
+    dist = np.sqrt((xs[..., None] - points[:, 0]) ** 2 + (ys[..., None] - points[:, 1]) ** 2)
+    order = np.sort(dist, axis=-1)
+    nearest = np.argmin(dist, axis=-1)
+    tone = rng.uniform(0.9, 1.05, len(points))[nearest]
+    # A crease where two facets meet: the two nearest points are almost equally near.
+    crease = np.clip(1.0 - (order[..., 1] - order[..., 0]) / (9.0 * SCALE), 0.0, 1.0)
+    light = _smooth(tone * (1.0 - 0.13 * crease), w, h)
+    # Soften the folds so they read as paper, not as drawn lines.
+    folds = Image.fromarray(np.clip(light * 200.0, 0, 255).astype("uint8"), "L").filter(ImageFilter.GaussianBlur(3 * SCALE))
+    light = np.asarray(folds, dtype=float) / 200.0
+    rgba[..., :3] = np.clip(rgba[..., :3] * light[..., None], 0, 255)
+    # Bent edges: every pixel is nudged a little by a smooth random field.
+    bend = 7.0 * SCALE
+    dx = _smooth(rng.uniform(-1, 1, (5, 6)), w, h) * bend
+    dy = _smooth(rng.uniform(-1, 1, (5, 6)), w, h) * bend
+    yy, xx = np.mgrid[0:h, 0:w].astype(float)
+    out = np.stack([_sample(rgba[..., c], yy + dy, xx + dx) for c in range(4)], axis=-1)
+    return Image.fromarray(np.clip(out, 0, 255).astype("uint8"), "RGBA")
+
+
 def draw_card_on_floor() -> None:
-    """The food delivery card lying flat on the floor, seen at the room's angle, made from the
-    card's own picture so it keeps its look."""
+    """The food delivery flyer lying on the floor, slightly crumpled, seen at the room's angle,
+    made from the card's own picture so it keeps its look."""
     card = Image.open(PROPS / "food_delivery_card.png").convert("RGBA")
     card = card.resize((card.width * SCALE, card.height * SCALE), Image.LANCZOS)
+    pad = 12 * SCALE
+    padded = Image.new("RGBA", (card.width + pad * 2, card.height + pad * 2), (0, 0, 0, 0))
+    padded.alpha_composite(card, (pad, pad))
+    card = crumple(padded, seed=7).rotate(-9, expand=True, resample=Image.BICUBIC)
     w, h = card.size
     out_w, out_h = int(w * 1.05), int(h * 0.62)
     square = [(0, 0), (w, 0), (w, h), (0, h)]

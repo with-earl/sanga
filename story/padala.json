@@ -79,7 +79,7 @@
 			],
 			"objectives": [
 				"Read the police emergency poster",
-				"Or the food delivery card"
+				"Or the food delivery flyer"
 			],
 			"objectives_after_card": [
 				"Use the telephone"
@@ -90,7 +90,7 @@
 					"call": "padala_police"
 				},
 				"FoodDeliveryCard": {
-					"objective": "Get the food delivery card",
+					"objective": "Get the food delivery flyer",
 					"call": "padala_food"
 				}
 			},
