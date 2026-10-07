@@ -303,6 +303,11 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   (Safari only unlocks sound on those, not on `touchstart`), and sets
   `navigator.audioSession.type = 'playback'` so the iPhone's silent switch does not mute it.
   Not yet confirmed on a real iPhone.
+- **The web build was completely silent** (measured: peak 0.0 at the browser's output, desktop
+  Chromium too). Cause: the Sound and Music buses were only created at runtime by Settings, and
+  Godot's web (sample) playback never routed them. Fix: `default_bus_layout.tres` defines both
+  buses. Measured after: peak about 0.015 on the main screen (music at -24 dB is very quiet on a
+  phone speaker; raise `MusicDirector.VOLUME_DB` if the user finds it too soft).
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions
