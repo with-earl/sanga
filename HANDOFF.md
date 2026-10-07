@@ -144,25 +144,48 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
     - The web build was exported and played locally in a browser before pushing: Tap to start,
       then the content warning, then the main screen. No Quit, no debug menu (it is a release
       build), no console errors.
+12. **Cloud session, 2026-10-07 (not yet on `main`, see "Where we stopped").** The Pages deploy
+    failed once because the repo was still private. The user made it public and set the Pages
+    source, and the re-run deployed. Then four commits, which together are **v0.8.0** (MINOR):
+    - `style(ui)`: every button uses one cream text `#FFF3D6` with a dark brown outline `#2A1608`
+      (`UiSkin.BUTTON_TEXT`/`BUTTON_OUTLINE`). The user asked for "a uniform color and outline
+      color that gives best readability" with the font kept. Labels stay golden ochre.
+    - The user asked for a GUI/HUD plan "for retro 90s anime softness", then said "pick best
+      choices then start". Choices made: **warm plum-brown windows**, **typewriter text on**,
+      **wide phones show the art uncut with a blurred fill at the sides** (never crops props).
+    - `feat(ui)` phone fit: stretch aspect `expand`; every place keeps a centred 1280x720 stage
+      (`Location._fit_stage`), with a dim blurred copy of the background behind it
+      (`ScreenFit`, `SideFill` layer). Cutscenes, montage, menu video and still cover the screen.
+      Notch insets on android/ios only. Sizes: dialogue 26, speaker 24, HUD 23, headings 26,
+      buttons 24, buttons at least 64 tall, menu icon tap area 64x64. "Objective/s" is now
+      "Objectives".
+    - `feat(ui)` windows: `SoftWindow` (shader `soft_window.gdshader`) is the one window look for
+      the dialogue box, choices, game menu and every themed button: rounded, see-through plum
+      gradient, cream outer line, ochre inner line, soft shadow. Name plate on the box's top
+      edge, typewriter text at 42 letters/s (a tap finishes the line), a bobbing ▼, choices fade
+      in one by one with a ▶ cursor on press, ochre/cream switches.
+    - `feat(ui)` HUD: soft top shade behind the HUD, place name fades in, new objectives glow.
 
 ## Where we stopped
 
-- **The last thing the user asked** was this handoff: HANDOFF.md, CLAUDE.md, iPhone web
-  playtesting, a cloud setup script, `.gitignore`, then commit and push everything. It was done
-  in this release, and all work is committed and pushed. There is no half-finished work.
-- **Before that,** the user asked "why does the volume of background music is still high". In the
-  code everything was already quiet (-36 dBFS). The likely causes were a stale running copy or a
-  high system volume. Music was lowered anyway to -24 dB (v0.6.2). **The user has not confirmed
-  that it now sounds right.**
+- **The cloud session could not push to `main`** (HTTP 403 from the git proxy). All the work in
+  decision 12 is pushed to the branch **`claude/button-colors`** instead, and is **not tagged**.
+  The Pages site still shows v0.7.0. Next session: get it onto `main` (a PR the user merges, or
+  the user pushes), then tag **v0.8.0** on `main` ("v0.8.0 — soft 90s anime UI, wide phone fit,
+  larger text") and push with `--follow-tags`. Locally the clone was on a detached HEAD; a local
+  `main` was created that tracks `origin/claude/button-colors`, which makes the stop hook report
+  "unpushed commits on main".
+- Phases 1 to 4 of the GUI plan are done and checked in screenshots at 16:9, 19.5:9 and 4:3.
+  Left from the plan: **Phase 5** (a lighter text blur that is the same on every screen, and the
+  title/ending cards moved fully onto the window palette) and **Phase 6** polish (consistent
+  easing, a small press bounce). Both are optional.
+- **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions
 
-1. **GitHub Pages on a private repo.** `with-earl/sanga` is private. GitHub Pages for private
-   repos needs a paid plan (Pro, Team or Enterprise) on the owner account `with-earl`, and the
-   site itself is still public. If the deploy job fails with a Pages error, the user must either
-   upgrade, make the repo public, or choose another host. Pages also needs **Settings > Pages >
-   Source: GitHub Actions**, set once by the repo owner. The previous session could not check
-   the Actions result (no `gh` CLI on that machine).
+1. **Pushing to `main` from the cloud** is refused (403). Ask the user how they want changes
+   landed: PRs they merge, or granting the session push access to `main`. (Pages itself is
+   solved: the repo is public and the source is GitHub Actions.)
 2. **Is the music quiet enough now?** If not, lower `MusicDirector.VOLUME_DB` further.
 3. **Alternate ending numbering** (table above) is an assumption. Ask if it matches what they
    mean by "Alternate 1 to 5".
@@ -186,11 +209,10 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Next tasks, in order
 
-1. In the cloud session, run the first steps above. Check that the **Web build** workflow ran and
-   deployed. If Pages failed, explain open question 1 and get the user's choice.
-2. Give the user the Pages URL `https://with-earl.github.io/sanga/` to open on the iPhone, and
-   take their playtest feedback. Likely areas: touch input, load time, audio after "Tap to
-   start", text size on a small screen, and the landscape layout.
+1. Get `claude/button-colors` onto `main` and tag v0.8.0 (see "Where we stopped").
+2. Ask the user to playtest the new UI on the iPhone at `https://with-earl.github.io/sanga/`:
+   text size, the typewriter speed (`DialogueBox.LETTERS_PER_SECOND`), the plum window colour
+   (`SoftWindow.FILL_TOP`/`FILL_BOTTOM`), and the blurred side fill.
 3. Ask open questions 2-4 when it fits naturally. Don't block work on them.
 4. Ideas offered but not requested, so don't do them unasked: music that dips or changes at story
    moments (cutscenes, the confession sequence), and recolouring the main menu buttons or story
