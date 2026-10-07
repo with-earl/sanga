@@ -5,7 +5,7 @@ extends Control
 ## timeline, and the screens a timeline ends on, so testers can reach any part without playing
 ## from the start (see DevJump). Runs started here are never saved.
 ##
-## It follows Apple's own design: a black, rounded sheet with a title and a "Done" button at the
+## It follows Apple's own design: a black, rounded sheet with a title at the
 ## top, grouped lists of rows on rounded dark cards with thin dividers and a grey chevron, small
 ## grey section titles, and a grey footnote. Everything is black, white and greys, in terminal
 ## letters, so no one takes it for part of the story. Tapping outside the sheet closes it.
@@ -83,9 +83,15 @@ func _ready() -> void:
 	column.add_child(_build_bar())
 	column.add_child(_divider(0))
 	column.add_child(_build_lists())
+	# The same note as the game's windows, in the sheet's own crisp grey letters.
+	var hint := UiSkin.add_close_hint(self, SECONDARY, Color.TRANSPARENT)
+	hint.add_to_group(&"crisp_text")
+	hint.material = null
+	hint.add_theme_font_override("font", MONO)
+	hint.add_theme_font_size_override("font_size", SMALL_SIZE)
 
 
-## The top bar: the title at the left and "Done" at the right, as on an Apple sheet.
+## The top bar: the title. There is no close button: tapping outside closes the sheet.
 func _build_bar() -> MarginContainer:
 	var bar := MarginContainer.new()
 	bar.add_theme_constant_override("margin_left", int(SIDE))
@@ -97,18 +103,6 @@ func _build_bar() -> MarginContainer:
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	row.add_child(title)
-	var done := Button.new()
-	_plain_button(done)
-	done.text = "Done"
-	done.add_theme_font_override("font", MONO_BOLD)
-	done.add_theme_font_size_override("font_size", ROW_SIZE)
-	for state in ["font_color", "font_hover_color", "font_focus_color"]:
-		done.add_theme_color_override(state, LABEL)
-	for state in ["font_pressed_color", "font_hover_pressed_color"]:
-		done.add_theme_color_override(state, SECONDARY)
-	done.custom_minimum_size = Vector2(72, 44)
-	done.pressed.connect(close)
-	row.add_child(done)
 	bar.add_child(row)
 	return bar
 
