@@ -125,58 +125,5 @@ grow_horizontal = 0
 grow_vertical = 0
 theme_override_constants/separation = 10
 
-[node name="DevStories" type="VBoxContainer" parent="."]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 140.0
-offset_top = -316.0
-offset_right = 440.0
-offset_bottom = -84.0
-grow_vertical = 0
-theme_override_constants/separation = 20
-
-[node name="DevConfirm" type="VBoxContainer" parent="."]
-unique_name_in_owner = true
-visible = false
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 140.0
-offset_top = -316.0
-offset_right = 440.0
-offset_bottom = -84.0
-grow_vertical = 0
-theme_override_constants/separation = 20
-
-[node name="DevQuestion" type="Label" parent="DevConfirm"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 64)
-layout_mode = 2
-theme_type_variation = &"MenuPrompt"
-text = "Start with this story?"
-vertical_alignment = 1
-
-[node name="DevYes" type="Button" parent="DevConfirm"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 64)
-layout_mode = 2
-theme_type_variation = &"TextButton"
-text = "Yes"
-alignment = 0
-focus_mode = 0
-
-[node name="DevNo" type="Button" parent="DevConfirm"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 64)
-layout_mode = 2
-theme_type_variation = &"TextButton"
-text = "No"
-alignment = 0
-focus_mode = 0
-
 [node name="Settings" parent="." instance=ExtResource("2_settings")]
 main_screen = true

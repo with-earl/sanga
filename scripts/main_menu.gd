@@ -4,20 +4,22 @@ extends Control
 
 const MONTHS := ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 const ROW_SIZE := Vector2(300, 52)
-## Development only: the menu on the left, for quick testing without a save slot. "Stories" starts
-## a story's timeline; "Endings" shows the screen a timeline ends on (Main, Alternate 1, ...).
-## While the game is still being made it shows in every build, the web playtest build included.
-## Set this to false before release, and it shows only in debug builds again.
+## Development only: the "Jump to" window on the left, for opening any point of the game without
+## playing from the start (see DevJump), or the screen a timeline ends on. Runs started there are
+## never saved. While the game is still being made it shows in every build, the web playtest
+## build included. Set this to false before release, and it shows only in debug builds again.
 const SHOW_DEV_MENU_IN_ALL_BUILDS := true
+const DEV_PANEL_LEFT := 40.0
+const DEV_PANEL_TOP := 96.0
+const DEV_PANEL_WIDTH := 420.0
+const DEV_PANEL_BOTTOM := 36.0
+const DEV_PANEL_PADDING := 20.0
+const DEV_ROW_HEIGHT := 48.0
+const DEV_FONT_SIZE := 21
 
 @onready var _menu: Control = $Buttons
 @onready var _quit_confirm: Control = %QuitConfirm
 @onready var _save_panel: VBoxContainer = %SavePanel
-@onready var _dev_stories: Control = %DevStories
-@onready var _dev_confirm: Control = %DevConfirm
-@onready var _dev_question: Label = %DevQuestion
-@onready var _dev_yes: Button = %DevYes
-@onready var _dev_no: Button = %DevNo
 @onready var _continue_button: Button = %ContinueButton
 @onready var _new_button: Button = %NewButton
 @onready var _load_button: Button = %LoadButton
@@ -29,9 +31,10 @@ const SHOW_DEV_MENU_IN_ALL_BUILDS := true
 
 ## What the Android back button does while the save panel is showing.
 var _back_action := Callable()
-## What Yes does in the development question on the left, and what No goes back to.
-var _dev_yes_action := Callable()
-var _dev_no_action := Callable()
+var _dev_panel := PanelContainer.new()
+var _dev_title := Label.new()
+var _dev_list := VBoxContainer.new()
+var _dev_scroll := ScrollContainer.new()
 
 
 func _ready() -> void:
@@ -44,10 +47,9 @@ func _ready() -> void:
 	_quit_button.visible = not OS.has_feature("web")
 	_yes_button.pressed.connect(get_tree().quit)
 	_no_button.pressed.connect(_show_quit_confirm.bind(false))
-	_dev_stories.visible = SHOW_DEV_MENU_IN_ALL_BUILDS or OS.is_debug_build()
-	_show_dev_menu()
-	_dev_yes.pressed.connect(func() -> void: _dev_yes_action.call())
-	_dev_no.pressed.connect(func() -> void: _dev_no_action.call())
+	if SHOW_DEV_MENU_IN_ALL_BUILDS or OS.is_debug_build():
+		_build_dev_panel()
+		_show_dev_menu()
 
 
 ## Android back button steps back one level. From the main buttons it asks before leaving.
@@ -56,8 +58,6 @@ func _notification(what: int) -> void:
 		return
 	if _settings.is_open():
 		_settings.close()
-	elif _dev_confirm.visible:
-		_dev_no_action.call()
 	elif _save_panel.visible:
 		_back_action.call()
 	else:
@@ -76,36 +76,63 @@ func _show_main() -> void:
 	_menu.visible = true
 
 
-## Development only. The two choices on the left: Stories and Endings.
+## Development only. The "Jump to" window on the left: a title and a scrolling list of rows.
+func _build_dev_panel() -> void:
+	var style := StyleBoxEmpty.new()
+	for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
+		style.set_content_margin(side, DEV_PANEL_PADDING)
+	_dev_panel.add_theme_stylebox_override("panel", style)
+	SoftWindow.behind(_dev_panel)
+	_dev_panel.set_anchors_preset(Control.PRESET_LEFT_WIDE)
+	_dev_panel.offset_left = DEV_PANEL_LEFT
+	_dev_panel.offset_top = DEV_PANEL_TOP
+	_dev_panel.offset_right = DEV_PANEL_LEFT + DEV_PANEL_WIDTH
+	_dev_panel.offset_bottom = -DEV_PANEL_BOTTOM
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 10)
+	UiSkin.style_label(_dev_title, UiSkin.HEADING_SIZE)
+	column.add_child(_dev_title)
+	_dev_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_dev_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_dev_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_dev_list.add_theme_constant_override("separation", 2)
+	_dev_scroll.add_child(_dev_list)
+	column.add_child(_dev_scroll)
+	_dev_panel.add_child(column)
+	add_child(_dev_panel)
+
+
+## The first level: one row for each timeline, and one for the endings.
 func _show_dev_menu() -> void:
-	_open_dev_list()
-	_add_dev_row("Stories", _show_dev_stories)
-	_add_dev_row("Endings", _show_dev_endings)
+	_open_dev_list("Jump to (dev)")
+	for index in DevJump.GROUPS.size():
+		_add_dev_row(str(DevJump.GROUPS[index]["title"]) + "  ›", _show_dev_group.bind(index))
+	_add_dev_row("Endings  ›", _show_dev_endings)
 
 
-func _show_dev_stories() -> void:
-	_open_dev_list()
-	for story in StoryDirector.STORY_ORDER:
-		var title := StoryDirector.story_title(story)
-		_add_dev_row(title, _ask_dev("Start with %s?" % title, _start_dev_story.bind(story), _show_dev_stories))
-	_add_dev_row("Back", _show_dev_menu)
+## The points of one timeline. A tap opens the point straight away.
+func _show_dev_group(index: int) -> void:
+	var group: Dictionary = DevJump.GROUPS[index]
+	_open_dev_list(str(group["title"]))
+	_add_dev_row("‹  Back", _show_dev_menu)
+	for point in group["points"]:
+		_add_dev_row(str(point["label"]), DevJump.jump.bind(point))
 
 
 ## Main, then Alternate 1 to 5: one for each way a timeline can end.
 func _show_dev_endings() -> void:
-	_open_dev_list()
+	_open_dev_list("Endings")
+	_add_dev_row("‹  Back", _show_dev_menu)
 	var endings := TimelineMap.endings()
 	for index in endings.size():
-		var ending_name := TimelineMap.ending_name(index)
-		_add_dev_row(ending_name, _ask_dev("Show the %s ending?" % ending_name, _show_dev_ending.bind(endings[index]), _show_dev_endings))
-	_add_dev_row("Back", _show_dev_menu)
+		_add_dev_row(TimelineMap.ending_name(index), _show_dev_ending.bind(endings[index]))
 
 
-func _open_dev_list() -> void:
-	_dev_confirm.visible = false
-	_dev_stories.visible = SHOW_DEV_MENU_IN_ALL_BUILDS or OS.is_debug_build()
-	for child in _dev_stories.get_children():
-		_dev_stories.remove_child(child)
+func _open_dev_list(title: String) -> void:
+	_dev_title.text = title
+	_dev_scroll.scroll_vertical = 0
+	for child in _dev_list.get_children():
+		_dev_list.remove_child(child)
 		child.queue_free()
 
 
@@ -115,32 +142,16 @@ func _add_dev_row(text: String, action: Callable) -> void:
 	row.text = text
 	row.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	row.focus_mode = Control.FOCUS_NONE
-	row.custom_minimum_size = ROW_SIZE
+	row.custom_minimum_size.y = DEV_ROW_HEIGHT
+	row.add_theme_font_size_override("font_size", DEV_FONT_SIZE)
+	row.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	row.pressed.connect(action)
-	_dev_stories.add_child(row)
-
-
-## A question in place of the list, on the left. Yes does `yes`; No goes back with `no`.
-func _ask_dev(question: String, yes: Callable, no: Callable) -> Callable:
-	return func() -> void:
-		_dev_question.text = question
-		_dev_yes_action = yes
-		_dev_no_action = no
-		_dev_stories.visible = false
-		_dev_confirm.visible = true
-
-
-## Development only. Starts unsaved so test runs never fill the save slots.
-func _start_dev_story(story: String) -> void:
-	_show_dev_menu()
-	GameState.start_unsaved_game()
-	StoryDirector.begin_with(story)
+	_dev_list.add_child(row)
 
 
 ## Development only. Ends an unsaved run as if it had reached this reality, so the timeline's
 ## closing screen plays exactly as it does in the game.
 func _show_dev_ending(reality: Dictionary) -> void:
-	_show_dev_menu()
 	GameState.start_unsaved_game()
 	GameState.timeline = str(reality.get("timeline", ""))
 	GameState.run_outcomes = (reality.get("needs", []) as Array).duplicate()

@@ -66,8 +66,9 @@ picture. Delete the temporary script afterwards. The `--headless` runs print RID
   `MusicDirector.VOLUME_DB` (-24 dB) and must stay subtle. Effects play on the `Sound` bus at
   `Sfx.VOLUME_DB` (-10 dB).
 - **Debug-only features** are gated by `OS.is_debug_build()`, for example "Skip story (debug)".
-  The main screen's Stories/Endings menu shows in every build during development
-  (`main_menu.gd` `SHOW_DEV_MENU_IN_ALL_BUILDS`); set it to false before release.
+  The main screen's "Jump to (dev)" window (points in `scripts/dev_jump.gd`, plus the endings)
+  shows in every build during development (`main_menu.gd` `SHOW_DEV_MENU_IN_ALL_BUILDS`); set
+  it to false before release.
 - **Versioning:** follow [VERSIONING.md](VERSIONING.md).
   1. Make **every change** a Conventional Commit (`feat`, `fix`, `style`, `docs`, `chore`, …,
      with `!` or a `BREAKING CHANGE:` footer when something breaks).
