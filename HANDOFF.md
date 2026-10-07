@@ -267,6 +267,15 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   the other way from their usual ones, so `DialogueBox` takes per-picture facing entries
   (`PORTRAITS_FACING_LEFT` = gloria_2 and gwen_2, `batista_2` in `PORTRAITS_FACING_RIGHT`); all four
   confessors were checked facing Father Eli.
+- **Game direction for the PH national game dev competition (decided):** the **Alaala** mechanic.
+  Every death the player sees becomes a permanent memory per save that unlocks one new choice
+  elsewhere; three of them in one Main Timeline run give the true ending "Walang Namatay".
+  The full design, hidden truth, rules R1-R8, every line of the new script (natural modern
+  Tagalog, written by Claude at the user's request) and the new art list are in
+  **docs/STORY_BIBLE.md**. Presentation stays 2D with 2.5D staging (layered parallax places,
+  living cutscenes, breathing characters, light); no 3D rebuild. The user approved Father Eli
+  confessing his own sin. Next: Phase 1 (Alaala system), then content, endings and art, map,
+  playtest.
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions
