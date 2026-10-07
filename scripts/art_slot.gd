@@ -75,6 +75,16 @@ const CATEGORY_COLORS := {
 	set(value):
 		art_scale = value
 		queue_redraw()
+## A thin dark outline around the art, this many pixels wide on screen whatever the art's size, in
+## the cel style of the characters. 0 draws none.
+@export_range(0.0, 4.0, 0.1) var outline_width := 0.0:
+	set(value):
+		outline_width = value
+		queue_redraw()
+const OUTLINE_COLOR := Color(0.03, 0.02, 0.02, 1.0)
+## Directions the outline copies are drawn in: eight around the art make an even line.
+const OUTLINE_DIRECTIONS := [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1),
+	Vector2(0.71, 0.71), Vector2(-0.71, 0.71), Vector2(0.71, -0.71), Vector2(-0.71, -0.71)]
 ## Makes a prop look like it really sits in the scene instead of being pasted on top: it gets the
 ## same soft film look and warm grade as the room's art, plus a shadow. CONTACT is a soft dark
 ## patch where an object rests on a surface (keys on a bed); WALL is a faint drop shadow behind
@@ -240,6 +250,11 @@ func _draw() -> void:
 			# A negative width draws the picture mirrored inside the same rectangle.
 			art.size.x = -art.size.x
 		var light := scene_light if grounding != Grounding.NONE else Color.WHITE
+		if outline_width > 0.0:
+			# The art's silhouette, drawn dark a little to each side, peeks out as the outline.
+			var reach := outline_width / maxf(get_global_transform_with_canvas().get_scale().x, 0.01)
+			for direction in OUTLINE_DIRECTIONS:
+				draw_texture_rect(_texture, Rect2(art.position + direction * reach, art.size), false, OUTLINE_COLOR)
 		draw_texture_rect(_texture, art, false, light)
 	else:
 		_draw_placeholder(rect)
