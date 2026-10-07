@@ -208,12 +208,12 @@ func get_art_texture() -> Texture2D:
 	return _texture
 
 
-## Where the art is drawn inside the slot: covering all of it (backgrounds), or fitted and bottom
-## aligned. A background in a slot of another shape, such as the main screen on a wide phone, is
-## enlarged to cover it rather than stretched out of shape.
+## Where the art is drawn inside the slot: filling its width (backgrounds), or fitted and bottom
+## aligned. A background in a slot of another shape, such as the main screen on a phone, keeps its
+## shape and fills the width (see ScreenFit.width_rect) rather than being stretched.
 func _art_rect(rect: Rect2) -> Rect2:
 	if stretch_to_fit:
-		return ScreenFit.cover_rect(_texture.get_size(), rect.size)
+		return ScreenFit.width_rect(_texture.get_size(), rect.size)
 	var tex_size := _texture.get_size()
 	var factor := minf(rect.size.x / tex_size.x, rect.size.y / tex_size.y)
 	var fitted := tex_size * factor

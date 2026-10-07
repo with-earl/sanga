@@ -47,7 +47,7 @@ func _ready() -> void:
 	_fill(base)
 	add_child(base)
 	_picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_picture.stretch_mode = TextureRect.STRETCH_SCALE
 	_picture.size = SCREEN_SIZE
 	_picture.pivot_offset = SCREEN_SIZE / 2.0
 	_picture.material = ArtSlot.retro_material()
@@ -137,12 +137,12 @@ func _play_picture(data: Dictionary) -> void:
 		push_error("Missing cutscene picture: %s" % data["image"])
 		return
 	_picture.texture = texture
-	# The picture covers the whole screen, whatever the phone's shape.
-	var screen := get_viewport().get_visible_rect().size
-	_picture.size = screen
-	_picture.pivot_offset = screen / 2.0
+	# The picture fills the screen's width at its own shape, whatever the phone's shape.
+	var area := ScreenFit.width_rect(texture.get_size(), get_viewport().get_visible_rect().size)
+	_picture.size = area.size
+	_picture.pivot_offset = area.size / 2.0
 	_picture.scale = Vector2.ONE * ZOOM_FROM
-	_picture.position = Vector2.ZERO
+	_picture.position = area.position
 	var lines: Array = data.get("lines", [])
 	var hold: float = float(data.get("hold", DEFAULT_HOLD))
 	var zoom := create_tween()

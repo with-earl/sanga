@@ -15,6 +15,14 @@ static func width_scale(screen_size: Vector2) -> float:
 	return screen_size.x / DESIGN_SIZE.x
 
 
+## Where to draw a picture of `content` size so it fills the width of `area`, keeping its shape and
+## centred top to bottom: on a wide phone its top and bottom are cut off, and on a phone held
+## upright it leaves dark bars above and below. Every full-screen picture follows this rule.
+static func width_rect(content: Vector2, area: Vector2) -> Rect2:
+	var drawn := content * (area.x / content.x)
+	return Rect2((area - drawn) / 2.0, drawn)
+
+
 ## Where to draw a picture of `content` size so it covers all of `area` without being stretched,
 ## centred, cutting off whatever spills over.
 static func cover_rect(content: Vector2, area: Vector2) -> Rect2:
