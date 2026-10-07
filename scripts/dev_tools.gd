@@ -33,11 +33,13 @@ const WHITE := Color(0.95, 0.95, 0.95, 1)
 const GREY := Color(0.62, 0.62, 0.62, 1)
 const EDGE := Color(1, 1, 1, 0.75)
 const DIM := Color(0.0, 0.0, 0.0, 0.6)
-## The note every tester sees first.
-const DISCLAIMER := "Continuous improvement in progress."
+## The heading over the list of places to jump to.
+const HEADING := "Jump into specific parts"
+## The note at the foot of the window, so testers know rough spots are expected.
+const NOTE_LABEL := "Developer Note: "
+const NOTE := "Continuous improvement in progress. Some parts may appear as placeholder."
 
 var _heading := Label.new()
-var _note := Label.new()
 var _list := VBoxContainer.new()
 var _scroll := ScrollContainer.new()
 var _tween: Tween
@@ -69,7 +71,7 @@ func _ready() -> void:
 	window.add_child(_build_screen())
 
 
-## The window's top strip: its name and a Close button.
+## The window's top strip: its name at the left, and a plain "Close" at the right.
 func _build_title_bar() -> PanelContainer:
 	var bar := PanelContainer.new()
 	var style := _flat(TITLE_BAR, EDGE)
@@ -87,7 +89,7 @@ func _build_title_bar() -> PanelContainer:
 	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	row.add_child(title)
 	var close_button := Button.new()
-	_style_button(close_button, "Close  ✕", WHITE)
+	_style_button(close_button, "Close", WHITE)
 	close_button.custom_minimum_size.y = 40
 	close_button.pressed.connect(close)
 	row.add_child(close_button)
@@ -95,8 +97,8 @@ func _build_title_bar() -> PanelContainer:
 	return bar
 
 
-## The black screen: the disclaimer, a heading, a short note and the list. A faint pattern of
-## scan lines lies over it, like an old monitor.
+## The black screen: a heading, the list of places, and the developer note at the foot. A faint
+## pattern of scan lines lies over it, like an old monitor.
 func _build_screen() -> PanelContainer:
 	var screen := PanelContainer.new()
 	var style := _flat(SCREEN, EDGE)
@@ -106,22 +108,31 @@ func _build_screen() -> PanelContainer:
 	style.set_content_margin_all(PADDING)
 	screen.add_theme_stylebox_override("panel", style)
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 12)
-	column.add_child(_text(DISCLAIMER, SMALL_SIZE, GREY))
-	var rule := ColorRect.new()
-	rule.color = Color(WHITE, 0.25)
-	rule.custom_minimum_size.y = 1
-	column.add_child(rule)
+	column.add_theme_constant_override("separation", 16)
 	_set_text_style(_heading, FONT_SIZE + 2, WHITE, true)
 	column.add_child(_heading)
-	_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_set_text_style(_note, SMALL_SIZE, GREY)
-	column.add_child(_note)
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_list.add_theme_constant_override("separation", int(ROW_GAP))
 	_scroll.add_child(_list)
 	column.add_child(_scroll)
+	var rule := ColorRect.new()
+	rule.color = Color(WHITE, 0.25)
+	rule.custom_minimum_size.y = 1
+	column.add_child(rule)
+	var note := RichTextLabel.new()
+	note.add_to_group(&"crisp_text")
+	note.bbcode_enabled = true
+	note.fit_content = true
+	note.scroll_active = false
+	note.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	note.add_theme_font_override("normal_font", MONO)
+	note.add_theme_font_override("bold_font", MONO_BOLD)
+	note.add_theme_font_size_override("normal_font_size", SMALL_SIZE)
+	note.add_theme_font_size_override("bold_font_size", SMALL_SIZE)
+	note.add_theme_color_override("default_color", GREY)
+	note.text = "[b][color=#%s]%s[/color][/b]%s" % [WHITE.to_html(false), NOTE_LABEL, NOTE]
+	column.add_child(note)
 	screen.add_child(column)
 	var lines := ColorRect.new()
 	lines.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -173,7 +184,7 @@ func _fade(alpha: float, seconds: float) -> void:
 
 ## The first level: one row for each timeline, and one for the endings.
 func _show_menu() -> void:
-	_open_list("Jump to", "Start from any part of the game. Runs started here are not saved.")
+	_open_list(HEADING)
 	for index in DevJump.GROUPS.size():
 		_add_row(str(DevJump.GROUPS[index]["title"]), _show_group.bind(index), true)
 	_add_row("Endings", _show_endings, true)
@@ -182,7 +193,7 @@ func _show_menu() -> void:
 ## The points of one timeline. A tap opens the point straight away.
 func _show_group(index: int) -> void:
 	var group: Dictionary = DevJump.GROUPS[index]
-	_open_list(str(group["title"]), "Tap a point to start there.")
+	_open_list(HEADING + ": " + str(group["title"]))
 	_add_back_row()
 	for point in group["points"]:
 		_add_row(str(point["label"]), _jump.bind(point))
@@ -190,16 +201,15 @@ func _show_group(index: int) -> void:
 
 ## Main, then Alternate 1 to 5: one for each way a timeline can end.
 func _show_endings() -> void:
-	_open_list("Endings", "Tap one to see the screen a timeline ends on.")
+	_open_list(HEADING + ": Endings")
 	_add_back_row()
 	var endings := TimelineMap.endings()
 	for index in endings.size():
 		_add_row(TimelineMap.ending_name(index), _show_ending.bind(endings[index]))
 
 
-func _open_list(heading: String, note: String) -> void:
+func _open_list(heading: String) -> void:
 	_heading.text = heading
-	_note.text = note
 	_scroll.scroll_vertical = 0
 	for child in _list.get_children():
 		_list.remove_child(child)
