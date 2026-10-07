@@ -181,6 +181,10 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   1280) about its centre, so on a wide phone a thin strip at the top and bottom is cut off; on a
   taller screen black bars show above and below. The blurred side fill was removed. The HUD and
   dialogue are laid out on the real screen. Don't change this fit again without asking.
+- **Final fit (v0.9.2):** the user plays with the phone **upright (portrait)**. They want the whole game,
+  buttons included, as one 16:9 box filling the phone's width. So `expand` is removed again
+  (Godot's default `keep`): black bars above and below in portrait, at the sides on a wide
+  landscape phone. `ScreenFit` width-fit code stays and is harmless at 1280x720.
 - v0.9.0 (user's requests): the main screen's **Settings text row is removed** (the gear stays);
   **Stories/Endings show in every build** while in development; the market's **motorcycle is a
   large, out-of-focus foreground** at the bottom left, its top right in view (delivery box,
