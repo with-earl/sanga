@@ -3,9 +3,9 @@ extends Control
 ## first card, and a glowing green line travels the path this run took, card to card, with the
 ## view following it. Then the view pulls back to show every reality this save has made.
 ##
-## Only timelines the player has finished at least once are shown. Inside one, the branches not yet
-## reached show as dim "???" cards on faint lines: the player sees that more is possible, but not
-## what. The layout follows the
+## Only what the player has finished is shown: a timeline, branch or ending they have not reached
+## never appears, and the cards are packed together with no gaps where others would go, so the
+## diagram never gives away how much else is possible. The layout follows the
 ## timelines chart (story/timelines.json). A tap afterwards returns to the main screen.
 ##
 ## The diagram is built from nodes, not drawn into a picture: each card is a Panel with a flat
@@ -37,11 +37,6 @@ const BACKGROUND_BOTTOM := Color(0.03, 0.02, 0.035, 1)
 const CARD_FILL := Color(0.17, 0.1, 0.14, 0.95)
 const PAST_LINE := Color(1, 1, 1, 0.32)
 const PAST_LINE_WIDTH := 2.0
-## A branch not reached yet: a fainter line, and a dim card that only says "???".
-const UNKNOWN_LINE := Color(1, 1, 1, 0.1)
-const UNKNOWN_TITLE := "???"
-const UNKNOWN_BORDER := Color(0.55, 0.55, 0.55, 0.45)
-const UNKNOWN_TEXT := Color(1, 1, 1, 0.38)
 const GLOW_CORE := Color(0.62, 1.0, 0.66, 1)
 const GLOW_INNER := Color(0.3, 0.95, 0.42, 0.35)
 const GLOW_OUTER := Color(0.2, 0.9, 0.35, 0.14)
@@ -97,9 +92,11 @@ var _sections: Dictionary = {}
 var _centers: Dictionary = {}
 ## Card id to its Panel, for the cards being shown.
 var _cards: Dictionary = {}
-## The cards and connections of finished realities, as opposed to "???" ones.
-var _known: Dictionary = {}
+## Connections already drawn, so a connection several realities share is drawn once.
 var _drawn_edges: Dictionary = {}
+## For each shown timeline, the rows its reached cards use, packed together from 0, by the row the
+## chart gives them. A branch not reached leaves no gap.
+var _packed_rows: Dictionary = {}
 var _shown_sections: Array = []
 ## Where each shown timeline starts, in rows. Shown timelines are stacked with no gap for the ones
 ## not finished yet.
@@ -176,29 +173,19 @@ func _build() -> void:
 			var section := str(_nodes[id].get("section", ""))
 			if section not in _shown_sections:
 				_shown_sections.append(section)
+	_pack_rows(realities)
 	_stack_sections()
 	for reality in realities:
 		var path: Array = reality.get("path", [])
 		for id in path:
-			_known[id] = true
 			if not _centers.has(id):
 				_centers[id] = _center_of(id)
 		for index in range(path.size() - 1):
 			_add_edge(path[index], path[index + 1], PAST_LINE)
-	# The branches not reached yet, in the timelines already shown, faintly behind the rest.
-	for reality in map.get("realities", []):
-		var path: Array = reality.get("path", [])
-		if reality in realities or path.is_empty() or str(_nodes[path[0]].get("section", "")) not in _shown_sections:
-			continue
-		for id in path:
-			if not _centers.has(id):
-				_centers[id] = _center_of(id)
-		for index in range(path.size() - 1):
-			_add_edge(path[index], path[index + 1], UNKNOWN_LINE)
 	for section in _shown_sections:
 		_add_section_title(section)
 	for id in _centers:
-		_add_card(id, _known.has(id))
+		_add_card(id)
 	_new_path = StoryDirector.last_reality.get("path", [])
 	if TimelineMap.key_of(StoryDirector.last_reality) not in GameState.realities:
 		_new_path = []
@@ -219,11 +206,8 @@ func _stack_sections() -> void:
 	var next_row := 0.0
 	for section in _shown_sections:
 		_section_rows[section] = next_row
-		var last_row := 0.0
-		for id in _nodes:
-			if str(_nodes[id].get("section", "")) == section:
-				last_row = maxf(last_row, float(_nodes[id].get("row", 0.0)))
-		next_row += last_row + 1.0 + SECTION_GAP_ROWS
+		var last_row := float((_packed_rows.get(section, {}) as Dictionary).size() - 1)
+		next_row += maxf(last_row, 0.0) + 1.0 + SECTION_GAP_ROWS
 
 
 ## A timeline's first row: where it is stacked, or its place in the chart if it is not shown.
@@ -231,9 +215,30 @@ func _section_row(section: String) -> float:
 	return float(_section_rows.get(section, _sections.get(section, {}).get("row", 0.0)))
 
 
+## Gives the rows the reached cards of each timeline use new numbers, 0, 1, 2 and on, in the
+## chart's order, so the rows of branches not reached do not leave gaps.
+func _pack_rows(realities: Array) -> void:
+	var used: Dictionary = {}
+	for reality in realities:
+		for id in reality.get("path", []):
+			var section := str(_nodes[id].get("section", ""))
+			if not used.has(section):
+				used[section] = {}
+			used[section][float(_nodes[id].get("row", 0.0))] = true
+	for section in used:
+		var rows: Array = (used[section] as Dictionary).keys()
+		rows.sort()
+		var packed := {}
+		for index in rows.size():
+			packed[rows[index]] = float(index)
+		_packed_rows[section] = packed
+
+
 func _center_of(id: String) -> Vector2:
 	var card: Dictionary = _nodes[id]
-	var row := _section_row(str(card.get("section", ""))) + float(card.get("row", 0.0))
+	var section := str(card.get("section", ""))
+	var chart_row := float(card.get("row", 0.0))
+	var row := _section_row(section) + float((_packed_rows.get(section, {}) as Dictionary).get(chart_row, chart_row))
 	return Vector2(float(card.get("col", 0.0)) * COLUMN_WIDTH, row * ROW_HEIGHT + SECTION_TITLE_GAP)
 
 
@@ -252,9 +257,7 @@ func _add_edge(from_id: String, to_id: String, color: Color) -> void:
 	if _drawn_edges.has(key):
 		return
 	_drawn_edges[key] = true
-	var line := _add_line(_edge_layer, _edge(from_id, to_id), color, PAST_LINE_WIDTH)
-	if color == UNKNOWN_LINE:
-		_edge_layer.move_child(line, 0)
+	_add_line(_edge_layer, _edge(from_id, to_id), color, PAST_LINE_WIDTH)
 
 
 func _add_line(layer: Node2D, points: PackedVector2Array, color: Color, width: float) -> Line2D:
@@ -290,28 +293,12 @@ func _add_section_title(section: String) -> void:
 	_card_layer.add_child(title)
 
 
-## A card: a rounded box in the colour of its kind, its title, and a short line under it. A card no
-## finished reality reaches is dim and says only "???".
-func _add_card(id: String, known := true) -> void:
+## A card: a rounded box in the colour of its kind, its title, and a short line under it.
+func _add_card(id: String) -> void:
 	var card: Dictionary = _nodes[id]
 	var kind := str(card.get("kind", "story"))
 	if not KIND_COLORS.has(kind):
 		kind = "story"
-	if not known:
-		var hidden := Panel.new()
-		hidden.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		hidden.size = CARD_SIZE
-		hidden.position = (_centers[id] as Vector2) - CARD_SIZE / 2.0
-		var dim := _card_style(kind, false)
-		dim.border_color = UNKNOWN_BORDER
-		dim.bg_color = Color(CARD_FILL, 0.6)
-		hidden.add_theme_stylebox_override("panel", dim)
-		var mark := _label(UNKNOWN_TITLE, _title_font, TITLE_SIZE, UNKNOWN_TEXT, CARD_SIZE.x - CARD_PADDING * 2.0)
-		mark.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		mark.position = Vector2(CARD_PADDING, (CARD_SIZE.y - _title_font.get_height(TITLE_SIZE)) / 2.0)
-		hidden.add_child(mark)
-		_card_layer.add_child(hidden)
-		return
 	var panel := Panel.new()
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.size = CARD_SIZE

@@ -1,5 +1,5 @@
 {
-	"_comment": "Every reality the stories can make, from the timelines chart. 'nodes' are the cards of the diagram: 'col' and 'row' place them in their section's grid, and 'kind' colours them (story, lives, suffers, dies, someone_dies). 'realities' list, for each finished run, every outcome it records ('needs', matched exactly) and the cards its line passes through. 'aliases' are the names older saves gave the same reality. Finished realities are shown in full; in a shown timeline, the cards no save has reached yet show as '???'.",
+	"_comment": "Every reality the stories can make, from the timelines chart. 'nodes' are the cards of the diagram: 'col' and 'row' place them in their section's grid, and 'kind' colours them (story, lives, suffers, dies, someone_dies). 'realities' list, for each finished run, every outcome it records ('needs', matched exactly) and the cards its line passes through. 'aliases' are the names older saves gave the same reality. Only realities a save has finished are ever shown, packed so no gaps hint at the others.",
 	"sections": {
 		"main": {
 			"title": "Main timeline",
