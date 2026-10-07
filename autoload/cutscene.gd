@@ -119,6 +119,8 @@ func play(steps: Array) -> void:
 		if not Alaala.allows(data):
 			continue
 		if data.has("card"):
+			if not data.get("alaala", false):
+				GameState.log_moment({"ending": str(data["card"]), "line": str(data.get("line", ""))})
 			await _play_card(str(data["card"]), str(data.get("line", "")))
 		elif data.has("image"):
 			var next_steps: Array = await _play_picture(data)

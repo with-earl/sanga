@@ -298,8 +298,20 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
     (main: Ligtas, Sinamahan, Pinalaya, Walang Namatay; kumpisal: Nagtago, Pinalaya; padala:
     Tanod, Sinamahan) and 32 realities, each listing every outcome of its run. `TimelineMap
     .reality_for` matches exactly (same outcomes, no more, no fewer). Older saves' reality names
-    are kept as `aliases`. In a shown timeline, branches not reached yet show as dim "???" cards on
-    faint lines. The smoke test checks the chart. The developer tools' Endings list grew to match.
+    are kept as `aliases`. The smoke test checks the chart. The developer tools' Endings list grew
+    to match.
+  - **No spoilers of what was not played** (user: "hide possible outcomes to player... plan
+    first", then "keep the closing line, go ahead"). The chart shows only finished realities: no
+    "???" cards, no faint lines, and rows are packed (`_pack_rows`) so unreached branches leave no
+    gaps. The memory book lists only held memories, with no count ("Wala ka pang naaalala." when
+    empty). Every run now ends with **"Ang Nangyari"** (`scenes/run_recap.tscn`,
+    `scripts/run_recap.gd`): the run written into the open book: stories in played order, the
+    player's own choices in quotes, each ending's line, memories gained, then "Ito ang nangyari.
+    Hindi ito ang tanging maaaring mangyari." It turns pages by tap when long, then goes to the
+    time-order card (main timeline) or the chart (other timelines). The record is
+    `GameState.run_log` (saved per slot), filled by `StoryDirector._enter_chapter`,
+    `DialogueBox.choose`, `Cutscene` ending cards (memory cards skipped) and
+    `StoryDirector._remember`. The smoke test checks the recap.
     **Next: Phase 5**, a full playthrough from a fresh save to the true ending.
 - **No sound on iPhone** (user report). The game itself plays music (checked: player playing,
   buses not muted). Fix in the Web preset's `html/head_include`: it wraps `AudioContext` to keep

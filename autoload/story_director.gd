@@ -29,6 +29,10 @@ const TIMELINES := {
 const TIMELINE_STARTING_WITH := {"tokhang": "main", "kumpisal": "kumpisal", "padala": "padala"}
 ## The reality the last finished run made (see TimelineMap), for the timeline reveal.
 var last_reality: Dictionary = {}
+## What happened in the last finished run, for its recap (see GameState.run_log).
+var last_run_log: Array = []
+## The timeline the last finished run was on, so its recap knows where to go next.
+var last_timeline := ""
 
 ## Story order shown to the player when choosing where to begin.
 const STORY_ORDER := ["tokhang", "kumpisal", "padala"]
@@ -63,6 +67,7 @@ func begin_with(story: String) -> void:
 	# Flags starting with "run_" remember choices that shape later stories of this run only.
 	GameState.clear_flags(RUN_FLAG_PREFIX)
 	GameState.run_outcomes = []
+	GameState.run_log = []
 	if timeline != "main":
 		await Cutscene.play(_prologue_for(story))
 	_enter_chapter([])
@@ -112,6 +117,9 @@ func end_run(ending_id: String, title: String, line: String, lead_in: Array = []
 	GameState.record_ending(ending_id)
 	await _remember(ending_id)
 	var finished_timeline := GameState.timeline
+	last_run_log = GameState.run_log.duplicate(true)
+	last_timeline = finished_timeline
+	GameState.run_log = []
 	last_reality = TimelineMap.reality_for(finished_timeline, GameState.run_outcomes)
 	GameState.record_reality(TimelineMap.key_of(last_reality))
 	GameState.run_outcomes = []
@@ -127,10 +135,9 @@ func end_run(ending_id: String, title: String, line: String, lead_in: Array = []
 		Cutscene.hand_over()
 	if title != "":
 		StoryCard.show_ending(title, line, lead_in)
-	elif finished_timeline == "main":
-		StoryCard.show_time_order(lead_in)
 	else:
-		StoryCard.show_ending("", "", lead_in, "timeline_reveal")
+		# Every run closes with its recap; the recap goes on to the time order or the chart.
+		StoryCard.show_ending("", "", lead_in, "run_recap")
 
 
 ## A death the player has seen for the first time becomes an Alaala: it is saved at once, and a
@@ -139,6 +146,8 @@ func _remember(ending_id: String) -> void:
 	var gained := Alaala.remember_from(ending_id)
 	if gained.is_empty():
 		return
+	for item in gained:
+		GameState.log_moment({"alaala": str(item.get("id", ""))})
 	GameState.save_current()
 	await Cutscene.play(Alaala.cards_for(gained))
 
@@ -148,6 +157,7 @@ func _enter_chapter(lead_in: Array) -> void:
 		Cutscene.hand_over()
 	var story := current_story()
 	var info: Dictionary = STORIES[story]
+	GameState.log_moment({"story": str(info["title"])})
 	# Each story starts fresh, even if it was played before in another run.
 	GameState.clear_flags("objective_")
 	GameState.location = info["scene"]
