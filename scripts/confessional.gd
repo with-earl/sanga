@@ -8,6 +8,18 @@ extends Location
 ##   the ending cutscene plays, and the next story starts by itself, or the run ends.
 ##
 ## Who confesses and how it ends depend on the timeline, and come from story/kumpisal.json.
+##
+## Two Alaala choices live here (see Alaala): in Kulas' confession, "Sasamahan kita" saves him
+## (the Sinamahan ending), and at the end Father Eli can confess his own sin, which changes how
+## Padala ends.
+
+## Set while Kulas is in danger after the confessions, so his confession offers the choice that
+## saves him, and while Mercy is in church, so Gloria can ask Father Eli to look after her.
+const KULAS_AT_RISK_FLAG := "objective_kumpisal_kulas_at_risk"
+const MERCY_HERE_FLAG := "objective_kumpisal_mercy_here"
+## Set for the rest of the run when Father Eli walks Kulas out instead of letting him run.
+const KULAS_SAFE_FLAG := "run_kulas_safe"
+const SINAMAHAN_OUTCOME := "kumpisal_sinamahan"
 
 ## Where the church nave keeps its route progress. "Go to confessional booth" is its last step.
 @export var nave_step_flag := "objective_step:church_nave"
@@ -55,6 +67,8 @@ func _play_confessions() -> void:
 	if _back_button != null:
 		_back_button.modulate.a = 0.0
 		_back_button.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	GameState.set_flag(KULAS_AT_RISK_FLAG, _variant.get("kulas_at_risk", false))
+	GameState.set_flag(MERCY_HERE_FLAG, "Mercy" in _variant.get("cast", []))
 	for confession in _variant.get("confessions", []):
 		_show_caption(str(confession.get("title", "")))
 		var who := str(confession.get("who", ""))
@@ -67,11 +81,12 @@ func _play_confessions() -> void:
 		await _dialogue.dismissed
 	GameState.set_flag(nave_step_flag, _booth_step() + 1)
 	await Cutscene.play(_variant.get("ending", []))
+	var kulas_safe: bool = GameState.get_flag(KULAS_SAFE_FLAG, false)
 	var run_ending := str(_variant.get("end_run", ""))
 	if run_ending != "":
-		StoryDirector.end_run(run_ending, "", "")
+		StoryDirector.end_run(SINAMAHAN_OUTCOME if kulas_safe else run_ending, "", "")
 	else:
-		StoryDirector.finish_story([], "kumpisal_" + KumpisalStory.variant_name())
+		StoryDirector.finish_story([], SINAMAHAN_OUTCOME if kulas_safe else "kumpisal_" + KumpisalStory.variant_name())
 
 
 ## The step of the nave's route that is "Go to confessional booth": always the last one.

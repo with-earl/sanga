@@ -276,6 +276,20 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   living cutscenes, breathing characters, light); no 3D rebuild. The user approved Father Eli
   confessing his own sin. Next: Phase 1 (Alaala system), then content, endings and art, map,
   playtest.
+- **Alaala built (PR after #19), phases 1-3 of the plan in code:**
+  - System: `GameState.alaala` (saved per slot, never reset), `scripts/alaala.gd`, awarded by
+    `StoryDirector._remember` at every finished story or run (a card: name, memory line,
+    "Hindi mo na ito makakalimutan."). Every run opens with the prologue (`story/prologue.json`).
+    Developer tools have "Remember All Memories" / "Forget All Memories"; jumps keep memories.
+  - Script: all of docs/STORY_BIBLE.md is in `story/tokhang.json`, `kumpisal.json`,
+    `padala.json` (nave talks, confessions with choices, revelation lines, the five Alaala
+    choices, endings Ligtas, Sinamahan, Pinalaya, Tanod, Nagtago and the true ending
+    Walang Namatay). Run flags: `run_kulas_safe`, `run_eli_confessed`, `run_tanod`.
+  - Art: 13 placeholder cutscenes from `tools/draw_placeholders.py`
+    (`assets/cutscenes/PLACEHOLDERS.txt` lists them). Painting them is the main art task.
+  - **Not done yet (Phase 4):** `story/timelines.json` has no cards or realities for the new
+    endings, so they don't show on the timelines chart, and a run mixing a new ending with old
+    ones can match an old reality. Phase 5 is playtesting from a fresh save.
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions

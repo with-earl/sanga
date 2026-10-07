@@ -10,6 +10,9 @@ extends Location
 ##
 ## In the Padala timeline, after Mercy called the police, there is no choice: after the phone call
 ## Father Eli trades Kulas' whereabouts to Batista for Mercy, and Peter dies.
+##
+## With the Alaala "Ang Laruang Baril" the buyer can take the water gun instead (an Alaala choice).
+## Paying for it with Gloria then leads to the Ligtas ending: nobody is shot.
 
 const STORY_FILE := "res://story/tokhang.json"
 ## Saved progress: who went to the market, "" until the phone call is over.
@@ -18,6 +21,8 @@ const BUYER_FLAG := "objective_tokhang_buyer"
 const STEP_GLORIA := 0
 const STEP_CHOOSE := 1
 const STEP_RETURN := 2
+## Saved progress: "water" once the buyer settled on the water gun (an Alaala choice).
+const GUN_FLAG := "objective_tokhang_gun"
 
 var _story: Dictionary = {}
 var _buyer := ""
@@ -122,15 +127,31 @@ func _tap_gloria(slot: ArtSlot) -> void:
 			await _converse(_with_buyer(asking.slice(1)), false)
 		STEP_RETURN:
 			_advance_step()
-			await _play_outcome(_buyer.to_lower())
+			# Paying: a little haggling, and, for a player who remembers, what Gloria does next.
+			_hide_characters(_only_if_character(slot))
+			await _converse(_story.get("pay", []), false)
+			var safe: bool = GameState.get_flag(GUN_FLAG, "") == "water"
+			await _play_outcome("safe" if safe else _buyer.to_lower())
 
 
 func _tap_gun(slot: ArtSlot, gun: Dictionary) -> void:
 	if _step == STEP_GLORIA:
 		await _converse([{"speaker": _buyer, "text": _story.get("talk_first", "")}], false)
 		return
-	await _converse([{"speaker": _buyer, "text": gun.get("text", "")}], false)
-	if _step == STEP_CHOOSE and gun.get("chosen", false):
+	var lines: Array = [{"speaker": _buyer, "text": gun.get("text", "")}]
+	var picked := [""]
+	if _step == STEP_CHOOSE and gun.has("choice"):
+		lines.append(gun["choice"])
+	var remember := func(id: String) -> void: picked[0] = id
+	_dialogue.line_choice_made.connect(remember)
+	await _converse(lines, false)
+	_dialogue.line_choice_made.disconnect(remember)
+	if _step != STEP_CHOOSE:
+		return
+	if picked[0] == "water_gun":
+		GameState.set_flag(GUN_FLAG, "water")
+		_advance_step()
+	elif gun.get("chosen", false):
 		_advance_step()
 
 

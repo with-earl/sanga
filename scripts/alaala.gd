@@ -10,6 +10,8 @@ extends RefCounted
 ## The story files say what needs which Alaala. Any line, cutscene step or choice option can have:
 ##   "needs": "father_eli"       shown only when the save holds that Alaala
 ##   "needs_not": "father_eli"   shown only when it does not
+##   "if_flag": "run_x"          shown only while that flag of the run is set
+##   "unless_flag": "run_x"      shown only while it is not
 ## A line can also change who speaks once an Alaala is held, for a voice that gets a name:
 ##   {"speaker": "???", "text": "...", "reveal": {"needs": "father_eli", "speaker": "Batista"}}
 
@@ -74,6 +76,10 @@ static func allows(entry: Variant) -> bool:
 	if data.has("needs") and not has(str(data["needs"])):
 		return false
 	if data.has("needs_not") and has(str(data["needs_not"])):
+		return false
+	if data.has("if_flag") and not GameState.get_flag(str(data["if_flag"]), false):
+		return false
+	if data.has("unless_flag") and GameState.get_flag(str(data["unless_flag"]), false):
 		return false
 	return true
 
