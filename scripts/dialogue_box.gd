@@ -41,7 +41,7 @@ const PORTRAIT_SIZE_FACTORS := {
 ## looks the other way from their usual one.
 const PORTRAITS_FACING_RIGHT := ["father_eli", "ben", "gloria", "gwen", "peter", "batista_2"]
 ## Single pictures that look to the left although their character's usual picture looks right.
-const PORTRAITS_FACING_LEFT := ["gloria_2"]
+const PORTRAITS_FACING_LEFT := ["gloria_2", "gwen_2"]
 ## How far a portrait stands in from the side of the box, so the characters are a little in from
 ## its edges.
 const PORTRAIT_INSET := 40.0
