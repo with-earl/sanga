@@ -168,13 +168,15 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
-- **The cloud session could not push to `main`** (HTTP 403 from the git proxy). All the work in
-  decision 12 is pushed to the branch **`claude/button-colors`** instead, and is **not tagged**.
-  The Pages site still shows v0.7.0. Next session: get it onto `main` (a PR the user merges, or
-  the user pushes), then tag **v0.8.0** on `main` ("v0.8.0 — soft 90s anime UI, wide phone fit,
-  larger text") and push with `--follow-tags`. Locally the clone was on a detached HEAD; a local
-  `main` was created that tracks `origin/claude/button-colors`, which makes the stop hook report
-  "unpushed commits on main".
+- **The cloud session cannot push to `main` or push tags** (HTTP 403). Work goes to a
+  `claude/...` branch and a PR the user merges on GitHub. Decision 12 landed as PR #1, and Pages
+  deployed it. The **v0.8.0 tag is not on GitHub**; the user can add it from Releases (tag
+  `v0.8.0`, target the PR #1 merge commit `df91f23`).
+- After playtesting v0.8.0 on the iPhone the user said the game "should be rendering its right
+  ratio": they want the **16:9 shape kept, with black bars**, not the window growing to fill the
+  phone. The `expand` stretch aspect was removed (v0.8.1). The stage and side-fill code in
+  `ScreenFit`/`Location` stays, but only acts if `expand` is ever turned back on. They also asked
+  for **"Progress saved" at the top centre** (it was bottom right).
 - Phases 1 to 4 of the GUI plan are done and checked in screenshots at 16:9, 19.5:9 and 4:3.
   Left from the plan: **Phase 5** (a lighter text blur that is the same on every screen, and the
   title/ending cards moved fully onto the window palette) and **Phase 6** polish (consistent

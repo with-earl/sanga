@@ -1,9 +1,10 @@
 class_name ScreenFit
 extends RefCounted
-## Helps the game fit any phone screen. The game is drawn for a 1280 x 720 screen, but most phones
-## are wider than that. The window grows to the phone's shape, every place keeps its 1280 x 720
-## "stage" in the middle (so nothing in the art is ever cut off or stretched), and a soft blurred
-## copy of the background fills the extra space at the sides.
+## Helps the game fit any phone screen. The game is drawn for a 1280 x 720 screen and keeps that
+## shape: on a wider phone it shows black bars at the sides rather than stretching. The helpers
+## below also cope with a window that grows to the phone's shape (project setting
+## display/window/stretch/aspect = "expand"): then every place keeps its 1280 x 720 "stage" in the
+## middle and a soft blurred copy of the background fills the extra space.
 
 ## The screen size every place, prop position and piece of art is made for.
 const DESIGN_SIZE := Vector2(1280, 720)
@@ -33,6 +34,9 @@ static func cover_rect(content: Vector2, area: Vector2) -> Rect2:
 ## where the browser already keeps the page clear of them.
 static func safe_insets(viewport: Viewport) -> Vector4:
 	if not (OS.has_feature("android") or OS.has_feature("ios")):
+		return Vector4.ZERO
+	# With the 16:9 shape kept, the black bars already keep the game clear of the notch.
+	if str(ProjectSettings.get_setting("display/window/stretch/aspect", "keep")) != "expand":
 		return Vector4.ZERO
 	var window := Vector2(DisplayServer.window_get_size())
 	var safe := Rect2(DisplayServer.get_display_safe_area())

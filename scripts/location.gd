@@ -142,7 +142,7 @@ func _fit_stage() -> void:
 ## story scripts have picked their background (Padala swaps it in its own `_ready`).
 func _build_side_fill() -> void:
 	var background := get_node_or_null("Background") as ArtSlot
-	if background == null:
+	if background == null or get_viewport().get_visible_rect().size == ScreenFit.DESIGN_SIZE:
 		return
 	var blurred := ScreenFit.blurred_copy(background.get_art_texture())
 	if blurred == null:

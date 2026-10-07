@@ -1,5 +1,5 @@
 extends CanvasLayer
-## A quiet "Progress saved" note in the bottom right corner after each automatic save the player
+## A quiet "Progress saved" note at the top centre of the screen after each automatic save the player
 ## should know about. It fades in, stays a moment, and fades out.
 
 const FADE_IN_SECONDS := 0.25
@@ -14,12 +14,12 @@ func _ready() -> void:
 	layer = 60
 	_label.text = "Progress saved"
 	_label.theme_type_variation = &"HudBody"
-	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	_label.offset_left = -320.0
-	_label.offset_top = -56.0
-	_label.offset_right = -32.0
-	_label.offset_bottom = -24.0
+	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	_label.offset_left = -200.0
+	_label.offset_top = 24.0
+	_label.offset_right = 200.0
+	_label.offset_bottom = 58.0
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_label.modulate.a = 0.0
 	add_child(_label)
