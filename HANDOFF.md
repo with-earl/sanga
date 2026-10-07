@@ -323,7 +323,8 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   the gear (gear 64, book 67, clipboard 59). Later (user): no ribbon on the book, and all three
   were redrawn with more depth: the gear's thickness and bevel, the book's leather cover, stacked
   page edges and gutter shadow, the clipboard's board thickness and lifted paper corner, plus a
-  soft drop shadow on each (`_finish` in `draw_props.py`).
+  soft drop shadow on each (`_finish` in `draw_props.py`). The book is drawn as if seen more from
+  above (`BOOK_HEIGHT` in `draw_props.py`) so it stands as tall as the clipboard on screen.
   Icons drawn by `tools/draw_props.py` (`assets/ui/book.png`, `clipboard.png`), window in
   `scripts/journal_modal.gd`. All HUD icons hide during dialogues (`GameMenu.get_hud_icons`).
 - **Music volume:** the user still has not confirmed -24 dB sounds right.

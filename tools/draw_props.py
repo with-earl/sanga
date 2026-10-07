@@ -333,6 +333,10 @@ def _finish(icon: Image.Image, name: str, s: int) -> None:
     out.resize((128, 128), Image.LANCZOS).save(ROOT / "assets" / "ui" / name)
 
 
+## How tall the open book is drawn (of 128), so it stands as tall as the clipboard on screen.
+BOOK_HEIGHT = 104
+
+
 def draw_book_icon() -> None:
     """The memories (Alaala) icon: an old book lying open, seen a little from above. A worn leather
     cover shows under the pages, the pages bow up from the spine with a deep shadow in the gutter,
@@ -386,6 +390,12 @@ def draw_book_icon() -> None:
     d.line([(64 * s, 38 * s), (64 * s, 92 * s)], fill=(90, 62, 36, 255), width=3 * s)
     # A soft shine on the upper left page.
     d.arc((14 * s, 30 * s, 54 * s, 70 * s), 200, 255, fill=(255, 252, 240, 255), width=3 * s)
+    # Seen more from above, so the book stands as tall as the clipboard beside it.
+    box = icon.getbbox()
+    book = icon.crop(box)
+    tall = book.resize((book.width, BOOK_HEIGHT * s), Image.LANCZOS)
+    icon = Image.new("RGBA", (n, n), (0, 0, 0, 0))
+    icon.alpha_composite(tall, ((n - tall.width) // 2, (n - tall.height) // 2))
     _finish(icon, "book.png", s)
 
 
