@@ -105,7 +105,7 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
      | Name | Timeline | Ends on |
      |---|---|---|
      | Main | main | Key |
-     | Alternate 1 | main | Police Card |
+     | Alternate 1 | main | Police Poster (was Police Card) |
      | Alternate 2 | kumpisal | Run |
      | Alternate 3 | kumpisal | Ride Jeep |
      | Alternate 4 | padala | Trade |
@@ -187,7 +187,23 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   rack, tail light and part of the seat; `ArtSlot.depth_blur` 5); **Gloria, Ben and Gwen's portraits are mirrored** in the
   Kumpisal scenes (`Location.flipped_portraits`). Tapping Ben or Gwen shows **both of them on the
   right for the whole talk** (Ben in front, Gwen behind; `DialogueBox` companion portrait), in
-  script order, Ben first. Open question 4 (keep the gear) is answered.
+  script order, Ben first.
+- Later in the same PR (#4), on the user's requests:
+  - **Everyone faces each other** in dialogue: portraits are mirrored by side
+    (`DialogueBox.PORTRAITS_FACING_RIGHT`), so left faces right and right faces left.
+  - **Confessions start at once**; each confession's title shows at the top meanwhile.
+  - **Objective hint** is now one fixed glint per target that breathes slowly (3.4 s), after
+    8 s idle, God of War style (`Location._show_glints`).
+  - **Dev "Jump to" window** on the main screen (`scripts/dev_jump.gd`), replacing
+    Stories/Endings: every story of every timeline, the confessions, the room after Padala's
+    intro, and the endings. Unsaved runs, no confirmation.
+  - **Police card is now a police emergency poster** on the wall ("Read the police emergency
+    poster"; ending card "Police Poster"; ids unchanged). **Keys redrawn from a low side angle.**
+    Both drawn by `tools/draw_props.py`, plus a floor-lying food delivery card.
+  - **Props sit in the room**: `ArtSlot.grounding` (CONTACT or WALL shadow, room light, film look).
+  - **GUI polish**: plate behind the scene title, soft window behind objectives and the title
+    screen's lists, `TapHint` pill, `TitleOrnament` on title/ending cards, and a restyled,
+    larger timeline ending (plum sky, window-coloured cards). Open question 4 (keep the gear) is answered.
 - Phases 1 to 4 of the GUI plan are done and checked in screenshots at 16:9, 19.5:9 and 4:3.
   Left from the plan: **Phase 5** (a lighter text blur that is the same on every screen, and the
   title/ending cards moved fully onto the window palette) and **Phase 6** polish (consistent
