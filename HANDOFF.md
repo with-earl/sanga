@@ -249,6 +249,14 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   sits under the first section (the user had "Progress from these shortcuts isn't saved" removed). `DevJump.GROUPS` now
   holds only each story's start plus the Kumpisal confessions (the in-church, in-room and
   Peter/Gwen-buying points were removed).
+- PR #15 (user's request): on a phone or tablet held upright, the web page **turns the game to
+  landscape** by itself (browsers cannot lock orientation, iOS Safari above all). A script in the
+  Web preset's `html/head_include` rotates the canvas 90°, sizes it to the long side
+  (`canvas_resize_policy=0`), and rewrites each touch and mouse event's position before the
+  game reads it (touch lists are swapped for turned copies, since a Touch's own position cannot
+  be changed), so touches stay real touches. Checked in Playwright as a 390x844 touch phone:
+  taps on Tap to start, Continue and the terminal icon land, and a finger drag scrolls the
+  developer tools list. Not yet checked on a real iPhone.
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions
