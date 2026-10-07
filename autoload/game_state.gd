@@ -34,6 +34,9 @@ var realities: Array = []
 ## The Alaala (memories) this save holds, by id (see Alaala). Unlike flags, they are never reset
 ## between runs: they are what the player carries from one life to the next.
 var alaala: Array = []
+## What happened in the run being played, in order, for the recap at its end ("Ang Nangyari"):
+## {"story": title}, {"choice": words}, {"ending": title, "line": words}, {"alaala": id}.
+var run_log: Array = []
 ## Seconds played in this save.
 var play_seconds := 0.0
 ## Undo: the state after each step of the story being played, oldest first. The first entry is
@@ -81,6 +84,7 @@ func _reset() -> void:
 	run_outcomes = []
 	realities = []
 	alaala = []
+	run_log = []
 	play_seconds = 0.0
 	history = []
 	changed_since_checkpoint = false
@@ -126,6 +130,12 @@ func record_decision(decision_id: String, choice: String) -> void:
 	changed_since_checkpoint = true
 	save_current(true)
 	state_changed.emit()
+
+
+## Adds a moment to this run's recap.
+func log_moment(entry: Dictionary) -> void:
+	if timeline != "":
+		run_log.append(entry)
 
 
 func record_ending(ending_id: String) -> void:
@@ -197,6 +207,7 @@ func save_to_slot(slot: int) -> bool:
 		"run_outcomes": run_outcomes,
 		"realities": realities,
 		"alaala": alaala,
+		"run_log": run_log,
 		"play_seconds": play_seconds,
 		"history": history,
 		"changed_since_checkpoint": changed_since_checkpoint,
@@ -228,6 +239,7 @@ func load_slot(slot: int) -> bool:
 	run_outcomes = data["run_outcomes"]
 	realities = data["realities"]
 	alaala = data["alaala"]
+	run_log = data["run_log"]
 	play_seconds = data["play_seconds"]
 	history = data["history"]
 	changed_since_checkpoint = data["changed_since_checkpoint"]
@@ -276,7 +288,7 @@ func read_slot(slot: int) -> Dictionary:
 	data["runs_finished"] = int(data.get("runs_finished", 0))
 	data["play_seconds"] = float(data.get("play_seconds", 0.0))
 	# Saves made before realities were recorded simply have none yet.
-	for list_key in ["run_outcomes", "realities", "alaala", "history"]:
+	for list_key in ["run_outcomes", "realities", "alaala", "run_log", "history"]:
 		if not data.get(list_key) is Array:
 			data[list_key] = []
 	# Undo points must each hold a whole state, or none are kept.

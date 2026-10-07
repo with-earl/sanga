@@ -64,7 +64,7 @@ static func remember_from(ending_id: String) -> Array:
 static func cards_for(gained: Array) -> Array:
 	var cards: Array = []
 	for item in gained:
-		cards.append({"card": str(item.get("name", "")), "line": "%s\n\n%s" % [item.get("memory", ""), GAINED_LINE]})
+		cards.append({"card": str(item.get("name", "")), "line": "%s\n\n%s" % [item.get("memory", ""), GAINED_LINE], "alaala": true})
 	return cards
 
 

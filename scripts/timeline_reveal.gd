@@ -3,8 +3,9 @@ extends Control
 ## first card, and a glowing green line travels the path this run took, card to card, with the
 ## view following it. Then the view pulls back to show every reality this save has made.
 ##
-## Only finished realities are shown: a timeline or branch the player has not finished never
-## appears, so the diagram never gives away what else is possible. The layout follows the
+## Only what the player has finished is shown: a timeline, branch or ending they have not reached
+## never appears, and the cards are packed together with no gaps where others would go, so the
+## diagram never gives away how much else is possible. The layout follows the
 ## timelines chart (story/timelines.json). A tap afterwards returns to the main screen.
 ##
 ## The diagram is built from nodes, not drawn into a picture: each card is a Panel with a flat
@@ -69,6 +70,8 @@ const TRAVEL_SPEED := 300.0
 const ARRIVAL_HOLD_SECONDS := 0.8
 const ZOOM_OUT_SECONDS := 2.2
 const FIT_MARGIN := 44.0
+## Room kept free under the diagram for the "Tap anywhere to continue" note.
+const HINT_ROOM := 84.0
 ## When everything fits with room to spare, the pulled-back view may stay this much larger, so a
 ## save with only one or two endings still reads comfortably.
 const MAX_FIT_ZOOM := 1.5
@@ -89,6 +92,11 @@ var _sections: Dictionary = {}
 var _centers: Dictionary = {}
 ## Card id to its Panel, for the cards being shown.
 var _cards: Dictionary = {}
+## Connections already drawn, so a connection several realities share is drawn once.
+var _drawn_edges: Dictionary = {}
+## For each shown timeline, the rows its reached cards use, packed together from 0, by the row the
+## chart gives them. A branch not reached leaves no gap.
+var _packed_rows: Dictionary = {}
 var _shown_sections: Array = []
 ## Where each shown timeline starts, in rows. Shown timelines are stacked with no gap for the ones
 ## not finished yet.
@@ -165,6 +173,7 @@ func _build() -> void:
 			var section := str(_nodes[id].get("section", ""))
 			if section not in _shown_sections:
 				_shown_sections.append(section)
+	_pack_rows(realities)
 	_stack_sections()
 	for reality in realities:
 		var path: Array = reality.get("path", [])
@@ -172,7 +181,7 @@ func _build() -> void:
 			if not _centers.has(id):
 				_centers[id] = _center_of(id)
 		for index in range(path.size() - 1):
-			_add_line(_edge_layer, _edge(path[index], path[index + 1]), PAST_LINE, PAST_LINE_WIDTH)
+			_add_edge(path[index], path[index + 1], PAST_LINE)
 	for section in _shown_sections:
 		_add_section_title(section)
 	for id in _centers:
@@ -197,11 +206,8 @@ func _stack_sections() -> void:
 	var next_row := 0.0
 	for section in _shown_sections:
 		_section_rows[section] = next_row
-		var last_row := 0.0
-		for id in _nodes:
-			if str(_nodes[id].get("section", "")) == section:
-				last_row = maxf(last_row, float(_nodes[id].get("row", 0.0)))
-		next_row += last_row + 1.0 + SECTION_GAP_ROWS
+		var last_row := float((_packed_rows.get(section, {}) as Dictionary).size() - 1)
+		next_row += maxf(last_row, 0.0) + 1.0 + SECTION_GAP_ROWS
 
 
 ## A timeline's first row: where it is stacked, or its place in the chart if it is not shown.
@@ -209,9 +215,30 @@ func _section_row(section: String) -> float:
 	return float(_section_rows.get(section, _sections.get(section, {}).get("row", 0.0)))
 
 
+## Gives the rows the reached cards of each timeline use new numbers, 0, 1, 2 and on, in the
+## chart's order, so the rows of branches not reached do not leave gaps.
+func _pack_rows(realities: Array) -> void:
+	var used: Dictionary = {}
+	for reality in realities:
+		for id in reality.get("path", []):
+			var section := str(_nodes[id].get("section", ""))
+			if not used.has(section):
+				used[section] = {}
+			used[section][float(_nodes[id].get("row", 0.0))] = true
+	for section in used:
+		var rows: Array = (used[section] as Dictionary).keys()
+		rows.sort()
+		var packed := {}
+		for index in rows.size():
+			packed[rows[index]] = float(index)
+		_packed_rows[section] = packed
+
+
 func _center_of(id: String) -> Vector2:
 	var card: Dictionary = _nodes[id]
-	var row := _section_row(str(card.get("section", ""))) + float(card.get("row", 0.0))
+	var section := str(card.get("section", ""))
+	var chart_row := float(card.get("row", 0.0))
+	var row := _section_row(section) + float((_packed_rows.get(section, {}) as Dictionary).get(chart_row, chart_row))
 	return Vector2(float(card.get("col", 0.0)) * COLUMN_WIDTH, row * ROW_HEIGHT + SECTION_TITLE_GAP)
 
 
@@ -222,6 +249,15 @@ func _edge(from_id: String, to_id: String) -> PackedVector2Array:
 	var end: Vector2 = _centers.get(to_id, _center_of(to_id)) - Vector2(CARD_SIZE.x / 2.0, 0)
 	var bend := (start.x + end.x) / 2.0
 	return PackedVector2Array([start, Vector2(bend, start.y), Vector2(bend, end.y), end])
+
+
+## A connection between two cards, drawn once even when several realities share it.
+func _add_edge(from_id: String, to_id: String, color: Color) -> void:
+	var key := from_id + ">" + to_id
+	if _drawn_edges.has(key):
+		return
+	_drawn_edges[key] = true
+	_add_line(_edge_layer, _edge(from_id, to_id), color, PAST_LINE_WIDTH)
 
 
 func _add_line(layer: Node2D, points: PackedVector2Array, color: Color, width: float) -> Line2D:
@@ -402,9 +438,10 @@ func _view_all(seconds: float) -> void:
 		first = false
 	for section in _shown_sections:
 		bounds = bounds.expand(_section_title_position(section) + Vector2(0, -SECTION_SIZE))
-	var fit := minf((size.x - FIT_MARGIN * 2.0) / bounds.size.x, (size.y - FIT_MARGIN * 2.0) / bounds.size.y)
+	var room := Vector2(size.x, size.y - HINT_ROOM)
+	var fit := minf((room.x - FIT_MARGIN * 2.0) / bounds.size.x, (room.y - FIT_MARGIN * 2.0) / bounds.size.y)
 	var zoom := minf(fit, MAX_FIT_ZOOM)
-	var target_position := size / 2.0 - bounds.get_center() * zoom
+	var target_position := room / 2.0 - bounds.get_center() * zoom
 	if seconds <= 0.0:
 		_diagram.scale = Vector2(zoom, zoom)
 		_diagram.position = target_position

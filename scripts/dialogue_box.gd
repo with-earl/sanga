@@ -326,6 +326,8 @@ func choose(options: Array) -> int:
 		create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT) \
 			.tween_property(button, "modulate:a", 1.0, CHOICE_FADE_SECONDS).set_delay(index * CHOICE_STAGGER_SECONDS)
 	var picked: int = await choice_made
+	# The recap at the end of the run quotes what the player chose, in their own words.
+	GameState.log_moment({"choice": str(options[picked]).trim_prefix(Alaala.MARK)})
 	_clear_choices()
 	if not _panel.visible:
 		_panel.visible = true

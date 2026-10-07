@@ -33,9 +33,8 @@ const BOX_SIZE := 36
 const NOTHING_YET := "Wala pang layunin."
 const OBJECTIVES_TITLE := "Objectives"
 const MEMORIES_TITLE := "Alaala"
-## A memory the save does not hold yet keeps its place, unnamed, so the player knows there is more.
-const UNKNOWN_NAME := "???"
-const UNKNOWN_MEMORY := "Hindi mo pa ito naaalala."
+## Shown in the book before the player remembers anything.
+const NOTHING_REMEMBERED := "Wala ka pang naaalala."
 ## How many memories are written on the left page; the rest go on the right.
 const LEFT_PAGE_MEMORIES := 2
 
@@ -89,31 +88,26 @@ func open_objectives(lines: PackedStringArray, struck_count: int) -> void:
 	_show()
 
 
-## Every memory across the two pages of the open book: the ones this save holds by name with their
-## line, the rest unnamed.
+## The memories this save holds, across the two pages of the open book, each by name with its
+## line. Memories not reached yet are never mentioned, not even as a count, so nothing gives away
+## how many there are.
 func open_memories() -> void:
 	var book := _start(BOOK_PICTURE, BOOK_SCALE)
 	var left := _area(book, LEFT_PAGE)
 	var right := _area(book, RIGHT_PAGE)
-	var all := Alaala.all()
-	var held := 0
-	for item in all:
+	left.add_child(_ink(MEMORIES_TITLE, TITLE_SIZE, INK))
+	var held: Array = []
+	for item in Alaala.all():
 		if Alaala.has(str(item.get("id", ""))):
-			held += 1
-	var heading := HBoxContainer.new()
-	heading.add_theme_constant_override("separation", 14)
-	heading.add_child(_ink(MEMORIES_TITLE, TITLE_SIZE, INK))
-	var count := _ink("%d / %d" % [held, all.size()], SMALL_SIZE, FADED_INK)
-	count.size_flags_vertical = Control.SIZE_SHRINK_END
-	heading.add_child(count)
-	left.add_child(heading)
-	for index in all.size():
-		var item: Dictionary = all[index]
-		var known := Alaala.has(str(item.get("id", "")))
+			held.append(item)
+	if held.is_empty():
+		left.add_child(_ink(NOTHING_REMEMBERED, SMALL_SIZE, FADED_INK))
+	for index in held.size():
+		var item: Dictionary = held[index]
 		var entry := VBoxContainer.new()
 		entry.add_theme_constant_override("separation", 2)
-		entry.add_child(_ink(str(item.get("name", "")) if known else UNKNOWN_NAME, TEXT_SIZE, INK if known else FADED_INK))
-		var memory := _ink(str(item.get("memory", "")) if known else UNKNOWN_MEMORY, SMALL_SIZE, INK if known else FADED_INK)
+		entry.add_child(_ink(str(item.get("name", "")), TEXT_SIZE, INK))
+		var memory := _ink(str(item.get("memory", "")), SMALL_SIZE, INK)
 		memory.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		entry.add_child(memory)
 		(left if index < LEFT_PAGE_MEMORIES else right).add_child(entry)

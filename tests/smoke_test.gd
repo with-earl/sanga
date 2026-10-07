@@ -15,6 +15,8 @@ func _initialize() -> void:
 	_test_save_upgrade()
 	_test_story_order()
 	_test_choices_fit_one_line()
+	_test_timelines_chart()
+	_test_run_recap()
 	await _test_asset_preloader()
 	if _failures.is_empty():
 		print("SMOKE TEST PASSED")
@@ -29,6 +31,47 @@ func _initialize() -> void:
 ## short and the screen stays balanced.
 const CHOICE_ROOM := 560.0
 const CHOICE_FONT_SIZE := 26
+
+
+## The timelines chart: every path uses real cards, every reality has its own name, and runs land
+## on exactly the reality they made (not on one that only shares some of its outcomes).
+func _test_timelines_chart() -> void:
+	var map_script: GDScript = load("res://scripts/timeline_map.gd")
+	var map: Dictionary = map_script.call("data")
+	var nodes: Dictionary = map.get("nodes", {})
+	var keys := {}
+	for reality in map.get("realities", []):
+		for id in reality.get("path", []):
+			_check(nodes.has(id), "timelines chart: unknown card %s" % id)
+		var key: String = map_script.call("key_of", reality)
+		_check(not keys.has(key), "timelines chart: two realities named %s" % key)
+		keys[key] = true
+		var found: Dictionary = map_script.call("reality_for", reality["timeline"], reality["needs"])
+		_check(found == reality, "timelines chart: %s matches another reality" % key)
+	var mixed: Dictionary = map_script.call("reality_for", "main", ["tokhang_peter", "kumpisal_sinamahan", "padala_key"])
+	_check(mixed.get("path", []).has("m_sinamahan"), "timelines chart: a saved Kulas shows on the chart")
+	var old: Array = map_script.call("realities_with", ["main:tokhang_peter+padala_key"])
+	_check(old.size() == 1, "timelines chart: an older save's reality is still found")
+
+
+## The recap writes only what the run did, and always closes with the same line, so it never
+## hints at how many other ways there were.
+func _test_run_recap() -> void:
+	var recap: GDScript = load("res://scripts/run_recap.gd")
+	var run_log := [
+		{"story": "Tokhang"},
+		{"choice": "Oo."},
+		{"ending": "Peter", "line": "Peter dies."},
+		{"alaala": "laruang_baril"},
+	]
+	var lines: Array = recap.call("lines_for", run_log)
+	var words: Array = lines.map(func(line: Array) -> String: return str(line[0]))
+	_check(words[0] == recap.get("TITLE"), "recap: starts with its title")
+	_check(words[-1] == recap.get("CLOSING_LINE"), "recap: ends with the closing line")
+	_check(words.has("Tokhang") and words.has("“Oo.”") and words.has("Peter dies."), "recap: writes the story, the choice and the ending")
+	_check(lines.size() == 7, "recap: one line per moment, two for a memory")
+	var empty: Array = recap.call("lines_for", [])
+	_check(empty.size() == 2, "recap: an empty run shows only the title and the closing line")
 
 
 func _test_choices_fit_one_line() -> void:
@@ -80,7 +123,9 @@ func _test_save_roundtrip() -> void:
 	state.location = "public_market"
 	state.flags = {"trusted_gloria": true}
 	state.decisions = [{"id": "d1", "choice": "yes", "location": "public_market"}]
+	state.run_log = [{"story": "Tokhang"}, {"choice": "Oo."}]
 	_check(state.save_to_slot(slot), "save_to_slot returns true")
+	state.run_log = []
 	state.location = "church_nave"
 	state.flags = {}
 	state.decisions = []
@@ -88,6 +133,7 @@ func _test_save_roundtrip() -> void:
 	_check(state.location == "public_market", "location restored")
 	_check(state.flags.get("trusted_gloria") == true, "flags restored")
 	_check(state.decisions.size() == 1, "decisions restored")
+	_check(state.run_log.size() == 2, "run log restored")
 	_check(state.delete_slot(slot), "delete_slot returns true")
 	_check(not state.has_slot(slot), "slot is gone after delete")
 	_check(not state.load_slot(99), "invalid slot is rejected")
