@@ -293,6 +293,67 @@ def draw_terminal_icon() -> None:
     icon.resize((128, 128), Image.LANCZOS).save(ROOT / "assets" / "ui" / "terminal.png")
 
 
+## The HUD icons share one look with the gear: light grey, a darker shade, a thick near-black
+## outline and a white shine.
+ICON_INK = (24, 24, 28, 255)
+ICON_LIGHT = (196, 199, 205, 255)
+ICON_SHADE = (150, 153, 162, 255)
+
+
+def draw_book_icon() -> None:
+    """The memories (Alaala) icon: an old book lying open, its yellowed pages curving up from the
+    spine, on a worn brown leather cover, with a red ribbon marking the page."""
+    s = 8
+    icon = Image.new("RGBA", (128 * s, 128 * s), (0, 0, 0, 0))
+    d = ImageDraw.Draw(icon)
+    leather, leather_dark = (122, 74, 42, 255), (84, 48, 26, 255)
+    page, page_shade, page_edge = (238, 222, 184, 255), (214, 192, 146, 255), (190, 164, 118, 255)
+    # The outline of the whole open book, then the cover peeking out below the pages.
+    d.polygon([(2 * s, 30 * s), (40 * s, 22 * s), (64 * s, 32 * s), (88 * s, 22 * s), (126 * s, 30 * s),
+               (126 * s, 104 * s), (88 * s, 98 * s), (64 * s, 110 * s), (40 * s, 98 * s), (2 * s, 104 * s)], fill=ICON_INK)
+    d.polygon([(10 * s, 38 * s), (40 * s, 32 * s), (64 * s, 40 * s), (88 * s, 32 * s), (118 * s, 38 * s),
+               (118 * s, 98 * s), (88 * s, 92 * s), (64 * s, 102 * s), (40 * s, 92 * s), (10 * s, 98 * s)], fill=leather_dark)
+    d.polygon([(10 * s, 38 * s), (40 * s, 32 * s), (64 * s, 40 * s), (64 * s, 96 * s), (40 * s, 88 * s), (10 * s, 92 * s)], fill=leather)
+    # The two pages, each curving up from the spine, with the stacked edges below them.
+    for side in (-1, 1):
+        x0, x1 = 64, 64 + side * 50
+        top = [(x0, 34), (64 + side * 22, 26), (x1, 30), (x1, 86), (64 + side * 22, 82), (x0, 90)]
+        d.polygon([(x * s, (y + 4) * s) for x, y in top], fill=page_edge)
+        d.polygon([(x * s, y * s) for x, y in top], fill=page if side < 0 else page_shade)
+        # Faded lines of old writing.
+        for row in range(5):
+            y = 42 + row * 8
+            d.line([((64 + side * 10) * s, (y + 1) * s), ((64 + side * 42) * s, (y - 3) * s)], fill=(150, 120, 80, 255), width=2 * s)
+    # The spine's crease and the ribbon hanging out of the book.
+    d.line([(64 * s, 34 * s), (64 * s, 92 * s)], fill=(120, 92, 56, 255), width=3 * s)
+    d.polygon([(70 * s, 88 * s), (78 * s, 88 * s), (78 * s, 122 * s), (74 * s, 117 * s), (70 * s, 122 * s)], fill=(178, 46, 40, 255))
+    d.arc((16 * s, 30 * s, 52 * s, 62 * s), 200, 260, fill=(255, 255, 255, 255), width=4 * s)
+    icon.resize((128, 128), Image.LANCZOS).save(ROOT / "assets" / "ui" / "book.png")
+
+
+def draw_clipboard_icon() -> None:
+    """The objectives icon: a blue clipboard with a silver clip and a sheet with a checklist."""
+    s = 8
+    icon = Image.new("RGBA", (128 * s, 128 * s), (0, 0, 0, 0))
+    d = ImageDraw.Draw(icon)
+    blue, blue_dark = (58, 122, 204, 255), (38, 86, 152, 255)
+    d.rounded_rectangle((14 * s, 12 * s, 114 * s, 124 * s), radius=16 * s, fill=ICON_INK)
+    d.rounded_rectangle((23 * s, 21 * s, 105 * s, 115 * s), radius=9 * s, fill=blue_dark)
+    d.rounded_rectangle((23 * s, 21 * s, 99 * s, 109 * s), radius=9 * s, fill=blue)
+    # The sheet of paper on the board.
+    d.rounded_rectangle((33 * s, 32 * s, 91 * s, 102 * s), radius=4 * s, fill=(244, 244, 238, 255))
+    # The clip at the top.
+    d.rounded_rectangle((40 * s, 2 * s, 88 * s, 30 * s), radius=8 * s, fill=ICON_INK)
+    d.rounded_rectangle((48 * s, 10 * s, 80 * s, 22 * s), radius=5 * s, fill=ICON_LIGHT)
+    # A tick and two lines, like a list of things to do.
+    d.line([(40 * s, 52 * s), (46 * s, 58 * s), (55 * s, 46 * s)], fill=ICON_INK, width=6 * s, joint="curve")
+    d.line([(61 * s, 53 * s), (84 * s, 53 * s)], fill=ICON_INK, width=6 * s)
+    d.rounded_rectangle((40 * s, 70 * s, 53 * s, 83 * s), radius=3 * s, outline=ICON_INK, width=4 * s)
+    d.line([(61 * s, 77 * s), (84 * s, 77 * s)], fill=ICON_INK, width=6 * s)
+    d.arc((28 * s, 26 * s, 62 * s, 60 * s), 190, 255, fill=(255, 255, 255, 255), width=5 * s)
+    icon.resize((128, 128), Image.LANCZOS).save(ROOT / "assets" / "ui" / "clipboard.png")
+
+
 class PhoneModel:
     """A very small 3D model of the desk telephone, so its faces have a true angle, depth and light.
     The phone is built from flat faces in the room's space (x to the right, y up, z away from the
@@ -510,6 +571,8 @@ def draw_telephone() -> None:
 
 if __name__ == "__main__":
     draw_terminal_icon()
+    draw_book_icon()
+    draw_clipboard_icon()
     draw_telephone()
     draw_key()
     draw_poster()

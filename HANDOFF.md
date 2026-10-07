@@ -312,6 +312,13 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   Choices are plain golden ochre text with an outline (`DialogueBox._style_choice`), with a small
   note above them: "Your choice may change the timeline." (`CHOICE_HINT`). The objectives list
   has no soft window behind it any more; the top shade keeps it readable.
+- **Top-right HUD icons** (user's request): an old open book (opens the Alaala window: each
+  memory held by name and line, the rest "???", with "2 / 5") and a blue clipboard (opens the
+  objectives window, finished ones struck through). They replace the on-screen objectives list
+  (`ObjectivesPanel.SHOWN_ON_SCREEN = false`; it still tracks objectives, plays the strike sound
+  and feeds `GameMenu.set_objectives`). The clipboard swells briefly when objectives change.
+  Icons drawn by `tools/draw_props.py` (`assets/ui/book.png`, `clipboard.png`), window in
+  `scripts/journal_modal.gd`. All HUD icons hide during dialogues (`GameMenu.get_hud_icons`).
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions

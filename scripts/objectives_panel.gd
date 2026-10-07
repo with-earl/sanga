@@ -15,6 +15,13 @@ const FINISHED_ALPHA := 0.6
 ## How far the text sits below the top of its area.
 const TOP_MARGIN := 18.0
 
+## The objectives are read in a window opened from the clipboard icon at the top right (see
+## GameMenu), so this list keeps track of them and plays the strike sound, but stays off screen.
+const SHOWN_ON_SCREEN := false
+
+## Emitted whenever the objectives change, for the clipboard window.
+signal objectives_changed(lines: PackedStringArray, struck_count: int, animate: bool)
+
 @onready var _list: VBoxContainer = %List
 @onready var _box: VBoxContainer = $Box
 
@@ -41,7 +48,8 @@ func _fit_box() -> void:
 func set_objectives(lines: PackedStringArray, struck_count := 0, animate := false, delay := 0.0) -> void:
 	for child in _list.get_children():
 		child.queue_free()
-	visible = not lines.is_empty()
+	visible = SHOWN_ON_SCREEN and not lines.is_empty()
+	objectives_changed.emit(lines, struck_count, animate)
 	for index in lines.size():
 		var item := ObjectiveItem.new()
 		item.theme_type_variation = &"HudBody"

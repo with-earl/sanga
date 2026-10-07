@@ -1,7 +1,8 @@
 class_name GameMenu
 extends CanvasLayer
 ## The in-game menu: the gear at the top left, then the developer tools' terminal icon while the
-## game is being made, then the place name. The gear opens a modal with
+## game is being made, then the place name. In a place, the top right holds two more icons in the
+## same style: the book opens the memories (Alaala), the clipboard opens the objectives. The gear opens a modal with
 ## on and off switches for sound, music and vibration, and a way back to the main menu. Tapping
 ## outside the modal closes it.
 ## The modal looks like the dialogue box: the same black box with a gray and silver border,
@@ -23,6 +24,14 @@ const TITLE_GAP := 22.0
 ## The terminal is a little wider than it is tall, so it is drawn a touch larger than the gear to
 ## look the same size.
 const TERMINAL_PICTURE_SIZE := 72.0
+## The icons at the top right of a place, mirroring the gear's distance from the edge.
+const BOOK_PICTURE := preload("res://assets/ui/book.png")
+const CLIPBOARD_PICTURE := preload("res://assets/ui/clipboard.png")
+const RIGHT_PICTURE_SIZE := 64.0
+const EDGE_MARGIN := Vector2(12.0, 4.0)
+## When the objectives change, the clipboard swells for a moment, so the player knows to look.
+const NUDGE_SCALE := 1.18
+const NUDGE_SECONDS := 0.35
 
 ## On the main screen the gear opens only the settings: no way back to the main menu, no story
 ## skip, and no place name.
@@ -49,6 +58,12 @@ const TERMINAL_PICTURE_SIZE := 72.0
 var _tween: Tween
 var _panel_style := StyleBoxEmpty.new()
 var _dev_tools: DevTools
+var _journal: JournalModal
+var _right_icons := HBoxContainer.new()
+var _clipboard_icon: IconButton
+## The objectives this place shows, kept up to date by the place (see set_objectives).
+var _objectives := PackedStringArray()
+var _struck_count := 0
 var _terminal_icon: IconButton
 
 
@@ -79,6 +94,77 @@ func _ready() -> void:
 		_location_title.visible = false
 	if DevTools.enabled():
 		_add_dev_tools()
+	if not main_screen:
+		_add_journal()
+
+
+## The book and the clipboard at the top right, and the window they open.
+func _add_journal() -> void:
+	_right_icons.name = "RightIcons"
+	_right_icons.add_theme_constant_override("separation", 0)
+	_right_icons.add_child(_make_icon("BookIcon", BOOK_PICTURE, _open_memories))
+	_clipboard_icon = _make_icon("ClipboardIcon", CLIPBOARD_PICTURE, _open_objectives)
+	_right_icons.add_child(_clipboard_icon)
+	add_child(_right_icons)
+	_right_icons.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE)
+	_right_icons.position += Vector2(-EDGE_MARGIN.x, EDGE_MARGIN.y)
+	_journal = JournalModal.new()
+	_journal.name = "Journal"
+	add_child(_journal)
+
+
+func _make_icon(icon_name: String, picture: Texture2D, action: Callable) -> IconButton:
+	var icon := IconButton.new()
+	icon.name = icon_name
+	icon.theme_type_variation = &"TextButton"
+	icon.focus_mode = Control.FOCUS_NONE
+	icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	icon.plain = true
+	icon.picture = picture
+	icon.picture_size = RIGHT_PICTURE_SIZE
+	icon.custom_minimum_size = Vector2(ICON_SIZE, ICON_SIZE)
+	icon.pivot_offset = Vector2(ICON_SIZE, ICON_SIZE) / 2.0
+	icon.pressed.connect(action)
+	return icon
+
+
+## The place's objectives, for the clipboard window. With `animate` (an objective was just done
+## or a new one appeared), the clipboard swells for a moment.
+func set_objectives(lines: PackedStringArray, struck_count: int, animate: bool) -> void:
+	_objectives = lines
+	_struck_count = struck_count
+	if animate and _clipboard_icon != null and not lines.is_empty():
+		var nudge := create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		nudge.tween_property(_clipboard_icon, "scale", Vector2.ONE * NUDGE_SCALE, NUDGE_SECONDS)
+		nudge.tween_property(_clipboard_icon, "scale", Vector2.ONE, NUDGE_SECONDS)
+
+
+## The icons that hide while a dialogue is open: the gear (with the terminal and place name on it)
+## and the icons at the top right.
+func get_hud_icons() -> Array[Control]:
+	var icons: Array[Control] = [_menu_icon]
+	if _right_icons.get_parent() != null:
+		icons.append(_right_icons)
+	return icons
+
+
+func _open_memories() -> void:
+	if _hud_out_of_reach():
+		return
+	close()
+	_journal.open_memories()
+
+
+func _open_objectives() -> void:
+	if _hud_out_of_reach():
+		return
+	close()
+	_journal.open_objectives(_objectives, _struck_count)
+
+
+## True while the place has put the icons away, for example during a dialogue.
+func _hud_out_of_reach() -> bool:
+	return _menu_icon.mouse_filter == Control.MOUSE_FILTER_IGNORE or _menu_icon.modulate.a < 0.5
 
 
 ## The terminal icon beside the gear, and the developer tools window it opens.
@@ -105,7 +191,7 @@ func _add_dev_tools() -> void:
 ## Opens the developer tools, unless the place has put the icons out of reach (during a dialogue,
 ## for example, where the gear stops taking taps).
 func _open_dev_tools() -> void:
-	if _menu_icon.mouse_filter == Control.MOUSE_FILTER_IGNORE or _menu_icon.modulate.a < 0.5:
+	if _hud_out_of_reach():
 		return
 	close()
 	_dev_tools.open()
@@ -154,7 +240,7 @@ func get_icon() -> Button:
 
 
 func is_open() -> bool:
-	return _modal.visible or (_dev_tools != null and _dev_tools.is_open())
+	return _modal.visible or (_dev_tools != null and _dev_tools.is_open()) or (_journal != null and _journal.is_open())
 
 
 func open() -> void:
@@ -167,6 +253,8 @@ func open() -> void:
 func close() -> void:
 	if _dev_tools != null:
 		_dev_tools.close()
+	if _journal != null:
+		_journal.close()
 	if not _modal.visible:
 		return
 	await _fade(0.0, CLOSE_SECONDS)
