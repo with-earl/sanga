@@ -61,7 +61,8 @@ func _play_confessions() -> void:
 		var lines: Array = confession.get("lines", [])
 		if lines.is_empty():
 			continue
-		_dialogue.set_cast(left_character, _portrait_for(left_character), who, _portrait_for(who))
+		# The one confessing is shown with their sad picture.
+		_dialogue.set_cast(left_character, _portrait_for(left_character), who, _sad_portrait_for(who))
 		_dialogue.say_lines(str((lines[0] as Dictionary).get("speaker", who)), lines)
 		await _dialogue.dismissed
 	GameState.set_flag(nave_step_flag, _booth_step() + 1)

@@ -52,7 +52,7 @@ slot (keeping their proportions) and sit on the bottom edge of it.
 
 The characters shown beside the dialogue box. The character you tap appears on the right, and in the
 church nave Father Eli always stands on the left. Name them `<character>_1.png` for the main picture,
-and `_2`, `_3` and so on for other expressions. Standing full-length pictures work best.
+and `_2`, `_3` and so on for other expressions. `_2` is the sad expression, shown while a character confesses. Standing full-length pictures work best.
 
 | File | Used for |
 | --- | --- |

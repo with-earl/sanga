@@ -38,6 +38,8 @@ extends Control
 const BACKDROP_SHADER := preload("res://shaders/dialogue_backdrop.gdshader")
 ## Above the screen vignette (layer 10) and below the HUD and dialogue box (layer 20).
 const BACKDROP_LAYER := 15
+## The file ending of a character's sad picture, used while they confess.
+const SAD_PORTRAIT_SUFFIX := "_2"
 const FOCUS_IN_SECONDS := 0.2
 const FOCUS_OUT_SECONDS := 0.25
 ## Characters vanish instantly when tapped, and fade back in when the dialogue closes.
@@ -246,6 +248,16 @@ func _portrait_for(character: String) -> Texture2D:
 	if not ResourceLoader.exists(path):
 		path = "res://assets/portraits/%s.png" % key
 	return load(path) as Texture2D if ResourceLoader.exists(path) else null
+
+
+## The sad picture of a character (their "_2" picture), for heavy moments such as a confession.
+## Falls back to their usual picture when they have no sad one yet.
+func _sad_portrait_for(character: String) -> Texture2D:
+	var key := character.to_lower().replace(" ", "_")
+	var path := "res://assets/portraits/%s%s.png" % [key, SAD_PORTRAIT_SUFFIX]
+	if character != "" and ResourceLoader.exists(path):
+		return load(path) as Texture2D
+	return _portrait_for(character)
 
 
 ## Replaces the objectives on screen, for example after the player completes one.

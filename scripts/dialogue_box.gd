@@ -37,7 +37,11 @@ const PORTRAIT_SIZE_FACTORS := {
 ## Which way each portrait looks in its picture. Portraits not listed here look to the left. A
 ## portrait is mirrored when needed so that people on the left of the box always face right and
 ## people on the right always face left: everyone in a conversation faces each other.
-const PORTRAITS_FACING_RIGHT := ["father_eli", "ben", "gloria", "gwen", "peter"]
+## A whole character is named ("gloria"), or one picture of them ("batista_2") when that picture
+## looks the other way from their usual one.
+const PORTRAITS_FACING_RIGHT := ["father_eli", "ben", "gloria", "gwen", "peter", "batista_2"]
+## Single pictures that look to the left although their character's usual picture looks right.
+const PORTRAITS_FACING_LEFT := ["gloria_2", "gwen_2"]
 ## How far a portrait stands in from the side of the box, so the characters are a little in from
 ## its edges.
 const PORTRAIT_INSET := 40.0
@@ -383,7 +387,11 @@ func _place_portrait(portrait: TextureRect, picture: Texture2D, on_left: bool, _
 ## True when the person in this portrait looks to the right in the picture itself.
 static func faces_right(picture: Texture2D) -> bool:
 	var base := picture.resource_path.get_file().get_basename()
-	# "gloria_2" is still Gloria.
+	if base in PORTRAITS_FACING_LEFT:
+		return false
+	if base in PORTRAITS_FACING_RIGHT:
+		return true
+	# Otherwise "gloria_1" looks the way Gloria usually does.
 	var parts := base.rsplit("_", true, 1)
 	if parts.size() == 2 and parts[1].is_valid_int():
 		base = parts[0]
