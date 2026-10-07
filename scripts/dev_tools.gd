@@ -41,7 +41,7 @@ const DIM := Color(0.0, 0.0, 0.0, 0.5)
 const TITLE := "Developer Tools"
 const ENDINGS_TITLE := "Endings"
 ## The footnote under the lists.
-const FOOTNOTE := "This build is still in development, so some parts may use placeholder art or text. Progress from these shortcuts isn't saved."
+const FOOTNOTE := "This build is still in development, so some parts may use placeholder art or text."
 
 var _tween: Tween
 

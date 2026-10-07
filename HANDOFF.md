@@ -245,8 +245,8 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   fewer jump buttons, better copy): the developer tools are now one Apple-style sheet with no
   drill-in. Title "Developer Tools" and "Done"; sections Main / Kumpisal / Padala Timeline and
   Endings on rounded cards (Apple dark greys, 50 px rows, inset dividers, grey chevrons); the
-  footnote "This build is still in development, so some parts may use placeholder art or text.
-  Progress from these shortcuts isn't saved." sits under the first section. `DevJump.GROUPS` now
+  footnote "This build is still in development, so some parts may use placeholder art or text."
+  sits under the first section (the user had "Progress from these shortcuts isn't saved" removed). `DevJump.GROUPS` now
   holds only each story's start plus the Kumpisal confessions (the in-church, in-room and
   Peter/Gwen-buying points were removed).
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
