@@ -38,8 +38,7 @@ func _ready() -> void:
 	video.expand = true
 	video.loop = true
 	video.modulate.a = 0.0
-	# The video keeps its shape and covers the whole screen; on a wide phone a little of its top
-	# and bottom is cut off instead of it being stretched sideways.
+	# The video keeps its shape and fills the screen's width, like every full-screen picture.
 	video.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(video)
 	get_viewport().size_changed.connect(_cover_screen_with_video)
@@ -114,7 +113,7 @@ func _cover_screen_with_video() -> void:
 	var texture := video.get_video_texture()
 	if texture != null and texture.get_width() > 0:
 		stream_size = texture.get_size()
-	var area := ScreenFit.cover_rect(stream_size, get_viewport().get_visible_rect().size)
+	var area := ScreenFit.width_rect(stream_size, get_viewport().get_visible_rect().size)
 	video.position = area.position
 	video.size = area.size
 

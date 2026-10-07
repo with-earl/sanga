@@ -177,9 +177,9 @@ func start(title: String, scene_key: String, lead_in: Array = []) -> void:
 ## and comes back down at the end of it, so the next picture always starts from black. A double
 ## tap ends the montage early.
 func _play_montage(paths: Array) -> void:
-	# Each picture covers the whole screen, whatever the phone's shape, with room to pan.
+	# Each picture fills the screen's width, whatever the phone's shape, with room to pan.
 	var screen := get_viewport().get_visible_rect().size
-	var zoomed := SCREEN_SIZE * maxf(screen.x / SCREEN_SIZE.x, screen.y / SCREEN_SIZE.y) * MONTAGE_ZOOM
+	var zoomed := SCREEN_SIZE * (screen.x / SCREEN_SIZE.x) * MONTAGE_ZOOM
 	var overflow := zoomed.x - screen.x
 	_picture.size = zoomed
 	_stage.visible = true
