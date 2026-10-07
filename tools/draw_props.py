@@ -293,8 +293,8 @@ def draw_terminal_icon() -> None:
     icon.resize((128, 128), Image.LANCZOS).save(ROOT / "assets" / "ui" / "terminal.png")
 
 
-## The HUD icons share one look with the gear: light grey, a darker shade, a thick near-black
-## outline and a white shine.
+## The HUD icons share one look: a thick near-black outline, shading from light at the top left,
+## and a white shine. These greys are the steel parts.
 ICON_INK = (24, 24, 28, 255)
 ICON_LIGHT = (196, 199, 205, 255)
 ICON_SHADE = (150, 153, 162, 255)
@@ -332,26 +332,108 @@ def draw_book_icon() -> None:
 
 
 def draw_clipboard_icon() -> None:
-    """The objectives icon: a blue clipboard with a silver clip and a sheet with a checklist."""
+    """The objectives icon: a real brown hardboard clipboard with a shiny steel clip and a sheet of
+    paper with a checklist, drawn with the same care as the book: grain, shading and highlights."""
+    import numpy as np
+
     s = 8
-    icon = Image.new("RGBA", (128 * s, 128 * s), (0, 0, 0, 0))
+    n = 128 * s
+    icon = Image.new("RGBA", (n, n), (0, 0, 0, 0))
     d = ImageDraw.Draw(icon)
-    blue, blue_dark = (58, 122, 204, 255), (38, 86, 152, 255)
-    d.rounded_rectangle((14 * s, 12 * s, 114 * s, 124 * s), radius=16 * s, fill=ICON_INK)
-    d.rounded_rectangle((23 * s, 21 * s, 105 * s, 115 * s), radius=9 * s, fill=blue_dark)
-    d.rounded_rectangle((23 * s, 21 * s, 99 * s, 109 * s), radius=9 * s, fill=blue)
-    # The sheet of paper on the board.
-    d.rounded_rectangle((33 * s, 32 * s, 91 * s, 102 * s), radius=4 * s, fill=(244, 244, 238, 255))
-    # The clip at the top.
-    d.rounded_rectangle((40 * s, 2 * s, 88 * s, 30 * s), radius=8 * s, fill=ICON_INK)
-    d.rounded_rectangle((48 * s, 10 * s, 80 * s, 22 * s), radius=5 * s, fill=ICON_LIGHT)
-    # A tick and two lines, like a list of things to do.
-    d.line([(40 * s, 52 * s), (46 * s, 58 * s), (55 * s, 46 * s)], fill=ICON_INK, width=6 * s, joint="curve")
-    d.line([(61 * s, 53 * s), (84 * s, 53 * s)], fill=ICON_INK, width=6 * s)
-    d.rounded_rectangle((40 * s, 70 * s, 53 * s, 83 * s), radius=3 * s, outline=ICON_INK, width=4 * s)
-    d.line([(61 * s, 77 * s), (84 * s, 77 * s)], fill=ICON_INK, width=6 * s)
-    d.arc((28 * s, 26 * s, 62 * s, 60 * s), 190, 255, fill=(255, 255, 255, 255), width=5 * s)
+    # The board: a dark outline, then brown hardboard shaded from light (top left) to dark.
+    d.rounded_rectangle((12 * s, 10 * s, 116 * s, 126 * s), radius=14 * s, fill=ICON_INK)
+    board_mask = Image.new("L", (n, n), 0)
+    ImageDraw.Draw(board_mask).rounded_rectangle((20 * s, 18 * s, 108 * s, 118 * s), radius=9 * s, fill=255)
+    yy, xx = np.mgrid[0:n, 0:n] / n
+    shade = 1.0 - 0.35 * (xx * 0.4 + yy * 0.6)
+    grain = 0.06 * np.sin(yy * 260 + np.sin(xx * 9) * 3) + 0.03 * np.sin(yy * 610)
+    base = np.array([150, 98, 56], dtype=float)
+    board = np.clip(base[None, None, :] * (shade + grain)[..., None], 0, 255).astype("uint8")
+    board_img = Image.fromarray(board, "RGB").convert("RGBA")
+    icon.paste(board_img, (0, 0), board_mask)
+    # A thin lighter bevel along the board's top and left edges.
+    d.rounded_rectangle((20 * s, 18 * s, 108 * s, 118 * s), radius=9 * s, outline=(196, 142, 92, 255), width=2 * s)
+    # The paper, with a soft shadow under it and faint blue lines.
+    d.rectangle((33 * s, 37 * s, 99 * s, 113 * s), fill=(70, 40, 20, 160))
+    d.rectangle((30 * s, 34 * s, 96 * s, 110 * s), fill=(246, 242, 230, 255))
+    for row in range(6):
+        y = (50 + row * 10) * s
+        d.line([(36 * s, y), (90 * s, y)], fill=(176, 196, 220, 255), width=s)
+    # The checklist: a tick, a box, ink lines.
+    d.line([(37 * s, 54 * s), (42 * s, 59 * s), (50 * s, 48 * s)], fill=(40, 40, 46, 255), width=4 * s, joint="curve")
+    d.line([(56 * s, 55 * s), (86 * s, 55 * s)], fill=(60, 60, 68, 255), width=3 * s)
+    d.rectangle((37 * s, 68 * s, 47 * s, 78 * s), outline=(40, 40, 46, 255), width=3 * s)
+    d.line([(56 * s, 74 * s), (82 * s, 74 * s)], fill=(60, 60, 68, 255), width=3 * s)
+    d.rectangle((37 * s, 88 * s, 47 * s, 98 * s), outline=(40, 40, 46, 255), width=3 * s)
+    d.line([(56 * s, 94 * s), (78 * s, 94 * s)], fill=(60, 60, 68, 255), width=3 * s)
+    # The steel clip: outline, a brushed metal gradient, a fold, a hole and a bright highlight.
+    d.rounded_rectangle((36 * s, 2 * s, 92 * s, 40 * s), radius=8 * s, fill=ICON_INK)
+    clip_mask = Image.new("L", (n, n), 0)
+    ImageDraw.Draw(clip_mask).rounded_rectangle((42 * s, 8 * s, 86 * s, 34 * s), radius=5 * s, fill=255)
+    metal = np.clip(205 + 45 * np.cos(yy * 40) - 60 * (yy * 4 % 1.0) * 0, 120, 250)
+    steel = np.stack([metal, metal + 2, metal + 8], axis=-1).clip(0, 255).astype("uint8")
+    icon.paste(Image.fromarray(steel, "RGB").convert("RGBA"), (0, 0), clip_mask)
+    d.line([(44 * s, 24 * s), (84 * s, 24 * s)], fill=(120, 124, 132, 255), width=2 * s)
+    d.ellipse((58 * s, 11 * s, 70 * s, 20 * s), fill=ICON_INK)
+    d.line([(46 * s, 12 * s), (56 * s, 12 * s)], fill=(255, 255, 255, 255), width=2 * s)
+    # Two rivets holding the clip to the board.
+    for x in (48, 80):
+        d.ellipse(((x - 3) * s, 30 * s, (x + 3) * s, 36 * s), fill=(110, 112, 120, 255))
+        d.ellipse(((x - 2) * s, 31 * s, x * s, 33 * s), fill=(235, 236, 240, 255))
+    # The shine on the board's top left.
+    d.arc((24 * s, 22 * s, 52 * s, 50 * s), 190, 255, fill=(255, 236, 210, 255), width=3 * s)
     icon.resize((128, 128), Image.LANCZOS).save(ROOT / "assets" / "ui" / "clipboard.png")
+
+
+def draw_gear_icon() -> None:
+    """The settings icon: a steel cog drawn with the same care as the book: a thick dark outline,
+    brushed metal shaded by light from the top left, bevelled teeth, a raised hub with a bolt hole,
+    and a bright highlight."""
+    import math
+
+    import numpy as np
+
+    s = 8
+    n = 128 * s
+    c = n / 2
+    teeth, r_out, r_in, r_hole = 8, 60 * s, 45 * s, 17 * s
+
+    def cog(scale: float) -> list:
+        points = []
+        for i in range(teeth * 4):
+            a = (i / (teeth * 4)) * 2 * math.pi - math.pi / 2
+            r = r_out if (i % 4) in (1, 2) else r_in
+            r *= scale
+            points.append((c + r * math.cos(a), c + r * math.sin(a)))
+        return points
+
+    yy, xx = np.mgrid[0:n, 0:n] / n
+    lit = 1.0 - 0.45 * (xx * 0.5 + yy * 0.5)
+    brushed = 0.03 * np.sin((xx + yy) * 400)
+    metal = np.clip(205 * (lit + brushed), 0, 255)
+    steel = Image.fromarray(np.stack([metal, metal + 3, metal + 10], axis=-1).clip(0, 255).astype("uint8"), "RGB").convert("RGBA")
+    icon = Image.new("RGBA", (n, n), (0, 0, 0, 0))
+    d = ImageDraw.Draw(icon)
+    # Outline: the cog drawn larger in near-black.
+    outline = Image.new("L", (n, n), 0)
+    ImageDraw.Draw(outline).polygon(cog(1.0), fill=255)
+    outline = outline.filter(ImageFilter.MaxFilter(8 * s + 1))
+    icon.paste(Image.new("RGBA", (n, n), ICON_INK), (0, 0), outline)
+    # The body in shaded steel, with a darker lower right edge for thickness.
+    body = Image.new("L", (n, n), 0)
+    ImageDraw.Draw(body).polygon(cog(1.0), fill=255)
+    icon.paste(Image.new("RGBA", (n, n), (110, 114, 124, 255)), (0, 0), body)
+    face = Image.new("L", (n, n), 0)
+    ImageDraw.Draw(face).polygon([(x - 2 * s, y - 2 * s) for x, y in cog(0.96)], fill=255)
+    icon.paste(steel, (0, 0), face)
+    # A raised hub ring and the bolt hole.
+    d.ellipse((c - 30 * s, c - 30 * s, c + 30 * s, c + 30 * s), outline=(120, 124, 134, 255), width=4 * s)
+    d.ellipse((c - 26 * s, c - 26 * s, c + 26 * s, c + 26 * s), outline=(236, 238, 242, 255), width=2 * s)
+    d.ellipse((c - r_hole - 4 * s, c - r_hole - 4 * s, c + r_hole + 4 * s, c + r_hole + 4 * s), fill=ICON_INK)
+    d.ellipse((c - r_hole, c - r_hole, c + r_hole, c + r_hole), fill=(0, 0, 0, 0))
+    # Shine along the top left of the body.
+    d.arc((c - 50 * s, c - 50 * s, c + 50 * s, c + 50 * s), 200, 250, fill=(255, 255, 255, 255), width=5 * s)
+    icon.resize((128, 128), Image.LANCZOS).save(ROOT / "assets" / "ui" / "gear.png")
 
 
 class PhoneModel:
@@ -573,6 +655,7 @@ if __name__ == "__main__":
     draw_terminal_icon()
     draw_book_icon()
     draw_clipboard_icon()
+    draw_gear_icon()
     draw_telephone()
     draw_key()
     draw_poster()

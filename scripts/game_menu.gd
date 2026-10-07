@@ -27,7 +27,10 @@ const TERMINAL_PICTURE_SIZE := 72.0
 ## The icons at the top right of a place, mirroring the gear's distance from the edge.
 const BOOK_PICTURE := preload("res://assets/ui/book.png")
 const CLIPBOARD_PICTURE := preload("res://assets/ui/clipboard.png")
-const RIGHT_PICTURE_SIZE := 64.0
+## Drawn so each covers about as much of the screen as the gear (64): the book is wide and short,
+## the clipboard tall and solid, so they get slightly different sizes to look the same.
+const BOOK_PICTURE_SIZE := 66.0
+const CLIPBOARD_PICTURE_SIZE := 58.0
 const EDGE_MARGIN := Vector2(12.0, 4.0)
 ## When the objectives change, the clipboard swells for a moment, so the player knows to look.
 const NUDGE_SCALE := 1.18
@@ -102,8 +105,8 @@ func _ready() -> void:
 func _add_journal() -> void:
 	_right_icons.name = "RightIcons"
 	_right_icons.add_theme_constant_override("separation", 0)
-	_right_icons.add_child(_make_icon("BookIcon", BOOK_PICTURE, _open_memories))
-	_clipboard_icon = _make_icon("ClipboardIcon", CLIPBOARD_PICTURE, _open_objectives)
+	_right_icons.add_child(_make_icon("BookIcon", BOOK_PICTURE, BOOK_PICTURE_SIZE, _open_memories))
+	_clipboard_icon = _make_icon("ClipboardIcon", CLIPBOARD_PICTURE, CLIPBOARD_PICTURE_SIZE, _open_objectives)
 	_right_icons.add_child(_clipboard_icon)
 	add_child(_right_icons)
 	_right_icons.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE)
@@ -113,7 +116,7 @@ func _add_journal() -> void:
 	add_child(_journal)
 
 
-func _make_icon(icon_name: String, picture: Texture2D, action: Callable) -> IconButton:
+func _make_icon(icon_name: String, picture: Texture2D, picture_size: float, action: Callable) -> IconButton:
 	var icon := IconButton.new()
 	icon.name = icon_name
 	icon.theme_type_variation = &"TextButton"
@@ -121,7 +124,7 @@ func _make_icon(icon_name: String, picture: Texture2D, action: Callable) -> Icon
 	icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	icon.plain = true
 	icon.picture = picture
-	icon.picture_size = RIGHT_PICTURE_SIZE
+	icon.picture_size = picture_size
 	icon.custom_minimum_size = Vector2(ICON_SIZE, ICON_SIZE)
 	icon.pivot_offset = Vector2(ICON_SIZE, ICON_SIZE) / 2.0
 	icon.pressed.connect(action)

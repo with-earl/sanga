@@ -317,6 +317,10 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   objectives window, finished ones struck through). They replace the on-screen objectives list
   (`ObjectivesPanel.SHOWN_ON_SCREEN = false`; it still tracks objectives, plays the strike sound
   and feeds `GameMenu.set_objectives`). The clipboard swells briefly when objectives change.
+  Then (user): the clipboard is a realistic brown hardboard one with a steel clip and rivets,
+  and the gear was redrawn in the same detail (brushed steel, bevel, hub); `gear.png` is now made
+  by `tools/draw_props.py` too. Each icon's `picture_size` is set so it covers the same area as
+  the gear (gear 64, book 66, clipboard 58).
   Icons drawn by `tools/draw_props.py` (`assets/ui/book.png`, `clipboard.png`), window in
   `scripts/journal_modal.gd`. All HUD icons hide during dialogues (`GameMenu.get_hud_icons`).
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
