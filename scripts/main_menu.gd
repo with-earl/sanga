@@ -16,6 +16,9 @@ const DEV_PANEL_BOTTOM := 36.0
 const DEV_PANEL_PADDING := 20.0
 const DEV_ROW_HEIGHT := 48.0
 const DEV_FONT_SIZE := 21
+## The main buttons, the save list and the quit question each sit on a soft window, hugging their
+## contents above the bottom right corner.
+const MENU_WINDOW_MARGIN := Vector2(26.0, 18.0)
 
 @onready var _menu: Control = $Buttons
 @onready var _quit_confirm: Control = %QuitConfirm
@@ -47,6 +50,8 @@ func _ready() -> void:
 	_quit_button.visible = not OS.has_feature("web")
 	_yes_button.pressed.connect(get_tree().quit)
 	_no_button.pressed.connect(_show_quit_confirm.bind(false))
+	for panel in [_menu, _quit_confirm, _save_panel]:
+		_put_on_window(panel)
 	if SHOW_DEV_MENU_IN_ALL_BUILDS or OS.is_debug_build():
 		_build_dev_panel()
 		_show_dev_menu()
@@ -62,6 +67,21 @@ func _notification(what: int) -> void:
 		_back_action.call()
 	else:
 		_show_quit_confirm(not _quit_confirm.visible)
+
+
+## Gives one of the right-hand lists a soft window that grows and shrinks with what is in it,
+## with its buttons centred on it.
+func _put_on_window(panel: VBoxContainer) -> void:
+	SoftWindow.behind(panel, SoftWindow.Look.WINDOW, MENU_WINDOW_MARGIN)
+	for child in panel.get_children():
+		if child is Button:
+			(child as Button).alignment = HORIZONTAL_ALIGNMENT_CENTER
+		elif child is Label:
+			(child as Label).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var hug := func() -> void:
+		panel.offset_top = panel.offset_bottom - panel.get_combined_minimum_size().y
+	panel.minimum_size_changed.connect(hug)
+	hug.call()
 
 
 ## The question takes the place of the three menu buttons, in the same spot.

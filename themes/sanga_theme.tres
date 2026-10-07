@@ -2,6 +2,10 @@
 
 [ext_resource type="FontFile" uid="uid://h8yh067b8sm3" path="res://assets/fonts/Lora.ttf" id="1_serif"]
 
+[sub_resource type="FontVariation" id="title_letters"]
+base_font = ExtResource("1_serif")
+spacing_glyph = 3
+
 [sub_resource type="StyleBoxFlat" id="dialog_body"]
 content_margin_left = 16.0
 content_margin_top = 8.0
@@ -209,7 +213,8 @@ StoryTitle/base_type = &"Label"
 StoryTitle/colors/font_color = Color(0.965, 0.906, 0.796, 1)
 StoryTitle/colors/font_outline_color = Color(0, 0, 0, 0)
 StoryTitle/constants/outline_size = 0
-StoryTitle/font_sizes/font_size = 44
+StoryTitle/font_sizes/font_size = 56
+StoryTitle/fonts/font = SubResource("title_letters")
 TextButton/base_type = &"Button"
 TextButton/colors/font_color = Color(1, 0.953, 0.839, 1)
 TextButton/colors/font_disabled_color = Color(1, 0.953, 0.839, 0.5)

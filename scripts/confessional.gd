@@ -18,6 +18,7 @@ const CAPTION_FADE_SECONDS := 0.4
 const CAPTION_HOLD_SECONDS := 2.2
 const CAPTION_TOP := 92.0
 const CAPTION_HEIGHT := 64.0
+const CAPTION_SIZE := 42
 const TOO_EARLY_LINE := "No one is here yet. I should go back to the Church Nave."
 
 var _caption_layer := CanvasLayer.new()
@@ -82,6 +83,7 @@ func _build_caption() -> void:
 	# Above the dialogue box (layer 20), so it reads over the portraits.
 	_caption_layer.layer = 22
 	_caption_label.theme_type_variation = &"StoryTitle"
+	_caption_label.add_theme_font_size_override("font_size", CAPTION_SIZE)
 	_caption_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_caption_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_caption_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)

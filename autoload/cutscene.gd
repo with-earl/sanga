@@ -76,11 +76,16 @@ func _ready() -> void:
 	_fill(_card_title)
 	_card_title.modulate.a = 0.0
 	add_child(_card_title)
+	# The same golden ornament as the story title cards, fading with the title.
+	TitleOrnament.make(_card_title, StoryCard.ORNAMENT_BELOW_TITLE)
 	_card_line.theme_type_variation = &"HudBody"
 	_card_line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_card_line.set_anchors_and_offsets_preset(Control.PRESET_HCENTER_WIDE)
-	_card_line.offset_top = 46.0
-	_card_line.offset_bottom = 90.0
+	_card_line.offset_top = StoryCard.ENDING_LINE_TOP
+	_card_line.offset_bottom = StoryCard.ENDING_LINE_TOP + 44.0
+	_card_line.add_theme_color_override("font_color", UiSkin.BUTTON_TEXT)
+	_card_line.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0))
+	_card_line.add_theme_font_size_override("font_size", StoryCard.ENDING_LINE_SIZE)
 	_card_line.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_card_line.modulate.a = 0.0
 	add_child(_card_line)

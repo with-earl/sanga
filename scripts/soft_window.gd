@@ -32,13 +32,17 @@ var lit := 0.0:
 		(material as ShaderMaterial).set_shader_parameter("lit", value)
 
 var _light_tween: Tween
+var _margin := Vector2.ZERO
 
 
-## Puts a soft window behind `host` that always matches its size, and returns it.
-static func behind(host: Control, look := Look.WINDOW) -> SoftWindow:
+## Puts a soft window behind `host` that always matches its size, and returns it. `margin` makes
+## the window that much bigger than the host on each side, for a host with no padding of its own,
+## such as a plain label.
+static func behind(host: Control, look := Look.WINDOW, margin := Vector2.ZERO) -> SoftWindow:
 	var window := SoftWindow.new()
 	window.name = "SoftWindow"
 	window.setup(look)
+	window._margin = margin
 	host.add_child(window, false, Node.INTERNAL_MODE_FRONT)
 	if host is Container:
 		# A container lays out every child, this one too, inside its own padding. Put the window
@@ -47,10 +51,10 @@ static func behind(host: Control, look := Look.WINDOW) -> SoftWindow:
 		window._cover_host(host)
 	else:
 		window.set_anchors_preset(Control.PRESET_FULL_RECT)
-		window.offset_left = -PAD
-		window.offset_top = -PAD
-		window.offset_right = PAD
-		window.offset_bottom = PAD
+		window.offset_left = -PAD - margin.x
+		window.offset_top = -PAD - margin.y
+		window.offset_right = PAD + margin.x
+		window.offset_bottom = PAD + margin.y
 	return window
 
 
@@ -103,8 +107,9 @@ func light(on: bool) -> void:
 
 
 func _cover_host(host: Control) -> void:
-	position = Vector2(-PAD, -PAD)
-	size = host.size + Vector2(PAD, PAD) * 2.0
+	var outset := Vector2(PAD, PAD) + _margin
+	position = -outset
+	size = host.size + outset * 2.0
 
 
 func _set_fill(top: Color, bottom: Color) -> void:
