@@ -5,6 +5,9 @@ extends Control
 
 const STRIKE_SECONDS := 0.35
 const NEW_ITEM_FADE_SECONDS := 0.3
+## A new objective glows a little brighter as it appears, then settles, so the eye finds it.
+const NEW_ITEM_GLOW := 1.45
+const NEW_ITEM_GLOW_SECONDS := 1.2
 
 @onready var _list: VBoxContainer = %List
 
@@ -38,8 +41,10 @@ func set_objectives(lines: PackedStringArray, struck_count := 0, animate := fals
 		elif finished:
 			item.strike_amount = 1.0
 		if animate and is_new:
-			item.modulate.a = 0.0
-			create_tween().tween_property(item, "modulate:a", 1.0, NEW_ITEM_FADE_SECONDS) \
+			item.modulate = Color(NEW_ITEM_GLOW, NEW_ITEM_GLOW, NEW_ITEM_GLOW, 0.0)
+			var appear := create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+			appear.tween_property(item, "modulate:a", 1.0, NEW_ITEM_FADE_SECONDS) \
 				.set_delay(delay + STRIKE_SECONDS)
+			appear.tween_property(item, "modulate", Color.WHITE, NEW_ITEM_GLOW_SECONDS)
 	_shown_count = lines.size()
 	_struck_count = struck_count

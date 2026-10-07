@@ -62,6 +62,10 @@ const UNDO_SIZE := Vector2(220, 56)
 const UNDO_GAP := 4.0
 ## The blurred background that fills the sides of a wide phone screen sits behind everything.
 const SIDE_FILL_LAYER := -20
+## A soft dark fade along the top of the screen, behind the place name and objectives, so they
+## read clearly over bright art. It hides with them during a dialogue.
+const TOP_SHADE_HEIGHT := 150.0
+const TOP_SHADE_ALPHA := 0.42
 
 @onready var _dialogue: DialogueBox = $Hud/DialogueBox
 @onready var _back_button: Button = get_node_or_null("Hud/BackButton")
@@ -88,6 +92,7 @@ var _sparkle_layer := CanvasLayer.new()
 var _sparkle_texture: ImageTexture
 ## Takes back the last step of the story. Only shown when there is a step to take back.
 var _undo_button := BackLink.new()
+var _top_shade := TextureRect.new()
 
 
 func _ready() -> void:
@@ -107,6 +112,7 @@ func _ready() -> void:
 	if _back_button != null:
 		_back_button.text = back_label
 		_back_button.pressed.connect(_go_back)
+	_build_top_shade()
 	_build_undo_button()
 	_build_backdrop()
 	_dialogue.portrait_source = _portrait_for
@@ -173,6 +179,27 @@ func _keep_clear_of_notch() -> void:
 	_dialogue.keep_clear(insets)
 
 
+func _build_top_shade() -> void:
+	var gradient := Gradient.new()
+	gradient.set_color(0, Color(0.06, 0.03, 0.05, TOP_SHADE_ALPHA))
+	gradient.set_color(1, Color(0.06, 0.03, 0.05, 0.0))
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill_from = Vector2(0.0, 0.0)
+	texture.fill_to = Vector2(0.0, 1.0)
+	texture.width = 4
+	texture.height = 64
+	_top_shade.name = "TopShade"
+	_top_shade.texture = texture
+	_top_shade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_top_shade.stretch_mode = TextureRect.STRETCH_SCALE
+	_top_shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_top_shade.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	_top_shade.offset_bottom = TOP_SHADE_HEIGHT
+	$Hud.add_child(_top_shade)
+	$Hud.move_child(_top_shade, 0)
+
+
 func _build_undo_button() -> void:
 	_undo_button.name = "UndoButton"
 	_undo_button.text = "Undo"
@@ -237,6 +264,7 @@ func _focus_on_dialogue(focused: bool) -> void:
 	icon.visible = true
 	icon.mouse_filter = Control.MOUSE_FILTER_STOP if show_hud else Control.MOUSE_FILTER_IGNORE
 	_focus_tween.tween_property(_objectives_panel, "modulate:a", hud_alpha, seconds)
+	_focus_tween.tween_property(_top_shade, "modulate:a", hud_alpha, seconds)
 	_focus_tween.tween_property(icon, "modulate:a", hud_alpha, seconds)
 	if _back_button != null:
 		_back_button.mouse_filter = Control.MOUSE_FILTER_STOP if show_hud else Control.MOUSE_FILTER_IGNORE

@@ -25,7 +25,7 @@ const TIME_ORDER_COLUMN_WIDTH := 300.0
 const TIME_ORDER_STEP_SECONDS := 0.7
 const TIME_ORDER_PAUSE_SECONDS := 1.0
 const TIME_ORDER_RISE := 12.0
-const TIME_WORD_COLOR := Color(0.78, 0.78, 0.78, 1)
+const TIME_WORD_COLOR := Color(1.0, 0.953, 0.839, 0.62)
 
 ## How long the title takes to fade out into the first montage picture.
 const TITLE_REVEAL_SECONDS := 0.6

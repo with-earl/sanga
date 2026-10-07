@@ -9,6 +9,9 @@ extends CanvasLayer
 const OPEN_SECONDS := 0.15
 const CLOSE_SECONDS := 0.12
 const PANEL_PADDING := 28.0
+## The place name fades in this long after a place opens, over this many seconds.
+const TITLE_FADE_DELAY := 0.35
+const TITLE_FADE_SECONDS := 0.9
 
 ## On the main screen the gear opens only the settings: no way back to the main menu, no story
 ## skip, and no place name.
@@ -87,8 +90,13 @@ func _apply_dialog_look() -> void:
 		_close_button.add_theme_stylebox_override(state, StyleBoxEmpty.new())
 
 
+## Shows the place name beside the menu icon. It fades in gently each time a place opens, like a
+## location caption in an anime episode.
 func set_location_title(text: String) -> void:
 	_location_title.text = text
+	_location_title.modulate.a = 0.0
+	create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT) \
+		.tween_property(_location_title, "modulate:a", 1.0, TITLE_FADE_SECONDS).set_delay(TITLE_FADE_DELAY)
 
 
 ## The gear icon, so a scene can hide it while a dialogue is open.
