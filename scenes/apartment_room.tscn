@@ -54,16 +54,17 @@ hotspot = true
 
 [node name="Telephone" type="Control" parent="Props"]
 layout_mode = 0
-offset_left = 1000.0
-offset_top = 392.0
-offset_right = 1096.0
-offset_bottom = 462.0
+offset_left = 989.86
+offset_top = 384.87
+offset_right = 1104.69
+offset_bottom = 469.8
 script = ExtResource("2_art")
 asset_id = "telephone"
 category = "props"
 display_name = "Telephone"
 interactive = true
-hotspot = true
+outline_width = 1.2
+scene_light = Color(1, 1, 1, 1)
 
 [node name="Keys1" type="Control" parent="Props"]
 layout_mode = 0

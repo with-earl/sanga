@@ -18,6 +18,13 @@ SCALE = 4
 INK = (46, 26, 14, 255)
 FONT_BOLD = "/usr/share/fonts/opentype/inter/Inter-Bold.otf"
 FONT_BLACK = "/usr/share/fonts/opentype/inter/InterDisplay-Bold.otf"
+## Where the telephone is in the apartment's painting (pixels of apartment_room_bath.png).
+TELEPHONE_BOX = (1293, 503, 1443, 614)
+## The phone's edge inside that box, handset on the left, traced around the painting.
+TELEPHONE_EDGE = [
+    (49, 22), (58, 20), (70, 21), (75, 26), (79, 26), (125, 29), (128, 33), (127, 41), (126, 60),
+    (125, 79), (119, 88), (113, 95), (70, 94), (40, 90), (30, 85), (30, 74), (37, 56), (45, 31),
+]
 
 
 def font(path: str, size: int) -> ImageFont.FreeTypeFont:
@@ -257,8 +264,23 @@ def draw_card_on_floor() -> None:
     final.save(PROPS / "food_delivery_card_floor.png")
 
 
+def cut_out_telephone() -> None:
+    """Cuts the telephone out of the apartment's own painting, so it matches it exactly and can sit
+    on top of the painted one with an outline. The phone's edge is traced by hand (in pixels of the
+    cut-out box), drawn four times larger and shrunk again so the edge is smooth."""
+    background = Image.open(ROOT / "assets" / "backgrounds" / "apartment_room_bath.png").convert("RGB")
+    crop = background.crop(TELEPHONE_BOX).convert("RGBA")
+    big = 4
+    mask = Image.new("L", (crop.width * big, crop.height * big), 0)
+    ImageDraw.Draw(mask).polygon([(x * big, y * big) for x, y in TELEPHONE_EDGE], fill=255)
+    mask = mask.resize(crop.size, Image.LANCZOS)
+    crop.putalpha(mask)
+    crop.save(PROPS / "telephone.png")
+
+
 if __name__ == "__main__":
+    cut_out_telephone()
     draw_key()
     draw_poster()
     draw_card_on_floor()
-    print("Drew keys.png, police_poster.png and food_delivery_card_floor.png")
+    print("Drew telephone.png, keys.png, police_poster.png and food_delivery_card_floor.png")
