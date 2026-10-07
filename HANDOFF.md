@@ -181,7 +181,7 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   1280) about its centre, so on a wide phone a thin strip at the top and bottom is cut off; on a
   taller screen black bars show above and below. The blurred side fill was removed. The HUD and
   dialogue are laid out on the real screen. Don't change this fit again without asking.
-- v0.8.3 (user's requests): the main screen's **Settings text row is removed** (the gear stays);
+- v0.9.0 (user's requests): the main screen's **Settings text row is removed** (the gear stays);
   **Stories/Endings show in every build** while in development; the market's **motorcycle is a
   large, out-of-focus foreground** at the bottom left, only its delivery box (its top right)
   in view (`ArtSlot.depth_blur`); **Gloria, Ben and Gwen's portraits are mirrored** in the
