@@ -21,8 +21,13 @@ func _draw() -> void:
 	var font := get_theme_font("font")
 	var font_size := get_theme_font_size("font_size")
 	var text_width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size).x
-	# The text is right aligned, so it starts this far in from the left edge.
-	var start_x := size.x - text_width
+	# Where the text starts depends on how it is aligned.
+	var start_x := 0.0
+	match horizontal_alignment:
+		HORIZONTAL_ALIGNMENT_RIGHT:
+			start_x = size.x - text_width
+		HORIZONTAL_ALIGNMENT_CENTER:
+			start_x = (size.x - text_width) / 2.0
 	var y := size.y * 0.54
 	var end_x := start_x + text_width * strike_amount
 	draw_line(Vector2(start_x - 2.0, y), Vector2(end_x + 2.0, y), LINE_OUTLINE, LINE_OUTLINE_WIDTH, true)

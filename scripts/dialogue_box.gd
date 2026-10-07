@@ -86,8 +86,13 @@ const PORTRAIT_FADE_SECONDS := 0.15
 const COMPANION_OVERLAP := 0.4
 ## Choices: soft windows stacked above the box, fading in one after another.
 const CHOICE_WIDTH := 720.0
-const CHOICE_GAP := 14.0
+const CHOICE_GAP := 4.0
+## Each choice's tap area: its words plus a little room above and below.
+const CHOICE_HEIGHT := 48.0
 const CHOICE_FADE_SECONDS := 0.22
+## A short note above every choice, so the player knows what a decision can do.
+const CHOICE_HINT := "Your choice may change the timeline."
+const CHOICE_HINT_SIZE := 20
 const CHOICE_STAGGER_SECONDS := 0.07
 ## The gameplay text colours: golden ochre with a brown outline.
 const CHOICE_TEXT := Color(0.851, 0.643, 0.255, 1.0)
@@ -117,6 +122,7 @@ var _typing_tween: Tween
 var _keep_open := false
 var _choosing := false
 var _choices := VBoxContainer.new()
+var _choice_hint := Label.new()
 ## Extra room kept free at each edge for a phone's notch or rounded corners (left, top, right,
 ## bottom), set by the location.
 var _insets := Vector4.ZERO
@@ -152,6 +158,12 @@ func _ready() -> void:
 	_choices.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_choices.visible = false
 	add_child(_choices)
+	_choice_hint.text = CHOICE_HINT
+	_choice_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_choice_hint.add_theme_font_size_override("font_size", CHOICE_HINT_SIZE)
+	_choice_hint.add_theme_color_override("font_color", Color(UiSkin.BUTTON_TEXT, 0.85))
+	_choice_hint.add_theme_color_override("font_outline_color", CHOICE_OUTLINE)
+	_choice_hint.add_theme_constant_override("outline_size", UiSkin.OUTLINE_SIZE)
 
 
 ## Keeps the box clear of a phone's notch and rounded corners. See ScreenFit.safe_insets.
@@ -288,6 +300,7 @@ func choose(options: Array) -> int:
 	_choosing = true
 	_finish_typing()
 	_show_next_cursor(false)
+	_choices.add_child(_choice_hint)
 	for index in options.size():
 		_choices.add_child(_make_choice_button(str(options[index]), index))
 	_choices.size = Vector2(CHOICE_WIDTH, 0.0)
@@ -306,7 +319,7 @@ func choose(options: Array) -> int:
 		show()
 	create_tween().tween_property(_choices, "modulate:a", 1.0, CHOICE_FADE_SECONDS)
 	# Each choice fades in a moment after the one above it.
-	var buttons := _choices.get_children()
+	var buttons := _choices.get_children().filter(func(child: Node) -> bool: return child is Button)
 	for index in buttons.size():
 		var button := buttons[index] as Button
 		button.modulate.a = 0.0
@@ -324,9 +337,9 @@ func _make_choice_button(text: String, index: int) -> Button:
 	var button := Button.new()
 	button.text = text
 	button.focus_mode = Control.FOCUS_NONE
-	button.custom_minimum_size = Vector2(CHOICE_WIDTH, UiSkin.BUTTON_HEIGHT)
+	button.custom_minimum_size = Vector2(CHOICE_WIDTH, CHOICE_HEIGHT)
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	UiSkin.style_button(button, _text.get_theme_font_size("font_size"))
+	_style_choice(button)
 	button.pressed.connect(func() -> void:
 		if _choosing:
 			_choosing = false
@@ -335,9 +348,28 @@ func _make_choice_button(text: String, index: int) -> Button:
 	return button
 
 
+## A choice is just its words, in the dialogue's golden ochre with a dark outline, with no box
+## around it, so the options stay light on the screen. Held down, the words turn cream.
+func _style_choice(button: Button) -> void:
+	# A variation keeps the game's default button look (the soft window) off it.
+	button.theme_type_variation = &"TextButton"
+	button.custom_minimum_size.y = CHOICE_HEIGHT
+	for state in ["normal", "hover", "focus", "disabled", "pressed", "hover_pressed"]:
+		button.add_theme_stylebox_override(state, StyleBoxEmpty.new())
+	button.add_theme_font_size_override("font_size", _text.get_theme_font_size("font_size"))
+	for color_name in ["font_color", "font_hover_color", "font_focus_color"]:
+		button.add_theme_color_override(color_name, CHOICE_TEXT)
+	for color_name in ["font_pressed_color", "font_hover_pressed_color"]:
+		button.add_theme_color_override(color_name, UiSkin.BUTTON_TEXT)
+	button.add_theme_color_override("font_outline_color", CHOICE_OUTLINE)
+	button.add_theme_constant_override("outline_size", UiSkin.OUTLINE_SIZE)
+
+
 func _clear_choices() -> void:
 	_choosing = false
 	_choices.visible = false
+	if _choice_hint.get_parent() == _choices:
+		_choices.remove_child(_choice_hint)
 	for child in _choices.get_children():
 		child.queue_free()
 

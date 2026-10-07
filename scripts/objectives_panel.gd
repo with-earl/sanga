@@ -1,7 +1,8 @@
 class_name ObjectivesPanel
 extends Control
-## Top-right objective list on a small soft window: a heading, a thin line, then one right-aligned
-## line per objective. The window fits its text. Finished objectives have a line struck through
+## Top-right objective list: a heading, a thin line, then one right-aligned line per objective,
+## as outlined text with no box around it, so it stays light on the screen (the soft shade along
+## the top of the screen keeps it readable). Finished objectives have a line struck through
 ## them and fade back, so the current one stands out.
 
 const STRIKE_SECONDS := 0.35
@@ -11,8 +12,15 @@ const NEW_ITEM_GLOW := 1.45
 const NEW_ITEM_GLOW_SECONDS := 1.2
 ## Finished objectives settle at this opacity once struck through.
 const FINISHED_ALPHA := 0.6
-## Room between the text and the edge of its window.
-const WINDOW_MARGIN := Vector2(26.0, 18.0)
+## How far the text sits below the top of its area.
+const TOP_MARGIN := 18.0
+
+## The objectives are read in a window opened from the clipboard icon at the top right (see
+## GameMenu), so this list keeps track of them and plays the strike sound, but stays off screen.
+const SHOWN_ON_SCREEN := false
+
+## Emitted whenever the objectives change, for the clipboard window.
+signal objectives_changed(lines: PackedStringArray, struck_count: int, animate: bool)
 
 @onready var _list: VBoxContainer = %List
 @onready var _box: VBoxContainer = $Box
@@ -25,11 +33,10 @@ var _struck_count := 0
 ## With `animate`, the ones that have just been finished draw their line in, and a new line fades
 ## in, starting after `delay` seconds.
 func _ready() -> void:
-	# The box hugs its text at the top right, and a soft window sits behind it.
+	# The box hugs its text at the top right.
 	_box.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	_box.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	_box.offset_top = WINDOW_MARGIN.y
-	SoftWindow.behind(_box, SoftWindow.Look.WINDOW, WINDOW_MARGIN)
+	_box.offset_top = TOP_MARGIN
 	_box.resized.connect(_fit_box)
 
 
@@ -41,7 +48,8 @@ func _fit_box() -> void:
 func set_objectives(lines: PackedStringArray, struck_count := 0, animate := false, delay := 0.0) -> void:
 	for child in _list.get_children():
 		child.queue_free()
-	visible = not lines.is_empty()
+	visible = SHOWN_ON_SCREEN and not lines.is_empty()
+	objectives_changed.emit(lines, struck_count, animate)
 	for index in lines.size():
 		var item := ObjectiveItem.new()
 		item.theme_type_variation = &"HudBody"

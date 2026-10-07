@@ -62,8 +62,9 @@ func _play_confessions() -> void:
 	# The menu and buttons stay out of the way for the whole sequence.
 	hud_locked = true
 	_objectives_panel.modulate.a = 0.0
-	_game_menu.get_icon().modulate.a = 0.0
-	_game_menu.get_icon().mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for icon in _game_menu.get_hud_icons():
+		icon.modulate.a = 0.0
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if _back_button != null:
 		_back_button.modulate.a = 0.0
 		_back_button.mouse_filter = Control.MOUSE_FILTER_IGNORE
