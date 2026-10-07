@@ -68,6 +68,23 @@ const CATEGORY_COLORS := {
 		hotspot = value
 		queue_redraw()
 @export var font_size := 22
+## Draws the art smaller than its slot (1 is the full fit), centred and resting on the slot's
+## bottom, while the whole slot still answers taps. For small things that must look their real
+## size in the room, such as keys, yet stay easy to tap.
+@export_range(0.05, 1.0, 0.01) var art_scale := 1.0:
+	set(value):
+		art_scale = value
+		queue_redraw()
+## A thin dark outline around the art, this many pixels wide on screen whatever the art's size, in
+## the cel style of the characters. 0 draws none.
+@export_range(0.0, 4.0, 0.1) var outline_width := 0.0:
+	set(value):
+		outline_width = value
+		queue_redraw()
+const OUTLINE_COLOR := Color(0.03, 0.02, 0.02, 1.0)
+## Directions the outline copies are drawn in: eight around the art make an even line.
+const OUTLINE_DIRECTIONS := [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1),
+	Vector2(0.71, 0.71), Vector2(-0.71, 0.71), Vector2(0.71, -0.71), Vector2(-0.71, -0.71)]
 ## Makes a prop look like it really sits in the scene instead of being pasted on top: it gets the
 ## same soft film look and warm grade as the room's art, plus a shadow. CONTACT is a soft dark
 ## patch where an object rests on a surface (keys on a bed); WALL is a faint drop shadow behind
@@ -215,7 +232,7 @@ func _art_rect(rect: Rect2) -> Rect2:
 	if stretch_to_fit:
 		return ScreenFit.width_rect(_texture.get_size(), rect.size)
 	var tex_size := _texture.get_size()
-	var factor := minf(rect.size.x / tex_size.x, rect.size.y / tex_size.y)
+	var factor := minf(rect.size.x / tex_size.x, rect.size.y / tex_size.y) * art_scale
 	var fitted := tex_size * factor
 	return Rect2(Vector2((rect.size.x - fitted.x) / 2.0, rect.size.y - fitted.y), fitted)
 
@@ -233,6 +250,11 @@ func _draw() -> void:
 			# A negative width draws the picture mirrored inside the same rectangle.
 			art.size.x = -art.size.x
 		var light := scene_light if grounding != Grounding.NONE else Color.WHITE
+		if outline_width > 0.0:
+			# The art's silhouette, drawn dark a little to each side, peeks out as the outline.
+			var reach := outline_width / maxf(get_global_transform_with_canvas().get_scale().x, 0.01)
+			for direction in OUTLINE_DIRECTIONS:
+				draw_texture_rect(_texture, Rect2(art.position + direction * reach, art.size), false, OUTLINE_COLOR)
 		draw_texture_rect(_texture, art, false, light)
 	else:
 		_draw_placeholder(rect)
