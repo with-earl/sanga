@@ -68,9 +68,29 @@ const CATEGORY_COLORS := {
 		hotspot = value
 		queue_redraw()
 @export var font_size := 22
+## Makes a prop look like it really sits in the scene instead of being pasted on top: it gets the
+## same soft film look and warm grade as the room's art, plus a shadow. CONTACT is a soft dark
+## patch where an object rests on a surface (keys on a bed); WALL is a faint drop shadow behind
+## something stuck to a wall (a poster).
+enum Grounding { NONE, CONTACT, WALL }
+@export var grounding := Grounding.NONE:
+	set(value):
+		grounding = value
+		_refresh()
+## The room's light on a grounded prop: white leaves it as drawn; a warm, slightly darker colour
+## sinks it into a dim corner.
+@export var scene_light := Color(1.0, 0.97, 0.92, 1.0):
+	set(value):
+		scene_light = value
+		queue_redraw()
 
 static var _retro_material: ShaderMaterial
 static var _character_material: ShaderMaterial
+static var _contact_shadow: GradientTexture2D
+## How dark the shadows of grounded props are, and how far a wall shadow falls (in slot units).
+const SHADOW_COLOR := Color(0.12, 0.06, 0.03, 0.6)
+const WALL_SHADOW_COLOR := Color(0.1, 0.06, 0.04, 0.32)
+const WALL_SHADOW_OFFSET := Vector2(3.0, 5.0)
 
 var _texture: Texture2D
 var _shape: BitMap
@@ -146,7 +166,7 @@ func _refresh() -> void:
 		_texture = _out_of_focus(_texture, depth_blur)
 	if _texture != null and shape_hit_test:
 		_shape = _build_shape(_texture)
-	var shaded := _texture != null and retro_look and category != "props"
+	var shaded := _texture != null and retro_look and (category != "props" or grounding != Grounding.NONE)
 	if not shaded:
 		material = null
 	else:
@@ -208,12 +228,47 @@ func _draw() -> void:
 		return
 	if _texture != null:
 		var art := _art_rect(rect)
+		_draw_grounding_shadow(art)
 		if flip_horizontal:
 			# A negative width draws the picture mirrored inside the same rectangle.
 			art.size.x = -art.size.x
-		draw_texture_rect(_texture, art, false)
+		var light := scene_light if grounding != Grounding.NONE else Color.WHITE
+		draw_texture_rect(_texture, art, false, light)
 	else:
 		_draw_placeholder(rect)
+
+
+## The shadow under or behind a grounded prop, drawn before the prop itself.
+func _draw_grounding_shadow(art: Rect2) -> void:
+	match grounding:
+		Grounding.CONTACT:
+			# A soft oval hugging the bottom of the object, a little wider than it.
+			var shadow_size := Vector2(art.size.x * 1.08, maxf(art.size.y * 0.5, 10.0))
+			var centre := Vector2(art.get_center().x, art.end.y - shadow_size.y * 0.3)
+			draw_texture_rect(contact_shadow(), Rect2(centre - shadow_size / 2.0, shadow_size), false, SHADOW_COLOR)
+		Grounding.WALL:
+			var behind := Rect2(art.position + WALL_SHADOW_OFFSET, art.size)
+			if flip_horizontal:
+				behind.size.x = -behind.size.x
+			# The picture itself, tinted almost black and see-through, falls as the shadow.
+			draw_texture_rect(_texture, behind, false, WALL_SHADOW_COLOR)
+
+
+## A soft round shadow picture, white with alpha fading out from the middle; tinted when drawn.
+static func contact_shadow() -> GradientTexture2D:
+	if _contact_shadow == null:
+		var gradient := Gradient.new()
+		gradient.set_color(0, Color(1, 1, 1, 1))
+		gradient.set_color(1, Color(1, 1, 1, 0))
+		gradient.add_point(0.45, Color(1, 1, 1, 0.55))
+		_contact_shadow = GradientTexture2D.new()
+		_contact_shadow.gradient = gradient
+		_contact_shadow.fill = GradientTexture2D.FILL_RADIAL
+		_contact_shadow.fill_from = Vector2(0.5, 0.5)
+		_contact_shadow.fill_to = Vector2(0.5, 0.0)
+		_contact_shadow.width = 64
+		_contact_shadow.height = 64
+	return _contact_shadow
 
 
 func _draw_placeholder(rect: Rect2) -> void:

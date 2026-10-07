@@ -5,12 +5,12 @@ extends Location
 ## Opening: Gloria, the luggage, the beating, and the man going for his bath. Then Mercy is alone
 ## in the room while he bathes, and looks for a way out. What she can do depends on the timeline:
 ##
-## - Main timeline: take the police calling card and use the telephone (Mercy dies), or find the
+## - Main timeline: read the police emergency poster and use the telephone (Mercy dies), or find the
 ##   right key among five (Mercy escapes).
 ## - Kumpisal timeline: find the right key. Each wrong key, Father Eli speaks from the bathroom.
 ##   Outside, she chooses to run or ride a jeep.
 ## - Padala timeline: the man is revealed as Father Eli. There are no keys. Mercy takes the police
-##   calling card or the food delivery card (taking one puts the other out of reach) and calls.
+##   emergency poster or the food delivery card (taking one puts the other out of reach) and calls.
 ##   The card she called decides how the rest of the run goes.
 ##
 ## The words come from story/padala.json. The right key is picked at random for each run.
@@ -64,7 +64,13 @@ func _arrange_room() -> void:
 	var cards: Dictionary = _variant.get("cards", {})
 	var nothing_taken := _taken_card() == ""
 	for card in ["PoliceCard", "FoodDeliveryCard"]:
-		(get_node("Props/" + card) as ArtSlot).visible = cards.has(card) and nothing_taken
+		var slot := get_node("Props/" + card) as ArtSlot
+		if card == "PoliceCard":
+			# The police poster is taped to the wall: it stays up once read, but cannot be read twice.
+			slot.visible = cards.has(card)
+			slot.interactive = nothing_taken
+		else:
+			slot.visible = cards.has(card) and nothing_taken
 	for index in range(1, KEY_COUNT + 1):
 		var key_node := get_node("Props/Keys%d" % index) as ArtSlot
 		key_node.visible = _variant.get("keys", false) and key_node.name not in tried

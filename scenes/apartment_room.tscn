@@ -67,9 +67,9 @@ hotspot = true
 
 [node name="Keys1" type="Control" parent="Props"]
 layout_mode = 0
-offset_left = 400.0
-offset_top = 300.0
-offset_right = 470.0
+offset_left = 383.0
+offset_top = 312.0
+offset_right = 487.0
 offset_bottom = 356.0
 script = ExtResource("2_art")
 asset_id = "keys"
@@ -77,11 +77,12 @@ category = "props"
 display_name = "Keys"
 interactive = true
 
+grounding = 1
 [node name="Keys2" type="Control" parent="Props"]
 layout_mode = 0
-offset_left = 858.0
-offset_top = 218.0
-offset_right = 928.0
+offset_left = 841.0
+offset_top = 230.0
+offset_right = 945.0
 offset_bottom = 274.0
 script = ExtResource("2_art")
 asset_id = "keys"
@@ -89,11 +90,13 @@ category = "props"
 display_name = "Keys"
 interactive = true
 
+flip_horizontal = true
+grounding = 1
 [node name="Keys3" type="Control" parent="Props"]
 layout_mode = 0
-offset_left = 640.0
-offset_top = 440.0
-offset_right = 710.0
+offset_left = 623.0
+offset_top = 452.0
+offset_right = 727.0
 offset_bottom = 496.0
 script = ExtResource("2_art")
 asset_id = "keys"
@@ -101,11 +104,12 @@ category = "props"
 display_name = "Keys"
 interactive = true
 
+grounding = 1
 [node name="Keys4" type="Control" parent="Props"]
 layout_mode = 0
-offset_left = 520.0
-offset_top = 610.0
-offset_right = 590.0
+offset_left = 503.0
+offset_top = 622.0
+offset_right = 607.0
 offset_bottom = 666.0
 script = ExtResource("2_art")
 asset_id = "keys"
@@ -113,11 +117,13 @@ category = "props"
 display_name = "Keys"
 interactive = true
 
+flip_horizontal = true
+grounding = 1
 [node name="Keys5" type="Control" parent="Props"]
 layout_mode = 0
-offset_left = 1010.0
-offset_top = 496.0
-offset_right = 1080.0
+offset_left = 993.0
+offset_top = 508.0
+offset_right = 1097.0
 offset_bottom = 552.0
 script = ExtResource("2_art")
 asset_id = "keys"
@@ -125,18 +131,21 @@ category = "props"
 display_name = "Keys"
 interactive = true
 
+grounding = 1
+scene_light = Color(0.78, 0.73, 0.68, 1)
 [node name="PoliceCard" type="Control" parent="Props"]
 layout_mode = 0
-offset_left = 500.0
-offset_top = 300.0
-offset_right = 570.0
-offset_bottom = 356.0
+offset_left = 424.0
+offset_top = 168.0
+offset_right = 496.0
+offset_bottom = 264.0
 script = ExtResource("2_art")
-asset_id = "police_card"
+asset_id = "police_poster"
 category = "props"
-display_name = "Police Card"
+display_name = "Police Emergency Poster"
 interactive = true
 
+grounding = 2
 [node name="FoodDeliveryCard" type="Control" parent="Props"]
 layout_mode = 0
 offset_left = 280.0
@@ -144,11 +153,12 @@ offset_top = 610.0
 offset_right = 350.0
 offset_bottom = 666.0
 script = ExtResource("2_art")
-asset_id = "food_delivery_card"
+asset_id = "food_delivery_card_floor"
 category = "props"
 display_name = "Food Delivery Card"
 interactive = true
 
+grounding = 1
 [node name="Hud" type="CanvasLayer" parent="."]
 layer = 20
 

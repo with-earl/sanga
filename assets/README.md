@@ -35,10 +35,11 @@ slot (keeping their proportions) and sit on the bottom edge of it.
 
 | File | Used in |
 | --- | --- |
-| `keys.png` | Apartment room: the five keys (drawn for the game) |
+| `keys.png` | Apartment room: the five keys, seen from a low side angle (drawn by `tools/draw_props.py`) |
 | `door.png` | Apartment room |
-| `police_card.png` | Apartment room (drawn for the game) |
-| `food_delivery_card.png` | Apartment room, Padala timeline only (drawn for the game) |
+| `police_poster.png` | Apartment room: the police emergency poster on the wall (drawn by `tools/draw_props.py`) |
+| `food_delivery_card.png` | The food delivery card's own picture (drawn for the game) |
+| `food_delivery_card_floor.png` | Apartment room, Padala timeline only: the card lying on the floor (made from the card by `tools/draw_props.py`) |
 | `telephone.png` | Apartment room |
 | `confessional_booth.png` | Church nave (cutout above the background) |
 | `nave_vase.png` | Church nave (cutout above the booth) |

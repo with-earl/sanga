@@ -33,6 +33,7 @@ godot --headless --path . -s res://tests/smoke_test.gd               # smoke tes
 godot --headless --path . --export-release "Web" build/web/index.html  # web build
 python tools/compose_music.py [name]                                 # regenerate music (numpy, scipy)
 python tools/compose_sounds.py                                       # regenerate sound effects
+python tools/draw_props.py                                           # redraw keys, police poster, floor card (needs Pillow, numpy)
 tools/next_version.sh                                                # next version from the commits
 ```
 
@@ -50,7 +51,7 @@ picture. Delete the temporary script afterwards. The `--headless` runs print RID
 | `scripts/` | `location.gd` is the base of every playable place (objectives route, conversations, hints, Undo). Each story has its own subclass: `tokhang.gd`, `church_nave.gd`/`confessional.gd` (with `kumpisal_story.gd`), `padala.gd` |
 | `story/*.json` | All story text, conversations and choices. `timelines.json` is the timelines chart: cards, sections and realities |
 | `assets/` | Art (see `assets/README.md`), `music/`, `sounds/`, `fonts/Lora.ttf`, `videos/main_screen.ogv` |
-| `tools/` | `next_version.sh`, `compose_music.py`, `compose_sounds.py`, `cloud_setup.sh`. Has a `.gdignore`, so Godot skips it |
+| `tools/` | `next_version.sh`, `compose_music.py`, `compose_sounds.py`, `draw_props.py`, `cloud_setup.sh`. Has a `.gdignore`, so Godot skips it |
 | `tests/smoke_test.gd` | Headless smoke test |
 
 ## Conventions
