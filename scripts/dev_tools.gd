@@ -1,47 +1,48 @@
 class_name DevTools
 extends Control
-## Development only: the "Developer tools" window, opened by the terminal icon next to the
-## settings gear, on the main screen and in every place. It lists points of the game to jump to
-## without playing from the start (see DevJump), and the screens a timeline ends on. Runs started
-## here are never saved.
+## Development only: the "Developer Tools" window, opened by the terminal icon next to the
+## settings gear, on the main screen and in every place. It lists the start of each story on each
+## timeline, and the screens a timeline ends on, so testers can reach any part without playing
+## from the start (see DevJump). Runs started here are never saved.
 ##
-## It looks like a plain black and white computer terminal (monospaced letters on a black screen)
-## instead of the game's warm storybook windows, so no one takes it for part of the story, while
-## the words stay everyday words: a heading, a short note and a list of places to tap. Tapping
-## outside the window closes it.
+## It follows Apple's own design: a black, rounded sheet with a title and a "Done" button at the
+## top, grouped lists of rows on rounded dark cards with thin dividers and a grey chevron, small
+## grey section titles, and a grey footnote. Everything is black, white and greys, in terminal
+## letters, so no one takes it for part of the story. Tapping outside the sheet closes it.
 
 ## While the game is still being made, the tools show in every build, the web playtest build
 ## included, so coaches and testers can reach any part. Set this to false before release, and
 ## they show only in debug builds again.
 const SHOW_IN_ALL_BUILDS := true
-const OPEN_SECONDS := 0.15
-const CLOSE_SECONDS := 0.12
-const PANEL_WIDTH := 600.0
-## The list grows with its rows, and scrolls once it would get taller than this.
-const LIST_HEIGHT := 360.0
-const PADDING := 28.0
-const ROW_HEIGHT := 48.0
-const ROW_GAP := 6.0
-const FONT_SIZE := 20
-const SMALL_SIZE := 16
-## A terminal's monospaced letters (DejaVu Sans Mono, a free font; licence in assets/fonts).
+const OPEN_SECONDS := 0.2
+const CLOSE_SECONDS := 0.15
+const SHEET_WIDTH := 620.0
+## The sheet never gets taller than this; the lists scroll inside it.
+const LIST_HEIGHT := 440.0
+const SHEET_RADIUS := 18
+const CARD_RADIUS := 12
+const SIDE := 20.0
+const ROW_HEIGHT := 50.0
+const ROW_INSET := 18
+const TITLE_SIZE := 22
+const ROW_SIZE := 19
+const SMALL_SIZE := 15
+## Terminal letters (DejaVu Sans Mono, a free font; licence in assets/fonts).
 const MONO := preload("res://assets/fonts/DejaVuSansMono.ttf")
 const MONO_BOLD := preload("res://assets/fonts/DejaVuSansMono-Bold.ttf")
-const SCREEN := Color(0.02, 0.02, 0.02, 0.97)
-const TITLE_BAR := Color(0.1, 0.1, 0.1, 1)
-const WHITE := Color(0.95, 0.95, 0.95, 1)
-const GREY := Color(0.62, 0.62, 0.62, 1)
-const EDGE := Color(1, 1, 1, 0.75)
-const DIM := Color(0.0, 0.0, 0.0, 0.6)
-## The heading over the list of places to jump to.
-const HEADING := "Jump into specific parts"
-## The note at the foot of the window, so testers know rough spots are expected.
-const NOTE_LABEL := "Developer Note: "
-const NOTE := "Continuous improvement in progress. Some parts may appear as placeholder."
+## Apple's dark-mode greys: the sheet, the cards, a held row, the dividers and the quieter text.
+const SHEET := Color(0.0, 0.0, 0.0, 0.97)
+const CARD := Color(0.11, 0.11, 0.118, 1)
+const CARD_HELD := Color(0.227, 0.227, 0.235, 1)
+const DIVIDER := Color(0.22, 0.22, 0.227, 1)
+const LABEL := Color(1, 1, 1, 1)
+const SECONDARY := Color(0.557, 0.557, 0.576, 1)
+const DIM := Color(0.0, 0.0, 0.0, 0.5)
+const TITLE := "Developer Tools"
+const ENDINGS_TITLE := "Endings"
+## The footnote under the lists.
+const FOOTNOTE := "This build is still in development, so some parts may use placeholder art or text. Progress from these shortcuts isn't saved."
 
-var _heading := Label.new()
-var _list := VBoxContainer.new()
-var _scroll := ScrollContainer.new()
 var _tween: Tween
 
 
@@ -63,93 +64,195 @@ func _ready() -> void:
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(center)
-	var window := VBoxContainer.new()
-	window.custom_minimum_size.x = PANEL_WIDTH
-	window.add_theme_constant_override("separation", 0)
-	center.add_child(window)
-	window.add_child(_build_title_bar())
-	window.add_child(_build_screen())
+	var sheet := PanelContainer.new()
+	var sheet_style := StyleBoxFlat.new()
+	sheet_style.bg_color = SHEET
+	sheet_style.border_color = DIVIDER
+	sheet_style.set_border_width_all(1)
+	sheet_style.set_corner_radius_all(SHEET_RADIUS)
+	sheet_style.anti_aliasing = true
+	sheet.add_theme_stylebox_override("panel", sheet_style)
+	sheet.custom_minimum_size.x = SHEET_WIDTH
+	center.add_child(sheet)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 0)
+	sheet.add_child(column)
+	column.add_child(_build_bar())
+	column.add_child(_divider(0))
+	column.add_child(_build_lists())
 
 
-## The window's top strip: its name at the left, and a plain "Close" at the right.
-func _build_title_bar() -> PanelContainer:
-	var bar := PanelContainer.new()
-	var style := _flat(TITLE_BAR, EDGE)
-	style.corner_radius_bottom_left = 0
-	style.corner_radius_bottom_right = 0
-	style.border_width_bottom = 1
-	style.content_margin_left = PADDING
-	style.content_margin_right = PADDING - 8
-	style.content_margin_top = 8
-	style.content_margin_bottom = 8
-	bar.add_theme_stylebox_override("panel", style)
+## The top bar: the title at the left and "Done" at the right, as on an Apple sheet.
+func _build_bar() -> MarginContainer:
+	var bar := MarginContainer.new()
+	bar.add_theme_constant_override("margin_left", int(SIDE))
+	bar.add_theme_constant_override("margin_right", int(SIDE) - 8)
+	bar.add_theme_constant_override("margin_top", 10)
+	bar.add_theme_constant_override("margin_bottom", 10)
 	var row := HBoxContainer.new()
-	var title := _text("Developer tools", SMALL_SIZE + 2, WHITE, true)
+	var title := _text(TITLE, TITLE_SIZE, LABEL, true)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	row.add_child(title)
-	var close_button := Button.new()
-	_style_button(close_button, "Close", WHITE)
-	close_button.custom_minimum_size.y = 40
-	close_button.pressed.connect(close)
-	row.add_child(close_button)
+	var done := Button.new()
+	_plain_button(done)
+	done.text = "Done"
+	done.add_theme_font_override("font", MONO_BOLD)
+	done.add_theme_font_size_override("font_size", ROW_SIZE)
+	for state in ["font_color", "font_hover_color", "font_focus_color"]:
+		done.add_theme_color_override(state, LABEL)
+	for state in ["font_pressed_color", "font_hover_pressed_color"]:
+		done.add_theme_color_override(state, SECONDARY)
+	done.custom_minimum_size = Vector2(72, 44)
+	done.pressed.connect(close)
+	row.add_child(done)
 	bar.add_child(row)
 	return bar
 
 
-## The black screen: a heading, the list of places, and the developer note at the foot. A faint
-## pattern of scan lines lies over it, like an old monitor.
-func _build_screen() -> PanelContainer:
-	var screen := PanelContainer.new()
-	var style := _flat(SCREEN, EDGE)
-	style.corner_radius_top_left = 0
-	style.corner_radius_top_right = 0
-	style.border_width_top = 0
-	style.set_content_margin_all(PADDING)
-	screen.add_theme_stylebox_override("panel", style)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 16)
-	_set_text_style(_heading, FONT_SIZE + 2, WHITE, true)
-	column.add_child(_heading)
-	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_list.add_theme_constant_override("separation", int(ROW_GAP))
-	_scroll.add_child(_list)
-	column.add_child(_scroll)
-	var rule := ColorRect.new()
-	rule.color = Color(WHITE, 0.25)
-	rule.custom_minimum_size.y = 1
-	column.add_child(rule)
-	var note := RichTextLabel.new()
-	note.add_to_group(&"crisp_text")
-	note.bbcode_enabled = true
-	note.fit_content = true
-	note.scroll_active = false
-	note.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	note.add_theme_font_override("normal_font", MONO)
-	note.add_theme_font_override("bold_font", MONO_BOLD)
-	note.add_theme_font_size_override("normal_font_size", SMALL_SIZE)
-	note.add_theme_font_size_override("bold_font_size", SMALL_SIZE)
-	note.add_theme_color_override("default_color", GREY)
-	note.text = "[b][color=#%s]%s[/color][/b]%s" % [WHITE.to_html(false), NOTE_LABEL, NOTE]
-	column.add_child(note)
-	screen.add_child(column)
-	var lines := ColorRect.new()
-	lines.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var lines_material := ShaderMaterial.new()
-	lines_material.shader = _scanline_shader()
-	lines.material = lines_material
-	screen.add_child(lines)
-	return screen
+## One section per timeline, then the endings, in a scrolling area, with the footnote under the
+## first section.
+func _build_lists() -> ScrollContainer:
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.custom_minimum_size.y = LIST_HEIGHT
+	var margin := MarginContainer.new()
+	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for side in ["margin_left", "margin_right"]:
+		margin.add_theme_constant_override(side, int(SIDE))
+	margin.add_theme_constant_override("margin_top", 8)
+	margin.add_theme_constant_override("margin_bottom", int(SIDE))
+	var sections := VBoxContainer.new()
+	sections.add_theme_constant_override("separation", 0)
+	for index in DevJump.GROUPS.size():
+		var group: Dictionary = DevJump.GROUPS[index]
+		var rows: Array = []
+		for point in group["points"]:
+			rows.append([str(point["label"]), _jump.bind(point)])
+		_add_section(sections, str(group["title"]), rows)
+		# The footnote sits under the first list, as on Apple's settings screens, so it is read
+		# without scrolling.
+		if index == 0:
+			sections.add_child(_footnote())
+	var endings: Array = []
+	var realities := TimelineMap.endings()
+	for index in realities.size():
+		var name := "Main Ending" if index == 0 else "Alternate Ending %d" % index
+		endings.append([name, _show_ending.bind(realities[index])])
+	_add_section(sections, ENDINGS_TITLE, endings)
+	margin.add_child(sections)
+	scroll.add_child(margin)
+	return scroll
 
 
-func _scanline_shader() -> Shader:
-	var shader := Shader.new()
-	shader.code = """shader_type canvas_item;
-void fragment() {
-	COLOR = vec4(0.0, 0.0, 0.0, 0.12 * step(0.5, fract(FRAGCOORD.y / 3.0)));
-}"""
-	return shader
+## The grey footnote, indented like the rows above it.
+func _footnote() -> MarginContainer:
+	var footnote := _text(FOOTNOTE, SMALL_SIZE, SECONDARY)
+	footnote.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var holder := MarginContainer.new()
+	holder.add_theme_constant_override("margin_left", ROW_INSET)
+	holder.add_theme_constant_override("margin_right", ROW_INSET)
+	holder.add_theme_constant_override("margin_top", 8)
+	holder.add_child(footnote)
+	return holder
+
+
+## A small grey section title, then its rows on one rounded card, with thin dividers between rows.
+func _add_section(parent: VBoxContainer, title: String, rows: Array) -> void:
+	var heading := MarginContainer.new()
+	heading.add_theme_constant_override("margin_left", ROW_INSET)
+	heading.add_theme_constant_override("margin_top", 20)
+	heading.add_theme_constant_override("margin_bottom", 8)
+	heading.add_child(_text(title, SMALL_SIZE, SECONDARY))
+	parent.add_child(heading)
+	var card := PanelContainer.new()
+	var card_style := StyleBoxFlat.new()
+	card_style.bg_color = CARD
+	card_style.set_corner_radius_all(CARD_RADIUS)
+	card_style.anti_aliasing = true
+	card.add_theme_stylebox_override("panel", card_style)
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override("separation", 0)
+	for index in rows.size():
+		if index > 0:
+			list.add_child(_divider(ROW_INSET))
+		var row: Button = _row(str(rows[index][0]), index == 0, index == rows.size() - 1)
+		row.pressed.connect(rows[index][1])
+		list.add_child(row)
+	card.add_child(list)
+	parent.add_child(card)
+
+
+## One row: its name at the left and a grey chevron at the right. While held it turns a lighter
+## grey, the way an Apple list row does.
+func _row(text: String, first: bool, last: bool) -> Button:
+	var row := Button.new()
+	_plain_button(row)
+	row.custom_minimum_size.y = ROW_HEIGHT
+	var held := StyleBoxFlat.new()
+	held.bg_color = CARD_HELD
+	held.anti_aliasing = true
+	if first:
+		held.corner_radius_top_left = CARD_RADIUS
+		held.corner_radius_top_right = CARD_RADIUS
+	if last:
+		held.corner_radius_bottom_left = CARD_RADIUS
+		held.corner_radius_bottom_right = CARD_RADIUS
+	for state in ["pressed", "hover_pressed"]:
+		row.add_theme_stylebox_override(state, held)
+	var line := HBoxContainer.new()
+	line.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	line.offset_left = ROW_INSET
+	line.offset_right = -ROW_INSET
+	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var name := _text(text, ROW_SIZE, LABEL)
+	name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	name.clip_text = true
+	name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	line.add_child(name)
+	var chevron := _text("›", ROW_SIZE + 4, SECONDARY)
+	chevron.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	line.add_child(chevron)
+	row.add_child(line)
+	return row
+
+
+## A thin divider line, indented from the left like Apple's list dividers.
+func _divider(inset: int) -> MarginContainer:
+	var holder := MarginContainer.new()
+	holder.add_theme_constant_override("margin_left", inset)
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var line := ColorRect.new()
+	line.color = DIVIDER
+	line.custom_minimum_size.y = 1
+	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	holder.add_child(line)
+	return holder
+
+
+## A text-free, see-through button, kept out of the game's own button look and blur.
+func _plain_button(button: Button) -> void:
+	button.add_to_group(&"crisp_text")
+	# A variation keeps the game's own button look (warm window, cursor) off this button.
+	button.theme_type_variation = &"TextButton"
+	button.focus_mode = Control.FOCUS_NONE
+	button.add_theme_constant_override("outline_size", 0)
+	for state in ["normal", "hover", "pressed", "hover_pressed", "focus", "disabled"]:
+		button.add_theme_stylebox_override(state, StyleBoxEmpty.new())
+
+
+## Terminal letters: monospaced, crisp (no retro blur) and with no outline.
+func _text(text: String, font_size: int, color: Color, bold := false) -> Label:
+	var label := Label.new()
+	label.add_to_group(&"crisp_text")
+	label.text = text
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.add_theme_font_override("font", MONO_BOLD if bold else MONO)
+	label.add_theme_font_size_override("font_size", font_size)
+	label.add_theme_color_override("font_color", color)
+	label.add_theme_constant_override("outline_size", 0)
+	return label
 
 
 func is_open() -> bool:
@@ -157,7 +260,6 @@ func is_open() -> bool:
 
 
 func open() -> void:
-	_show_menu()
 	visible = true
 	_fade(1.0, OPEN_SECONDS)
 
@@ -180,121 +282,6 @@ func _fade(alpha: float, seconds: float) -> void:
 	_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	_tween.tween_property(self, "modulate:a", alpha, seconds)
 	await _tween.finished
-
-
-## The first level: one row for each timeline, and one for the endings.
-func _show_menu() -> void:
-	_open_list(HEADING)
-	for index in DevJump.GROUPS.size():
-		_add_row(str(DevJump.GROUPS[index]["title"]), _show_group.bind(index), true)
-	_add_row("Endings", _show_endings, true)
-
-
-## The points of one timeline. A tap opens the point straight away.
-func _show_group(index: int) -> void:
-	var group: Dictionary = DevJump.GROUPS[index]
-	_open_list(HEADING + ": " + str(group["title"]))
-	_add_back_row()
-	for point in group["points"]:
-		_add_row(str(point["label"]), _jump.bind(point))
-
-
-## Main, then Alternate 1 to 5: one for each way a timeline can end.
-func _show_endings() -> void:
-	_open_list(HEADING + ": Endings")
-	_add_back_row()
-	var endings := TimelineMap.endings()
-	for index in endings.size():
-		_add_row(TimelineMap.ending_name(index), _show_ending.bind(endings[index]))
-
-
-func _open_list(heading: String) -> void:
-	_heading.text = heading
-	_scroll.scroll_vertical = 0
-	for child in _list.get_children():
-		_list.remove_child(child)
-		child.queue_free()
-	_scroll.custom_minimum_size.y = 0.0
-
-
-func _add_back_row() -> void:
-	var row := _add_row("‹  Back", _show_menu)
-	row.add_theme_color_override("font_color", GREY)
-
-
-## One line of the list, in a thin white frame. `opens_more` adds a › for a line that leads to
-## another list. While held it turns white with black letters, like a selected line.
-func _add_row(text: String, action: Callable, opens_more := false) -> Button:
-	var row := Button.new()
-	_style_button(row, text + ("  ›" if opens_more else ""), WHITE)
-	row.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	row.custom_minimum_size.y = ROW_HEIGHT
-	row.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	var frame := _flat(Color(1, 1, 1, 0.04), Color(1, 1, 1, 0.3))
-	_pad_row(frame)
-	row.add_theme_stylebox_override("normal", frame)
-	var lit := _flat(WHITE, WHITE)
-	_pad_row(lit)
-	for state in ["hover", "pressed", "hover_pressed"]:
-		row.add_theme_stylebox_override(state, lit)
-	for state in ["font_hover_color", "font_pressed_color", "font_hover_pressed_color"]:
-		row.add_theme_color_override(state, SCREEN)
-	row.pressed.connect(action)
-	_list.add_child(row)
-	var rows := _list.get_child_count()
-	_scroll.custom_minimum_size.y = minf(rows * ROW_HEIGHT + (rows - 1) * ROW_GAP, LIST_HEIGHT)
-	return row
-
-
-func _pad_row(style: StyleBoxFlat) -> void:
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(4)
-	style.content_margin_left = 16
-	style.content_margin_right = 16
-
-
-## A text-only button in the terminal's letters, kept out of the game's own button look and blur.
-func _style_button(button: Button, text: String, color: Color) -> void:
-	button.add_to_group(&"crisp_text")
-	# A variation keeps the game's own button look (warm window, cursor) off this button.
-	button.theme_type_variation = &"TextButton"
-	button.text = text
-	button.focus_mode = Control.FOCUS_NONE
-	for state in ["normal", "hover", "pressed", "hover_pressed", "focus", "disabled"]:
-		var empty := StyleBoxEmpty.new()
-		empty.content_margin_left = 6
-		empty.content_margin_right = 6
-		button.add_theme_stylebox_override(state, empty)
-	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_hover_pressed_color"]:
-		button.add_theme_color_override(state, color)
-	button.add_theme_font_override("font", MONO)
-	button.add_theme_font_size_override("font_size", FONT_SIZE)
-	button.add_theme_constant_override("outline_size", 0)
-
-
-func _text(text: String, font_size: int, color: Color, bold := false) -> Label:
-	var label := Label.new()
-	label.text = text
-	_set_text_style(label, font_size, color, bold)
-	return label
-
-
-## Terminal letters: monospaced, crisp (no retro blur) and with no outline.
-func _set_text_style(label: Label, font_size: int, color: Color, bold := false) -> void:
-	label.add_to_group(&"crisp_text")
-	label.add_theme_font_override("font", MONO_BOLD if bold else MONO)
-	label.add_theme_font_size_override("font_size", font_size)
-	label.add_theme_color_override("font_color", color)
-	label.add_theme_constant_override("outline_size", 0)
-
-
-func _flat(fill: Color, edge: Color) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = fill
-	style.border_color = edge
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(6)
-	return style
 
 
 func _jump(point: Dictionary) -> void:
