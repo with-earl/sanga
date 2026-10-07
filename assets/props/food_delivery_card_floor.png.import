@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://1kvgkkcxoc1p"
-path="res://.godot/imported/police_card.png-083884a8139f14ce6316d8711d5a0dc3.ctex"
+uid="uid://xvjddjn1lvr8"
+path="res://.godot/imported/food_delivery_card_floor.png-87fd6436dc7e5ae01d2c307a4ea7b115.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/props/police_card.png"
-dest_files=["res://.godot/imported/police_card.png-083884a8139f14ce6316d8711d5a0dc3.ctex"]
+source_file="res://assets/props/food_delivery_card_floor.png"
+dest_files=["res://.godot/imported/food_delivery_card_floor.png-87fd6436dc7e5ae01d2c307a4ea7b115.ctex"]
 
 [params]
 

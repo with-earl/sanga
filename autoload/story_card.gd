@@ -21,7 +21,7 @@ const TITLE_FADE_OUT_SECONDS := 0.25
 const ENDING_HOLD_SECONDS := 3.5
 ## The main timeline's closing screen: the three titles, then when each one happens.
 const TIME_ORDER := [["Tokhang", "Future"], ["Kumpisal", "Past"], ["Padala", "Present"]]
-const TIME_ORDER_COLUMN_WIDTH := 300.0
+const TIME_ORDER_COLUMN_WIDTH := 350.0
 const TIME_ORDER_STEP_SECONDS := 0.7
 const TIME_ORDER_PAUSE_SECONDS := 1.0
 const TIME_ORDER_RISE := 12.0
@@ -38,6 +38,10 @@ const MONTAGE_ZOOM := 1.1
 const SCREEN_SIZE := Vector2(1280, 720)
 
 const SKIP_HINT := "Tap anywhere to continue"
+## Under the title: the ornament, then the ending card's one-line summary, in soft cream.
+const ORNAMENT_BELOW_TITLE := 50.0
+const ENDING_LINE_TOP := 76.0
+const ENDING_LINE_SIZE := 26
 ## The hint, and skipping, only start this long after the montage begins...
 const SKIP_HINT_DELAY_SECONDS := 2.0
 ## ...and the hint fades in over this long.
@@ -61,7 +65,7 @@ var _stage := Control.new()
 var _picture := TextureRect.new()
 var _black := ColorRect.new()
 var _title := Label.new()
-var _hint := Label.new()
+var _hint: TapHint
 var _ending_line := Label.new()
 var _time_order := HBoxContainer.new()
 var _waiting_for_tap := false
@@ -110,6 +114,8 @@ func _ready() -> void:
 	_title.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_black.add_child(_title)
+	# A fine golden ornament under the title, fading with it.
+	TitleOrnament.make(_title, ORNAMENT_BELOW_TITLE)
 	# The ending card's one-line summary, under the title.
 	_ending_line.theme_type_variation = &"HudBody"
 	_ending_line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -118,8 +124,11 @@ func _ready() -> void:
 	_ending_line.anchor_bottom = 0.5
 	_ending_line.offset_left = -400.0
 	_ending_line.offset_right = 400.0
-	_ending_line.offset_top = 46.0
-	_ending_line.offset_bottom = 90.0
+	_ending_line.offset_top = ENDING_LINE_TOP
+	_ending_line.offset_bottom = ENDING_LINE_TOP + 44.0
+	_ending_line.add_theme_color_override("font_color", UiSkin.BUTTON_TEXT)
+	_ending_line.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0))
+	_ending_line.add_theme_font_size_override("font_size", ENDING_LINE_SIZE)
 	_ending_line.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_ending_line.modulate.a = 0.0
 	_black.add_child(_ending_line)
@@ -127,15 +136,11 @@ func _ready() -> void:
 	_build_time_order()
 
 	# The hint sits above the black, so it stays readable between pictures.
-	_hint.theme_type_variation = &"HudHeading"
-	_hint.text = SKIP_HINT
-	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	_hint.offset_top = -90.0
-	_hint.offset_bottom = -40.0
-	_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_hint.modulate.a = 0.0
-	add_child(_hint)
+	var hint_holder := Control.new()
+	hint_holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	hint_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(hint_holder)
+	_hint = TapHint.make(hint_holder, SKIP_HINT)
 
 
 ## Shows the card with the story's title, plays its montage if it has one, opens the scene behind

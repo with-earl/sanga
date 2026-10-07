@@ -89,6 +89,25 @@ static func sparkle(size: int) -> ImageTexture:
 	return ImageTexture.create_from_image(image)
 
 
+## The hint glint: a soft warm four-pointed star inside a wide, faint halo of light, `size` pixels
+## across. Gentler and larger than the sparkle, made to breathe slowly in and out.
+static func glint(size: int) -> ImageTexture:
+	var image := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var half := size / 2.0
+	for y in size:
+		for x in size:
+			var offset := (Vector2(x + 0.5, y + 0.5) - Vector2(half, half)) / half
+			var distance := offset.length()
+			var ray := maxf(_ray(offset.x, offset.y), _ray(offset.y, offset.x))
+			var core := clampf(1.0 - distance / 0.16, 0.0, 1.0)
+			var halo := exp(-distance * distance * 9.0) * 0.28
+			var alpha := clampf(maxf(maxf(ray, core * core), halo), 0.0, 1.0)
+			# White at the heart, warming to soft gold toward the edge of the halo.
+			var tint := Color(1.0, 1.0, 1.0).lerp(Color(1.0, 0.86, 0.55), clampf(distance * 1.4, 0.0, 1.0))
+			image.set_pixel(x, y, Color(tint, alpha))
+	return ImageTexture.create_from_image(image)
+
+
 static func _ray(along: float, across: float) -> float:
 	var length := clampf(1.0 - absf(along), 0.0, 1.0)
 	var width := 0.06 + 0.1 * length

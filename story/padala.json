@@ -42,7 +42,7 @@
 	"variants": {
 		"main": {
 			"objectives": [
-				"Get the police calling card",
+				"Read the police emergency poster",
 				"Or find the right key"
 			],
 			"objectives_after_card": [
@@ -51,7 +51,7 @@
 			],
 			"cards": {
 				"PoliceCard": {
-					"objective": "Get the police calling card",
+					"objective": "Read the police emergency poster",
 					"call": "main_police"
 				}
 			},
@@ -78,7 +78,7 @@
 				}
 			],
 			"objectives": [
-				"Get the police calling card",
+				"Read the police emergency poster",
 				"Or the food delivery card"
 			],
 			"objectives_after_card": [
@@ -86,7 +86,7 @@
 			],
 			"cards": {
 				"PoliceCard": {
-					"objective": "Get the police calling card",
+					"objective": "Read the police emergency poster",
 					"call": "padala_police"
 				},
 				"FoodDeliveryCard": {
@@ -140,7 +140,7 @@
 					"hold": 2.6
 				},
 				{
-					"card": "Police Card",
+					"card": "Police Poster",
 					"line": "Mercy dies."
 				},
 				{
@@ -249,7 +249,7 @@
 					"hold": 2.8
 				},
 				{
-					"card": "Police Card"
+					"card": "Police Poster"
 				}
 			]
 		},

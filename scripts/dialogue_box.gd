@@ -34,6 +34,10 @@ const PORTRAIT_SIZE_FACTORS := {
 	"kulas_1": 0.96,
 	"peter_1": 1.0,
 }
+## Which way each portrait looks in its picture. Portraits not listed here look to the left. A
+## portrait is mirrored when needed so that people on the left of the box always face right and
+## people on the right always face left: everyone in a conversation faces each other.
+const PORTRAITS_FACING_RIGHT := ["father_eli", "ben", "gloria", "gwen", "peter"]
 ## How far a portrait stands in from the side of the box, so the characters are a little in from
 ## its edges.
 const PORTRAIT_INSET := 40.0
@@ -62,6 +66,9 @@ const NEXT_CURSOR_BOB_SECONDS := 0.5
 const RETRO_TEXT_SHADER := preload("res://shaders/retro_text.gdshader")
 const LISTENER_BRIGHTNESS := 0.55
 const PORTRAIT_FADE_SECONDS := 0.15
+## When two people stand together on the right (such as Ben and Gwen), the first stands in front
+## and nearer the middle, overlapping the one behind by this much of their own width.
+const COMPANION_OVERLAP := 0.4
 ## Choices: soft windows stacked above the box, fading in one after another.
 const CHOICE_WIDTH := 720.0
 const CHOICE_GAP := 14.0
@@ -80,6 +87,9 @@ const CHOICE_OUTLINE := Color(0.29, 0.165, 0.071, 1.0)
 var _pending_lines: Array = []
 var _left_name := ""
 var _right_name := ""
+## A second person standing on the right, behind the first, for a conversation with two people.
+var _portrait_companion := TextureRect.new()
+var _companion_name := ""
 var _portrait_tween: Tween
 ## Looks up the picture for a character by name. The box uses it to bring in whoever speaks next
 ## on the right, when a conversation has more than one person speaking there.
@@ -99,6 +109,13 @@ var _insets := Vector4.ZERO
 
 func _ready() -> void:
 	hide()
+	_portrait_companion.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_portrait_companion.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_portrait_companion.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_portrait_companion.visible = false
+	add_child(_portrait_companion)
+	# Behind the first person on the right.
+	move_child(_portrait_companion, _portrait_right.get_index())
 	_fit_panel()
 	resized.connect(_fit_panel)
 	var box_style := StyleBoxEmpty.new()
@@ -188,12 +205,18 @@ func _show_next_cursor(on: bool) -> void:
 
 
 ## Sets who stands beside the box before it opens: a name and a picture for each side. Pass an
-## empty name or no picture to leave a side empty.
-func set_cast(left_name: String, left_picture: Texture2D, right_name: String, right_picture: Texture2D) -> void:
+## empty name or no picture to leave a side empty. A companion stands on the right too, behind the
+## right character, for a conversation with two people there, such as Ben and Gwen.
+func set_cast(left_name: String, left_picture: Texture2D, right_name: String, right_picture: Texture2D, companion_name := "", companion_picture: Texture2D = null) -> void:
 	_left_name = left_name
 	_right_name = right_name
-	_place_portrait(_portrait_left, left_picture, true)
-	_place_portrait(_portrait_right, right_picture, false)
+	_companion_name = companion_name if companion_picture != null else ""
+	_place_portrait(_portrait_left, left_picture, true, left_name)
+	var front_width := _place_portrait(_portrait_right, right_picture, false, right_name)
+	_place_portrait(_portrait_companion, companion_picture, false, companion_name)
+	if companion_picture != null and front_width > 0.0:
+		# The companion keeps the corner; the right character steps in front of them.
+		_portrait_right.position.x = _portrait_companion.position.x - front_width * (1.0 - COMPANION_OVERLAP)
 
 
 ## Plays a single line.
@@ -253,6 +276,7 @@ func choose(options: Array) -> int:
 		_plate.visible = false
 		_portrait_left.visible = false
 		_portrait_right.visible = false
+		_portrait_companion.visible = false
 		show()
 	create_tween().tween_property(_choices, "modulate:a", 1.0, CHOICE_FADE_SECONDS)
 	# Each choice fades in a moment after the one above it.
@@ -317,27 +341,29 @@ func _show_next_line(default_speaker: String) -> void:
 ## If someone other than the left character and the current right character speaks, they replace
 ## the right character, for example Ben answering after Gwen.
 func _bring_in_speaker(who: String) -> void:
-	if who == "" or who == _left_name or who == _right_name or not portrait_source.is_valid():
+	if who == "" or who == _left_name or who == _right_name or who == _companion_name or not portrait_source.is_valid():
 		return
 	var picture := portrait_source.call(who) as Texture2D
 	if picture == null:
 		return
 	_right_name = who
-	_place_portrait(_portrait_right, picture, false)
+	_place_portrait(_portrait_right, picture, false, who)
 
 
-## The speaker is shown at full brightness, the other side slightly dimmed.
+## The speaker is shown at full brightness, everyone else slightly dimmed.
 func _highlight(who: String) -> void:
 	_portrait_left.modulate.v = 1.0 if who == _left_name else LISTENER_BRIGHTNESS
 	_portrait_right.modulate.v = 1.0 if who == _right_name else LISTENER_BRIGHTNESS
+	_portrait_companion.modulate.v = 1.0 if who == _companion_name else LISTENER_BRIGHTNESS
 
 
 ## Shows the top part of a portrait standing on the bottom edge of the screen, at the left or right
 ## corner and underneath the box. Returns how wide it is drawn, or 0 if there is no picture.
-func _place_portrait(portrait: TextureRect, picture: Texture2D, on_left: bool) -> float:
+func _place_portrait(portrait: TextureRect, picture: Texture2D, on_left: bool, _who := "") -> float:
 	portrait.visible = picture != null
 	if picture == null:
 		return 0.0
+	portrait.flip_h = faces_right(picture) != on_left
 	var full := picture.get_size()
 	var shown := AtlasTexture.new()
 	shown.atlas = picture
@@ -354,11 +380,21 @@ func _place_portrait(portrait: TextureRect, picture: Texture2D, on_left: bool) -
 	return drawn.x
 
 
+## True when the person in this portrait looks to the right in the picture itself.
+static func faces_right(picture: Texture2D) -> bool:
+	var base := picture.resource_path.get_file().get_basename()
+	# "gloria_2" is still Gloria.
+	var parts := base.rsplit("_", true, 1)
+	if parts.size() == 2 and parts[1].is_valid_int():
+		base = parts[0]
+	return base in PORTRAITS_FACING_RIGHT
+
+
 func _fade_portraits_in() -> void:
 	if _portrait_tween != null and _portrait_tween.is_valid():
 		_portrait_tween.kill()
 	_portrait_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	for portrait in [_portrait_left, _portrait_right]:
+	for portrait in [_portrait_left, _portrait_right, _portrait_companion]:
 		portrait.modulate.a = 0.0
 		_portrait_tween.tween_property(portrait, "modulate:a", 1.0, PORTRAIT_FADE_SECONDS)
 

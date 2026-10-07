@@ -14,7 +14,7 @@
 		"m_chased": {"section": "main", "col": 3, "row": 1, "kind": "someone_dies", "title": "Kulas", "line": "Chased; gunshot; Father Eli prays"},
 		"m_padala": {"section": "main", "col": 4, "row": 1, "kind": "story", "title": "3. Padala", "line": "Mercy held captive"},
 		"m_key": {"section": "main", "col": 5, "row": 0.5, "kind": "lives", "title": "Key", "line": "Mercy escapes"},
-		"m_police": {"section": "main", "col": 5, "row": 1.5, "kind": "dies", "title": "Police Card", "line": "Mercy dies; the man is Father Eli"},
+		"m_police": {"section": "main", "col": 5, "row": 1.5, "kind": "dies", "title": "Police Poster", "line": "Mercy dies; the man is Father Eli"},
 		"k_kumpisal": {"section": "kumpisal", "col": 0, "row": 0.5, "kind": "story", "title": "2. Kumpisal", "line": "Church and confessions"},
 		"k_chased": {"section": "kumpisal", "col": 1, "row": 0.5, "kind": "someone_dies", "title": "Kulas", "line": "Chased; gunshot; Father Eli prays"},
 		"k_padala": {"section": "kumpisal", "col": 2, "row": 0.5, "kind": "story", "title": "3. Padala", "line": "Mercy held captive"},

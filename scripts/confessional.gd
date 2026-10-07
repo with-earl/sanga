@@ -12,16 +12,18 @@ extends Location
 ## Where the church nave keeps its route progress. "Go to confessional booth" is its last step.
 @export var nave_step_flag := "objective_step:church_nave"
 
+## Each confession's title ("Gwen's Confession") shows at the top of the screen while the
+## confession itself already plays, so nothing holds the dialogue up.
 const CAPTION_FADE_SECONDS := 0.4
-const CAPTION_HOLD_SECONDS := 1.0
-const CAPTION_SHADE := 0.55
-## How long the empty booth is seen before the confessions begin.
-const FIRST_LOOK_SECONDS := 0.7
+const CAPTION_HOLD_SECONDS := 2.2
+const CAPTION_TOP := 92.0
+const CAPTION_HEIGHT := 64.0
+const CAPTION_SIZE := 42
 const TOO_EARLY_LINE := "No one is here yet. I should go back to the Church Nave."
 
 var _caption_layer := CanvasLayer.new()
-var _caption_shade := ColorRect.new()
 var _caption_label := Label.new()
+var _caption_tween: Tween
 var _variant: Dictionary = {}
 
 
@@ -41,7 +43,6 @@ func _begin() -> void:
 	if step != _booth_step() or _variant.get("confessions", []).is_empty():
 		_say_alone(TOO_EARLY_LINE)
 		return
-	await get_tree().create_timer(FIRST_LOOK_SECONDS).timeout
 	await _play_confessions()
 
 
@@ -56,7 +57,7 @@ func _play_confessions() -> void:
 		_back_button.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_refresh_undo()
 	for confession in _variant.get("confessions", []):
-		await _show_caption(str(confession.get("title", "")))
+		_show_caption(str(confession.get("title", "")))
 		var who := str(confession.get("who", ""))
 		var lines: Array = confession.get("lines", [])
 		if lines.is_empty():
@@ -79,28 +80,32 @@ func _booth_step() -> int:
 
 
 func _build_caption() -> void:
-	_caption_layer.layer = 18
-	_caption_shade.color = Color(0, 0, 0, CAPTION_SHADE)
-	_caption_shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_caption_shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Above the dialogue box (layer 20), so it reads over the portraits.
+	_caption_layer.layer = 22
 	_caption_label.theme_type_variation = &"StoryTitle"
+	_caption_label.add_theme_font_size_override("font_size", CAPTION_SIZE)
 	_caption_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_caption_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_caption_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_caption_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	_caption_label.offset_top = CAPTION_TOP
+	_caption_label.offset_bottom = CAPTION_TOP + CAPTION_HEIGHT
+	_caption_label.add_theme_color_override("font_outline_color", Color(0.06, 0.03, 0.05, 0.85))
+	_caption_label.add_theme_constant_override("outline_size", 10)
 	_caption_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_caption_shade.add_child(_caption_label)
-	_caption_shade.modulate.a = 0.0
-	_caption_layer.add_child(_caption_shade)
+	_caption_label.modulate.a = 0.0
+	_caption_layer.add_child(_caption_label)
 	add_child(_caption_layer)
 
 
-## Shows a caption such as "Gwen's Confession" over the scene, then fades it away.
+## Shows a caption such as "Gwen's Confession" at the top of the screen for a moment, without
+## waiting for it: the confession starts at the same time.
 func _show_caption(text: String) -> void:
 	if text == "":
 		return
 	_caption_label.text = text
-	var tween := create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	tween.tween_property(_caption_shade, "modulate:a", 1.0, CAPTION_FADE_SECONDS)
-	tween.tween_interval(CAPTION_HOLD_SECONDS)
-	tween.tween_property(_caption_shade, "modulate:a", 0.0, CAPTION_FADE_SECONDS)
-	await tween.finished
+	if _caption_tween != null and _caption_tween.is_valid():
+		_caption_tween.kill()
+	_caption_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_caption_tween.tween_property(_caption_label, "modulate:a", 1.0, CAPTION_FADE_SECONDS)
+	_caption_tween.tween_interval(CAPTION_HOLD_SECONDS)
+	_caption_tween.tween_property(_caption_label, "modulate:a", 0.0, CAPTION_FADE_SECONDS)

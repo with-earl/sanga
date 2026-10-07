@@ -12,6 +12,8 @@ const PANEL_PADDING := 28.0
 ## The place name fades in this long after a place opens, over this many seconds.
 const TITLE_FADE_DELAY := 0.35
 const TITLE_FADE_SECONDS := 0.9
+## Room between the place name and the edge of its plate.
+const TITLE_PLATE_MARGIN := Vector2(14.0, 2.0)
 
 ## On the main screen the gear opens only the settings: no way back to the main menu, no story
 ## skip, and no place name.
@@ -84,6 +86,8 @@ func _apply_dialog_look() -> void:
 		UiSkin.style_label(label, UiSkin.HEADING_SIZE if label in headings else UiSkin.TEXT_SIZE)
 	for button in [_main_menu_button, _dev_skip_button, _yes_button, _no_button]:
 		UiSkin.style_button(button)
+	# The place name sits on a small warm plate beside the menu icon.
+	SoftWindow.behind(_location_title, SoftWindow.Look.PLATE, TITLE_PLATE_MARGIN)
 	# The close button: a plain golden ochre cross with a brown outline, like the text.
 	UiSkin.style_icon(_close_button)
 	for state in ["normal", "hover", "pressed", "hover_pressed", "focus"]:
@@ -94,6 +98,8 @@ func _apply_dialog_look() -> void:
 ## location caption in an anime episode.
 func set_location_title(text: String) -> void:
 	_location_title.text = text
+	# The plate behind it hugs the words.
+	_location_title.reset_size()
 	_location_title.modulate.a = 0.0
 	create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT) \
 		.tween_property(_location_title, "modulate:a", 1.0, TITLE_FADE_SECONDS).set_delay(TITLE_FADE_DELAY)

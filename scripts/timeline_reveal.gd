@@ -12,25 +12,28 @@ extends Control
 ## sharp at every zoom, including the close-up at the start. Nothing blurs this screen: it has no
 ## retro text shader and no screen vignette.
 
-const COLUMN_WIDTH := 250.0
-const ROW_HEIGHT := 112.0
-const CARD_SIZE := Vector2(200, 86)
+## Sized to stay readable on a phone even when the whole diagram is in view.
+const COLUMN_WIDTH := 280.0
+const ROW_HEIGHT := 132.0
+const CARD_SIZE := Vector2(224, 104)
 const SECTION_TITLE_GAP := 80.0
 ## Rows of space between one shown timeline and the next.
 const SECTION_GAP_ROWS := 0.6
-const TITLE_SIZE := 17
-const LINE_SIZE := 13
-const SECTION_SIZE := 20
-const CARD_PADDING := 10.0
+const TITLE_SIZE := 21
+const LINE_SIZE := 16
+const SECTION_SIZE := 26
+const CARD_PADDING := 12.0
 const CARD_BORDER := 2
-const CARD_RADIUS := 8
+const CARD_RADIUS := 12
 const LINE_GAP := 4
 ## Text is laid out this many times larger than it appears and then scaled down, so it is already
 ## sharp in the close-up at START_ZOOM, and smoothed (with mipmaps) when the view pulls back.
 const TEXT_DETAIL := 3.4
 
-const BACKGROUND := Color(0, 0, 0, 1)
-const CARD_FILL := Color(0.06, 0.06, 0.06, 0.92)
+## A deep plum night sky, darker toward the bottom, in the colours of the game's windows.
+const BACKGROUND_TOP := Color(0.14, 0.08, 0.12, 1)
+const BACKGROUND_BOTTOM := Color(0.03, 0.02, 0.035, 1)
+const CARD_FILL := Color(0.17, 0.1, 0.14, 0.95)
 const PAST_LINE := Color(1, 1, 1, 0.32)
 const PAST_LINE_WIDTH := 2.0
 const GLOW_CORE := Color(0.62, 1.0, 0.66, 1)
@@ -42,8 +45,10 @@ const GLOW_HEAD_RADIUS := 5.0
 ## A card on this run's path glows green around its border once the line reaches it.
 const CARD_GLOW := Color(0.3, 0.95, 0.42, 0.45)
 const CARD_GLOW_SIZE := 7
-const TEXT := Color(1, 1, 1, 1)
-const LINE_TEXT := Color(0.8, 0.8, 0.8, 1)
+const TEXT := Color(1.0, 0.953, 0.839, 1)
+const LINE_TEXT := Color(0.86, 0.82, 0.76, 1)
+## Timeline names are golden ochre, like the game's headings.
+const SECTION_TEXT := Color(0.851, 0.643, 0.255, 1)
 ## The chart's legend colours, by kind of card.
 const KIND_COLORS := {
 	"story": Color(0.78, 0.78, 0.78, 1),
@@ -63,7 +68,10 @@ const OPENING_HOLD_SECONDS := 0.9
 const TRAVEL_SPEED := 300.0
 const ARRIVAL_HOLD_SECONDS := 0.8
 const ZOOM_OUT_SECONDS := 2.2
-const FIT_MARGIN := 70.0
+const FIT_MARGIN := 44.0
+## When everything fits with room to spare, the pulled-back view may stay this much larger, so a
+## save with only one or two endings still reads comfortably.
+const MAX_FIT_ZOOM := 1.5
 const HINT_DELAY_SECONDS := 0.6
 
 ## A Node2D, not a Control: a Control is only drawn while its own rectangle is on screen, and the
@@ -74,7 +82,7 @@ var _glow_layer := Node2D.new()
 var _card_layer := Node2D.new()
 var _glow_lines: Array[Line2D] = []
 var _glow_head := Polygon2D.new()
-var _hint := Label.new()
+var _hint: TapHint
 var _nodes: Dictionary = {}
 var _sections: Dictionary = {}
 ## Card id to its centre, in diagram units, for the cards being shown.
@@ -98,26 +106,29 @@ var _waiting := false
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var black := ColorRect.new()
-	black.color = BACKGROUND
-	black.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	black.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(black)
+	var sky := TextureRect.new()
+	var gradient := Gradient.new()
+	gradient.set_color(0, BACKGROUND_TOP)
+	gradient.set_color(1, BACKGROUND_BOTTOM)
+	var sky_texture := GradientTexture2D.new()
+	sky_texture.gradient = gradient
+	sky_texture.fill_from = Vector2(0, 0)
+	sky_texture.fill_to = Vector2(0, 1)
+	sky_texture.width = 4
+	sky_texture.height = 128
+	sky.texture = sky_texture
+	sky.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	sky.stretch_mode = TextureRect.STRETCH_SCALE
+	sky.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	sky.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(sky)
 	_make_fonts()
 	_diagram.add_child(_edge_layer)
 	_diagram.add_child(_glow_layer)
 	_diagram.add_child(_card_layer)
 	add_child(_diagram)
 	_build_glow()
-	_hint.theme_type_variation = &"HudHeading"
-	_hint.text = StoryCard.SKIP_HINT
-	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	_hint.offset_top = -70.0
-	_hint.offset_bottom = -30.0
-	_hint.modulate.a = 0.0
-	_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_hint)
+	_hint = TapHint.make(self, StoryCard.SKIP_HINT)
 	_build()
 	_play.call_deferred()
 
@@ -241,7 +252,7 @@ func _build_glow() -> void:
 
 
 func _add_section_title(section: String) -> void:
-	var title := _label(str(_sections[section].get("title", "")), _title_font, SECTION_SIZE, TEXT)
+	var title := _label(str(_sections[section].get("title", "")), _title_font, SECTION_SIZE, SECTION_TEXT)
 	title.position = _section_title_position(section) - Vector2(0, _title_font.get_ascent(SECTION_SIZE))
 	_card_layer.add_child(title)
 
@@ -392,7 +403,7 @@ func _view_all(seconds: float) -> void:
 	for section in _shown_sections:
 		bounds = bounds.expand(_section_title_position(section) + Vector2(0, -SECTION_SIZE))
 	var fit := minf((size.x - FIT_MARGIN * 2.0) / bounds.size.x, (size.y - FIT_MARGIN * 2.0) / bounds.size.y)
-	var zoom := minf(fit, 1.0)
+	var zoom := minf(fit, MAX_FIT_ZOOM)
 	var target_position := size / 2.0 - bounds.get_center() * zoom
 	if seconds <= 0.0:
 		_diagram.scale = Vector2(zoom, zoom)
