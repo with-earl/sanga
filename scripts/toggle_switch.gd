@@ -1,19 +1,19 @@
 class_name ToggleSwitch
 extends Button
-## An on and off switch in the dialogue box's black and white: a rounded track with a round knob
-## that slides across when tapped. On is a white track with a black knob on the right; off is a
-## dark track with a white knob on the left. Drawn from pictures, so the retro text shader softens
+## An on and off switch in the window's colours: a rounded track with a round cream knob that
+## slides across when tapped. On is a golden ochre track with the knob on the right; off is a dark
+## plum track with a dimmer knob on the left. Drawn from pictures, so the retro text shader softens
 ## it like the text.
 
 const TRACK_SIZE := Vector2i(52, 30)
 const KNOB_INSET := 3
 const BORDER := 2
 const SLIDE_SECONDS := 0.15
-const ON_TRACK := Color(0.92, 0.92, 0.92, 1)
-const OFF_TRACK := Color(0, 0, 0, 0.55)
-const EDGE := Color(0.87, 0.87, 0.87, 1)
-const ON_KNOB := Color(0, 0, 0, 1)
-const OFF_KNOB := Color(1, 1, 1, 1)
+const ON_TRACK := Color(0.851, 0.643, 0.255, 1)
+const OFF_TRACK := Color(0.118, 0.071, 0.098, 0.85)
+const EDGE := Color(1.0, 0.953, 0.839, 0.95)
+const ON_KNOB := Color(1.0, 0.953, 0.839, 1)
+const OFF_KNOB := Color(0.78, 0.74, 0.66, 1)
 
 ## 0 when off, 1 when on, in between while sliding.
 var _amount := 1.0
@@ -59,7 +59,7 @@ func _set_amount(value: float) -> void:
 
 func _draw() -> void:
 	var track := Rect2((size - Vector2(TRACK_SIZE)) / 2.0, Vector2(TRACK_SIZE))
-	# The track turns white once the knob is past the middle.
+	# The track turns ochre once the knob is past the middle.
 	draw_style_box(_on_track if _amount >= 0.5 else _off_track, track)
 	var knob_size := Vector2(_knob.get_size())
 	var travel := track.size.x - knob_size.x - KNOB_INSET * 2

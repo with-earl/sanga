@@ -1,7 +1,8 @@
 class_name BackLink
 extends Button
 ## A "back" link: a left chevron and the name of the place it leads to, drawn exactly like the
-## objectives text (golden ochre with a brown outline, same size), with no button shape around it.
+## objectives text (same size), with no button shape around it. It uses the shared button colours
+## (cream with a dark outline), like every other button.
 
 const CHEVRON_WIDTH := 6.0
 const CHEVRON_HEIGHT := 12.0
@@ -18,8 +19,8 @@ var _outline_size := 4
 func _ready() -> void:
 	focus_mode = Control.FOCUS_NONE
 	alignment = HORIZONTAL_ALIGNMENT_LEFT
-	_fill = get_theme_color("font_color", &"HudBody")
-	_outline = get_theme_color("font_outline_color", &"HudBody")
+	_fill = UiSkin.BUTTON_TEXT
+	_outline = UiSkin.BUTTON_OUTLINE
 	_outline_size = get_theme_constant("outline_size", &"HudBody")
 	# The HUD text has no font of its own: it uses the theme's default font.
 	add_theme_font_override("font", get_theme_default_font())

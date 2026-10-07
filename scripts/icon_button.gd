@@ -3,17 +3,17 @@ extends Button
 ## A button with a simple drawn icon, so no image files are needed. The icon is drawn into a
 ## small picture rather than as vector lines, so the retro text shader softens it like the text.
 ##
-## With `plain` on, there is no button box at all: just the icon, drawn in the text style (golden
-## ochre with a brown outline) and getting the same soft look as the text. Taps still use the whole
+## With `plain` on, there is no button box at all: just the icon, drawn in the button colours (cream
+## with a dark outline) and getting the same soft look as the text. Taps still use the whole
 ## button area, so it stays easy to hit.
 
 enum Icon { MENU, CLOSE, MINUS, PLUS }
 
 const INK := Color(0.29, 0.184, 0.153, 1.0)
 const STROKE := 4.0
-## The text style, used by a plain icon.
-const PLAIN_FILL := Color(0.851, 0.643, 0.255, 1.0)
-const PLAIN_OUTLINE := Color(0.29, 0.165, 0.071, 1.0)
+## The shared button colours, used by a plain icon.
+const PLAIN_FILL := UiSkin.BUTTON_TEXT
+const PLAIN_OUTLINE := UiSkin.BUTTON_OUTLINE
 const PLAIN_STROKE := 5.0
 const PLAIN_OUTLINE_WIDTH := 2.5
 

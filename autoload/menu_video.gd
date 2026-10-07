@@ -38,8 +38,12 @@ func _ready() -> void:
 	video.expand = true
 	video.loop = true
 	video.modulate.a = 0.0
+	# The video keeps its shape and covers the whole screen; on a wide phone a little of its top
+	# and bottom is cut off instead of it being stretched sideways.
+	video.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(video)
-	_fill_screen(video)
+	get_viewport().size_changed.connect(_cover_screen_with_video)
+	_cover_screen_with_video()
 
 	# The cozy grade reads whatever is drawn below it, so it covers the still and the video.
 	_cozy_layer.layer = -9
@@ -103,6 +107,16 @@ func _stop_video() -> void:
 func _kill_tween() -> void:
 	if _tween != null and _tween.is_valid():
 		_tween.kill()
+
+
+func _cover_screen_with_video() -> void:
+	var stream_size := Vector2(ScreenFit.DESIGN_SIZE)
+	var texture := video.get_video_texture()
+	if texture != null and texture.get_width() > 0:
+		stream_size = texture.get_size()
+	var area := ScreenFit.cover_rect(stream_size, get_viewport().get_visible_rect().size)
+	video.position = area.position
+	video.size = area.size
 
 
 func _fill_screen(control: Control) -> void:

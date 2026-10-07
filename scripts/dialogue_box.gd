@@ -1,10 +1,12 @@
 class_name DialogueBox
 extends Control
-## Bottom-of-screen dialogue box that plays one or more lines.
+## Bottom-of-screen dialogue box that plays one or more lines, in a soft 90s anime window with the
+## speaker's name on a little plate on its top edge.
 ##
-## Each line shows in full at once. A tap moves to the next line, and a tap after the last line
-## closes the box. Characters can stand beside the box, one on each side, with whoever is speaking
-## shown at full brightness and the other slightly dimmed.
+## Each line types itself out. A tap while it types shows the rest at once; once it is all there a
+## small ▼ bobs in the corner, and a tap moves to the next line. A tap after the last line closes
+## the box. Characters can stand beside the box, one on each side, with whoever is speaking shown
+## at full brightness and the other slightly dimmed.
 
 signal opened
 signal dismissed
@@ -32,33 +34,42 @@ const PORTRAIT_SIZE_FACTORS := {
 	"kulas_1": 0.96,
 	"peter_1": 1.0,
 }
-## Space between a portrait and the side of the screen. Wider than the dialogue box's own margin,
-## so the characters stand a little in from the edges.
-const PORTRAIT_MARGIN := 64.0
-## The box spans the whole screen. Its text starts at the top left, this far in from the edge.
-const TEXT_PADDING := 28.0
-## The box: black at 40% opacity with a gray and silver gradient border.
-const BOX_FILL := Color(0.0, 0.0, 0.0, 0.4)
-const BORDER_GRAY := Color(0.52, 0.52, 0.52, 1.0)
-const BORDER_SILVER := Color(0.92, 0.92, 0.92, 1.0)
-## How many times the gray to silver gradient repeats around the border: 2 reads as
-## gray, silver, gray, silver and then back to gray where it started.
-const BORDER_REPEATS := 2
-const BORDER_WIDTH := 5
-const TEXT_PADDING_VERTICAL := 18.0
+## How far a portrait stands in from the side of the box, so the characters are a little in from
+## its edges.
+const PORTRAIT_INSET := 40.0
+## The box spans the screen with this margin on the sides and bottom, but never grows wider than
+## the 1280 x 720 stage, so lines stay easy to read on very wide phones.
+const BOX_MARGIN := 24.0
+const BOX_HEIGHT := 196.0
+const MAX_BOX_WIDTH := 1232.0
+## The text starts at the top left of the box, this far in from its edge. The top leaves room for
+## the name plate that sits across the box's top edge.
+const TEXT_PADDING := 32.0
+const TEXT_PADDING_TOP := 34.0
+const TEXT_PADDING_BOTTOM := 18.0
+## The name plate starts this far in from the box's left edge, and about half of it rises above
+## the box.
+const PLATE_INSET := 22.0
+const PLATE_RISE := 0.55
+const PLATE_PADDING := Vector2(18.0, 4.0)
+## How fast a line types itself out, in letters per second. Unhurried, like a 90s visual novel.
+const LETTERS_PER_SECOND := 42.0
+## The ▼ in the bottom right corner when a line is all there, bobbing gently.
+const NEXT_CURSOR_SIZE := Vector2i(18, 14)
+const NEXT_CURSOR_MARGIN := Vector2(26.0, 20.0)
+const NEXT_CURSOR_BOB := 4.0
+const NEXT_CURSOR_BOB_SECONDS := 0.5
 const RETRO_TEXT_SHADER := preload("res://shaders/retro_text.gdshader")
 const LISTENER_BRIGHTNESS := 0.55
 const PORTRAIT_FADE_SECONDS := 0.15
-## Choices: stacked above the box, in the box's own colours.
+## Choices: soft windows stacked above the box, fading in one after another.
 const CHOICE_WIDTH := 720.0
-const CHOICE_GAP := 12.0
-const CHOICE_FILL := Color(0.0, 0.0, 0.0, 0.72)
-const CHOICE_FILL_PRESSED := Color(0.24, 0.24, 0.24, 0.85)
-const CHOICE_BORDER := Color(0.87, 0.87, 0.87, 1.0)
+const CHOICE_GAP := 14.0
+const CHOICE_FADE_SECONDS := 0.22
+const CHOICE_STAGGER_SECONDS := 0.07
+## The gameplay text colours: golden ochre with a brown outline.
 const CHOICE_TEXT := Color(0.851, 0.643, 0.255, 1.0)
 const CHOICE_OUTLINE := Color(0.29, 0.165, 0.071, 1.0)
-const CHOICE_FADE_SECONDS := 0.2
-## The Continue button is at least this tall, for an easy tap.
 
 @onready var _speaker: Label = %SpeakerLabel
 @onready var _text: Label = %TextLabel
@@ -73,33 +84,107 @@ var _portrait_tween: Tween
 ## Looks up the picture for a character by name. The box uses it to bring in whoever speaks next
 ## on the right, when a conversation has more than one person speaking there.
 var portrait_source := Callable()
-var _box_style := StyleBoxTexture.new()
-var _box_size := Vector2i.ZERO
+var _plate := PanelContainer.new()
+var _next_cursor := TextureRect.new()
+var _next_tween: Tween
+var _typing_tween: Tween
 ## When true, tapping past the last line leaves the box open, for more lines or a choice to follow.
 var _keep_open := false
 var _choosing := false
 var _choices := VBoxContainer.new()
+## Extra room kept free at each edge for a phone's notch or rounded corners (left, top, right,
+## bottom), set by the location.
+var _insets := Vector4.ZERO
 
 
 func _ready() -> void:
 	hide()
-	# The box background is drawn from a picture made at the box's exact size (see _build_box),
-	# so the soft retro look affects it by about a pixel. It keeps its exact opacity.
-	_box_style.content_margin_top = TEXT_PADDING_VERTICAL
-	_box_style.content_margin_bottom = TEXT_PADDING_VERTICAL
-	_box_style.content_margin_left = TEXT_PADDING
-	_box_style.content_margin_right = TEXT_PADDING
-	_panel.add_theme_stylebox_override("panel", _box_style)
-	_panel.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	var retro := ShaderMaterial.new()
-	retro.shader = RETRO_TEXT_SHADER
-	retro.set_shader_parameter("alpha_boost", 1.0)
-	_panel.material = retro
+	_fit_panel()
+	resized.connect(_fit_panel)
+	var box_style := StyleBoxEmpty.new()
+	box_style.content_margin_top = TEXT_PADDING_TOP
+	box_style.content_margin_bottom = TEXT_PADDING_BOTTOM
+	box_style.content_margin_left = TEXT_PADDING
+	box_style.content_margin_right = TEXT_PADDING
+	_panel.add_theme_stylebox_override("panel", box_style)
+	SoftWindow.behind(_panel)
 	_panel.gui_input.connect(_on_panel_gui_input)
+	_build_plate()
+	_build_next_cursor()
 	_choices.add_theme_constant_override("separation", int(CHOICE_GAP))
 	_choices.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_choices.visible = false
 	add_child(_choices)
+
+
+## Keeps the box clear of a phone's notch and rounded corners. See ScreenFit.safe_insets.
+func keep_clear(insets: Vector4) -> void:
+	_insets = insets
+	_fit_panel()
+
+
+## Places the box along the bottom of the screen, within the stage's width and clear of the notch.
+func _fit_panel() -> void:
+	var side := maxf(BOX_MARGIN + maxf(_insets.x, _insets.z), (size.x - MAX_BOX_WIDTH) / 2.0)
+	_panel.offset_left = side
+	_panel.offset_right = -side
+	_panel.offset_bottom = -(BOX_MARGIN + _insets.w)
+	_panel.offset_top = _panel.offset_bottom - BOX_HEIGHT
+	_place_plate()
+
+
+## The name plate: the speaker's name on a small warm-brown window across the box's top edge.
+func _build_plate() -> void:
+	var plate_style := StyleBoxEmpty.new()
+	plate_style.content_margin_left = PLATE_PADDING.x
+	plate_style.content_margin_right = PLATE_PADDING.x
+	plate_style.content_margin_top = PLATE_PADDING.y
+	plate_style.content_margin_bottom = PLATE_PADDING.y
+	_plate.add_theme_stylebox_override("panel", plate_style)
+	_plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	SoftWindow.behind(_plate, SoftWindow.Look.PLATE)
+	_speaker.reparent(_plate, false)
+	# A child of the box itself rather than of the panel, which would lay it out like its text.
+	add_child(_plate)
+	_plate.resized.connect(_place_plate)
+	_panel.item_rect_changed.connect(_place_plate)
+
+
+func _place_plate() -> void:
+	_plate.reset_size()
+	_plate.position = _panel.position + Vector2(PLATE_INSET, -_plate.size.y * PLATE_RISE)
+	if _next_cursor.visible:
+		_show_next_cursor(true)
+
+
+## Where the ▼ rests, in the bottom right corner of the panel.
+func _next_cursor_rest() -> Vector2:
+	return _panel.position + _panel.size - NEXT_CURSOR_MARGIN - Vector2(NEXT_CURSOR_SIZE)
+
+
+## The ▼ that bobs in the box's bottom right corner once a line is all there.
+func _build_next_cursor() -> void:
+	var w := float(NEXT_CURSOR_SIZE.x)
+	var h := float(NEXT_CURSOR_SIZE.y)
+	_next_cursor.texture = SoftShapes.triangle(NEXT_CURSOR_SIZE, PackedVector2Array([Vector2(2, 2), Vector2(w - 2, 2), Vector2(w / 2.0, h - 2)]), CHOICE_TEXT, CHOICE_OUTLINE, 1.5)
+	_next_cursor.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_next_cursor.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_next_cursor.visible = false
+	add_child(_next_cursor)
+	_next_cursor.size = Vector2(NEXT_CURSOR_SIZE)
+
+
+func _show_next_cursor(on: bool) -> void:
+	if _next_tween != null and _next_tween.is_valid():
+		_next_tween.kill()
+	_next_cursor.visible = on
+	if not on:
+		return
+	var rest := _next_cursor_rest()
+	_next_cursor.position = rest
+	_next_tween = create_tween().set_loops().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_next_tween.tween_property(_next_cursor, "position:y", rest.y + NEXT_CURSOR_BOB, NEXT_CURSOR_BOB_SECONDS)
+	_next_tween.tween_property(_next_cursor, "position:y", rest.y, NEXT_CURSOR_BOB_SECONDS)
 
 
 ## Sets who stands beside the box before it opens: a name and a picture for each side. Pass an
@@ -107,47 +192,8 @@ func _ready() -> void:
 func set_cast(left_name: String, left_picture: Texture2D, right_name: String, right_picture: Texture2D) -> void:
 	_left_name = left_name
 	_right_name = right_name
-	_build_box()
 	_place_portrait(_portrait_left, left_picture, true)
 	_place_portrait(_portrait_right, right_picture, false)
-
-
-## Draws the box background at its exact size: black at 40% with a gray and silver gradient
-## border that runs around the box and repeats twice. Made only when the size changes.
-func _build_box() -> void:
-	var wanted := Vector2i(roundi(size.x + _panel.offset_right - _panel.offset_left), roundi(_panel.offset_bottom - _panel.offset_top))
-	if wanted == _box_size or wanted.x <= 0 or wanted.y <= 0:
-		return
-	_box_size = wanted
-	_box_style.texture = box_texture(wanted)
-
-
-## The box background at an exact size: black at 40% with a gray and silver gradient border
-## that runs around the box and repeats twice. Other panels use it to look like the dialogue box.
-static func box_texture(box_size: Vector2i) -> ImageTexture:
-	var width := box_size.x
-	var height := box_size.y
-	var image := Image.create(width, height, false, Image.FORMAT_RGBA8)
-	image.fill(BOX_FILL)
-	var perimeter := float(2 * (width + height))
-	for y in height:
-		var on_edge_row := y < BORDER_WIDTH or y >= height - BORDER_WIDTH
-		for x in width:
-			if not on_edge_row and x >= BORDER_WIDTH and x < width - BORDER_WIDTH:
-				continue
-			# How far round the box this pixel is, clockwise from the top left corner.
-			var along: float
-			if y < BORDER_WIDTH:
-				along = x
-			elif y >= height - BORDER_WIDTH:
-				along = width + height + (width - 1 - x)
-			elif x >= width - BORDER_WIDTH:
-				along = width + y
-			else:
-				along = 2 * width + height + (height - 1 - y)
-			var wave := 0.5 - 0.5 * cos(TAU * BORDER_REPEATS * along / perimeter)
-			image.set_pixel(x, y, BORDER_GRAY.lerp(BORDER_SILVER, wave))
-	return ImageTexture.create_from_image(image)
 
 
 ## Plays a single line.
@@ -182,6 +228,7 @@ func close() -> void:
 		_pending_lines.clear()
 		_keep_open = false
 		_clear_choices()
+		_stop_typing()
 		hide()
 		dismissed.emit()
 
@@ -190,21 +237,31 @@ func close() -> void:
 func choose(options: Array) -> int:
 	_clear_choices()
 	_choosing = true
+	_finish_typing()
+	_show_next_cursor(false)
 	for index in options.size():
 		_choices.add_child(_make_choice_button(str(options[index]), index))
 	_choices.size = Vector2(CHOICE_WIDTH, 0.0)
 	_choices.reset_size()
 	var box_top := size.y + _panel.offset_top
-	_choices.position = Vector2((size.x - CHOICE_WIDTH) / 2.0, box_top - _choices.get_combined_minimum_size().y - 28.0)
+	_choices.position = Vector2((size.x - CHOICE_WIDTH) / 2.0, box_top - _choices.get_combined_minimum_size().y - 40.0)
 	_choices.modulate.a = 0.0
 	_choices.visible = true
 	# Choices can be offered with no line on screen: then only the choices show.
 	if not visible:
 		_panel.visible = false
+		_plate.visible = false
 		_portrait_left.visible = false
 		_portrait_right.visible = false
 		show()
 	create_tween().tween_property(_choices, "modulate:a", 1.0, CHOICE_FADE_SECONDS)
+	# Each choice fades in a moment after the one above it.
+	var buttons := _choices.get_children()
+	for index in buttons.size():
+		var button := buttons[index] as Button
+		button.modulate.a = 0.0
+		create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT) \
+			.tween_property(button, "modulate:a", 1.0, CHOICE_FADE_SECONDS).set_delay(index * CHOICE_STAGGER_SECONDS)
 	var picked: int = await choice_made
 	_clear_choices()
 	if not _panel.visible:
@@ -217,34 +274,15 @@ func _make_choice_button(text: String, index: int) -> Button:
 	var button := Button.new()
 	button.text = text
 	button.focus_mode = Control.FOCUS_NONE
-	button.custom_minimum_size = Vector2(CHOICE_WIDTH, 56.0)
+	button.custom_minimum_size = Vector2(CHOICE_WIDTH, UiSkin.BUTTON_HEIGHT)
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	for state in ["normal", "hover", "focus", "disabled"]:
-		button.add_theme_stylebox_override(state, choice_style(CHOICE_FILL))
-	button.add_theme_stylebox_override("pressed", choice_style(CHOICE_FILL_PRESSED))
-	button.add_theme_stylebox_override("hover_pressed", choice_style(CHOICE_FILL_PRESSED))
-	for color_name in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color", "font_focus_color"]:
-		button.add_theme_color_override(color_name, CHOICE_TEXT)
-	button.add_theme_color_override("font_outline_color", CHOICE_OUTLINE)
-	button.add_theme_constant_override("outline_size", 6)
-	button.add_theme_font_size_override("font_size", _text.get_theme_font_size("font_size"))
+	UiSkin.style_button(button, _text.get_theme_font_size("font_size"))
 	button.pressed.connect(func() -> void:
 		if _choosing:
 			_choosing = false
 			Settings.vibrate(Settings.HAPTIC_LIGHT)
 			choice_made.emit(index))
 	return button
-
-
-## The look of a choice button, also used by buttons on panels styled like the dialogue box.
-## It is drawn from a picture, so the retro text shader softens it like the text.
-static func choice_style(fill: Color) -> StyleBoxTexture:
-	var style := SoftShapes.box_style(fill, CHOICE_BORDER, 3)
-	style.content_margin_left = 24.0
-	style.content_margin_right = 24.0
-	style.content_margin_top = 12.0
-	style.content_margin_bottom = 12.0
-	return style
 
 
 func _clear_choices() -> void:
@@ -267,7 +305,8 @@ func _show_next_line(default_speaker: String) -> void:
 	else:
 		text = str(line)
 	_speaker.text = who
-	_text.text = text
+	_plate.visible = who != ""
+	_type_out(text)
 	if offscreen:
 		_highlight("")
 		return
@@ -309,7 +348,7 @@ func _place_portrait(portrait: TextureRect, picture: Texture2D, on_left: bool) -
 	portrait.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	var factor: float = PORTRAIT_SIZE_FACTORS.get(picture.resource_path.get_file().get_basename(), 1.0)
 	var drawn := shown.region.size * PORTRAIT_SCALE * factor
-	var x := PORTRAIT_MARGIN if on_left else size.x - PORTRAIT_MARGIN - drawn.x
+	var x := _panel.offset_left + PORTRAIT_INSET if on_left else size.x + _panel.offset_right - PORTRAIT_INSET - drawn.x
 	portrait.position = Vector2(x, size.y - drawn.y)
 	portrait.size = drawn
 	return drawn.x
@@ -329,9 +368,42 @@ func _on_panel_gui_input(event: InputEvent) -> void:
 		advance()
 
 
-## Moves to the next line, the same as tapping the box.
+## Types the line out letter by letter, then shows the ▼.
+func _type_out(text: String) -> void:
+	_stop_typing()
+	_show_next_cursor(false)
+	_text.text = text
+	_text.visible_characters = 0
+	var letters := _text.get_total_character_count()
+	_typing_tween = create_tween()
+	_typing_tween.tween_property(_text, "visible_characters", letters, letters / LETTERS_PER_SECOND)
+	_typing_tween.tween_callback(_finish_typing)
+
+
+func _is_typing() -> bool:
+	return _typing_tween != null and _typing_tween.is_valid() and _typing_tween.is_running()
+
+
+## Shows the whole line at once, for a tap while it is still typing.
+func _finish_typing() -> void:
+	_stop_typing()
+	_text.visible_characters = -1
+	_show_next_cursor(not _choosing)
+
+
+func _stop_typing() -> void:
+	if _typing_tween != null and _typing_tween.is_valid():
+		_typing_tween.kill()
+	_typing_tween = null
+
+
+## Moves to the next line, the same as tapping the box. A tap while a line is still typing shows
+## the rest of it first.
 func advance() -> void:
 	if _choosing:
+		return
+	if _is_typing():
+		_finish_typing()
 		return
 	if has_more_lines():
 		_show_next_line(_speaker.text)

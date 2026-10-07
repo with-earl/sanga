@@ -8,7 +8,10 @@ extends CanvasLayer
 
 const OPEN_SECONDS := 0.15
 const CLOSE_SECONDS := 0.12
-const PANEL_PADDING := 24.0
+const PANEL_PADDING := 28.0
+## The place name fades in this long after a place opens, over this many seconds.
+const TITLE_FADE_DELAY := 0.35
+const TITLE_FADE_SECONDS := 0.9
 
 ## On the main screen the gear opens only the settings: no way back to the main menu, no story
 ## skip, and no place name.
@@ -33,8 +36,7 @@ const PANEL_PADDING := 24.0
 @onready var _location_title: Label = %LocationTitle
 
 var _tween: Tween
-var _panel_style := StyleBoxTexture.new()
-var _panel_size := Vector2i.ZERO
+var _panel_style := StyleBoxEmpty.new()
 
 
 func _ready() -> void:
@@ -68,15 +70,14 @@ func _apply_dialog_look() -> void:
 	for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
 		_panel_style.set_content_margin(side, PANEL_PADDING)
 	_panel.add_theme_stylebox_override("panel", _panel_style)
-	_panel.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	# The same soft retro look as the dialogue box, keeping its exact opacity.
+	# The same soft 90s window as the dialogue box.
+	SoftWindow.behind(_panel)
+	# The switches get the soft retro look too, keeping their exact opacity.
 	var retro := ShaderMaterial.new()
 	retro.shader = DialogueBox.RETRO_TEXT_SHADER
 	retro.set_shader_parameter("alpha_boost", 1.0)
-	_panel.material = retro
 	for toggle in [_sound_toggle, _music_toggle, _vibration_toggle]:
 		toggle.material = retro
-	_panel.resized.connect(_redraw_panel)
 	var headings := [$Modal/Center/Panel/MainView/Header/Title, $Modal/Center/Panel/ConfirmView/Question]
 	for node in _modal.find_children("*", "Label", true, false):
 		var label := node as Label
@@ -89,19 +90,13 @@ func _apply_dialog_look() -> void:
 		_close_button.add_theme_stylebox_override(state, StyleBoxEmpty.new())
 
 
-## Redraws the box background whenever the panel changes size, for example between the menu and
-## the question.
-func _redraw_panel() -> void:
-	var wanted := Vector2i(_panel.size.round())
-	if wanted == _panel_size or wanted.x <= 0 or wanted.y <= 0:
-		return
-	_panel_size = wanted
-	_panel_style.texture = DialogueBox.box_texture(wanted)
-
-
-## Shows where the player is, beside the gear, for example "Church Nave".
+## Shows the place name beside the menu icon. It fades in gently each time a place opens, like a
+## location caption in an anime episode.
 func set_location_title(text: String) -> void:
 	_location_title.text = text
+	_location_title.modulate.a = 0.0
+	create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT) \
+		.tween_property(_location_title, "modulate:a", 1.0, TITLE_FADE_SECONDS).set_delay(TITLE_FADE_DELAY)
 
 
 ## The gear icon, so a scene can hide it while a dialogue is open.
