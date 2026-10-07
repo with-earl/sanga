@@ -6,7 +6,7 @@ const MONTHS := ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", 
 const ROW_SIZE := Vector2(300, 52)
 ## The main buttons, the save list and the quit question each sit on a soft window, hugging their
 ## contents above the bottom right corner.
-const MENU_WINDOW_MARGIN := Vector2(40.0, 26.0)
+const MENU_WINDOW_MARGIN := Vector2(40.0, 24.0)
 
 @onready var _menu: Control = $Buttons
 @onready var _quit_confirm: Control = %QuitConfirm
@@ -189,7 +189,8 @@ func _open_panel(prompt: String) -> void:
 	label.theme_type_variation = &"MenuPrompt"
 	label.text = prompt
 	label.custom_minimum_size = ROW_SIZE
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	# Centred, like the main buttons, so every list on its window reads the same way.
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_save_panel.add_child(label)
 
@@ -198,7 +199,7 @@ func _add_row(text: String, enabled: bool, action: Callable) -> void:
 	var row := Button.new()
 	row.theme_type_variation = &"TextButton"
 	row.text = text
-	row.alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	row.alignment = HORIZONTAL_ALIGNMENT_CENTER
 	row.focus_mode = Control.FOCUS_NONE
 	row.disabled = not enabled
 	row.custom_minimum_size = ROW_SIZE

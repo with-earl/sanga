@@ -25,13 +25,13 @@ offset_right = -140.0
 offset_bottom = -84.0
 grow_horizontal = 0
 grow_vertical = 0
-theme_override_constants/separation = 20
+theme_override_constants/separation = 12
 alignment = 2
 
 [node name="ContinueButton" type="Button" parent="Buttons"]
 unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(300, 64)
+custom_minimum_size = Vector2(300, 52)
 layout_mode = 2
 theme_type_variation = &"TextButton"
 text = "Continue"
@@ -40,7 +40,7 @@ focus_mode = 0
 
 [node name="NewButton" type="Button" parent="Buttons" unique_id=1318555377]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 64)
+custom_minimum_size = Vector2(300, 52)
 layout_mode = 2
 theme_type_variation = &"TextButton"
 text = "New Game"
@@ -49,7 +49,7 @@ focus_mode = 0
 
 [node name="LoadButton" type="Button" parent="Buttons" unique_id=1975006900]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 64)
+custom_minimum_size = Vector2(300, 52)
 layout_mode = 2
 theme_type_variation = &"TextButton"
 text = "Load Game"
@@ -58,7 +58,7 @@ focus_mode = 0
 
 [node name="QuitButton" type="Button" parent="Buttons" unique_id=303759184]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 64)
+custom_minimum_size = Vector2(300, 52)
 layout_mode = 2
 theme_type_variation = &"TextButton"
 text = "Quit"
@@ -80,10 +80,10 @@ offset_right = -140.0
 offset_bottom = -84.0
 grow_horizontal = 0
 grow_vertical = 0
-theme_override_constants/separation = 20
+theme_override_constants/separation = 12
 
 [node name="Question" type="Label" parent="QuitConfirm"]
-custom_minimum_size = Vector2(300, 64)
+custom_minimum_size = Vector2(300, 52)
 layout_mode = 2
 theme_type_variation = &"MenuPrompt"
 text = "Quit the game?"
@@ -92,7 +92,7 @@ vertical_alignment = 1
 
 [node name="YesButton" type="Button" parent="QuitConfirm"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 64)
+custom_minimum_size = Vector2(300, 52)
 layout_mode = 2
 theme_type_variation = &"TextButton"
 text = "Yes"
@@ -101,7 +101,7 @@ focus_mode = 0
 
 [node name="NoButton" type="Button" parent="QuitConfirm"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 64)
+custom_minimum_size = Vector2(300, 52)
 layout_mode = 2
 theme_type_variation = &"TextButton"
 text = "No"
@@ -123,7 +123,7 @@ offset_right = -140.0
 offset_bottom = -84.0
 grow_horizontal = 0
 grow_vertical = 0
-theme_override_constants/separation = 10
+theme_override_constants/separation = 12
 
 [node name="Settings" parent="." instance=ExtResource("2_settings")]
 main_screen = true

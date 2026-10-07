@@ -229,9 +229,10 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   follow-up): the terminal icon is just a dark screen with a `>_` prompt (no grey frame), the
   same visual size as the gear; the disclaimer "# Continuous improvement in progress." lives
   inside the modal (nothing fixed at the bottom left any more); and the modal looks like a
-  terminal: title bar with three dots, black screen with scan lines, green DejaVu Sans Mono text,
-  `dev@sanga:~$ ls` prompts, folders like `main_timeline/`, rows that light up green when held,
-  and a blinking cursor. The user disliked "not the final game" wording. Paddings were widened: settings modal (34 px, more row spacing), main screen windows,
+  simple **black and white** terminal (the user rejected green text, prompts and folder names as
+  too complicated): DejaVu Sans Mono, a title bar with "Close ✕", faint scan lines, a plain
+  heading and note, and framed rows that turn white while held. Main screen lists now share one
+  spacing (52 px rows, 12 px gaps, 24 px window margin top and bottom, centred text). The user disliked "not the final game" wording. Paddings were widened: settings modal (34 px, more row spacing), main screen windows,
   objectives window (moved in from the edge and level with the place name), place-name plate.
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 

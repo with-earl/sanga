@@ -70,7 +70,7 @@ picture. Delete the temporary script afterwards. The `--headless` runs print RID
   The "Developer tools" window (`scripts/dev_tools.gd`, points in `scripts/dev_jump.gd`, plus
   the endings) opens from the terminal icon beside the gear, on the main screen and in every
   place. It shows in every build during development (`DevTools.SHOW_IN_ALL_BUILDS`); set it to
-  false before release. It looks like a terminal (black screen, green DejaVu Sans Mono text,
+  false before release. It looks like a plain black and white terminal (DejaVu Sans Mono,
   crisp: the `crisp_text` group skips the retro blur), never like the game's own windows.
 - **Versioning:** follow [VERSIONING.md](VERSIONING.md).
   1. Make **every change** a Conventional Commit (`feat`, `fix`, `style`, `docs`, `chore`, …,
