@@ -14,6 +14,11 @@ extends Location
 ##   The card she called decides how the rest of the run goes.
 ##
 ## The words come from story/padala.json. The right key is picked at random for each run.
+##
+## The Alaala choices (see Alaala) are in the story file's cutscenes: hiding until morning, and
+## asking the rider to bring a tanod, which ends the run with Mercy rescued. And when Father Eli
+## confessed in Kumpisal this run, the first thing Mercy touches brings him to the door to let her
+## go (Pinalaya), or, if nobody died at the market or the church either, the true ending.
 
 const STORY_FILE := "res://story/padala.json"
 const KEY_COUNT := 5
@@ -22,6 +27,14 @@ const INTRO_FLAG := "objective_padala_intro_seen"
 const CARD_FLAG := "objective_padala_card_taken"
 const RIGHT_KEY_FLAG := "objective_padala_right_key"
 const TRIED_FLAG := "objective_padala_tried_keys"
+## Set in Kumpisal this run when Father Eli confessed his own sin.
+const ELI_CONFESSED_FLAG := "run_eli_confessed"
+## Set when Mercy asked the rider to bring a tanod.
+const TANOD_FLAG := "run_tanod"
+const TANOD_OUTCOME := "padala_tanod"
+## What this run must already hold for the true ending, besides Father Eli's confession.
+const SAFE_MARKET_OUTCOME := "tokhang_safe"
+const KULAS_SAFE_FLAG := "run_kulas_safe"
 
 var _story: Dictionary = {}
 var _variant: Dictionary = {}
@@ -109,11 +122,15 @@ func _play_opening() -> void:
 func _on_slot_interacted(slot: ArtSlot) -> void:
 	if _busy or _dialogue.visible or not GameState.get_flag(INTRO_FLAG, false):
 		return
+	if GameState.get_flag(ELI_CONFESSED_FLAG, false):
+		# He confessed. The door opens before she can do anything.
+		await _play_ending("walang_namatay" if _nobody_died() else "pinalaya")
+		return
 	match slot.name:
 		"Door":
 			await _say_mercy(str(_story.get("locked_door", "")))
 		"PoliceCard", "FoodDeliveryCard":
-			_take_card(slot)
+			await _take_card(slot)
 		"Telephone":
 			await _use_telephone()
 		_:
@@ -134,7 +151,13 @@ func _hint_names() -> PackedStringArray:
 	return names
 
 
+## True when this run kept everyone at the market and the church alive.
+func _nobody_died() -> bool:
+	return SAFE_MARKET_OUTCOME in GameState.run_outcomes and GameState.get_flag(KULAS_SAFE_FLAG, false)
+
+
 func _take_card(slot: ArtSlot) -> void:
+	await _say_mercy(str(_story.get("read", {}).get(str(slot.name), "")))
 	GameState.set_flag(CARD_FLAG, str(slot.name))
 	_arrange_room()
 	GameState.checkpoint()
@@ -180,6 +203,10 @@ func _play_ending(key: String) -> void:
 	if not choices.is_empty() and Cutscene.last_choice >= 0:
 		ending = _story["endings"].get(choices[Cutscene.last_choice], {})
 		await Cutscene.play(ending.get("steps", []))
+	if GameState.get_flag(TANOD_FLAG, false):
+		# Mercy is rescued and Father Eli is caught at the door: nothing more happens in this run.
+		StoryDirector.end_run(TANOD_OUTCOME, "", "")
+		return
 	if ending.has("chain"):
 		# Kumpisal and Tokhang play out differently depending on who Mercy called.
 		GameState.set_flag(KumpisalStory.PADALA_CHAIN_FLAG, str(ending["chain"]))

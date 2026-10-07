@@ -1,44 +1,132 @@
 {
-	"_comment": "Kumpisal in each timeline. 'cast' lists who is in the church. 'objectives' and 'targets' are the route in the nave (the last target is the confessional booth). 'confessions' lists who confesses, in order. 'ending' plays after the confessions; with 'end_run' the whole run ends there.",
+	"_comment": "Kumpisal in each timeline, see docs/STORY_BIBLE.md section 8. 'cast' lists who is in the church. 'objectives' and 'targets' are the route in the nave (the last target is the confessional booth). 'confessions' lists who confesses, in order. 'kulas_at_risk' marks the versions where Kulas is shot after the confessions, so his confession offers the Alaala choice that saves him. 'ending' plays after the confessions; with 'end_run' the whole run ends there.",
 	"conversations": {
 		"Gloria": [
 			{
+				"speaker": "Father Eli",
+				"text": "Gloria. Ang aga mo, ah. Kumusta ang benta?"
+			},
+			{
 				"speaker": "Gloria",
-				"text": "Paminsan-minsan. Kailangan din naman natin humingi ng gabay, Father."
+				"text": "Naku, Father, alam n'yo naman. Minsan matumal, minsan suwerte."
+			},
+			{
+				"speaker": "Gloria",
+				"text": "Siya nga pala... 'yung pamangkin ko, nandito na. 'Yung sinasabi ko pong naghahanap ng trabaho."
+			},
+			{
+				"speaker": "Father Eli",
+				"text": "Mabuti. Kakausapin ko siya."
 			}
 		],
 		"Gwen|Ben": [
 			{
 				"speaker": "Ben",
-				"text": "Father, pwede po ba akong maglaro dito?"
+				"text": "Father! Pwede po ba akong maglaro dito?"
 			},
 			{
 				"speaker": "Gwen",
-				"text": "Ben, huwag kang tatakbo dito. Simbahan ito."
+				"text": "Ben, simbahan 'to. Bawal tumakbo."
+			},
+			{
+				"speaker": "Father Eli",
+				"text": "Hayaan mo na. Mas gusto ng Diyos ang batang masaya kaysa batang takot."
+			},
+			{
+				"speaker": "Gwen",
+				"text": "Father... pwede po ba akong mangumpisal mamaya?"
+			},
+			{
+				"speaker": "Father Eli",
+				"text": "Siyempre. Lagi akong nandito."
 			}
 		],
 		"Mercy": [
 			{
 				"speaker": "Mercy",
-				"text": "Hindi ko na po alam kung kanino ako lalapit."
+				"text": "Father... ako po si Mercy. Pamangkin po ni Tita Gloria."
+			},
+			{
+				"speaker": "Mercy",
+				"text": "Kakarating ko lang po galing Samar. Sabi po ni Tita, kayo raw po ang makakatulong sa'kin."
+			},
+			{
+				"speaker": "Mercy",
+				"text": "Pasensya na po. Hindi ko na po kasi alam kung kanino ako lalapit."
+			},
+			{
+				"choices": [
+					{
+						"text": "Huwag kang mag-alala. May trabaho ako para sa'yo.",
+						"after": [
+							{
+								"speaker": "Mercy",
+								"text": "Talaga po? Salamat po, Father! Kahit ano po, kakayanin ko."
+							}
+						]
+					},
+					{
+						"text": "Ano'ng klaseng trabaho ang hanap mo, anak?",
+						"after": [
+							{
+								"speaker": "Mercy",
+								"text": "Kahit ano po. Kasambahay, tindera... basta po makapagpadala ako kay Nanay."
+							},
+							{
+								"speaker": "Father Eli",
+								"text": "Padala. Naiintindihan ko."
+							}
+						]
+					}
+				]
+			},
+			{
+				"speaker": "Father Eli",
+				"text": "Mamaya, pagkatapos ng kumpisal. Sasamahan kita."
 			}
 		],
 		"Batista": [
 			{
 				"speaker": "Batista",
-				"text": "Pare! Kita mo nga naman natupad mo ang kagustuhan mong maging pari"
+				"text": "Pare! Ang ganda ng sermon mo kanina, ah. Muntik na 'kong maiyak."
 			},
 			{
 				"speaker": "Father Eli",
-				"text": "Bilis ng panahon 'no? Dati nangangarap lang tayo maging pari kung di ka lang sana naging sunud-sunuran sa tatay mo"
+				"text": "Muntik lang? Kailangan ko pang galingan."
 			},
 			{
 				"speaker": "Batista",
-				"text": "(laugh) Ikaw talaga pare, pero kahit anong mangyari tayo pa rin ang 'Eli-tista' (Eli at Batista)"
+				"text": "(tawa) Eli-tista pa rin tayo, pare. Kahit naka-sutana ka na."
 			},
 			{
 				"speaker": "Father Eli",
-				"text": "(laugh) Nung highschool pa 'yang tambalan nating 'yan ah"
+				"text": "Mula high school. Ikaw ang kamay, ako ang dasal."
+			},
+			{
+				"speaker": "Batista",
+				"text": "May operasyon kami mamaya, diyan lang sa malapit. 'Yung usapan natin, ha?"
+			},
+			{
+				"choices": [
+					{
+						"text": "Mag-ingat ka.",
+						"after": [
+							{
+								"speaker": "Batista",
+								"text": "Ako pa. Ikaw ang mag-ingat, pare. Ikaw ang maraming alam."
+							}
+						]
+					},
+					{
+						"text": "Huwag dito sa simbahan.",
+						"after": [
+							{
+								"speaker": "Batista",
+								"text": "Siyempre naman. Respeto. Sa labas lang."
+							}
+						]
+					}
+				]
 			}
 		]
 	},
@@ -49,23 +137,53 @@
 			"lines": [
 				{
 					"speaker": "Gwen",
-					"text": "Father... may kasalanan po ako."
-				},
-				{
-					"speaker": "Father Eli",
-					"text": "Sabihin mo lang. Nandito ako para makinig."
+					"text": "Basbasan n'yo po ako, Father, dahil nagkasala ako."
 				},
 				{
 					"speaker": "Gwen",
-					"text": "May kinakasama po ako. Hindi pa po kami kasal at buntis ako."
-				},
-				{
-					"speaker": "Father Eli",
-					"text": "Hindi pa tapos ang buhay dahil sa isang pagkakamali. Ang mahalaga ay harapin ninyo ang mga responsibilidad ninyo."
+					"text": "Buntis po ako. Hindi pa po kami kasal ni Peter."
 				},
 				{
 					"speaker": "Gwen",
-					"text": "Salamat po, Father."
+					"text": "Hindi ko pa po nasasabi sa kanya. Natatakot po ako. Ang hirap ng buhay, tapos ang delikado pa ng trabaho niya."
+				},
+				{
+					"choices": [
+						{
+							"text": "Sabihin mo sa kanya ngayong gabi.",
+							"after": [
+								{
+									"speaker": "Gwen",
+									"text": "Ngayong gabi po... Sige po. Kakayanin ko."
+								}
+							]
+						},
+						{
+							"text": "Ipagdasal mo muna. Hindi mo kailangang magmadali.",
+							"after": [
+								{
+									"speaker": "Gwen",
+									"text": "Opo, Father."
+								}
+							]
+						}
+					]
+				},
+				{
+					"speaker": "Father Eli",
+					"text": "Ang bata, hindi kasalanan. Biyaya 'yan."
+				},
+				{
+					"speaker": "Father Eli",
+					"text": "Si Peter... 'yung rider, 'di ba? Saan siya madalas mag-deliver?"
+				},
+				{
+					"speaker": "Gwen",
+					"text": "Diyan lang po sa may Sampaloc. Bakit po?"
+				},
+				{
+					"speaker": "Father Eli",
+					"text": "Wala. Ipagdadasal ko siya."
 				}
 			]
 		},
@@ -75,15 +193,49 @@
 			"lines": [
 				{
 					"speaker": "Batista",
-					"text": "Father... sa linya ng trabaho ko may mga tao na akong napatay."
-				},
-				{
-					"speaker": "Father Eli",
-					"text": "Humingi ka ng tawad sa ama at ipagdasal mo ang mga taong napatay mo at ang pamilya nila"
+					"text": "Pare... este, Father. Ayokong lumuhod dito, pero sige na."
 				},
 				{
 					"speaker": "Batista",
-					"text": "Salamat, Father"
+					"text": "Lima na ngayong buwan. Lahat \"nanlaban\" daw."
+				},
+				{
+					"speaker": "Batista",
+					"text": "Pero alam nating dalawa na hindi."
+				},
+				{
+					"speaker": "Batista",
+					"text": "Hindi na 'ko makatulog, pare."
+				},
+				{
+					"choices": [
+						{
+							"text": "Humingi ka ng tawad. Ipagdasal mo sila, at ang mga pamilya nila.",
+							"after": [
+								{
+									"speaker": "Batista",
+									"text": "Ipagdasal... Sige."
+								}
+							]
+						},
+						{
+							"text": "Alam ko kung bakit mo ginagawa 'yan.",
+							"after": [
+								{
+									"speaker": "Batista",
+									"text": "Oo. Dahil sa'yo."
+								},
+								{
+									"speaker": "Batista",
+									"text": "...Joke lang, pare."
+								}
+							]
+						}
+					]
+				},
+				{
+					"speaker": "Father Eli",
+					"text": "Pinapatawad ka na. Pero hindi pa tapos ang trabaho mo."
 				}
 			]
 		},
@@ -93,11 +245,51 @@
 			"lines": [
 				{
 					"speaker": "Gloria",
-					"text": "Father, nanloloko ako ng tao kapalit ng pera, lubos kong pinagsisisihan"
+					"text": "Father... nanloloko po ako. Para sa pera."
+				},
+				{
+					"speaker": "Gloria",
+					"text": "May mga babae po akong pinapaluwas galing probinsya. Sinasabi kong may trabaho."
+				},
+				{
+					"speaker": "Gloria",
+					"text": "Meron naman po. Pero hindi 'yung inaasahan nila."
+				},
+				{
+					"choices": [
+						{
+							"text": "Itigil mo na 'yan, Gloria.",
+							"after": [
+								{
+									"speaker": "Gloria",
+									"text": "Gusto ko po, Father. Pero sino po'ng magpapakain sa'kin?"
+								}
+							]
+						},
+						{
+							"text": "Ang Diyos lang ang makakahusga sa'yo.",
+							"after": [
+								{
+									"speaker": "Gloria",
+									"text": "Salamat po, Father. Gumaan po ang loob ko."
+								}
+							]
+						}
+					]
 				},
 				{
 					"speaker": "Father Eli",
-					"text": "Tandaan mo na walang kasalanang di niya kayang patawarin"
+					"text": "Walang kasalanang hindi kayang patawarin."
+				},
+				{
+					"speaker": "Gloria",
+					"text": "Father... 'yung pamangkin ko. Kayo na po'ng bahala sa kanya.",
+					"if_flag": "objective_kumpisal_mercy_here"
+				},
+				{
+					"speaker": "Father Eli",
+					"text": "Oo. Ako na'ng bahala.",
+					"if_flag": "objective_kumpisal_mercy_here"
 				}
 			]
 		},
@@ -107,15 +299,49 @@
 			"lines": [
 				{
 					"speaker": "Kulas",
-					"text": "Father... gusto ko nang tumigil sa droga"
+					"text": "Father... gusto ko nang tumigil."
 				},
 				{
 					"speaker": "Kulas",
-					"text": "Pagod na ako. Ayoko nang ganito ang buhay ko."
+					"text": "Pagod na 'ko. Ayoko na ng ganitong buhay."
+				},
+				{
+					"speaker": "Kulas",
+					"text": "May... may binuhat akong maleta nung isang buwan. Bayad lang daw.",
+					"needs": "pagtakbo_ni_kulas"
+				},
+				{
+					"speaker": "Kulas",
+					"text": "Pero gumagalaw 'yung loob, Father.",
+					"needs": "pagtakbo_ni_kulas"
 				},
 				{
 					"speaker": "Father Eli",
-					"text": "Ang pagbabago ay hindi madali. Pero kung tunay ang hangarin mo, kailangan mong magsimula."
+					"text": "...Saan mo dinala?",
+					"needs": "pagtakbo_ni_kulas"
+				},
+				{
+					"speaker": "Kulas",
+					"text": "Sa apartment diyan sa may Sampaloc. Iniwan ko lang sa pinto.",
+					"needs": "pagtakbo_ni_kulas"
+				},
+				{
+					"speaker": "Father Eli",
+					"text": "Ako na'ng bahala sa'yo, Kulas."
+				},
+				{
+					"if_flag": "objective_kumpisal_kulas_at_risk",
+					"needs": "pagtakbo_ni_kulas",
+					"choices": [
+						{
+							"text": "Umuwi ka na. Magpahinga ka."
+						},
+						{
+							"text": "Huwag kang tatakbo. Sasamahan kita.",
+							"needs": "pagtakbo_ni_kulas",
+							"flag": "run_kulas_safe"
+						}
+					]
 				}
 			]
 		}
@@ -152,29 +378,104 @@
 			],
 			"ending": [
 				{
+					"image": "res://assets/cutscenes/kumpisal_eli_hears.png",
+					"needs": "father_eli",
+					"unless_flag": "run_kulas_safe",
+					"lines": [
+						{
+							"speaker": "Father Eli",
+							"text": "(sa cellphone, mahina) Pare. 'Yung naka-gray na jacket. Paglabas niya."
+						}
+					]
+				},
+				{
 					"image": "res://assets/cutscenes/tokhang_kulas_runs.png",
+					"unless_flag": "run_kulas_safe",
 					"lines": [
 						{
 							"speaker": "Batista",
-							"text": "Pigilan niyo yan!"
+							"text": "Pigilan n'yo 'yan!"
 						}
 					]
 				},
 				{
 					"image": "res://assets/cutscenes/kumpisal_gunshot.png",
 					"gunshot": true,
-					"hold": 2.2
+					"hold": 2.2,
+					"unless_flag": "run_kulas_safe"
+				},
+				{
+					"image": "res://assets/cutscenes/kumpisal_eli_kulas_walk.png",
+					"if_flag": "run_kulas_safe",
+					"lines": [
+						{
+							"speaker": "Batista",
+							"text": "Pare. Ano 'to?"
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "Hindi siya."
+						},
+						{
+							"speaker": "Batista",
+							"text": "...Sigurado ka?"
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "Hindi siya, pare. Umuwi na kayo."
+						}
+					]
+				},
+				{
+					"card": "Sinamahan",
+					"line": "Kulas lives.",
+					"if_flag": "run_kulas_safe"
 				},
 				{
 					"image": "res://assets/cutscenes/kumpisal_eli_hears.png",
-					"lines": [
+					"choose": [
 						{
-							"speaker": "Father Eli",
 							"text": "Panginoon... patawarin Mo ako."
+						},
+						{
+							"text": "Aaminin ko na ang lahat.",
+							"needs": "father_eli",
+							"flag": "run_eli_confessed",
+							"then": [
+								{
+									"image": "res://assets/cutscenes/kumpisal_eli_penitent.png",
+									"lines": [
+										{
+											"speaker": "Father Eli",
+											"text": "Basbasan Mo ako, Ama, dahil nagkasala ako."
+										}
+									]
+								}
+							]
 						}
 					]
 				}
-			]
+			],
+			"opening": [
+				{
+					"image": "res://assets/backgrounds/church_nave.png",
+					"lines": [
+						{
+							"speaker": "Father Eli",
+							"text": "Tuwing Sabado ng hapon, bukas ang kumpisalan."
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "Dito, walang mayaman, walang mahirap. Lahat may dalang mabigat."
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "At lahat ng sinasabi rito... dito lang."
+						}
+					]
+				}
+			],
+			"kulas_at_risk": true
 		},
 		"kumpisal": {
 			"cast": [
@@ -208,10 +509,44 @@
 			"ending": [
 				{
 					"image": "res://assets/cutscenes/kumpisal_eli_forgiveness.png",
+					"choose": [
+						{
+							"text": "Panginoon... patawarin Mo ako."
+						},
+						{
+							"text": "Aaminin ko na ang lahat.",
+							"needs": "father_eli",
+							"flag": "run_eli_confessed",
+							"then": [
+								{
+									"image": "res://assets/cutscenes/kumpisal_eli_penitent.png",
+									"lines": [
+										{
+											"speaker": "Father Eli",
+											"text": "Basbasan Mo ako, Ama, dahil nagkasala ako."
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			],
+			"opening": [
+				{
+					"image": "res://assets/backgrounds/church_nave.png",
 					"lines": [
 						{
 							"speaker": "Father Eli",
-							"text": "Panginoon... patawarin Mo ako."
+							"text": "Tuwing Sabado ng hapon, bukas ang kumpisalan."
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "Dito, walang mayaman, walang mahirap. Lahat may dalang mabigat."
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "At lahat ng sinasabi rito... dito lang."
 						}
 					]
 				}
@@ -249,10 +584,46 @@
 						}
 					]
 				}
+			],
+			"opening": [
+				{
+					"image": "res://assets/backgrounds/church_nave.png",
+					"lines": [
+						{
+							"speaker": "Father Eli",
+							"text": "Tuwing Sabado ng hapon, bukas ang kumpisalan."
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "Dito, walang mayaman, walang mahirap. Lahat may dalang mabigat."
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "At lahat ng sinasabi rito... dito lang."
+						}
+					]
+				}
 			]
 		},
 		"padala_food": {
 			"opening": [
+				{
+					"image": "res://assets/backgrounds/church_nave.png",
+					"lines": [
+						{
+							"speaker": "Father Eli",
+							"text": "Tuwing Sabado ng hapon, bukas ang kumpisalan."
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "Dito, walang mayaman, walang mahirap. Lahat may dalang mabigat."
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "At lahat ng sinasabi rito... dito lang."
+						}
+					]
+				},
 				{
 					"image": "res://assets/cutscenes/kumpisal_eli_forgiveness.png",
 					"lines": [
@@ -294,25 +665,62 @@
 					"lines": [
 						{
 							"speaker": "Batista",
-							"text": "Pigilan niyo yan!"
+							"text": "Pigilan n'yo 'yan!"
 						}
-					]
+					],
+					"unless_flag": "run_kulas_safe"
 				},
 				{
 					"image": "res://assets/cutscenes/kumpisal_gunshot.png",
 					"gunshot": true,
-					"hold": 2.2
+					"hold": 2.2,
+					"unless_flag": "run_kulas_safe"
 				},
 				{
 					"image": "res://assets/cutscenes/kumpisal_eli_sacrifice.png",
-					"hold": 3.2
+					"unless_flag": "run_kulas_safe",
+					"lines": [
+						{
+							"speaker": "Father Eli",
+							"text": "Hindi siya, pare. Ako."
+						}
+					]
 				},
 				{
 					"card": "Sacrifice",
-					"line": "Father Eli died."
+					"line": "Father Eli died.",
+					"unless_flag": "run_kulas_safe"
+				},
+				{
+					"image": "res://assets/cutscenes/kumpisal_eli_kulas_walk.png",
+					"if_flag": "run_kulas_safe",
+					"lines": [
+						{
+							"speaker": "Batista",
+							"text": "Pare. Ano 'to?"
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "Hindi siya."
+						},
+						{
+							"speaker": "Batista",
+							"text": "...Sigurado ka?"
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "Hindi siya, pare. Umuwi na kayo."
+						}
+					]
+				},
+				{
+					"card": "Sinamahan",
+					"line": "Kulas lives.",
+					"if_flag": "run_kulas_safe"
 				}
 			],
-			"end_run": "kumpisal_sacrifice"
+			"end_run": "kumpisal_sacrifice",
+			"kulas_at_risk": true
 		}
 	}
 }

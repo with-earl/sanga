@@ -10,6 +10,10 @@ extends CanvasLayer
 ##   {"card": "Peter", "line": "Peter dies."}                     a title card on black
 ##   {"image": path, "choose": ["Run", "Ride Jeep"]}              a picture with a choice;
 ##                                                                the answer is in `last_choice`
+## A choice's options can also be {"text": ..., "needs": alaala, "flag": "run_x", "then": [steps]}:
+## an option that needs an Alaala shows only when the save holds it (marked ✦), its flag is set
+## when it is picked, and its "then" steps play right after. Any step can have "needs" or
+## "needs_not" (see Alaala) to play only with, or only without, a memory.
 ##
 ## `play` leaves the screen black at the end. Call `release` to fade back to the scene, or
 ## `hand_over` when a title card from the StoryCard follows.
@@ -109,12 +113,16 @@ func play(steps: Array) -> void:
 	visible = true
 	_black.modulate.a = 0.0
 	await _tween_alpha(_black, 1.0, FADE_SECONDS)
-	for step in steps:
-		var data := step as Dictionary
+	var queue: Array = steps.duplicate()
+	while not queue.is_empty():
+		var data := queue.pop_front() as Dictionary
+		if not Alaala.allows(data):
+			continue
 		if data.has("card"):
 			await _play_card(str(data["card"]), str(data.get("line", "")))
 		elif data.has("image"):
-			await _play_picture(data)
+			var next_steps: Array = await _play_picture(data)
+			queue = next_steps + queue
 	_playing = false
 
 
@@ -131,11 +139,12 @@ func hand_over() -> void:
 	visible = false
 
 
-func _play_picture(data: Dictionary) -> void:
+## Plays one picture step. Returns the steps a picked choice asks to play next, if any.
+func _play_picture(data: Dictionary) -> Array:
 	var texture := load(str(data["image"])) as Texture2D
 	if texture == null:
 		push_error("Missing cutscene picture: %s" % data["image"])
-		return
+		return []
 	_picture.texture = texture
 	# The picture fills the screen's width at its own shape, whatever the phone's shape.
 	var area := ScreenFit.width_rect(texture.get_size(), get_viewport().get_visible_rect().size)
@@ -143,7 +152,8 @@ func _play_picture(data: Dictionary) -> void:
 	_picture.pivot_offset = area.size / 2.0
 	_picture.scale = Vector2.ONE * ZOOM_FROM
 	_picture.position = area.position
-	var lines: Array = data.get("lines", [])
+	var lines: Array = Alaala.prepare_lines(data.get("lines", []))
+	var next_steps: Array = []
 	var hold: float = float(data.get("hold", DEFAULT_HOLD))
 	var zoom := create_tween()
 	zoom.tween_property(_picture, "scale", Vector2.ONE * ZOOM_TO, maxf(hold, 4.0) + 6.0)
@@ -160,13 +170,22 @@ func _play_picture(data: Dictionary) -> void:
 	elif data.has("choose"):
 		await _hold(MIN_HOLD_BEFORE_TAP)
 		_dialogue.set_cast("", null, "", null)
-		last_choice = await _dialogue.choose(data["choose"])
+		var options := Alaala.prepare_options(data["choose"])
+		var labels: Array = []
+		for option in options:
+			labels.append(option["label"])
+		var picked: Dictionary = options[await _dialogue.choose(labels)]
+		# Counted in the full list, so callers can match it to their own list of outcomes.
+		last_choice = int(picked["index"])
+		Alaala.apply_option(picked)
+		next_steps = picked.get("then", [])
 	else:
 		await _hold(hold)
 	if data.has("caption"):
 		_tween_alpha(_caption, 0.0, FADE_SECONDS)
 	await _tween_alpha(_black, 1.0, FADE_SECONDS)
 	zoom.kill()
+	return next_steps
 
 
 func _play_card(title: String, line: String) -> void:
