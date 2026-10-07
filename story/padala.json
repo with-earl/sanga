@@ -209,7 +209,7 @@
 							"text": "Sumakay ng jeep"
 						},
 						{
-							"text": "Magtago muna. Hintayin ang umaga.",
+							"text": "Magtago hanggang umaga.",
 							"needs": "baril_ni_batista"
 						}
 					]
@@ -251,7 +251,7 @@
 					"lines": [
 						{
 							"speaker": "Pulis",
-							"text": "Si Father Eli? (tawanan)"
+							"text": "Si Father Eli? *Nagtawanan*"
 						},
 						{
 							"speaker": "Pulis",
@@ -334,10 +334,10 @@
 					"needs": "rider",
 					"choose": [
 						{
-							"text": "Wala na po. 'Yun lang po."
+							"text": "'Yun lang po."
 						},
 						{
-							"text": "Pakisabi po sa rider, magsama siya ng tanod.",
+							"text": "Isama po niya ang tanod.",
 							"needs": "rider",
 							"flag": "run_tanod"
 						}
@@ -466,7 +466,7 @@
 						},
 						{
 							"speaker": "Peter",
-							"text": "...Talaga?! (tawa, iyak)"
+							"text": "...Talaga?! *Tumawa at naiyak*"
 						}
 					]
 				},

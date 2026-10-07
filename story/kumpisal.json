@@ -57,16 +57,16 @@
 			{
 				"choices": [
 					{
-						"text": "Huwag kang mag-alala. May trabaho ako para sa'yo.",
+						"text": "Huwag kang mag-alala, anak.",
 						"after": [
 							{
 								"speaker": "Mercy",
-								"text": "Talaga po? Salamat po, Father! Kahit ano po, kakayanin ko."
+								"text": "Salamat po, Father. Kahit ano pong trabaho, kakayanin ko."
 							}
 						]
 					},
 					{
-						"text": "Ano'ng klaseng trabaho ang hanap mo, anak?",
+						"text": "Ano'ng maitutulong ko, anak?",
 						"after": [
 							{
 								"speaker": "Mercy",
@@ -92,11 +92,11 @@
 			},
 			{
 				"speaker": "Father Eli",
-				"text": "Muntik lang? Kailangan ko pang galingan."
+				"text": "Salamat. Ang Espiritu Santo ang nagsalita, hindi ako."
 			},
 			{
 				"speaker": "Batista",
-				"text": "(tawa) Eli-tista pa rin tayo, pare. Kahit naka-sutana ka na."
+				"text": "*Tumawa* Eli-tista pa rin tayo, pare. Kahit naka-sutana ka na."
 			},
 			{
 				"speaker": "Father Eli",
@@ -109,7 +109,7 @@
 			{
 				"choices": [
 					{
-						"text": "Mag-ingat ka.",
+						"text": "Ingatan ka nawa ng Diyos.",
 						"after": [
 							{
 								"speaker": "Batista",
@@ -118,7 +118,7 @@
 						]
 					},
 					{
-						"text": "Huwag dito sa simbahan.",
+						"text": "Igalang mo ang bahay ng Diyos.",
 						"after": [
 							{
 								"speaker": "Batista",
@@ -150,7 +150,7 @@
 				{
 					"choices": [
 						{
-							"text": "Sabihin mo sa kanya ngayong gabi.",
+							"text": "Ipagtapat mo sa kanya, anak.",
 							"after": [
 								{
 									"speaker": "Gwen",
@@ -159,7 +159,7 @@
 							]
 						},
 						{
-							"text": "Ipagdasal mo muna. Hindi mo kailangang magmadali.",
+							"text": "Ipagdasal mo muna, anak.",
 							"after": [
 								{
 									"speaker": "Gwen",
@@ -210,7 +210,7 @@
 				{
 					"choices": [
 						{
-							"text": "Humingi ka ng tawad. Ipagdasal mo sila, at ang mga pamilya nila.",
+							"text": "Ipagdasal mo ang kanilang kaluluwa.",
 							"after": [
 								{
 									"speaker": "Batista",
@@ -219,7 +219,7 @@
 							]
 						},
 						{
-							"text": "Alam ko kung bakit mo ginagawa 'yan.",
+							"text": "Alam ng Diyos ang dahilan mo.",
 							"after": [
 								{
 									"speaker": "Batista",
@@ -258,7 +258,7 @@
 				{
 					"choices": [
 						{
-							"text": "Itigil mo na 'yan, Gloria.",
+							"text": "Talikuran mo na ang kasalanan.",
 							"after": [
 								{
 									"speaker": "Gloria",
@@ -267,7 +267,7 @@
 							]
 						},
 						{
-							"text": "Ang Diyos lang ang makakahusga sa'yo.",
+							"text": "Ang Diyos lang ang huhusga sa'yo.",
 							"after": [
 								{
 									"speaker": "Gloria",
@@ -334,10 +334,10 @@
 					"needs": "pagtakbo_ni_kulas",
 					"choices": [
 						{
-							"text": "Umuwi ka na. Magpahinga ka."
+							"text": "Umuwi ka na, anak. Magpahinga ka."
 						},
 						{
-							"text": "Huwag kang tatakbo. Sasamahan kita.",
+							"text": "Sasamahan kita, anak.",
 							"needs": "pagtakbo_ni_kulas",
 							"flag": "run_kulas_safe"
 						}
@@ -384,7 +384,7 @@
 					"lines": [
 						{
 							"speaker": "Father Eli",
-							"text": "(sa cellphone, mahina) Pare. 'Yung naka-gray na jacket. Paglabas niya."
+							"text": "*Mahina, sa cellphone* Pare. 'Yung naka-gray na jacket. Paglabas niya."
 						}
 					]
 				},
@@ -422,7 +422,7 @@
 						},
 						{
 							"speaker": "Father Eli",
-							"text": "Hindi siya, pare. Umuwi na kayo."
+							"text": "Hindi siya, Batista. Umuwi na kayo."
 						}
 					]
 				},
@@ -438,7 +438,7 @@
 							"text": "Panginoon... patawarin Mo ako."
 						},
 						{
-							"text": "Aaminin ko na ang lahat.",
+							"text": "Ama, aaminin ko na ang lahat.",
 							"needs": "father_eli",
 							"flag": "run_eli_confessed",
 							"then": [
@@ -514,7 +514,7 @@
 							"text": "Panginoon... patawarin Mo ako."
 						},
 						{
-							"text": "Aaminin ko na ang lahat.",
+							"text": "Ama, aaminin ko na ang lahat.",
 							"needs": "father_eli",
 							"flag": "run_eli_confessed",
 							"then": [
@@ -682,7 +682,7 @@
 					"lines": [
 						{
 							"speaker": "Father Eli",
-							"text": "Hindi siya, pare. Ako."
+							"text": "Hindi siya, Batista. Ako."
 						}
 					]
 				},
@@ -709,7 +709,7 @@
 						},
 						{
 							"speaker": "Father Eli",
-							"text": "Hindi siya, pare. Umuwi na kayo."
+							"text": "Hindi siya, Batista. Umuwi na kayo."
 						}
 					]
 				},

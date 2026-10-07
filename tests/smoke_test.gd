@@ -14,6 +14,7 @@ func _initialize() -> void:
 	_test_settings()
 	_test_save_upgrade()
 	_test_story_order()
+	_test_choices_fit_one_line()
 	await _test_asset_preloader()
 	if _failures.is_empty():
 		print("SMOKE TEST PASSED")
@@ -22,6 +23,36 @@ func _initialize() -> void:
 		for failure in _failures:
 			printerr("FAIL: ", failure)
 		quit(1)
+
+
+## Every choice must fit on one line, with room for the ✦ of a memory choice, so the options stay
+## short and the screen stays balanced.
+const CHOICE_ROOM := 560.0
+const CHOICE_FONT_SIZE := 26
+
+
+func _test_choices_fit_one_line() -> void:
+	var font: Font = load("res://assets/fonts/Lora.ttf")
+	for path in ["res://story/tokhang.json", "res://story/kumpisal.json", "res://story/padala.json"]:
+		var texts: Array[String] = []
+		_collect_choice_texts(JSON.parse_string(FileAccess.get_file_as_string(path)), texts)
+		for text in texts:
+			var width := font.get_string_size("✦  " + text, HORIZONTAL_ALIGNMENT_LEFT, -1, CHOICE_FONT_SIZE).x
+			_check(width <= CHOICE_ROOM, "choice too long for one line in %s: %s" % [path.get_file(), text])
+
+
+func _collect_choice_texts(data: Variant, texts: Array[String]) -> void:
+	if data is Dictionary:
+		for key in ["choices", "choose", "choice"]:
+			if data.get(key) is Array:
+				for option in data[key]:
+					if option is Dictionary and option.has("text"):
+						texts.append(str(option["text"]))
+		for value in data.values():
+			_collect_choice_texts(value, texts)
+	elif data is Array:
+		for value in data:
+			_collect_choice_texts(value, texts)
 
 
 func _check(condition: bool, message: String) -> void:

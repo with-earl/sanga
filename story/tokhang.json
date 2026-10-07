@@ -52,7 +52,7 @@
 	"choices": [
 		{
 			"id": "peter",
-			"text": "Sige, ako na. Dadaan ako sa palengke.",
+			"text": "Sige, ako na'ng bibili.",
 			"after_first_run_only": false,
 			"buyer": "Peter",
 			"after": [
@@ -72,7 +72,7 @@
 		},
 		{
 			"id": "gwen",
-			"text": "Ikaw na lang muna. May delivery pa 'ko.",
+			"text": "Ikaw na lang. May delivery ako.",
 			"after_first_run_only": true,
 			"buyer": "Gwen",
 			"after": [
@@ -84,7 +84,7 @@
 		},
 		{
 			"id": "kulas",
-			"text": "Mamaya na lang. Sabay na tayo.",
+			"text": "Mamaya, sabay na tayo.",
 			"after_first_run_only": true,
 			"buyer": "",
 			"after": [
@@ -128,12 +128,12 @@
 				"needs": "laruang_baril",
 				"choices": [
 					{
-						"text": "Ito na lang. Baka mapagkamalan pa 'yung mukhang totoo.",
+						"text": "Ito na lang ang bilhin ko.",
 						"needs": "laruang_baril",
 						"id": "water_gun"
 					},
 					{
-						"text": "Huwag na.",
+						"text": "Titingin pa ako.",
 						"id": "keep_looking"
 					}
 				]
@@ -310,7 +310,7 @@
 						},
 						{
 							"speaker": "Peter",
-							"text": "Ay, tinamaan ako. (tawa)"
+							"text": "Ay, tinamaan ako. *Tumawa*"
 						},
 						{
 							"speaker": "Gwen",
@@ -335,7 +335,7 @@
 		{
 			"choices": [
 				{
-					"text": "Ang mahal naman, Ate. Two hundred na lang?",
+					"text": "Two hundred na lang, Ate?",
 					"after": [
 						{
 							"speaker": "Gloria",
@@ -344,7 +344,7 @@
 					]
 				},
 				{
-					"text": "Sige po. Okay na 'yan.",
+					"text": "Sige po, okay na.",
 					"after": [
 						{
 							"speaker": "Gloria",
@@ -356,7 +356,7 @@
 		},
 		{
 			"speaker": "Gloria",
-			"text": "(mahina, sa cellphone) ...Oo. Kakaalis lang. Naka-jacket. May dalang baril.",
+			"text": "*Mahina, sa cellphone* ...Oo. Kakaalis lang. Naka-jacket. May dalang baril.",
 			"needs": "laruang_baril"
 		}
 	]

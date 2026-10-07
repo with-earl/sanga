@@ -308,6 +308,15 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   Godot's web (sample) playback never routed them. Fix: `default_bus_layout.tres` defines both
   buses. Measured after: peak about 0.015 on the main screen (music at -24 dB is very quiet on a
   phone speaker; raise `MusicDirector.VOLUME_DB` if the user finds it too soft).
+- **Every choice is one short line** (user's rule). All choices in the story files and the bible
+  were shortened (for example "Sasamahan kita.", "Ipagdasal mo sila.", "Magsama po siya ng
+  tanod."). The smoke test fails if any choice is wider than 560 px at size 26 with the ✦.
+- **Script pass (user's rules, also in the bible):** choices never hint at their outcome (the
+  water gun is now "Ito na lang ang bilhin ko." / "Titingin pa ako."); Father Eli speaks as a
+  priest in every line and choice (only his secret calls and the door keep "pare", as the
+  reveal); stage directions are Tagalog between asterisks (*Tumawa*). The Main Timeline has no
+  prologue. Story time is Kumpisal (past), Padala (present), Tokhang (future); the Main Timeline
+  already plays them future, past, present (Tokhang, Kumpisal, Padala).
 - **Choices and objectives without boxes** (user: the boxes were too big for the layout).
   Choices are plain golden ochre text with an outline (`DialogueBox._style_choice`), with a small
   note above them: "Your choice may change the timeline." (`CHOICE_HINT`). The objectives list
