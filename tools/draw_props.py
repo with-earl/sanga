@@ -20,11 +20,6 @@ FONT_BOLD = "/usr/share/fonts/opentype/inter/Inter-Bold.otf"
 FONT_BLACK = "/usr/share/fonts/opentype/inter/InterDisplay-Bold.otf"
 ## Where the telephone is in the apartment's painting (pixels of apartment_room_bath.png).
 TELEPHONE_BOX = (1293, 503, 1443, 614)
-## The phone's edge inside that box, handset on the left, traced around the painting.
-TELEPHONE_EDGE = [
-    (49, 22), (58, 20), (70, 21), (75, 26), (79, 26), (125, 29), (128, 33), (127, 41), (126, 60),
-    (125, 79), (119, 88), (113, 95), (70, 94), (40, 90), (30, 85), (30, 74), (37, 56), (45, 31),
-]
 
 
 def font(path: str, size: int) -> ImageFont.FreeTypeFont:
@@ -264,22 +259,72 @@ def draw_card_on_floor() -> None:
     final.save(PROPS / "food_delivery_card_floor.png")
 
 
-def cut_out_telephone() -> None:
-    """Cuts the telephone out of the apartment's own painting, so it matches it exactly and can sit
-    on top of the painted one with an outline. The phone's edge is traced by hand (in pixels of the
-    cut-out box), drawn four times larger and shrunk again so the edge is smooth."""
-    background = Image.open(ROOT / "assets" / "backgrounds" / "apartment_room_bath.png").convert("RGB")
-    crop = background.crop(TELEPHONE_BOX).convert("RGBA")
-    big = 4
-    mask = Image.new("L", (crop.width * big, crop.height * big), 0)
-    ImageDraw.Draw(mask).polygon([(x * big, y * big) for x, y in TELEPHONE_EDGE], fill=255)
-    mask = mask.resize(crop.size, Image.LANCZOS)
-    crop.putalpha(mask)
-    crop.save(PROPS / "telephone.png")
+def gradient_shape(size, points, top, bottom, rounding: float = 0.0) -> Image.Image:
+    """A filled polygon shaded from `top` to `bottom` colour, as a see-through layer. `rounding`
+    softens its corners, as moulded plastic has no sharp ones."""
+    w, h = size
+    ys = [y for _, y in points]
+    shade = Image.new("RGBA", size)
+    sd = ImageDraw.Draw(shade)
+    y0, y1 = min(ys), max(ys)
+    for y in range(int(y0), int(y1) + 1):
+        t = (y - y0) / max(y1 - y0, 1)
+        sd.line([(0, y), (w, y)], fill=tuple(int(a + (b - a) * t) for a, b in zip(top, bottom)))
+    mask = Image.new("L", size, 0)
+    ImageDraw.Draw(mask).polygon(points, fill=255)
+    if rounding > 0.0:
+        mask = mask.filter(ImageFilter.GaussianBlur(rounding)).point(lambda v: 255 if v >= 110 else 0)
+    layer = Image.new("RGBA", size, (0, 0, 0, 0))
+    layer.paste(shade, (0, 0), mask)
+    return layer
+
+
+def draw_telephone() -> None:
+    """A new desk telephone, drawn to sit exactly over the one painted on the nightstand and hide
+    it: the same size, the same three-quarter angle, the handset resting on its left. Coordinates
+    are pixels of the painted phone's box, drawn eight times larger and shrunk for smooth edges."""
+    k = 8
+    box_w, box_h = TELEPHONE_BOX[2] - TELEPHONE_BOX[0], TELEPHONE_BOX[3] - TELEPHONE_BOX[1]
+    size = (box_w * k, box_h * k)
+    P = lambda pts: [(x * k, y * k) for x, y in pts]
+    phone = Image.new("RGBA", size, (0, 0, 0, 0))
+    # The base: a dark shell whose sloping top faces the viewer.
+    phone.alpha_composite(gradient_shape(size, P([(66, 30), (126, 28), (131, 33), (127, 82), (120, 96),
+        (40, 96), (32, 88)]), (62, 64, 66), (30, 31, 33), 2 * k))
+    # The sloping face with the keys, a little lighter.
+    phone.alpha_composite(gradient_shape(size, P([(76, 33), (124, 32), (122, 80), (114, 88), (62, 88),
+        (66, 50)]), (84, 86, 88), (52, 54, 57)))
+    # The front lip where the base meets the table.
+    phone.alpha_composite(gradient_shape(size, P([(40, 89), (116, 89), (120, 96), (40, 96)]),
+        (40, 41, 43), (20, 20, 22)))
+    d = ImageDraw.Draw(phone)
+    # The screen, pale green-grey with a glint.
+    d.polygon(P([(80, 36), (121, 35), (120, 47), (78, 48)]), fill=(150, 168, 152))
+    d.polygon(P([(81, 37), (100, 36.5), (96, 41), (80, 41.5)]), fill=(186, 200, 184))
+    d.line(P([(76, 51), (121, 50)]), fill=(120, 122, 124), width=k)
+    # The keys: three columns of numbers and a column of function keys.
+    for row in range(4):
+        for col in range(3):
+            x = 72 + col * 10 - row * 1.4
+            y = 56 + row * 7.5
+            d.rounded_rectangle(P([(x, y), (x + 7, y + 4.5)]), radius=2 * k, fill=(28, 29, 31))
+            d.rounded_rectangle(P([(x + 0.5, y), (x + 6.5, y + 3.3)]), radius=2 * k, fill=(108, 110, 113))
+        x = 106 - row * 1.0
+        y = 55 + row * 7.5
+        d.rounded_rectangle(P([(x, y), (x + 9, y + 4.5)]), radius=2 * k, fill=(28, 29, 31))
+        d.rounded_rectangle(P([(x + 0.5, y), (x + 8.5, y + 3.3)]), radius=2 * k, fill=(96, 98, 101))
+    # The handset, resting in its cradle on the left, with a soft shine down its back.
+    handset = gradient_shape(size, P([(48, 18), (64, 18), (76, 26), (71, 34), (60, 40), (52, 74),
+        (52, 86), (40, 92), (28, 88), (29, 72), (38, 46), (43, 26)]), (70, 72, 75), (30, 31, 33), 3 * k)
+    phone.alpha_composite(handset)
+    d.line(P([(50, 22), (44, 40), (37, 66), (35, 82)]), fill=(132, 134, 138), width=int(1.6 * k))
+    d.line(P([(62, 22), (70, 27)]), fill=(118, 120, 124), width=k)
+    phone = phone.resize((box_w, box_h), Image.LANCZOS)
+    phone.save(PROPS / "telephone.png")
 
 
 if __name__ == "__main__":
-    cut_out_telephone()
+    draw_telephone()
     draw_key()
     draw_poster()
     draw_card_on_floor()
