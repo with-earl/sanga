@@ -29,6 +29,8 @@ var last_reality: Dictionary = {}
 ## Story order shown to the player when choosing where to begin.
 const STORY_ORDER := ["tokhang", "kumpisal", "padala"]
 const RUN_FLAG_PREFIX := "run_"
+## The voice in the dark confessional that opens every run (see docs/STORY_BIBLE.md).
+const PROLOGUE_FILE := "res://story/prologue.json"
 
 
 ## The story being played now, for example "kumpisal", or "" between runs.
@@ -56,7 +58,22 @@ func begin_with(story: String) -> void:
 	# Flags starting with "run_" remember choices that shape later stories of this run only.
 	GameState.clear_flags(RUN_FLAG_PREFIX)
 	GameState.run_outcomes = []
+	await Cutscene.play(_prologue_for(story))
 	_enter_chapter([])
+
+
+## The prologue for a run that begins with `story`: the same confession each time, ending on where
+## the voice decides to start.
+func _prologue_for(story: String) -> Array:
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(PROLOGUE_FILE))
+	if typeof(parsed) != TYPE_DICTIONARY:
+		return []
+	var prologue: Dictionary = parsed
+	var lines: Array = (prologue.get("lines", []) as Array).duplicate()
+	var last: Variant = prologue.get("last_line", {}).get(story, null)
+	if last != null:
+		lines.append(last)
+	return [{"image": str(prologue.get("image", "")), "lines": lines}]
 
 
 ## Picks up a save where it left off. Between runs there is nothing to resume, so the caller shows
@@ -73,6 +90,7 @@ func resume() -> bool:
 ## title card, for example the cutscene that closes this story.
 func finish_story(lead_in: Array = [], outcome_id := "") -> void:
 	GameState.record_ending(outcome_id)
+	await _remember(outcome_id)
 	GameState.chapter += 1
 	if GameState.chapter >= TIMELINES.get(GameState.timeline, []).size():
 		end_run("", "", "", lead_in)
@@ -86,6 +104,7 @@ func finish_story(lead_in: Array = [], outcome_id := "") -> void:
 ## plain ending card, which no timeline uses now.
 func end_run(ending_id: String, title: String, line: String, lead_in: Array = []) -> void:
 	GameState.record_ending(ending_id)
+	await _remember(ending_id)
 	var finished_timeline := GameState.timeline
 	last_reality = TimelineMap.reality_for(finished_timeline, GameState.run_outcomes)
 	GameState.record_reality(TimelineMap.key_of(last_reality))
@@ -106,6 +125,16 @@ func end_run(ending_id: String, title: String, line: String, lead_in: Array = []
 		StoryCard.show_time_order(lead_in)
 	else:
 		StoryCard.show_ending("", "", lead_in, "timeline_reveal")
+
+
+## A death the player has seen for the first time becomes an Alaala: it is saved at once, and a
+## card names it before the story moves on.
+func _remember(ending_id: String) -> void:
+	var gained := Alaala.remember_from(ending_id)
+	if gained.is_empty():
+		return
+	GameState.save_current()
+	await Cutscene.play(Alaala.cards_for(gained))
 
 
 func _enter_chapter(lead_in: Array) -> void:

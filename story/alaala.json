@@ -1,0 +1,35 @@
+{
+	"_comment": "The Alaala (memories), see docs/STORY_BIBLE.md. Each is gained the first time the save reaches one of the endings in 'from', and is never lost. 'name' and 'memory' show on the card that plays when it is gained.",
+	"alaala": [
+		{
+			"id": "laruang_baril",
+			"name": "Ang Laruang Baril",
+			"memory": "Isang laruan. Isang tawag. Isang bala.",
+			"from": ["tokhang_peter", "tokhang_gwen", "tokhang_trade"]
+		},
+		{
+			"id": "pagtakbo_ni_kulas",
+			"name": "Ang Pagtakbo ni Kulas",
+			"memory": "Tumakbo siya palabas ng simbahan. Hindi na siya nakarating sa kanto.",
+			"from": ["tokhang_kulas", "kumpisal_main"]
+		},
+		{
+			"id": "father_eli",
+			"name": "Si Father Eli",
+			"memory": "Ang taong nakikinig sa lahat ng kasalanan... may sarili palang itinatago.",
+			"from": ["padala_police_card"]
+		},
+		{
+			"id": "baril_ni_batista",
+			"name": "Ang Baril ni Batista",
+			"memory": "Sa dilim, lahat ng tumatakbo ay suspek.",
+			"from": ["padala_run"]
+		},
+		{
+			"id": "rider",
+			"name": "Ang Rider",
+			"memory": "Dumating siya para tumulong. Mag-isa.",
+			"from": ["padala_food"]
+		}
+	]
+}

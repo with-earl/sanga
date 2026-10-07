@@ -42,9 +42,13 @@ const NAVE_STEP_FLAG := "objective_step:church_nave"
 const KUMPISAL_OPENING_FLAG := "objective_kumpisal_opening_seen"
 
 
-## Starts an unsaved run set up as `point` describes, and opens its place.
+## Starts an unsaved run set up as `point` describes, and opens its place. Memories (Alaala)
+## held when jumping are kept.
 static func jump(point: Dictionary) -> void:
+	# The memories held now come along, so the Alaala choices can be tested from any point.
+	var memories := GameState.alaala.duplicate()
 	GameState.start_unsaved_game()
+	GameState.alaala = memories
 	GameState.timeline = str(point["timeline"])
 	GameState.chapter = int(point["chapter"])
 	GameState.clear_flags(StoryDirector.RUN_FLAG_PREFIX)

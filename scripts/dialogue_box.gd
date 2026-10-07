@@ -7,16 +7,27 @@ extends Control
 ## small ▼ bobs in the corner, and a tap moves to the next line. A tap after the last line closes
 ## the box. Characters can stand beside the box, one on each side, with whoever is speaking shown
 ## at full brightness and the other slightly dimmed.
+##
+## The lines are filtered by the Alaala the save holds (see Alaala), and a line can be a choice:
+##   {"choices": [{"text": "...", "after": [lines], "flag": "run_x", "needs": "alaala_id"}]}
+## The box stops there, shows the options (Alaala ones marked ✦), plays the picked option's
+## "after" lines, and carries on with the lines that follow.
 
 signal opened
 signal dismissed
 ## Emitted when the last line has been tapped through, whether or not the box then closes.
 signal lines_finished
 signal choice_made(index: int)
+## Emitted when the player picks an option of a choice written inside the lines, with its "id"
+## (or its text when it has none).
+signal line_choice_made(id: String)
 
 ## Portraits are drawn at this fraction of their picture size, and only the top part is shown.
 const PORTRAIT_SCALE := 1.1625
 const PORTRAIT_KEEP := 0.6
+## The story font has no ✦ (the mark of an Alaala choice); this one fills in what it lacks.
+const SERIF_FONT := preload("res://assets/fonts/Lora.ttf")
+const MARK_FONT := preload("res://assets/fonts/DejaVuSansMono.ttf")
 ## The pictures are not all drawn at the same size: measured from the top of the hair to the chin,
 ## Father Eli's head is 118 px tall in his picture but Mercy's is 142 px. These factors scale each
 ## picture so heads come out the same size as Father Eli's, so everyone looks equally close to the
@@ -37,7 +48,11 @@ const PORTRAIT_SIZE_FACTORS := {
 ## Which way each portrait looks in its picture. Portraits not listed here look to the left. A
 ## portrait is mirrored when needed so that people on the left of the box always face right and
 ## people on the right always face left: everyone in a conversation faces each other.
-const PORTRAITS_FACING_RIGHT := ["father_eli", "ben", "gloria", "gwen", "peter"]
+## A whole character is named ("gloria"), or one picture of them ("batista_2") when that picture
+## looks the other way from their usual one.
+const PORTRAITS_FACING_RIGHT := ["father_eli", "ben", "gloria", "gwen", "peter", "batista_2"]
+## Single pictures that look to the left although their character's usual picture looks right.
+const PORTRAITS_FACING_LEFT := ["gloria_2", "gwen_2"]
 ## How far a portrait stands in from the side of the box, so the characters are a little in from
 ## its edges.
 const PORTRAIT_INSET := 40.0
@@ -109,6 +124,11 @@ var _insets := Vector4.ZERO
 
 func _ready() -> void:
 	hide()
+	var serif: FontFile = SERIF_FONT
+	if MARK_FONT not in serif.fallbacks:
+		var fallbacks := serif.fallbacks.duplicate()
+		fallbacks.append(MARK_FONT)
+		serif.fallbacks = fallbacks
 	_portrait_companion.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_portrait_companion.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_portrait_companion.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -231,6 +251,12 @@ func say(speaker: String, text: String) -> void:
 func say_lines(speaker: String, lines: Array, keep_open := false) -> void:
 	if lines.is_empty():
 		return
+	lines = Alaala.prepare_lines(lines)
+	if lines.is_empty():
+		# Every line needs a memory the save does not hold: nothing to read. Deferred, so whoever
+		# called can start waiting first.
+		lines_finished.emit.call_deferred()
+		return
 	_keep_open = keep_open
 	_pending_lines = lines.duplicate()
 	var was_open := visible
@@ -318,6 +344,9 @@ func _clear_choices() -> void:
 
 func _show_next_line(default_speaker: String) -> void:
 	var line: Variant = _pending_lines.pop_front()
+	if line is Dictionary and (line as Dictionary).has("choices"):
+		_play_line_choice(line as Dictionary, default_speaker)
+		return
 	var who := default_speaker
 	var text := ""
 	# A voice from out of sight, such as someone in the next room: nobody on screen speaks.
@@ -383,7 +412,11 @@ func _place_portrait(portrait: TextureRect, picture: Texture2D, on_left: bool, _
 ## True when the person in this portrait looks to the right in the picture itself.
 static func faces_right(picture: Texture2D) -> bool:
 	var base := picture.resource_path.get_file().get_basename()
-	# "gloria_2" is still Gloria.
+	if base in PORTRAITS_FACING_LEFT:
+		return false
+	if base in PORTRAITS_FACING_RIGHT:
+		return true
+	# Otherwise "gloria_1" looks the way Gloria usually does.
 	var parts := base.rsplit("_", true, 1)
 	if parts.size() == 2 and parts[1].is_valid_int():
 		base = parts[0]
@@ -435,6 +468,35 @@ func _stop_typing() -> void:
 
 ## Moves to the next line, the same as tapping the box. A tap while a line is still typing shows
 ## the rest of it first.
+## A choice written inside the lines: the line before it stays on screen while the options show.
+## The picked option's lines play next, then the rest.
+func _play_line_choice(entry: Dictionary, default_speaker: String) -> void:
+	var options := Alaala.prepare_options(entry.get("choices", []))
+	if options.is_empty():
+		_continue_after_choice(default_speaker)
+		return
+	var labels: Array = []
+	for option in options:
+		labels.append(option["label"])
+	var picked: Dictionary = options[await choose(labels)]
+	Alaala.apply_option(picked)
+	line_choice_made.emit(str(picked.get("id", picked.get("text", ""))))
+	var after := Alaala.prepare_lines(picked.get("after", []))
+	_pending_lines = after + _pending_lines
+	_continue_after_choice(default_speaker)
+
+
+func _continue_after_choice(default_speaker: String) -> void:
+	if has_more_lines():
+		_show_next_line(default_speaker)
+	elif _keep_open:
+		_keep_open = false
+		lines_finished.emit()
+	else:
+		lines_finished.emit()
+		close()
+
+
 func advance() -> void:
 	if _choosing:
 		return

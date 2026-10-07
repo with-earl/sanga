@@ -2,11 +2,21 @@
 	"intro": [
 		{
 			"image": "res://assets/cutscenes/padala_gloria_mercy.png",
-			"hold": 3.0
+			"lines": [
+				{
+					"speaker": "Mercy",
+					"text": "Sabi ni Tita, may mabait na pari. May malinis na trabaho."
+				}
+			]
 		},
 		{
 			"image": "res://assets/cutscenes/padala_luggage.png",
-			"hold": 2.6
+			"lines": [
+				{
+					"speaker": "Mercy",
+					"text": "Hindi niya sinabing may maleta."
+				}
+			]
 		},
 		{
 			"image": "res://assets/cutscenes/padala_beaten.png",
@@ -28,17 +38,17 @@
 		"kumpisal": [
 			{
 				"speaker": "Father Eli",
-				"text": "Huwag mo na subukang tumakas, Mercy",
+				"text": "Huwag mo nang subukan, Mercy.",
 				"offscreen": true
 			},
 			{
 				"speaker": "Father Eli",
-				"text": "Nakikita ka ng Diyos",
+				"text": "Nakikita ka ng Diyos.",
 				"offscreen": true
 			}
 		]
 	},
-	"no_number": "Wala akong numerong matatawagan.",
+	"no_number": "Wala akong matatawagan.",
 	"variants": {
 		"main": {
 			"objectives": [
@@ -119,11 +129,28 @@
 					"lines": [
 						{
 							"speaker": "Mercy",
-							"text": "Pakiusap, tulungan mo ako..."
+							"text": "Hello? Pulis po ba 'to? Tulungan n'yo po ako, nakakulong po ako—"
 						},
 						{
-							"speaker": "???",
-							"text": "Oh pare, ikaw pala!"
+							"speaker": "Boses",
+							"text": "Saan ka?"
+						},
+						{
+							"speaker": "Mercy",
+							"text": "Hindi ko po alam... may simbahan po sa tapat."
+						},
+						{
+							"speaker": "Boses",
+							"text": "...Sige. Diyan ka lang. Papunta na kami."
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/padala_police_car.png",
+					"lines": [
+						{
+							"speaker": "Batista",
+							"text": "Oh, pare. Ikaw pala."
 						}
 					]
 				},
@@ -136,10 +163,6 @@
 					"hold": 2.6
 				},
 				{
-					"image": "res://assets/cutscenes/padala_police_car.png",
-					"hold": 2.6
-				},
-				{
 					"card": "Police Poster",
 					"line": "Mercy dies."
 				},
@@ -147,7 +170,7 @@
 					"image": "res://assets/cutscenes/padala_dressing.png",
 					"lines": [
 						{
-							"speaker": "???",
+							"speaker": "Father Eli",
 							"text": "Panginoon... patawarin Mo ako."
 						}
 					]
@@ -168,15 +191,34 @@
 				{
 					"image": "res://assets/cutscenes/padala_still_manila.png",
 					"caption": "Still in Manila",
+					"lines": [
+						{
+							"speaker": "Mercy",
+							"text": "Nasa Maynila pa rin ako. Saan ako pupunta?"
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/padala_still_manila.png",
+					"caption": "Still in Manila",
 					"choose": [
-						"Run",
-						"Ride Jeep"
+						{
+							"text": "Tumakbo"
+						},
+						{
+							"text": "Sumakay ng jeep"
+						},
+						{
+							"text": "Magtago muna. Hintayin ang umaga.",
+							"needs": "baril_ni_batista"
+						}
 					]
 				}
 			],
 			"choices": [
 				"kumpisal_run",
-				"kumpisal_jeep"
+				"kumpisal_jeep",
+				"kumpisal_hide"
 			]
 		},
 		"kumpisal_run": {
@@ -206,7 +248,16 @@
 				},
 				{
 					"image": "res://assets/cutscenes/padala_police_laugh.png",
-					"hold": 3.2
+					"lines": [
+						{
+							"speaker": "Pulis",
+							"text": "Si Father Eli? (tawanan)"
+						},
+						{
+							"speaker": "Pulis",
+							"text": "Ineng, umuwi ka na."
+						}
+					]
 				},
 				{
 					"card": "Ride Jeep",
@@ -223,7 +274,19 @@
 					"lines": [
 						{
 							"speaker": "Mercy",
-							"text": "Pakiusap, tulungan mo ako..."
+							"text": "Hello? Pulis po ba 'to? Tulungan n'yo po ako, nakakulong po ako—"
+						},
+						{
+							"speaker": "Boses",
+							"text": "Saan ka?"
+						},
+						{
+							"speaker": "Mercy",
+							"text": "Hindi ko po alam... may simbahan po sa tapat."
+						},
+						{
+							"speaker": "Boses",
+							"text": "...Sige. Diyan ka lang. Papunta na kami."
 						}
 					]
 				},
@@ -232,7 +295,7 @@
 					"lines": [
 						{
 							"speaker": "Father Eli",
-							"text": "Oh pare, ikaw pala!"
+							"text": "Oh, pare. Ikaw pala."
 						}
 					]
 				},
@@ -259,30 +322,197 @@
 			"steps": [
 				{
 					"image": "res://assets/cutscenes/padala_phone_call.png",
-					"hold": 2.4
-				},
-				{
-					"image": "res://assets/cutscenes/padala_peter_arrives.png",
 					"lines": [
 						{
 							"speaker": "Mercy",
-							"text": "Pakiusap, tulungan mo ako..."
+							"text": "Hello, isang order po. Pakisabi po sa rider... tulungan n'yo po ako. Room 3B."
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/padala_phone_call.png",
+					"needs": "rider",
+					"choose": [
+						{
+							"text": "Wala na po. 'Yun lang po."
+						},
+						{
+							"text": "Pakisabi po sa rider, magsama siya ng tanod.",
+							"needs": "rider",
+							"flag": "run_tanod"
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/padala_peter_arrives.png",
+					"unless_flag": "run_tanod",
+					"lines": [
+						{
+							"speaker": "Peter",
+							"text": "Ma'am? Delivery po—"
+						},
+						{
+							"speaker": "Peter",
+							"text": "Teka. Ano'ng nangyayari dito?"
 						}
 					]
 				},
 				{
 					"image": "res://assets/cutscenes/padala_peter_fights.png",
+					"unless_flag": "run_tanod",
 					"hold": 2.8
 				},
 				{
 					"image": "res://assets/cutscenes/padala_peter_stabbed.png",
+					"unless_flag": "run_tanod",
 					"hold": 3.0
 				},
 				{
 					"card": "Food Delivery",
-					"line": "Peter is stabbed."
+					"line": "Peter is stabbed.",
+					"unless_flag": "run_tanod"
+				},
+				{
+					"image": "res://assets/cutscenes/padala_tanod.png",
+					"if_flag": "run_tanod",
+					"lines": [
+						{
+							"speaker": "Peter",
+							"text": "Ma'am? Delivery po. Dito po 'yung sinabi ko."
+						},
+						{
+							"speaker": "Tanod",
+							"text": "Father? Ano'ng ginagawa n'yo rito?"
+						}
+					]
+				},
+				{
+					"card": "Tanod",
+					"line": "Mercy is rescued, and Peter lives.",
+					"if_flag": "run_tanod"
+				}
+			]
+		},
+		"kumpisal_hide": {
+			"id": "padala_nagtago",
+			"steps": [
+				{
+					"image": "res://assets/cutscenes/padala_hide_dawn.png",
+					"lines": [
+						{
+							"speaker": "Mercy",
+							"text": "'Nay? ...Uuwi na po ako."
+						}
+					]
+				},
+				{
+					"card": "Nagtago",
+					"line": "Mercy goes home."
+				}
+			]
+		},
+		"pinalaya": {
+			"id": "padala_pinalaya",
+			"steps": [
+				{
+					"image": "res://assets/cutscenes/padala_eli_unlocks.png",
+					"lines": [
+						{
+							"speaker": "Mercy",
+							"text": "...Huwag po. Huwag po."
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "Hindi na kita sasaktan."
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "Umuwi ka na, Mercy. Patawarin mo ako. Kahit hindi mo kaya."
+						}
+					]
+				},
+				{
+					"card": "Pinalaya",
+					"line": "Mercy is set free."
+				}
+			]
+		},
+		"walang_namatay": {
+			"id": "padala_walang_namatay",
+			"steps": [
+				{
+					"image": "res://assets/cutscenes/padala_eli_unlocks.png",
+					"lines": [
+						{
+							"speaker": "Mercy",
+							"text": "...Huwag po. Huwag po."
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "Hindi na kita sasaktan."
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "Umuwi ka na, Mercy. Patawarin mo ako. Kahit hindi mo kaya."
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/true_morning_family.png",
+					"lines": [
+						{
+							"speaker": "Gwen",
+							"text": "Mahal... buntis ako."
+						},
+						{
+							"speaker": "Peter",
+							"text": "...Talaga?! (tawa, iyak)"
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/true_morning_kulas.png",
+					"hold": 3.2
+				},
+				{
+					"image": "res://assets/cutscenes/true_morning_mercy.png",
+					"hold": 3.2
+				},
+				{
+					"image": "res://assets/cutscenes/true_morning_batista.png",
+					"hold": 3.2
+				},
+				{
+					"image": "res://assets/cutscenes/true_visiting.png",
+					"lines": [
+						{
+							"speaker": "Father Eli",
+							"text": "Basbasan n'yo po ako, Padre, dahil nagkasala ako."
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "Kayo po ang nakarinig ng lahat. Lahat ng bersyon."
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "Kayo lang po ang nakaalala."
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "Ano po'ng penitensya ko?"
+						}
+					]
+				},
+				{
+					"card": "Walang Namatay",
+					"line": "SANGA"
 				}
 			]
 		}
+	},
+	"_comment": "Padala, see docs/STORY_BIBLE.md section 9. Three Alaala choices live here: hide until morning (outside, Kumpisal timeline), bring a tanod (the food delivery call), and, when Father Eli confessed in Kumpisal this run, 'pinalaya' replaces the room: he opens the door. With Ligtas and Sinamahan also reached this run, 'walang_namatay' (the true ending) plays instead.",
+	"read": {
+		"PoliceCard": "Pulis. Tama... pulis.",
+		"FoodDeliveryCard": "Delivery. May pupunta rito."
 	}
 }

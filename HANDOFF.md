@@ -268,6 +268,41 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   "Start from Kumpisal?" with the note "Your current progress in Slot 1 will be lost." and
   "Start Over" / "Cancel". New Game over a used slot asks "Replace Slot 1?"; deleting asks
   "Delete Slot 1?" with "This can't be undone."
+- **Confessions show the sad pictures** (`_2`: Gloria, Batista, Gwen) of whoever is confessing
+  (`Location._sad_portrait_for`, `SAD_PORTRAIT_SUFFIX`). Kulas has no sad picture yet, so he
+  keeps his usual one until `kulas_2.png` is added. The sad pictures of Gloria and Batista look
+  the other way from their usual ones, so `DialogueBox` takes per-picture facing entries
+  (`PORTRAITS_FACING_LEFT` = gloria_2 and gwen_2, `batista_2` in `PORTRAITS_FACING_RIGHT`); all four
+  confessors were checked facing Father Eli.
+- **Game direction for the PH national game dev competition (decided):** the **Alaala** mechanic.
+  Every death the player sees becomes a permanent memory per save that unlocks one new choice
+  elsewhere; three of them in one Main Timeline run give the true ending "Walang Namatay".
+  The full design, hidden truth, rules R1-R8, every line of the new script (natural modern
+  Tagalog, written by Claude at the user's request) and the new art list are in
+  **docs/STORY_BIBLE.md**. Presentation stays 2D with 2.5D staging (layered parallax places,
+  living cutscenes, breathing characters, light); no 3D rebuild. The user approved Father Eli
+  confessing his own sin. Next: Phase 1 (Alaala system), then content, endings and art, map,
+  playtest.
+- **Alaala built (PR after #19), phases 1-3 of the plan in code:**
+  - System: `GameState.alaala` (saved per slot, never reset), `scripts/alaala.gd`, awarded by
+    `StoryDirector._remember` at every finished story or run (a card: name, memory line,
+    "Hindi mo na ito makakalimutan."). Every run opens with the prologue (`story/prologue.json`).
+    Developer tools have "Remember All Memories" / "Forget All Memories"; jumps keep memories.
+  - Script: all of docs/STORY_BIBLE.md is in `story/tokhang.json`, `kumpisal.json`,
+    `padala.json` (nave talks, confessions with choices, revelation lines, the five Alaala
+    choices, endings Ligtas, Sinamahan, Pinalaya, Tanod, Nagtago and the true ending
+    Walang Namatay). Run flags: `run_kulas_safe`, `run_eli_confessed`, `run_tanod`.
+  - Art: 13 placeholder cutscenes from `tools/draw_placeholders.py`
+    (`assets/cutscenes/PLACEHOLDERS.txt` lists them). Painting them is the main art task.
+  - **Not done yet (Phase 4):** `story/timelines.json` has no cards or realities for the new
+    endings, so they don't show on the timelines chart, and a run mixing a new ending with old
+    ones can match an old reality. Phase 5 is playtesting from a fresh save.
+- **No sound on iPhone** (user report). The game itself plays music (checked: player playing,
+  buses not muted). Fix in the Web preset's `html/head_include`: it wraps `AudioContext` to keep
+  every context the engine makes and resumes them on each `touchend`/`pointerup`/`click`
+  (Safari only unlocks sound on those, not on `touchstart`), and sets
+  `navigator.audioSession.type = 'playback'` so the iPhone's silent switch does not mute it.
+  Not yet confirmed on a real iPhone.
 - **Music volume:** the user still has not confirmed -24 dB sounds right.
 
 ## Open questions

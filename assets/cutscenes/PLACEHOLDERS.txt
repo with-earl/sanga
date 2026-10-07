@@ -1,0 +1,13 @@
+kumpisal_eli_kulas_walk.png
+kumpisal_eli_penitent.png
+padala_eli_unlocks.png
+padala_hide_dawn.png
+padala_tanod.png
+prologue_booth.png
+tokhang_safe_home.png
+tokhang_safe_market.png
+true_morning_batista.png
+true_morning_family.png
+true_morning_kulas.png
+true_morning_mercy.png
+true_visiting.png
