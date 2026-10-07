@@ -140,10 +140,10 @@ scene_light = Color(0.78, 0.73, 0.68, 1)
 art_scale = 0.36
 [node name="PoliceCard" type="Control" parent="Props"]
 layout_mode = 0
-offset_left = 424.0
-offset_top = 168.0
-offset_right = 496.0
-offset_bottom = 264.0
+offset_left = 428.0
+offset_top = 166.0
+offset_right = 494.0
+offset_bottom = 262.0
 script = ExtResource("2_art")
 asset_id = "police_poster"
 category = "props"
@@ -153,14 +153,14 @@ interactive = true
 grounding = 2
 [node name="FoodDeliveryCard" type="Control" parent="Props"]
 layout_mode = 0
-offset_left = 280.0
-offset_top = 610.0
-offset_right = 350.0
-offset_bottom = 666.0
+offset_left = 360.0
+offset_top = 606.0
+offset_right = 458.0
+offset_bottom = 648.0
 script = ExtResource("2_art")
 asset_id = "food_delivery_card_floor"
 category = "props"
-display_name = "Food Delivery Card"
+display_name = "Food Delivery Flyer"
 interactive = true
 
 grounding = 1
