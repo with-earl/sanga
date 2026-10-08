@@ -320,7 +320,7 @@ func choose(options: Array) -> int:
 		_portrait_right.visible = false
 		_portrait_companion.visible = false
 		show()
-	create_tween().tween_property(_choices, "modulate:a", 1.0, CHOICE_FADE_SECONDS)
+	create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT).tween_property(_choices, "modulate:a", 1.0, CHOICE_FADE_SECONDS)
 	# Each choice fades in a moment after the one above it.
 	var buttons := _choices.get_children().filter(func(child: Node) -> bool: return child is Button)
 	for index in buttons.size():

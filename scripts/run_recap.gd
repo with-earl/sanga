@@ -163,7 +163,7 @@ func _open() -> void:
 	tween.tween_property(_book, "modulate:a", 1.0, OPEN_SECONDS)
 	await tween.finished
 	await get_tree().create_timer(HINT_DELAY_SECONDS).timeout
-	create_tween().tween_property(_hint, "modulate:a", 1.0, 0.6)
+	create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT).tween_property(_hint, "modulate:a", 1.0, 0.6)
 	_waiting = true
 
 
@@ -193,7 +193,7 @@ func _turn_page() -> void:
 ## The main timeline goes on to the card that puts the stories in time order; any other timeline
 ## goes on to the chart of the realities this save has made.
 func _continue() -> void:
-	create_tween().tween_property(_hint, "modulate:a", 0.0, 0.3)
+	create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT).tween_property(_hint, "modulate:a", 0.0, 0.3)
 	if StoryDirector.last_timeline == "main":
 		StoryCard.show_time_order()
 	else:

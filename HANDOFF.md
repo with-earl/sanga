@@ -208,10 +208,13 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   - **GUI polish**: plate behind the scene title, soft window behind objectives and the title
     screen's lists, `TapHint` pill, `TitleOrnament` on title/ending cards, and a restyled,
     larger timeline ending (plum sky, window-coloured cards). Open question 4 (keep the gear) is answered.
-- Phases 1 to 4 of the GUI plan are done and checked in screenshots at 16:9, 19.5:9 and 4:3.
-  Left from the plan: **Phase 5** (a lighter text blur that is the same on every screen, and the
-  title/ending cards moved fully onto the window palette) and **Phase 6** polish (consistent
-  easing, a small press bounce). Both are optional.
+- All 6 phases of the GUI plan are done. Phase 5: the retro text blur (`retro_text.gdshader`) is
+  lighter (0.7, boost 1.2) and measured in the game's 1280x720 pixels (`screen_scale`, kept up to
+  date by RetroText), so text is equally soft on a small window and a big phone screen; the
+  title and ending cards already used the window palette's cream lettering and ornament. Phase 6:
+  every fade uses the same gentle sine curve (only the typewriter, push-ins, pans, flash and
+  shake stay steady), and every button sinks to 95% while held and springs back when let go
+  (`UiSkin.add_press_bounce`, given by RetroText; the developer tools keep their plain look).
 - **Coaches now have the Pages link.** So (PR after #9): the main screen's dev window is folded into
   one cool-blue "DEV · Developer tools" button (opens a window with a DEV badge, a note that the
   shortcuts are for testing and save nothing, and a Hide button), with a "DEVELOPMENT PREVIEW"

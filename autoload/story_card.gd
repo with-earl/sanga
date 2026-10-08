@@ -204,7 +204,7 @@ func _play_montage(paths: Array) -> void:
 		if index == 0:
 			# The title screen fades out into the first picture.
 			reveal_seconds = TITLE_REVEAL_SECONDS
-			create_tween().tween_property(_title, "modulate:a", 0.0, TITLE_FADE_OUT_SECONDS)
+			create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT).tween_property(_title, "modulate:a", 0.0, TITLE_FADE_OUT_SECONDS)
 		_fade_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		_fade_tween.tween_property(_black, "modulate:a", 0.0, reveal_seconds)
 		_fade_tween.tween_interval(MONTAGE_SECONDS - reveal_seconds - MONTAGE_FADE_SECONDS)
