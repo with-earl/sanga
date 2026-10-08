@@ -407,7 +407,18 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
       `shaders/memory_ripple.gdshader`); after two wrong keys Mercy says the worn key is used
       often and it catches the light; each memory in the book shows a faint "↳" hint
       (`alaala.json` "hint"); Kumpisal's opening gains one line per timeline (bible section 8).
-    - **G. Playtest** with the checklist (revelation timing, causality, replay motivation).
+    - **G. Playtest** with the checklist (revelation timing, causality, replay motivation). The
+      user's to run.
+    - **Art, object shots in 3D** (DONE for four): `tools/object_scenes.py` draws
+      `tokhang_tv_news` (an old set in a dark room; on screen the police street from
+      street_scene, a red bar "OPERASYON: 3 PATAY", LIVE, scan lines), `padala_jeep` (inside a
+      jeepney from the back: red benches, chrome rails, painted ceiling, city lights streaking past
+      the windows, a dark driver, Mercy seated looking out), `true_morning_batista` (morning sun
+      through blinds on a desk: the badge, a generic gold "PULIS" shield, on a handwritten
+      "Pagbibitiw" letter, and a cold coffee) and `true_visiting` (a visiting booth from the
+      visitor's chair: counter, green partition, glass with reflections, a round speaking grille;
+      Father Eli behind it in an inmate's orange shirt, made by recolouring his black clothes,
+      `in_jail_orange`). Still stand-ins for real paintings.
     - **Art in parallel:** object shots in 3D (jeepney, badge, visiting booth, TV news); ~10 key
       character shots need an artist (or Higgsfield if the user allows).
     **Art:** paint the cutscenes for real (user or artist), most important first: the reveals

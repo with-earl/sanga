@@ -21,7 +21,8 @@ import numpy as np
 from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import street_scene  # noqa: E402  (beside this file)
+import object_scenes  # noqa: E402  (beside this file)
+import street_scene  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CUTSCENES = ROOT / "assets" / "cutscenes"
@@ -251,16 +252,6 @@ def shot_market_down(who: str) -> Image.Image:
     return grain(vignette(grade(c, 0.6, 0.35, (200, 70, 60), 0.35), 0.75, (40, 0, 0)))
 
 
-def tokhang_tv_news() -> Image.Image:
-    news = police_lights(night(background("public_market", crop=(0.1, 0.1, 0.8, 0.8))), 0.45)
-    bar = ImageDraw.Draw(news)
-    bar.rectangle((0, int(H * 0.8), W, int(H * 0.9)), fill=(150, 20, 24, 255))
-    bar.rectangle((0, int(H * 0.9), W, H), fill=(18, 18, 30, 255))
-    room = grade(background("apartment_room", blur=8), 0.35, 0.6)
-    c = frame_around(news, (0.24, 0.16, 0.76, 0.66), room)
-    return vignette(glow(c, (0.5, 0.41), (120, 150, 220), 0.25, 0.6), 0.6)
-
-
 def tokhang_flashback_ben() -> Image.Image:
     c = background("church_nave", crop=(0.2, 0.08, 0.6, 0.6), blur=2)
     place(c, person("ben", True), 0.36, 0.98, 0.5)
@@ -435,17 +426,6 @@ def padala_run_shot() -> Image.Image:
     return grain(vignette(night(c), 0.8, (30, 0, 0)))
 
 
-def padala_jeep() -> Image.Image:
-    road = night(background("public_market", blur=16))
-    for x in (0.2, 0.45, 0.7, 0.9):
-        road = glow(road, (x, 0.5), (255, 200, 120), 0.18, 0.12)
-    road = motion(road, 40)
-    wall = Image.new("RGBA", SIZE, (30, 30, 38, 255))
-    c = frame_around(road, (0.05, 0.08, 0.95, 0.6), wall, border=(58, 60, 66), width=16, radius=14)
-    place(c, tinted(bust("mercy_praying"), (150, 160, 200), 0.35), 0.42, 1.0, 0.62, shadow=False)
-    return vignette(c, 0.6)
-
-
 def padala_police_laugh() -> Image.Image:
     c = night(background("public_market", blur=12))
     c = glow(c, (0.3, 0.1), (230, 235, 255), 0.3, 0.45)
@@ -581,23 +561,8 @@ def true_morning_mercy() -> Image.Image:
     return vignette(c, 0.45)
 
 
-def true_morning_batista() -> Image.Image:
-    c = background("church_nave", crop=(0.55, 0.0, 0.45, 0.6), blur=6)
-    place(c, person("batista_sad", True), 0.45, 1.12, 1.0, shadow=False)
-    return vignette(morning(c), 0.45)
-
-
-def true_visiting() -> Image.Image:
-    c = grade(background("confessional", blur=4), 0.6, 0.6)
-    place(c, person("eli", True), 0.5, 1.45, 1.25, shadow=False)
-    c = glow(c, (0.5, 0.2), (200, 210, 230), 0.2, 0.5)
-    glass = Image.new("RGBA", SIZE, (180, 200, 220, 40))
-    c.alpha_composite(glass)
-    return vignette(grille(c, spacing=60, width=6, color=(40, 40, 46, 200)), 0.55)
-
-
 SHOTS = {
-    "tokhang_tv_news.png": tokhang_tv_news,
+    "tokhang_tv_news.png": lambda: object_scenes.tokhang_tv_news(SIZE),
     "tokhang_peter_holding.png": lambda: shot_market_holding("peter"),
     "tokhang_peter_shot.png": lambda: shot_market_down("peter"),
     "tokhang_gwen_holding.png": lambda: shot_market_holding("gwen"),
@@ -629,7 +594,7 @@ SHOTS = {
     "padala_still_manila.png": padala_still_manila,
     "padala_run.png": padala_run,
     "padala_run_shot.png": padala_run_shot,
-    "padala_jeep.png": padala_jeep,
+    "padala_jeep.png": lambda: object_scenes.padala_jeep(SIZE, person("mercy", True)),
     "padala_police_laugh.png": padala_police_laugh,
     "padala_peter_arrives.png": padala_peter_arrives,
     "padala_peter_fights.png": padala_peter_fights,
@@ -642,8 +607,8 @@ SHOTS = {
     "true_morning_family.png": true_morning_family,
     "true_morning_kulas.png": true_morning_kulas,
     "true_morning_mercy.png": true_morning_mercy,
-    "true_morning_batista.png": true_morning_batista,
-    "true_visiting.png": true_visiting,
+    "true_morning_batista.png": lambda: object_scenes.true_morning_batista(SIZE),
+    "true_visiting.png": lambda: object_scenes.true_visiting(SIZE, object_scenes.in_jail_orange(person("eli"), 112, (150, 115, 195, 150))),
 }
 
 
