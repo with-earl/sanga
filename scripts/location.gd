@@ -123,6 +123,7 @@ func _ready() -> void:
 	_dialogue.dismissed.connect(_count_conversation)
 	get_viewport().size_changed.connect(_fit_stage)
 	_objectives_panel.objectives_changed.connect(_game_menu.set_objectives)
+	StageLife.add_to(self, location_key)
 
 
 ## Shows the place at its 16:9 shape, enlarged to fill the screen's width. On a phone wider than

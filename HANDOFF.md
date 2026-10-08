@@ -322,7 +322,17 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
     before the first tap finished (picking the realistic gun right after choosing the water gun
     lost the Ligtas ending; taking both Padala cards). Both scenes now ignore taps until the
     last one is handled (`_handling`). A read of the full transcript found no story problems.
-    **Next:** paint the 13 placeholder cutscenes, then 2.5D staging.
+  - **2.5D staging, the code part (story bible section 12):** `scripts/stage_life.gd`, added to
+    every place by `Location._ready`. The camera drifts slowly (±6 px, up to 1.2% zoom, cycles
+    of 23-37 s); people move 1.35× and blurred near things (market motor, a key) 1.9× as much as
+    the room, so there is depth with the existing art; every layer is 1.4% larger so no edge
+    shows. People and dialogue portraits breathe (0.7% taller, about 4 s, each on their own
+    rhythm). `shaders/stage_light.gdshader` adds flickering altar candles and wall lamps in the
+    church, dust in the sunlight, steam from the bathroom door, and slow cloud shadows. Cutscene
+    pictures already pushed in. Checked in screenshots; smoke test and playthrough pass.
+    **Left of section 12, needs art:** each place split into background / middle / foreground
+    layers, and the key cutscene reveals split into layers.
+    **Next:** paint the 13 placeholder cutscenes (user or artist).
 - **No sound on iPhone** (user report). The game itself plays music (checked: player playing,
   buses not muted). Fix in the Web preset's `html/head_include`: it wraps `AudioContext` to keep
   every context the engine makes and resumes them on each `touchend`/`pointerup`/`click`
