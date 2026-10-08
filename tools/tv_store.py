@@ -513,7 +513,7 @@ def neighbour_store(scene, x0, x1, front_z, kind: str, quads=None):
 def build(size) -> Image.Image:
     """The picture, seen over the rider's shoulder."""
     w, h = size
-    camera = s3.Camera((0.75, 1.5, -3.7), 2.5, -0.6, 59.0, size)
+    camera = s3.Camera((1.25, 1.5, -2.0), 0.0, -0.4, 70.0, size)
     scene = s3.Scene(camera, ambient=(168, 170, 178), sky_dir=(0.15, 1.0, -0.25))
     scene.light((9.0, 11.0, -9.0), SUN, 900.0, reach=22.0)
 
@@ -527,8 +527,8 @@ def build(size) -> Image.Image:
             crop = slabs.crop((int(ix * 1.5 * px_per_m), int(iz * 0.9 * px_per_m), int((ix + 1) * 1.5 * px_per_m), int((iz + 1) * 0.9 * px_per_m)))
             scene.face([(x0, 0, z1), (x1, 0, z1), (x1, 0, z0), (x0, 0, z0)], (150, 148, 142), texture=crop, layer=0)
 
-    gx0, gx1, gy0, gy1 = -2.1, 2.9, 0.5, 2.62
-    door_x0, door_x1, door_top = 1.5, 2.8, 2.1
+    gx0, gx1, gy0, gy1 = -2.1, 3.0, 0.5, 2.62
+    door_x0, door_x1, door_top = 1.62, 2.82, 2.1
     # Shops next door, left and right, all in focus.
     neighbour_store(scene, -5.45, gx0 - 0.02, 0.0, "botika")
     neighbour_store(scene, -8.9, -5.47, 0.2, "kainan")
@@ -560,13 +560,13 @@ def build(size) -> Image.Image:
     # Behind the doors: a clear aisle to a counter, with a bright promotion banner on the wall.
     banner = Image.new("RGBA", (500, 140), (200, 30, 40, 255))
     _text(ImageDraw.Draw(banner), (250, 70), "BIG SALE - TV PROMO", 52, (255, 255, 255, 255), anchor="mm")
-    scene.face([(1.6, 2.5, 4.97), (2.8, 2.5, 4.97), (2.8, 1.9, 4.97), (1.6, 1.9, 4.97)], (200, 30, 40), texture=banner, layer=1, emissive=True)
-    scene.box(1.5, 2.8, 0.0, 0.95, 3.8, 4.5, (120, 96, 70), layer=1)
-    scene.box(1.5, 2.8, 0.95, 0.99, 3.75, 4.55, (210, 210, 214), layer=1)
+    scene.face([(1.7, 2.5, 4.97), (2.9, 2.5, 4.97), (2.9, 1.9, 4.97), (1.7, 1.9, 4.97)], (200, 30, 40), texture=banner, layer=1, emissive=True)
+    scene.box(1.7, 2.9, 0.0, 0.95, 3.8, 4.5, (120, 96, 70), layer=1)
+    scene.box(1.7, 2.9, 0.95, 0.99, 3.75, 4.55, (210, 210, 214), layer=1)
     # Three shelves, each a row of five identical tube sets side by side with a clear gap between.
     plank = (118, 92, 66)
     shelf_tops = (0.42, 1.04, 1.66)
-    shelf_x0, shelf_x1 = -2.0, 1.3
+    shelf_x0, shelf_x1 = -2.0, 1.5
     for top in shelf_tops:
         scene.box(shelf_x0, shelf_x1, top - 0.03, top, 0.5, 1.3, plank, layer=1)
     for ux in (shelf_x0, shelf_x1):
@@ -583,7 +583,7 @@ def build(size) -> Image.Image:
 
     # ---- the window: aluminium frames between the sets, the double glass door, then the glass sheet
     frame_c = (176, 180, 188)
-    for fx in (gx0, shelf_x0 + pitch * 2 - 0.05, shelf_x0 + pitch * 4 - 0.11, door_x0, gx1):
+    for fx in (gx0, shelf_x0 + pitch * 2 - 0.02, shelf_x0 + pitch * 4 - 0.1, door_x0, gx1):
         scene.box(fx - 0.035, fx + 0.035, gy0 if fx < door_x0 else 0.0, gy1, -0.06, 0.03, frame_c, layer=4)
     scene.box(gx0, gx1, gy1 - 0.03, gy1 + 0.03, -0.06, 0.03, frame_c, layer=4)
     scene.box(gx0, door_x0, gy0 - 0.03, gy0 + 0.03, -0.06, 0.03, frame_c, layer=4)
@@ -606,7 +606,7 @@ def build(size) -> Image.Image:
     od = ImageDraw.Draw(open_sign)
     od.rounded_rectangle((4, 4, 216, 96), 10, fill=(190, 24, 32, 255))
     _text(od, (110, 50), "OPEN", 58, (255, 255, 255, 255), anchor="mm")
-    scene.face([(1.62, 1.72, -0.012), (1.98, 1.72, -0.012), (1.98, 1.54, -0.012), (1.62, 1.54, -0.012)], (255, 255, 255), texture=open_sign, layer=5, emissive=True)
+    scene.face([(1.74, 1.72, -0.012), (2.1, 1.72, -0.012), (2.1, 1.54, -0.012), (1.74, 1.54, -0.012)], (255, 255, 255), texture=open_sign, layer=5, emissive=True)
     # A door mat on the pavement.
     mat = Image.new("RGBA", (200, 60), (36, 36, 40, 255))
     ImageDraw.Draw(mat).rectangle((6, 6, 194, 54), outline=(150, 40, 40, 255), width=4)
@@ -619,10 +619,10 @@ def build(size) -> Image.Image:
     _text(nd, (100, 130), "INSTALLMENT", 26, (30, 30, 40, 255), FONT_BOLD, "mm")
     _text(nd, (100, 190), "UP TO", 22, (30, 30, 40, 255), FONT_BOLD, "mm")
     _text(nd, (100, 228), "12 MOS.", 34, (190, 24, 30, 255), FONT_BLACK, "mm")
-    scene.face([(1.12, 2.45, -0.015), (1.4, 2.45, -0.015), (1.4, 1.9, -0.015), (1.12, 1.9, -0.015)], (250, 245, 220), texture=notice, layer=5, emissive=True)
+    scene.face([(1.22, 2.45, -0.015), (1.5, 2.45, -0.015), (1.5, 1.9, -0.015), (1.22, 1.9, -0.015)], (250, 245, 220), texture=notice, layer=5, emissive=True)
 
     # ---- the wooden pole at the kerb in front of the neighbouring shop, with its shadow
-    pole_x, pole_z = 3.0, -0.7
+    pole_x, pole_z = 2.12, -1.05
     utility_pole(scene, pole_x, pole_z)
     pole_shadow = Image.new("RGBA", (60, 400), (0, 0, 0, 0))
     ImageDraw.Draw(pole_shadow).rectangle((10, 0, 50, 400), fill=(8, 8, 14, 150))
@@ -631,7 +631,7 @@ def build(size) -> Image.Image:
                (0, 0, 0), texture=pole_shadow, layer=1)
 
     # ---- the rider's shadow, thrown towards the shop, away from the sun
-    rider_x, rider_z = -0.8, -1.1
+    rider_x, rider_z = 0.8, -1.45
     shadow = Image.new("RGBA", (160, 520), (0, 0, 0, 0))
     sd = ImageDraw.Draw(shadow)
     sd.ellipse((58, 460, 102, 510), fill=(8, 8, 14, 190))
@@ -659,21 +659,21 @@ def build(size) -> Image.Image:
         wd.line(pts, fill=(18, 18, 22, 235), width=max(int(w / 420), 2), joint="curve")
     canvas.alpha_composite(wires.filter(ImageFilter.GaussianBlur(0.9)))
 
-    # ---- the rider, seen from behind and a little to the right, near the glass: the shop's sets
-    # stay in view past his shoulder.
-    rider = rider_back.rider_back()
+    # ---- the rider, seen from behind, so near the camera that only his head, shoulders and chest are
+    # in the picture: the sprite is pasted with whatever falls outside the frame cut off.
     foot = camera.project((rider_x, 0.0, rider_z))
-    scale = camera.pixels_for(1.75, foot[2]) / rider.height
-    sprite = rider.resize((int(rider.width * scale), int(rider.height * scale)), Image.LANCZOS)
+    scale = camera.pixels_for(1.75, foot[2]) / rider_back.HEIGHT
+    sprite = rider_back.rider_back(scale)
     px = np.asarray(sprite).astype(np.float32)
     ramp = np.linspace(0.0, 1.0, sprite.width)[None, :]
-    px[..., :3] *= (0.94 + 0.12 * ramp)[..., None]   # a little more sun on the side nearest the street
-    px[..., 2] += (1 - ramp) * 10                      # a cool bounce from the shop on the other side
+    px[..., :3] *= (0.94 + 0.12 * ramp)[..., None]   # a little more sun on the side nearest the shop
+    px[..., 2] += (1 - ramp) * 10                      # a cool bounce from the shop's screens on the other side
     sprite = Image.fromarray(np.clip(px, 0, 255).astype(np.uint8), "RGBA")
-    contact = Image.new("RGBA", size, (0, 0, 0, 0))
-    ImageDraw.Draw(contact).ellipse((foot[0] - sprite.width * 0.42, foot[1] - 10, foot[0] + sprite.width * 0.42, foot[1] + 14), fill=(10, 10, 14, 120))
-    canvas.alpha_composite(contact.filter(ImageFilter.GaussianBlur(7)))
-    canvas.alpha_composite(sprite, (int(foot[0] - sprite.width / 2), int(foot[1] - sprite.height)))
+    left, top = int(foot[0] - sprite.width / 2), int(foot[1] - sprite.height)
+    x0, y0 = max(left, 0), max(top, 0)
+    x1, y1 = min(left + sprite.width, w), min(top + sprite.height, h)
+    if x1 > x0 and y1 > y0:
+        canvas.alpha_composite(sprite.crop((x0 - left, y0 - top, x1 - left, y1 - top)), (x0, y0))
     return canvas
 
 

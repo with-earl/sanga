@@ -169,6 +169,9 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **TV news scene, super close (branch claude/tv-store-closeup, on claude/tv-store-shoulder):** the camera
+  is right at the glass; the rider is seen from head to chest only, large at the left; the tube sets, the
+  double door with its OPEN sign and the posted pole fill the rest. `tools/tv_store.py` (`build`).
 - **TV news scene, over the shoulder (branch claude/tv-store-shoulder, on claude/tv-store):** the picture
   is taken over the rider's shoulder, with him standing near the glass at the left so the news is clear;
   a thick wooden pole pasted with posters at the right; three rows of five identical tube sets side by
