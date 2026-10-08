@@ -169,6 +169,12 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **Main screen and saves GUI (branch claude/menu-polish):** the menu words are plain text centred
+  under the logo, gold when pressed; Continue and New Game open `scripts/save_slots.gd`, a
+  left-aligned list of rows (4:3 picture of the place the save stopped in, details beside it,
+  Delete per row, replace/delete questions as small windows); the "Tap outside to close" note now
+  sits right under the open modal (settings, book, clipboard, dev tools, the questions).
+
 - **First-run spine (branch claude/first-run-spine, stacked on calm/text menu):** Tokhang's errand now
   has two ways to say yes on the first run (both send Peter); in Padala on a save's first run the key
   ends with Eli catching Mercy (`padala_caught`, gives Si Father Eli), and the food ending shows the
