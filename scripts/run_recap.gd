@@ -1,7 +1,8 @@
 extends Control
 ## "Ang Nangyari": what happened in the run just finished, written into the old open book. It lists
-## the stories in the order they were played, the player's own choices in their own words, how each
-## story ended, and any memory gained on the way.
+## the stories in the order they were played, the player's own choices in their own words, the
+## moments those choices came back later in the run (marked ↳), how each story ended, and any
+## memory gained on the way.
 ##
 ## It only tells what this run did. Nothing here mentions the other choices, how many endings there
 ## are, or what else could have happened, so the player is left to find those by playing again. The
@@ -89,6 +90,9 @@ static func lines_for(run_log: Array) -> Array:
 			lines.append([str(moment["story"]), STORY_SIZE, INK, STORY_GAP, false])
 		elif moment.has("choice"):
 			lines.append(["“%s”" % str(moment["choice"]), TEXT_SIZE, INK, GAP, false])
+		elif moment.has("echo"):
+			# An earlier choice coming back, quoted as a reply under the story it reached.
+			lines.append(["↳ %s: %s" % [moment.get("speaker", ""), moment["echo"]], SMALL_SIZE, FADED_INK, UNDER_NAME_GAP + 4.0, false])
 		elif moment.has("ending"):
 			# The ending's own words say what happened; its card title is only a short name.
 			var line := str(moment.get("line", ""))

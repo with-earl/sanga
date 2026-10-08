@@ -38,7 +38,8 @@ var alaala: Array = []
 ## and stop at anything new (see DialogueBox). Kept across runs, like the memories.
 var seen_lines: Dictionary = {}
 ## What happened in the run being played, in order, for the recap at its end ("Ang Nangyari"):
-## {"story": title}, {"choice": words}, {"ending": title, "line": words}, {"alaala": id}.
+## {"story": title}, {"choice": words}, {"ending": title, "line": words}, {"alaala": id}, and
+## {"echo": words, "speaker": name} when an earlier choice comes back later in the run.
 var run_log: Array = []
 ## Seconds played in this save.
 var play_seconds := 0.0

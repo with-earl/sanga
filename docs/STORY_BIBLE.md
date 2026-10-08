@@ -108,6 +108,25 @@ choice fits on one line. Stage directions inside a line are Tagalog, between ast
 - **R7.** No new places, no new characters.
 - **R8.** An Alaala choice shows a faint **✦** before its text. Gaining an Alaala shows one
   line on the end-of-run screen: **"Hindi mo na ito makakalimutan."** and the Alaala's name.
+- **R9. Echoes.** An ordinary choice can come back later in the same run as an **echo**: one
+  line, somewhere else, that answers what was said. Echoes flow forward in story time as well as
+  in play order (Kumpisal, the past, can echo in Padala and Tokhang; nothing echoes backwards), so
+  the starting point decides which words reach which story. An echo never changes an ending,
+  never adds a choice, and is quoted in the run's recap under the story it reached, marked ↳.
+
+### The echoes
+
+| Choice (Kumpisal) | Echo | Where it comes back |
+|---|---|---|
+| Mercy: *Huwag kang mag-alala, anak.* | **Mercy:** “Huwag kang mag-alala, anak.” 'Yan pa ang sabi niya sa'kin. | Padala opening (Main, Kumpisal timelines) |
+| Mercy: *Ano'ng maitutulong ko, anak?* | **Mercy:** Tinanong pa niya kung ano'ng maitutulong niya. Padala lang naman ang hiningi ko. | Padala opening |
+| Gloria: *Talikuran mo na ang kasalanan.* | **Mercy:** Umiyak si Tita bago umalis. Hindi ko alam kung bakit. | Padala opening |
+| Gloria: *Ang Diyos lang ang huhusga sa'yo.* | **Mercy:** Ni hindi man lang lumingon si Tita. | Padala opening |
+| Batista: *Ingatan ka nawa ng Diyos.* | **Batista:** Ingat daw ako, sabi mo kanina. Ikaw pala ang dapat mag-ingat. | Padala, Police Poster ending, at the door |
+| Batista: *Igalang mo ang bahay ng Diyos.* | **Batista:** Bahay ng Diyos, ha? *Tumingin sa paligid* Ito pala ang bahay mo, pare. | Padala, Police Poster ending |
+| Batista's confession: *Ipagdasal mo ang kanilang kaluluwa.* | **Batista:** Diyos ko... ipagdasal n'yo ako. | Padala, Run ending, after the shot (Kumpisal timeline) |
+| Batista's confession: *Alam ng Diyos ang dahilan mo.* | **Batista:** ...Alam ng Diyos ang dahilan ko. | Padala, Run ending |
+| Gwen's confession: *Ipagtapat mo sa kanya, anak.* | **Gwen:** Importante 'yon, mahal. Umuwi ka nang maaga, ha. | Tokhang phone call (Padala timeline only, the one run where the past is played before the future) |
 
 ### The five Alaala
 

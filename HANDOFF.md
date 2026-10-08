@@ -374,8 +374,13 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
       the nave, once per visit, if every conversation there was heard before (one answer per
       choice is enough) and nothing in them changed, Father Eli is offered "Dumiretso sa
       kumpisalan." / "Kausapin muna sila." The playthrough takes the shortcut in two runs.
-    - **C. Echoes:** 6-8 ordinary choices set run flags that change 1-2 later lines in the same run,
-      shown in the recap. New rule R9: echoes never change ending ids (playthrough checks it).
+    - **C. Echoes** (DONE): bible rule R9 and table. Five Kumpisal choices (Mercy, Gloria,
+      Batista's talk, Batista's and Gwen's confessions) set `run_echo_*` flags; nine echo lines
+      (`"echo": true` + `if_flag`) come back in Padala's opening, the Police Poster ending, the Run
+      ending and, only when the run starts in Padala, Tokhang's phone call. Echoes flow forward in
+      story time only (the Tokhang haggle cannot echo into the past). DialogueBox logs them; the
+      recap shows them as "↳ Speaker: line". The playthrough checks echo counts in three runs and
+      picks the other answers in two Kumpisal-timeline runs.
     - **D. "Ayusin ayon sa oras" (signature):** after the recap, the book's pages reorder into
       true time order (Kumpisal, Padala, Tokhang) and red threads draw from causes to effects;
       replaces the time-order card. The chart gets a one-line cause per card on the run's path.

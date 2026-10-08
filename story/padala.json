@@ -6,6 +6,30 @@
 				{
 					"speaker": "Mercy",
 					"text": "Sabi ni Tita, may mabait na pari. May malinis na trabaho."
+				},
+				{
+					"speaker": "Mercy",
+					"text": "“Huwag kang mag-alala, anak.” 'Yan pa ang sabi niya sa'kin.",
+					"if_flag": "run_echo_mercy_reassured",
+					"echo": true
+				},
+				{
+					"speaker": "Mercy",
+					"text": "Tinanong pa niya kung ano'ng maitutulong niya. Padala lang naman ang hiningi ko.",
+					"if_flag": "run_echo_mercy_asked",
+					"echo": true
+				},
+				{
+					"speaker": "Mercy",
+					"text": "Umiyak si Tita bago umalis. Hindi ko alam kung bakit.",
+					"if_flag": "run_echo_gloria_repent",
+					"echo": true
+				},
+				{
+					"speaker": "Mercy",
+					"text": "Ni hindi man lang lumingon si Tita.",
+					"if_flag": "run_echo_gloria_judged",
+					"echo": true
 				}
 			]
 		},
@@ -160,6 +184,18 @@
 						{
 							"speaker": "Batista",
 							"text": "Oh, pare. Ikaw pala."
+						},
+						{
+							"speaker": "Batista",
+							"text": "Ingat daw ako, sabi mo kanina. Ikaw pala ang dapat mag-ingat.",
+							"if_flag": "run_echo_batista_blessed",
+							"echo": true
+						},
+						{
+							"speaker": "Batista",
+							"text": "Bahay ng Diyos, ha? *Tumingin sa paligid* Ito pala ang bahay mo, pare.",
+							"if_flag": "run_echo_batista_warned",
+							"echo": true
 						}
 					]
 				},
@@ -240,7 +276,21 @@
 				{
 					"image": "res://assets/cutscenes/padala_run_shot.png",
 					"gunshot": true,
-					"hold": 2.8
+					"hold": 2.8,
+					"lines": [
+						{
+							"speaker": "Batista",
+							"text": "Diyos ko... ipagdasal n'yo ako.",
+							"if_flag": "run_echo_batista_pray",
+							"echo": true
+						},
+						{
+							"speaker": "Batista",
+							"text": "...Alam ng Diyos ang dahilan ko.",
+							"if_flag": "run_echo_batista_reason",
+							"echo": true
+						}
+					]
 				},
 				{
 					"card": "Run",

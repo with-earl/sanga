@@ -47,6 +47,12 @@
 		{
 			"speaker": "Gwen",
 			"text": "Narinig mo na. Bilisan mo, ha. May sasabihin din ako sa'yo mamaya."
+		},
+		{
+			"speaker": "Gwen",
+			"text": "Importante 'yon, mahal. Umuwi ka nang maaga, ha.",
+			"if_flag": "run_echo_gwen_tell",
+			"echo": true
 		}
 	],
 	"choices": [

@@ -33,7 +33,7 @@ const TAP_EVERY := 3
 ## it must give.
 const RUNS := [
 	{"name": "first run, police poster", "begin": "tokhang", "prefer": ["Sige, ako", "Police"],
-		"expect": ["tokhang_peter", "kumpisal_main", "padala_police_card"],
+		"expect": ["tokhang_peter", "kumpisal_main", "padala_police_card"], "echoes": 3,
 		"gain": ["laruang_baril", "pagtakbo_ni_kulas", "father_eli"]},
 	{"name": "true ending", "begin": "tokhang", "prefer": ["Sige, ako"], "look": ["Water Gun"], "alaala": true,
 		"expect": ["tokhang_safe", "kumpisal_sinamahan", "padala_walang_namatay"], "gain": []},
@@ -41,16 +41,16 @@ const RUNS := [
 		"expect": ["tokhang_gwen", "kumpisal_main", "padala_key"], "gain": []},
 	{"name": "later, Eli confesses", "begin": "tokhang", "prefer": ["Mamaya", "Ama, aaminin"],
 		"expect": ["tokhang_kulas", "kumpisal_main", "padala_pinalaya"], "gain": []},
-	{"name": "Kumpisal timeline, run", "begin": "kumpisal", "prefer": ["Keys", "Tumakbo"],
-		"expect": ["kumpisal_kumpisal", "padala_run"], "gain": ["baril_ni_batista"]},
+	{"name": "Kumpisal timeline, run", "begin": "kumpisal", "prefer": ["Keys", "Tumakbo", "Alam ng Diyos"],
+		"expect": ["kumpisal_kumpisal", "padala_run"], "gain": ["baril_ni_batista"], "echoes": 3},
 	{"name": "Kumpisal timeline, jeep", "begin": "kumpisal", "prefer": ["Keys", "Sumakay", "Dumiretso"],
 		"expect": ["kumpisal_kumpisal", "padala_ride_jeep"], "gain": []},
-	{"name": "Kumpisal timeline, hide", "begin": "kumpisal", "prefer": ["Keys", "Magtago"],
+	{"name": "Kumpisal timeline, hide", "begin": "kumpisal", "prefer": ["Keys", "Magtago", "Ano'ng maitutulong", "Ang Diyos lang", "Igalang"],
 		"expect": ["kumpisal_kumpisal", "padala_nagtago"], "gain": []},
 	{"name": "Kumpisal timeline, Eli confesses", "begin": "kumpisal", "prefer": ["Ama, aaminin", "Keys"],
 		"expect": ["kumpisal_kumpisal", "padala_pinalaya"], "gain": []},
 	{"name": "Padala timeline, police", "begin": "padala", "prefer": ["Police"],
-		"expect": ["padala_police", "kumpisal_padala_police", "tokhang_trade"], "gain": []},
+		"expect": ["padala_police", "kumpisal_padala_police", "tokhang_trade"], "gain": [], "echoes": 1},
 	{"name": "Padala timeline, food", "begin": "padala", "prefer": ["Food", "'Yun lang"],
 		"expect": ["padala_food", "kumpisal_sacrifice"], "gain": ["rider"]},
 	{"name": "Padala timeline, tanod", "begin": "padala", "prefer": ["Food", "Isama po"],
@@ -109,6 +109,9 @@ func _initialize() -> void:
 			_fail("gained memories %s, expected %s" % [gained, run["gain"]])
 		if not _saw_recap:
 			_fail("the recap did not show")
+		var echoes: int = director.last_run_log.filter(func(moment: Dictionary) -> bool: return moment.has("echo")).size()
+		if echoes < int(run.get("echoes", 0)):
+			_fail("%d echoes came back, expected at least %d" % [echoes, run["echoes"]])
 		print("run %-36s %s" % [run["name"], ", ".join(outcomes)])
 	var held: int = state.alaala.size()
 	if held != 5:
