@@ -670,23 +670,45 @@ def build(size) -> Image.Image:
     scene.face([(door_x0 + 0.1, 0.004, -0.15), (door_x1 - 0.1, 0.004, -0.15), (door_x1 - 0.1, 0.004, -0.75), (door_x0 + 0.1, 0.004, -0.75)], (40, 40, 44), texture=mat, layer=1)
     scene.face([(gx0, gy1, -0.01), (gx1, gy1, -0.01), (gx1, 0.0, -0.01), (gx0, 0.0, -0.01)], (255, 255, 255),
                texture=glass_layer(1700, 700), layer=5, emissive=True)
-    notice = Image.new("RGBA", (200, 280), (250, 245, 220, 255))
+    # The HouseCredit instalment promo: one tall notice with a red header, the offer, the terms and the fine print.
+    red, ink, cream = (190, 24, 30, 255), (30, 30, 40, 255), (250, 245, 220, 255)
+    notice = Image.new("RGBA", (320, 700), cream)
     nd = ImageDraw.Draw(notice)
-    _text(nd, (100, 56), "0%", 80, (190, 24, 30, 255), anchor="mm")
-    _text(nd, (100, 130), "INSTALLMENT", 26, (30, 30, 40, 255), FONT_BOLD, "mm")
-    _text(nd, (100, 190), "UP TO", 22, (30, 30, 40, 255), FONT_BOLD, "mm")
-    _text(nd, (100, 228), "12 MOS.", 34, (190, 24, 30, 255), FONT_BLACK, "mm")
-    # Payment stickers on the glass, stacked beside the promo notice.
-    for n, (words, bg, fg, y_top) in enumerate([("BCash payment available", (24, 84, 200), (255, 255, 255), 2.45),
-                                              ("HouseCredit available", (200, 30, 40), (255, 255, 255), 2.21),
-                                              ("Loro payment", (12, 12, 14), (60, 220, 100), 1.97)]):
-        tag = Image.new("RGBA", (360, 150), bg + (255,))
+    nd.rectangle((0, 0, 320, 150), fill=red)
+    _fit(nd, (160, 62), "HouseCredit", 280, 52, (255, 255, 255, 255))
+    _fit(nd, (160, 116), "AVAILABLE DITO", 280, 28, (255, 232, 200, 255), FONT_BOLD)
+    _fit(nd, (160, 245), "0%", 260, 150, red)
+    _fit(nd, (160, 345), "INTEREST", 280, 44, ink)
+    _fit(nd, (160, 392), "INSTALLMENT", 280, 36, ink, FONT_BOLD)
+    nd.rectangle((30, 425, 290, 428), fill=ink)
+    _fit(nd, (160, 468), "hanggang", 200, 26, ink, FONT_BOLD)
+    _fit(nd, (160, 528), "12 BUWAN", 280, 56, red)
+    nd.rounded_rectangle((24, 574, 296, 624), radius=10, fill=ink)
+    _fit(nd, (160, 599), "WALANG DOWN PAYMENT", 250, 22, (255, 255, 255, 255), FONT_BOLD)
+    _fit(nd, (160, 650), "Valid ID lang. Approve agad!", 290, 22, ink, FONT_BOLD)
+    _fit(nd, (160, 681), "*Subject to credit approval. T&C apply.", 300, 14, (90, 90, 96, 255), FONT_BOLD)
+    scene.face([(1.2, 2.3, -0.015), (1.52, 2.3, -0.015), (1.52, 1.6, -0.015), (1.2, 1.6, -0.015)], (250, 245, 220), texture=notice, layer=5, emissive=True)
+
+    # "We accept" strip and the two e-wallet stickers, stacked beside the promo notice.
+    head = Image.new("RGBA", (360, 70), (30, 30, 40, 255))
+    _fit(ImageDraw.Draw(head), (180, 35), "TANGGAP DITO ANG:", 320, 34, (255, 255, 255, 255))
+    scene.face([(0.82, 2.3, -0.015), (1.16, 2.3, -0.015), (1.16, 2.2, -0.015), (0.82, 2.2, -0.015)], (30, 30, 40), texture=head, layer=5, emissive=True)
+    rows = [("BCash", "I-scan ang QR, bayad agad", (24, 84, 200), (255, 255, 255), 2.17),
+            ("Loro", "Loro Pay, tanggap dito", (12, 12, 14), (60, 220, 100), 1.93)]
+    rng_qr = np.random.default_rng(5)
+    for brand, line, bg, fg, y_top in rows:
+        tag = Image.new("RGBA", (360, 210), bg + (255,))
         td = ImageDraw.Draw(tag)
-        parts = words.split(" ", 1)
-        _fit(td, (180, 52), parts[0], 320, 72, fg + (255,))
-        _fit(td, (180, 112), parts[1], 320, 44, fg + (255,), FONT_BOLD)
-        scene.face([(0.86, y_top, -0.015), (1.18, y_top, -0.015), (1.18, y_top - 0.2, -0.015), (0.86, y_top - 0.2, -0.015)], bg, texture=tag, layer=5, emissive=True)
-    scene.face([(1.22, 2.45, -0.015), (1.5, 2.45, -0.015), (1.5, 1.9, -0.015), (1.22, 1.9, -0.015)], (250, 245, 220), texture=notice, layer=5, emissive=True)
+        _fit(td, (130, 78), brand, 230, 104, fg + (255,))
+        _fit(td, (180, 150), line, 320, 28, fg + (255,), FONT_BOLD)
+        # A little QR square in the corner.
+        td.rectangle((256, 14, 346, 104), fill=fg + (255,))
+        for qx in range(8):
+            for qy in range(8):
+                if rng_qr.random() < 0.5:
+                    td.rectangle((260 + qx * 11, 18 + qy * 11, 268 + qx * 11, 26 + qy * 11), fill=bg + (255,))
+        td.rectangle((8, 8, 351, 201), outline=fg + (255,), width=3)
+        scene.face([(0.82, y_top, -0.015), (1.16, y_top, -0.015), (1.16, y_top - 0.2, -0.015), (0.82, y_top - 0.2, -0.015)], bg, texture=tag, layer=5, emissive=True)
 
     # ---- the wooden pole at the kerb in front of the neighbouring shop, with its shadow
     pole_x, pole_z = 1.72, -0.42

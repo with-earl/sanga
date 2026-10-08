@@ -169,6 +169,9 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **TV shop glass copy:** the HouseCredit offer is now one tall promo notice (0% interest, up to 12 months,
+  no down payment, valid ID, fine print); beside it a "Tanggap dito ang:" strip with BCash (blue) and Loro
+  (black, green) stickers, each with a QR and a line of Filipino copy. `tools/tv_store.py` (`build`).
 - **TV news pole and glass:** the pole is thinner (radius 0.22); its posters are septic siphoning, job
   hiring (call Gloria), election, drug watchlist, police and food delivery flyers (`poster_image`). Three
   payment stickers sit beside the 0% promo notice: BCash (blue), HouseCredit (red), Loro (black, green text).
