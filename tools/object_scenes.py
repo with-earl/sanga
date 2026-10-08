@@ -10,6 +10,10 @@ police car, so they have a true camera angle, perspective and light.
   a painted ceiling, the city's lights streaking past the open windows, and Mercy on the bench.
 - tokhang_tv_news.png: a dark room at night lit only by an old television, showing the news: a
   street under police lights and a red news bar, "OPERASYON: 3 PATAY".
+- prologue_booth.png: inside the confessional, on the priest's side: dark wood, and through the
+  lattice screen a faint candle glow and the shape of someone kneeling close.
+- padala_luggage.png / padala_luggage_closed.png: a hard suitcase on the apartment floor, open and
+  empty, its lining crushed; then shut, in the dark.
 """
 
 import math
@@ -356,5 +360,159 @@ def tokhang_tv_news(size) -> Image.Image:
     canvas = scene.render(canvas)
     centre = camera.project((0.0, 0.92, 1.95))[:2]
     canvas = s3.add_glow(canvas, centre, screen_light, w / 4, 0.25)
+    return finish(canvas)
+
+
+# ---------------------------------------------------------------- the confessional
+
+
+def lattice(w: int, h: int, hole: int, bar: int, color=(84, 52, 30)) -> Image.Image:
+    """A confessional's wooden screen: diagonal bars with diamond holes you can see through."""
+    screen = Image.new("RGBA", (w, h), color + (255,))
+    holes = Image.new("L", (w, h), 255)
+    d = ImageDraw.Draw(holes)
+    step = hole + bar
+    for cy in range(-step, h + step, step):
+        for cx in range(-step, w + step, step):
+            for ox, oy in ((0, 0), (step // 2, step // 2)):
+                x, y = cx + ox, cy + oy
+                d.polygon([(x, y - hole / 2), (x + hole / 2, y), (x, y + hole / 2), (x - hole / 2, y)], fill=0)
+    screen.putalpha(holes)
+    # The bars are rounded wood: lighter along their middles.
+    shade = noise(w, h, 30, 41)
+    rgb = np.asarray(screen).astype(np.float32)
+    rgb[..., :3] *= (0.85 + 0.3 * shade)[..., None]
+    return Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8), "RGBA")
+
+
+def prologue_booth(size, figure: Image.Image) -> Image.Image:
+    w, h = size
+    camera = s3.Camera((0.0, 1.1, -0.45), 0.0, 0.0, 50.0, size)
+    scene = s3.Scene(camera, ambient=(34, 29, 26), sky_dir=(0.0, 1.0, 0.0))
+    panel = wood(600, 900, 51, base=(84, 52, 32))
+    # The priest's side: wooden walls close on either hand, and the wall with the screen ahead.
+    for x in (-0.5, 0.5):
+        scene.face([(x, 2.2, -0.6), (x, 2.2, 0.32), (x, 0.0, 0.32), (x, 0.0, -0.6)][:: (-1 if x > 0 else 1)], (84, 52, 32), texture=panel, layer=1, two_sided=True)
+    for y0, y1 in ((0.0, 0.86), (1.46, 2.2)):
+        scene.face([(-0.5, y1, 0.32), (0.5, y1, 0.32), (0.5, y0, 0.32), (-0.5, y0, 0.32)], (84, 52, 32), texture=panel, layer=1)
+    for x0, x1 in ((-0.5, -0.24), (0.24, 0.5)):
+        scene.face([(x0, 1.46, 0.32), (x1, 1.46, 0.32), (x1, 0.86, 0.32), (x0, 0.86, 0.32)], (84, 52, 32), texture=panel, layer=1)
+    # The screen itself, a frame around it, and a small shelf below.
+    scene.face([(-0.24, 1.46, 0.315), (0.24, 1.46, 0.315), (0.24, 0.86, 0.315), (-0.24, 0.86, 0.315)], (84, 52, 32),
+               texture=lattice(480, 600, 26, 9), layer=2)
+    for x0, x1, y0, y1 in ((-0.27, -0.24, 0.83, 1.49), (0.24, 0.27, 0.83, 1.49), (-0.27, 0.27, 1.46, 1.49), (-0.27, 0.27, 0.83, 0.86)):
+        scene.face([(x0, y1, 0.31), (x1, y1, 0.31), (x1, y0, 0.31), (x0, y0, 0.31)], (104, 68, 40), layer=3)
+    scene.box(-0.3, 0.3, 0.8, 0.83, 0.18, 0.32, (104, 68, 40), layer=3)
+    # Beyond the screen: the penitent's side, lit by a candle, and someone kneeling close.
+    scene.face([(-0.8, 2.2, 1.4), (0.8, 2.2, 1.4), (0.8, 0.0, 1.4), (-0.8, 0.0, 1.4)], (90, 60, 40), texture=wood(400, 500, 52, base=(90, 60, 40)), layer=0)
+    shape = Image.new("RGBA", figure.size, (8, 6, 6, 255))
+    shape.putalpha(figure.getchannel("A").filter(ImageFilter.GaussianBlur(3)))
+    tall = 1.75
+    half = tall * shape.width / shape.height / 2
+    # Kneeling close to the screen: only the head and shoulders rise into the window.
+    low = -0.58
+    scene.face([(-0.02 - half, low + tall, 0.6), (-0.02 + half, low + tall, 0.6), (-0.02 + half, low, 0.6), (-0.02 - half, low, 0.6)],
+               (8, 6, 6), texture=shape, layer=0, emissive=True)
+    scene.light((0.35, 1.0, 1.1), (255, 170, 90), 1.2)
+    scene.light((0.0, 1.15, 0.0), (255, 170, 90), 0.25)
+    canvas = Image.new("RGBA", size, (6, 5, 5, 255))
+    canvas = scene.render(canvas)
+    return finish(canvas)
+
+
+# ---------------------------------------------------------------- the suitcase
+
+
+def shell_texture(w: int, h: int, seam: float = 0.0) -> Image.Image:
+    """A hard suitcase's shell: dark grey plastic with raised ribs and a soft sheen."""
+    shell = Image.new("RGBA", (w, h), (58, 60, 66, 255))
+    d = ImageDraw.Draw(shell)
+    for x in range(int(w * 0.08), w, int(w * 0.14)):
+        d.rectangle((x, 0, x + int(w * 0.03), h), fill=(72, 74, 80, 255))
+        d.line((x + int(w * 0.03), 0, x + int(w * 0.03), h), fill=(40, 42, 46, 255), width=3)
+    if seam:
+        # Where the two shells meet: a dark zip with a light edge above it.
+        y = int(h * seam)
+        d.rectangle((0, y - 3, w, y + 5), fill=(26, 26, 30, 255))
+        d.line((0, y - 4, w, y - 4), fill=(110, 112, 118, 255), width=2)
+    return shell.filter(ImageFilter.GaussianBlur(1.2))
+
+
+def lining_texture(w: int, h: int) -> Image.Image:
+    """The inside: grey-blue cloth crushed into folds, with two crossed straps."""
+    folds = noise(w, h, 60, 61) * 0.6 + noise(w, h, 18, 62) * 0.4
+    rgb = np.stack([70 + folds * 50, 78 + folds * 52, 96 + folds * 56], axis=-1)
+    lining = Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8)).convert("RGBA")
+    d = ImageDraw.Draw(lining)
+    strap = int(min(w, h) * 0.05)
+    d.line((0, 0, w, h), fill=(40, 42, 50, 255), width=strap)
+    d.line((0, h, w, 0), fill=(40, 42, 50, 255), width=strap)
+    d.rectangle((w * 0.47, h * 0.45, w * 0.53, h * 0.55), fill=(150, 150, 156, 255))
+    return lining
+
+
+def floor_tiles(w: int, h: int) -> Image.Image:
+    base = noise(w, h, 30, 71)
+    rgb = np.stack([196 + base * 16, 188 + base * 16, 172 + base * 16], axis=-1)
+    tiles = Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8)).convert("RGBA")
+    d = ImageDraw.Draw(tiles)
+    step = w // 6
+    for i in range(0, w + 1, step):
+        d.line((i, 0, i, h), fill=(150, 144, 132, 255), width=4)
+    for j in range(0, h + 1, step):
+        d.line((0, j, w, j), fill=(150, 144, 132, 255), width=4)
+    return tiles
+
+
+def _turn_about_x(point, hinge_y: float, hinge_z: float, degrees: float):
+    """A point of the lid, swung open about the hinge along the suitcase's back edge."""
+    x, y, z = point
+    a = math.radians(degrees)
+    dy, dz = y - hinge_y, z - hinge_z
+    return (x, hinge_y + dy * math.cos(a) - dz * math.sin(a), hinge_z + dy * math.sin(a) + dz * math.cos(a))
+
+
+def padala_luggage(size, closed: bool = False) -> Image.Image:
+    w, h = size
+    camera = s3.Camera((-0.45, 0.95, -0.2), 14.0, -28.0, 46.0, size)
+    scene = s3.Scene(camera, ambient=(70, 72, 84) if not closed else (24, 26, 34), sky_dir=(-0.3, 1.0, -0.3))
+    scene.face([(-1.6, 0.0, 2.0), (1.6, 0.0, 2.0), (1.6, 0.0, 0.2), (-1.6, 0.0, 0.2)], (196, 188, 172), texture=floor_tiles(900, 600), layer=0)
+    scene.face([(-1.6, 1.6, 2.0), (1.6, 1.6, 2.0), (1.6, 0.0, 2.0), (-1.6, 0.0, 2.0)], (150, 176, 160), layer=0)
+    scene.face([(-1.6, 0.1, 1.99), (1.6, 0.1, 1.99), (1.6, 0.0, 1.99), (-1.6, 0.0, 1.99)], (110, 96, 84), layer=0)
+    x0, x1, z0, z1, top = -0.38, 0.38, 0.95, 1.45, 0.2 if not closed else 0.26
+    shell, lining = shell_texture(500, 200, 0.5 if closed else 0.0), lining_texture(600, 400)
+    # The shell's outside walls, ribbed.
+    scene.face([(x0, top, z0), (x1, top, z0), (x1, 0.0, z0), (x0, 0.0, z0)], (58, 60, 66), texture=shell, layer=1)
+    scene.face([(x1, top, z1), (x0, top, z1), (x0, 0.0, z1), (x1, 0.0, z1)], (58, 60, 66), texture=shell, layer=1)
+    scene.face([(x0, top, z1), (x0, top, z0), (x0, 0.0, z0), (x0, 0.0, z1)], (58, 60, 66), texture=shell, layer=1)
+    scene.face([(x1, top, z0), (x1, top, z1), (x1, 0.0, z1), (x1, 0.0, z0)], (58, 60, 66), texture=shell, layer=1)
+    if closed:
+        scene.face([(x0, top, z1), (x1, top, z1), (x1, top, z0), (x0, top, z0)], (58, 60, 66), texture=shell_texture(500, 340), layer=1)
+        # The handle and two latches along the front.
+        scene.box(-0.12, 0.12, top * 0.66, top * 0.82, z0 - 0.05, z0 - 0.03, (24, 24, 28), layer=2)
+        for x in (-0.12, 0.1):
+            scene.box(x, x + 0.02, top * 0.62, top * 0.82, z0 - 0.05, z0, (24, 24, 28), layer=2)
+        for x in (-0.24, 0.24):
+            scene.box(x - 0.025, x + 0.025, top * 0.62, top * 0.8, z0 - 0.015, z0 - 0.002, (170, 170, 176), layer=2)
+        scene.light((-1.2, 0.3, 1.2), (180, 200, 255), 0.9)
+    else:
+        # Inside: the crushed lining, the inner walls, and the lid standing open behind it.
+        inset = 0.02
+        scene.face([(x0 + inset, 0.03, z1 - inset), (x1 - inset, 0.03, z1 - inset), (x1 - inset, 0.03, z0 + inset), (x0 + inset, 0.03, z0 + inset)],
+                   (80, 88, 106), texture=lining, layer=2)
+        for points in ([(x0 + inset, top, z1 - inset), (x1 - inset, top, z1 - inset), (x1 - inset, 0.03, z1 - inset), (x0 + inset, 0.03, z1 - inset)],
+                       [(x1 - inset, top, z0 + inset), (x1 - inset, top, z1 - inset), (x1 - inset, 0.03, z1 - inset), (x1 - inset, 0.03, z0 + inset)],
+                       [(x0 + inset, top, z1 - inset), (x0 + inset, top, z0 + inset), (x0 + inset, 0.03, z0 + inset), (x0 + inset, 0.03, z1 - inset)]):
+            scene.face(points, (66, 72, 88), layer=2, two_sided=True)
+        lid = [_turn_about_x(p, top, z1, 100.0) for p in [(x0, top, z0), (x1, top, z0), (x1, top, z1), (x0, top, z1)]]
+        scene.face([lid[3], lid[2], lid[1], lid[0]][::-1], (80, 88, 106), texture=lining_texture(600, 400), layer=1, two_sided=True)
+        scene.light((0.4, 1.6, 0.6), (255, 220, 170), 1.6)
+    canvas = Image.new("RGBA", size, (10, 10, 12, 255))
+    canvas = scene.render(canvas)
+    if closed:
+        # One cold strip of light from under the door across the floor and the case.
+        strip = Image.new("RGBA", size, (0, 0, 0, 0))
+        ImageDraw.Draw(strip).polygon([(0, h * 0.72), (w, h * 0.5), (w, h * 0.56), (0, h * 0.8)], fill=(150, 170, 230, 70))
+        canvas = s3.add_light_layer(canvas, strip, w / 80)
     return finish(canvas)
 
