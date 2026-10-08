@@ -169,10 +169,12 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
-- **TV news scene, over the shoulder (branch claude/tv-store-shoulder, on claude/tv-store):** the picture is
-  now taken over the rider's shoulder: he is large and a little soft in the foreground; behind him a thick
-  wooden pole pasted with posters; the shop shows three rows of six identical tube sets side by side; the
-  shops next door are blurred; the motorbike is gone. `tools/tv_store.py`.
+- **TV news scene, over the shoulder (branch claude/tv-store-shoulder, on claude/tv-store):** the picture
+  is taken over the rider's shoulder, with him standing near the glass at the left so the news is clear;
+  a thick wooden pole pasted with posters at the right; three rows of five identical tube sets side by
+  side; a double glass door with push bars and an OPEN sign; the shops next door are sharp (no blur); no
+  motorbike. The rider's anatomy (sloping shoulders, V-taper torso, thigh shape, rim light) was improved
+  only where he is seen. `tools/tv_store.py`, `tools/rider_back.py`.
 - **TV news scene redone (branch claude/tv-store):** `tokhang_tv_news.png` is now a daylight TV shop
   seen through its glass front from an oblique angle (`tools/tv_store.py`): 14 sets of every size
   showing drug-war headlines, reflections and sun glare on the glass, the sign, awning, shutter, and

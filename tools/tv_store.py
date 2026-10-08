@@ -2,15 +2,16 @@
 front window, over the shoulder of a delivery rider who watches the news.
 
 Built in 3D with scene3d.py so it has a true camera angle, perspective and light:
-- the rider is in the foreground, close to the camera and a little out of focus, seen from behind and
-  cropped at the chest, so the picture is taken over his shoulder (drawn by rider_back.py, not from any
+- the rider stands near the glass in the foreground, seen from behind, so the picture is taken over his
+  shoulder (drawn by rider_back.py, not from any
   character art in the game);
-- the shop inside is lit by ceiling lights: three shelves, each a row of six identical tube sets
+- the shop inside is lit by ceiling lights: three shelves, each a row of five identical tube sets
   standing side by side with a clear gap between them, all turned to the drug-war news;
 - the glass is drawn as a see-through sheet that holds the sky, the buildings across the street and
   the sun's glare, so the shop looks like it is behind a window;
 - a thick wooden utility pole stands at the kerb in front of the glass, pasted with many posters;
-- the shops on either side are out of focus (blurred), with overhead wires crossing the street.
+- the shops on either side are in focus, with overhead wires crossing the street;
+- a double glass door leads into the shop.
 
 Run this file to save the picture next to it as tv_store_preview.png.
 """
@@ -151,10 +152,10 @@ def turned_box(scene, centre_xz, y0, y1, w, d, yaw, color, layer=2, skip=()):
 
 
 def crt_set(scene, cx, y0, cz, frame: Image.Image, bezel=(26, 26, 30), layer=2):
-    """A regular tube television, 56 cm wide and 44 cm high with a deep boxy body, standing on a
+    """A regular tube television, 50 cm wide and 40 cm high with a deep boxy body, standing on a
     shelf at (cx, cz) and facing the street. All the shop's sets are this size. Its screen glows
     with the news, and the body's sides and top catch the light so it reads as a solid."""
-    w, h, depth = 0.56, 0.44, 0.46
+    w, h, depth = 0.50, 0.40, 0.42
     turned_box(scene, (cx, cz + depth / 2), y0, y0 + h, w, depth, 0, (52, 52, 58), layer)
     # The bulge of the tube at the back, narrower than the front.
     turned_box(scene, (cx, cz + depth + 0.14), y0 + 0.05, y0 + h - 0.05, w * 0.62, 0.28, 0, (40, 40, 46), layer)
@@ -229,6 +230,8 @@ def glass_layer(w: int, h: int) -> Image.Image:
     dirt[..., :3] = 235
     dirt[..., 3] = np.clip((smear - 0.55) * 4, 0, 1) * 34
     img.alpha_composite(Image.fromarray(dirt.astype(np.uint8), "RGBA"))
+    # Let the shop show through more clearly.
+    img.putalpha(img.getchannel("A").point(lambda v: int(v * 0.72)))
     return img
 
 
@@ -402,71 +405,143 @@ def utility_pole(scene, cx, cz, radius=0.3, height=7.0, facets=20):
             scene.face([(p0[0], by + 0.035, p0[1]), (p1[0], by + 0.035, p1[1]), (p1[0], by, p1[1]), (p0[0], by, p0[1])], (80, 84, 90), layer=8)
 
 
-def neighbour_store(scene, x0, x1, front_z, wall_color, sign_text, sign_color, awning_colors, quads):
-    """A shop front next door: coloured walls over two floors, a sign, an awning and a dark open
-    front with a few bright goods. It is blurred afterwards, so only broad shapes matter. The
-    quads it uses are collected so the blur can be limited to them."""
-    wall = stained(256, 512, wall_color, int(x0 * 7) % 90 + 3, 0.22)
+def neighbour_store(scene, x0, x1, front_z, kind: str, quads=None):
+    """A shop front next door, in focus: painted walls over a second floor with grilled windows and
+    an air-conditioner, a sign, an awning, and a ground floor that depends on the kind of shop
+    ("botika", "kainan", "hardware", "load", "sarisari", "gcash")."""
+    styles = {
+        "botika": ((206, 226, 206), "BOTIKA", (30, 120, 70), ((238, 238, 238), (40, 150, 90))),
+        "kainan": ((244, 214, 140), "KAINAN", (196, 84, 30), ((250, 224, 100), (214, 74, 40))),
+        "hardware": ((178, 194, 220), "HARDWARE", (40, 70, 140), ((222, 222, 226), (60, 90, 170))),
+        "load": ((240, 168, 168), "LOAD", (30, 100, 190), ((240, 240, 244), (210, 50, 70))),
+        "sarisari": ((220, 230, 160), "SARI-SARI", (186, 40, 50), ((250, 232, 130), (190, 60, 50))),
+        "gcash": ((196, 170, 210), "GCASH", (30, 90, 220), ((232, 232, 242), (110, 80, 170))),
+    }
+    wall_color, sign_text, sign_color, awning_colors = styles[kind]
+    seed = int(abs(x0) * 7) % 90 + 3
+    wall = stained(256, 512, wall_color, seed, 0.22)
+    width = x1 - x0
+    rng = np.random.default_rng(seed)
+    z = front_z
+
     def add(points, color, **kw):
         scene.face(points, color, **kw)
-        quads.append(points)
-    add([(x0, 6.2, front_z), (x1, 6.2, front_z), (x1, 0.0, front_z), (x0, 0.0, front_z)], wall_color, texture=wall, layer=1)
-    # Upper floor windows with grilles and an air-conditioner.
-    for wx in (x0 + 0.5, x0 + (x1 - x0) / 2 + 0.2):
-        add([(wx, 5.2, front_z - 0.01), (wx + 0.9, 5.2, front_z - 0.01), (wx + 0.9, 3.9, front_z - 0.01), (wx, 3.9, front_z - 0.01)], (60, 76, 96), layer=2)
-        add([(wx, 4.0, front_z - 0.03), (wx + 0.6, 4.0, front_z - 0.03), (wx + 0.6, 3.7, front_z - 0.03), (wx, 3.7, front_z - 0.03)], (226, 226, 230), layer=2)
-    # The ground floor: a wide dark opening with bright shelves inside.
-    add([(x0 + 0.25, 2.6, front_z - 0.01), (x1 - 0.25, 2.6, front_z - 0.01), (x1 - 0.25, 0.0, front_z - 0.01), (x0 + 0.25, 0.0, front_z - 0.01)], (150, 118, 84), layer=2, emissive=True)
-    rng = np.random.default_rng(int(x0 * 13) % 500)
-    for gx in np.arange(x0 + 0.4, x1 - 0.7, 0.45):
-        gy = float(rng.uniform(0.5, 2.0))
-        col = [(220, 70, 60), (240, 200, 60), (60, 140, 220), (90, 190, 120), (240, 240, 240)][int(rng.integers(0, 5))]
-        add([(gx, gy + 0.3, front_z - 0.02), (gx + 0.35, gy + 0.3, front_z - 0.02), (gx + 0.35, gy, front_z - 0.02), (gx, gy, front_z - 0.02)], col, layer=3, emissive=True)
-    # Sign band and a striped awning.
-    sign = Image.new("RGBA", (800, 140), sign_color + (255,))
-    ImageDraw.Draw(sign).text((400, 70), sign_text, font=ImageFont.truetype(FONT_BLACK, 84), fill=(255, 255, 255, 255), anchor="mm")
-    add([(x0 + 0.15, 3.35, front_z - 0.02), (x1 - 0.15, 3.35, front_z - 0.02), (x1 - 0.15, 2.7, front_z - 0.02), (x0 + 0.15, 2.7, front_z - 0.02)], sign_color, texture=sign, layer=3)
+
+    def rect(xa, xb, ya, yb, dz):
+        return [(xa, yb, z - dz), (xb, yb, z - dz), (xb, ya, z - dz), (xa, ya, z - dz)]
+
+    add(rect(x0, x1, 0.0, 6.2, 0.0), wall_color, texture=wall, layer=1)
+    # A band of darker paint at the foot of the wall, and a second band under the roof line.
+    add(rect(x0, x1, 0.0, 0.5, 0.005), tuple(int(c * 0.72) for c in wall_color), layer=1)
+    add(rect(x0, x1, 5.7, 6.0, 0.005), tuple(int(c * 0.86) for c in wall_color), layer=1)
+    # Upper floor: two windows with white iron grilles, one with an air-conditioner under it.
+    for i, wx in enumerate((x0 + width * 0.12, x0 + width * 0.58)):
+        add(rect(wx, wx + 0.95, 3.9, 5.2, 0.01), (232, 232, 236), layer=2)
+        add(rect(wx + 0.06, wx + 0.89, 3.96, 5.14, 0.02), (58, 78, 100), layer=2)
+        for gx in np.arange(wx + 0.06, wx + 0.9, 0.14):
+            add(rect(gx, gx + 0.022, 3.96, 5.14, 0.03), (238, 238, 242), layer=2)
+        add(rect(wx + 0.06, wx + 0.89, 4.5, 4.52, 0.03), (238, 238, 242), layer=2)
+        if i == 1:
+            scene.box(wx + 0.1, wx + 0.8, 3.45, 3.8, z - 0.34, z - 0.02, (226, 228, 232), layer=2)
+            add(rect(wx + 0.16, wx + 0.74, 3.5, 3.62, 0.36), (70, 72, 78), layer=3)
+    # A drain pipe down the end of the wall.
+    scene.box(x1 - 0.12, x1 - 0.05, 0.0, 5.9, z - 0.08, z - 0.01, (170, 170, 172), layer=2)
+    sign = Image.new("RGBA", (800, 150), sign_color + (255,))
+    sd = ImageDraw.Draw(sign)
+    sd.rectangle((0, 0, 800, 10), fill=(255, 255, 255, 255))
+    sd.text((400, 80), sign_text, font=ImageFont.truetype(FONT_BLACK, 92), fill=(255, 255, 255, 255), anchor="mm")
+    add(rect(x0 + 0.1, x1 - 0.1, 2.72, 3.42, 0.04), sign_color, texture=sign, layer=3)
     stripes = Image.new("RGBA", (400, 100), awning_colors[0] + (255,))
     sd = ImageDraw.Draw(stripes)
     for i in range(0, 400, 80):
         sd.rectangle((i, 0, i + 40, 100), fill=awning_colors[1] + (255,))
-    add([(x0 + 0.05, 2.7, front_z - 0.02), (x1 - 0.05, 2.7, front_z - 0.02), (x1 - 0.05, 2.35, front_z - 0.7), (x0 + 0.05, 2.35, front_z - 0.7)], awning_colors[0], texture=stripes, layer=3, two_sided=True)
+    add([(x0 + 0.04, 2.7, z - 0.03), (x1 - 0.04, 2.7, z - 0.03), (x1 - 0.04, 2.34, z - 0.75), (x0 + 0.04, 2.34, z - 0.75)], awning_colors[0],
+        texture=stripes, layer=3, two_sided=True)
 
-
-# ---------------------------------------------------------------- the whole picture
+    # The ground floor.
+    if kind == "hardware":
+        # A steel shutter half rolled up over shelves of paint, with pipes leaning outside.
+        add(rect(x0 + 0.25, x1 - 0.25, 0.0, 2.55, 0.01), (70, 66, 62), layer=2)
+        for sy in np.arange(0.3, 2.2, 0.55):
+            add(rect(x0 + 0.3, x1 - 0.3, sy, sy + 0.04, 0.02), (150, 112, 70), layer=2)
+            for cx in np.arange(x0 + 0.4, x1 - 0.6, 0.32):
+                col = [(210, 60, 50), (240, 200, 60), (60, 120, 200), (220, 220, 224)][int(rng.integers(0, 4))]
+                add(rect(cx, cx + 0.2, sy + 0.04, sy + 0.24, 0.03), col, layer=3, emissive=True)
+        add(rect(x0 + 0.2, x1 - 0.2, 1.7, 2.6, 0.06), (150, 156, 162), texture=shutter_texture(400, 300), layer=3)
+        for px_ in (x1 - 0.7, x1 - 0.55, x1 - 0.4):
+            scene.box(px_, px_ + 0.08, 0.0, 2.1, z - 0.2, z - 0.12, (180, 184, 190), layer=3)
+    elif kind == "sarisari":
+        # An iron-grilled window full of hanging snacks, and a counter.
+        add(rect(x0 + 0.3, x1 - 0.3, 0.7, 2.5, 0.01), (62, 56, 52), layer=2)
+        for gx in np.arange(x0 + 0.4, x1 - 0.5, 0.2):
+            for gy in np.arange(1.0, 2.4, 0.24):
+                col = [(220, 60, 50), (240, 200, 50), (60, 150, 220), (90, 190, 110), (240, 120, 40), (240, 240, 240)][int(rng.integers(0, 6))]
+                add(rect(gx, gx + 0.14, gy, gy + 0.2, 0.03), col, layer=3, emissive=True)
+        for gx in np.arange(x0 + 0.3, x1 - 0.3, 0.16):
+            add(rect(gx, gx + 0.02, 0.7, 2.5, 0.05), (30, 30, 34), layer=3)
+        add(rect(x0 + 0.3, x1 - 0.3, 0.9, 1.0, 0.1), (120, 90, 60), layer=3)
+        add(rect(x0 + 0.3, x1 - 0.3, 0.0, 0.9, 0.08), (186, 60, 50), layer=2)
+    elif kind == "kainan":
+        # Open front: a counter with steel trays of food, and a menu board.
+        add(rect(x0 + 0.25, x1 - 0.25, 0.0, 2.55, 0.01), (96, 70, 50), layer=2, emissive=True)
+        add(rect(x0 + 0.25, x1 - 0.25, 0.0, 1.0, 0.1), (190, 192, 198), layer=3)
+        for tx in np.arange(x0 + 0.4, x1 - 0.8, 0.5):
+            col = [(210, 90, 40), (240, 200, 70), (150, 190, 80), (200, 60, 50)][int(rng.integers(0, 4))]
+            add(rect(tx, tx + 0.4, 1.0, 1.12, 0.14), (210, 212, 218), layer=3)
+            add(rect(tx + 0.03, tx + 0.37, 1.02, 1.1, 0.16), col, layer=3, emissive=True)
+        board = Image.new("RGBA", (200, 140), (40, 80, 50, 255))
+        bd = ImageDraw.Draw(board)
+        for i in range(5):
+            bd.rectangle((14, 16 + i * 24, 110, 24 + i * 24), fill=(240, 240, 235, 255))
+            bd.rectangle((130, 16 + i * 24, 186, 24 + i * 24), fill=(250, 220, 90, 255))
+        add(rect(x0 + 0.5, x0 + 1.5, 1.6, 2.3, 0.05), (40, 80, 50), texture=board, layer=3)
+    else:
+        # A glass shopfront with a door and a display of goods; a lit sign above the door.
+        add(rect(x0 + 0.25, x1 - 0.25, 0.0, 2.55, 0.01), (170, 190, 205), layer=2)
+        add(rect(x0 + 0.3, x1 - 0.3, 0.05, 2.5, 0.02), (96, 120, 140), layer=2)
+        add(rect(x0 + 0.3, x1 - 0.3, 0.9, 0.95, 0.04), (230, 230, 235), layer=3)
+        dw = x0 + width * 0.55
+        add(rect(dw, dw + 0.9, 0.0, 2.2, 0.04), (226, 228, 232), layer=3)
+        add(rect(dw + 0.06, dw + 0.84, 0.06, 2.14, 0.05), (110, 140, 160), layer=3)
+        for gx in np.arange(x0 + 0.4, dw - 0.4, 0.33):
+            col = [(60, 140, 220), (240, 240, 245), (220, 70, 70), (250, 200, 60)][int(rng.integers(0, 4))]
+            add(rect(gx, gx + 0.24, 0.95, 1.35 + float(rng.uniform(0, 0.4)), 0.06), col, layer=3, emissive=True)
+    if quads is not None:
+        quads.append(rect(x0, x1, 0.0, 6.2, 0.0))
 
 
 def build(size) -> Image.Image:
-    """The picture, seen over the rider's right shoulder."""
+    """The picture, seen over the rider's shoulder."""
     w, h = size
-    camera = s3.Camera((-0.7, 1.52, -3.35), 6.0, -2.0, 56.0, size)
+    camera = s3.Camera((0.75, 1.5, -3.7), 2.5, -0.6, 59.0, size)
     scene = s3.Scene(camera, ambient=(168, 170, 178), sky_dir=(0.15, 1.0, -0.25))
     scene.light((9.0, 11.0, -9.0), SUN, 900.0, reach=22.0)
-    quads: list = []
 
     # The pavement, in slabs small enough to draw well close to the camera.
-    slabs = paving(16.0, 3.4)
-    px_per_m = slabs.width / 16.0
-    for ix in range(10):
+    slabs = paving(18.0, 3.6)
+    px_per_m = slabs.width / 18.0
+    for ix in range(12):
         for iz in range(4):
-            x0, x1 = -8.0 + ix * 1.6, -8.0 + (ix + 1) * 1.6
-            z0, z1 = -3.3 + iz * 0.825, -3.3 + (iz + 1) * 0.825
-            crop = slabs.crop((int(ix * 1.6 * px_per_m), int(iz * 0.825 * px_per_m), int((ix + 1) * 1.6 * px_per_m), int((iz + 1) * 0.825 * px_per_m)))
+            x0, x1 = -9.0 + ix * 1.5, -9.0 + (ix + 1) * 1.5
+            z0, z1 = -3.6 + iz * 0.9, -3.6 + (iz + 1) * 0.9
+            crop = slabs.crop((int(ix * 1.5 * px_per_m), int(iz * 0.9 * px_per_m), int((ix + 1) * 1.5 * px_per_m), int((iz + 1) * 0.9 * px_per_m)))
             scene.face([(x0, 0, z1), (x1, 0, z1), (x1, 0, z0), (x0, 0, z0)], (150, 148, 142), texture=crop, layer=0)
 
-    gx0, gx1, gy0, gy1 = -2.1, 2.5, 0.5, 2.62
-    # Shops next door, left and right, a little way back from the street line, blurred later.
-    neighbour_store(scene, -5.4, gx0 - 0.02, 0.0, (196, 220, 196), "BOTIKA", (30, 120, 70), ((236, 236, 236), (40, 150, 90)), quads)
-    neighbour_store(scene, -8.8, -5.42, 0.25, (240, 206, 130), "KAINAN", (200, 90, 30), ((250, 220, 90), (220, 80, 40)), quads)
-    neighbour_store(scene, -12.4, -8.82, -0.1, (170, 186, 214), "HARDWARE", (40, 70, 140), ((220, 220, 224), (60, 90, 170)), quads)
-    neighbour_store(scene, gx1 + 0.02, 5.9, 0.0, (232, 150, 150), "LOAD", (30, 100, 190), ((240, 240, 244), (210, 50, 70)), quads)
-    neighbour_store(scene, 5.92, 9.4, 0.3, (214, 224, 150), "SARI-SARI", (190, 40, 50), ((250, 230, 120), (190, 60, 50)), quads)
-    neighbour_store(scene, 9.42, 13.0, -0.12, (186, 160, 200), "GCASH", (30, 90, 220), ((230, 230, 240), (110, 80, 170)), quads)
+    gx0, gx1, gy0, gy1 = -2.1, 2.9, 0.5, 2.62
+    door_x0, door_x1, door_top = 1.5, 2.8, 2.1
+    # Shops next door, left and right, all in focus.
+    neighbour_store(scene, -5.45, gx0 - 0.02, 0.0, "botika")
+    neighbour_store(scene, -8.9, -5.47, 0.2, "kainan")
+    neighbour_store(scene, -12.4, -8.92, -0.1, "hardware")
+    neighbour_store(scene, gx1 + 0.02, 6.3, 0.0, "load")
+    neighbour_store(scene, 6.32, 9.7, 0.25, "sarisari")
+    neighbour_store(scene, 9.72, 13.2, -0.1, "gcash")
 
-    # The TV shop: sign band, upper wall, the riser under the window.
+    # The TV shop: sign band, upper wall, the riser under the window (not under the doors).
     wall = stained(512, 512, (226, 214, 190), 41, 0.2)
-    scene.face([(gx0, gy0, 0), (gx1, gy0, 0), (gx1, 0.0, 0), (gx0, 0.0, 0)], (96, 96, 100), layer=1)
-    scene.face([(gx0, 3.5, 0), (gx1, 3.5, 0), (gx1, 2.62, 0), (gx0, 2.62, 0)], (24, 52, 120), texture=sign_texture(1400, 230), layer=1)
+    scene.face([(gx0, gy0, 0), (door_x0 - 0.05, gy0, 0), (door_x0 - 0.05, 0.0, 0), (gx0, 0.0, 0)], (96, 96, 100), layer=1)
+    scene.face([(door_x1 + 0.05, gy0, 0), (gx1, gy0, 0), (gx1, 0.0, 0), (door_x1 + 0.05, 0.0, 0)], (96, 96, 100), layer=1)
+    scene.face([(gx0, 3.5, 0), (gx1, 3.5, 0), (gx1, 2.62, 0), (gx0, 2.62, 0)], (24, 52, 120), texture=sign_texture(1500, 230), layer=1)
     scene.face([(gx0, 6.2, 0), (gx1, 6.2, 0), (gx1, 3.5, 0), (gx0, 3.5, 0)], (226, 214, 190), texture=wall, layer=1)
     scene.face([(gx0 - 0.1, 2.66, -0.04), (gx1 + 0.1, 2.66, -0.04), (gx1 + 0.1, 2.38, -1.0), (gx0 - 0.1, 2.38, -1.0)], (230, 230, 232),
                texture=awning_texture(900, 260), layer=3, two_sided=True)
@@ -482,50 +557,81 @@ def build(size) -> Image.Image:
         for lz in (1.2, 3.2):
             scene.face([(lx - 0.5, 2.99, lz + 0.12), (lx + 0.5, 2.99, lz + 0.12), (lx + 0.5, 2.99, lz - 0.12), (lx - 0.5, 2.99, lz - 0.12)], (255, 255, 250), layer=1, emissive=True, two_sided=True)
             scene.light((lx, 2.7, lz), (255, 244, 220), 1.5, reach=4.2)
-    # Three shelves, each a row of six identical tube sets side by side with a clear gap between.
+    # Behind the doors: a clear aisle to a counter, with a bright promotion banner on the wall.
+    banner = Image.new("RGBA", (500, 140), (200, 30, 40, 255))
+    _text(ImageDraw.Draw(banner), (250, 70), "BIG SALE - TV PROMO", 52, (255, 255, 255, 255), anchor="mm")
+    scene.face([(1.6, 2.5, 4.97), (2.8, 2.5, 4.97), (2.8, 1.9, 4.97), (1.6, 1.9, 4.97)], (200, 30, 40), texture=banner, layer=1, emissive=True)
+    scene.box(1.5, 2.8, 0.0, 0.95, 3.8, 4.5, (120, 96, 70), layer=1)
+    scene.box(1.5, 2.8, 0.95, 0.99, 3.75, 4.55, (210, 210, 214), layer=1)
+    # Three shelves, each a row of five identical tube sets side by side with a clear gap between.
     plank = (118, 92, 66)
     shelf_tops = (0.42, 1.04, 1.66)
+    shelf_x0, shelf_x1 = -2.0, 1.3
     for top in shelf_tops:
-        scene.box(-2.0, 2.4, top - 0.03, top, 0.5, 1.3, plank, layer=1)
-    for ux in (-2.0, 2.4):
+        scene.box(shelf_x0, shelf_x1, top - 0.03, top, 0.5, 1.3, plank, layer=1)
+    for ux in (shelf_x0, shelf_x1):
         scene.box(ux - 0.02, ux + 0.02, 0.0, 2.15, 0.5, 1.3, (70, 72, 82), layer=1)
-    scene.box(-2.0, 2.4, 0.0, 0.39, 0.55, 1.25, (44, 46, 54), layer=1)
-    pitch = 4.4 / 6
+    scene.box(shelf_x0, shelf_x1, 0.0, 0.39, 0.55, 1.25, (44, 46, 54), layer=1)
+    pitch = (shelf_x1 - shelf_x0) / 5
     bezels = [(26, 26, 30), (176, 178, 184)]
     frame_no = 0
     for row, top in enumerate(shelf_tops):
-        for col in range(6):
-            cx = -2.0 + pitch * (col + 0.5)
+        for col in range(5):
+            cx = shelf_x0 + pitch * (col + 0.5)
             crt_set(scene, cx, top, 0.6, broadcast(640, 360, frame_no % 5), bezel=bezels[(row + col) % 2])
             frame_no += 1 + (row == 1)
 
-    # ---- the window: aluminium frames between the sets, then the glass sheet
+    # ---- the window: aluminium frames between the sets, the double glass door, then the glass sheet
     frame_c = (176, 180, 188)
-    for fx in (gx0, -2.0 + pitch * 2 - 0.05, -2.0 + pitch * 4 - 0.14, gx1):
-        scene.box(fx - 0.035, fx + 0.035, gy0, gy1, -0.06, 0.03, frame_c, layer=4)
+    for fx in (gx0, shelf_x0 + pitch * 2 - 0.05, shelf_x0 + pitch * 4 - 0.11, door_x0, gx1):
+        scene.box(fx - 0.035, fx + 0.035, gy0 if fx < door_x0 else 0.0, gy1, -0.06, 0.03, frame_c, layer=4)
     scene.box(gx0, gx1, gy1 - 0.03, gy1 + 0.03, -0.06, 0.03, frame_c, layer=4)
-    scene.box(gx0, gx1, gy0 - 0.03, gy0 + 0.03, -0.06, 0.03, frame_c, layer=4)
-    scene.face([(gx0, gy1, -0.01), (gx1, gy1, -0.01), (gx1, gy0, -0.01), (gx0, gy0, -0.01)], (255, 255, 255),
-               texture=glass_layer(1600, 640), layer=5, emissive=True)
+    scene.box(gx0, door_x0, gy0 - 0.03, gy0 + 0.03, -0.06, 0.03, frame_c, layer=4)
+    scene.box(door_x1, gx1, gy0 - 0.03, gy0 + 0.03, -0.06, 0.03, frame_c, layer=4)
+    # The door: jambs, a centre stile where the two leaves meet, a top rail, kick plates, push bars
+    # and long pull handles, and a small OPEN sign.
+    mid = (door_x0 + door_x1) / 2
+    for fx in (door_x1, mid):
+        scene.box(fx - 0.04, fx + 0.04, 0.0, door_top, -0.07, 0.03, frame_c, layer=4)
+    scene.box(door_x0, door_x1, door_top - 0.04, door_top + 0.04, -0.07, 0.03, frame_c, layer=4)
+    scene.box(door_x0, door_x1, 0.0, 0.04, -0.07, 0.03, frame_c, layer=4)
+    for lx0, lx1 in ((door_x0 + 0.035, mid - 0.04), (mid + 0.04, door_x1 - 0.04)):
+        scene.face([(lx0, 0.32, -0.075), (lx1, 0.32, -0.075), (lx1, 0.04, -0.075), (lx0, 0.04, -0.075)], (150, 154, 162), layer=4)
+        scene.face([(lx0, door_top - 0.04, -0.075), (lx1, door_top - 0.04, -0.075), (lx1, door_top - 0.2, -0.075), (lx0, door_top - 0.2, -0.075)], (150, 154, 162), layer=4)
+    for hx in (mid - 0.14, mid + 0.14):
+        scene.box(hx - 0.012, hx + 0.012, 0.75, 1.55, -0.14, -0.1, (214, 216, 222), layer=4)
+        scene.box(hx - 0.012, hx + 0.012, 0.78, 0.8, -0.14, -0.07, (214, 216, 222), layer=4)
+        scene.box(hx - 0.012, hx + 0.012, 1.5, 1.52, -0.14, -0.07, (214, 216, 222), layer=4)
+    open_sign = Image.new("RGBA", (220, 100), (255, 255, 255, 255))
+    od = ImageDraw.Draw(open_sign)
+    od.rounded_rectangle((4, 4, 216, 96), 10, fill=(190, 24, 32, 255))
+    _text(od, (110, 50), "OPEN", 58, (255, 255, 255, 255), anchor="mm")
+    scene.face([(1.62, 1.72, -0.012), (1.98, 1.72, -0.012), (1.98, 1.54, -0.012), (1.62, 1.54, -0.012)], (255, 255, 255), texture=open_sign, layer=5, emissive=True)
+    # A door mat on the pavement.
+    mat = Image.new("RGBA", (200, 60), (36, 36, 40, 255))
+    ImageDraw.Draw(mat).rectangle((6, 6, 194, 54), outline=(150, 40, 40, 255), width=4)
+    scene.face([(door_x0 + 0.1, 0.004, -0.15), (door_x1 - 0.1, 0.004, -0.15), (door_x1 - 0.1, 0.004, -0.75), (door_x0 + 0.1, 0.004, -0.75)], (40, 40, 44), texture=mat, layer=1)
+    scene.face([(gx0, gy1, -0.01), (gx1, gy1, -0.01), (gx1, 0.0, -0.01), (gx0, 0.0, -0.01)], (255, 255, 255),
+               texture=glass_layer(1700, 700), layer=5, emissive=True)
     notice = Image.new("RGBA", (200, 280), (250, 245, 220, 255))
     nd = ImageDraw.Draw(notice)
     _text(nd, (100, 56), "0%", 80, (190, 24, 30, 255), anchor="mm")
     _text(nd, (100, 130), "INSTALLMENT", 26, (30, 30, 40, 255), FONT_BOLD, "mm")
     _text(nd, (100, 190), "UP TO", 22, (30, 30, 40, 255), FONT_BOLD, "mm")
     _text(nd, (100, 228), "12 MOS.", 34, (190, 24, 30, 255), FONT_BLACK, "mm")
-    scene.face([(0.72, 2.4, -0.015), (1.1, 2.4, -0.015), (1.1, 1.72, -0.015), (0.72, 1.72, -0.015)], (250, 245, 220), texture=notice, layer=5, emissive=True)
+    scene.face([(1.12, 2.45, -0.015), (1.4, 2.45, -0.015), (1.4, 1.9, -0.015), (1.12, 1.9, -0.015)], (250, 245, 220), texture=notice, layer=5, emissive=True)
 
-    # ---- the wooden pole at the kerb in front of the shop's right end, with its shadow
-    pole_x, pole_z = -1.3, -0.8
+    # ---- the wooden pole at the kerb in front of the neighbouring shop, with its shadow
+    pole_x, pole_z = 3.0, -0.7
     utility_pole(scene, pole_x, pole_z)
     pole_shadow = Image.new("RGBA", (60, 400), (0, 0, 0, 0))
     ImageDraw.Draw(pole_shadow).rectangle((10, 0, 50, 400), fill=(8, 8, 14, 150))
     pole_shadow = pole_shadow.filter(ImageFilter.GaussianBlur(3))
-    scene.face([(pole_x - 1.4 - 0.3, 0.003, pole_z + 0.8), (pole_x - 1.4 + 0.3, 0.003, pole_z + 0.8), (pole_x + 0.3, 0.003, pole_z), (pole_x - 0.3, 0.003, pole_z)],
+    scene.face([(pole_x - 1.4 - 0.3, 0.003, pole_z + 0.7), (pole_x - 1.4 + 0.3, 0.003, pole_z + 0.7), (pole_x + 0.3, 0.003, pole_z), (pole_x - 0.3, 0.003, pole_z)],
                (0, 0, 0), texture=pole_shadow, layer=1)
 
     # ---- the rider's shadow, thrown towards the shop, away from the sun
-    rider_x, rider_z = -1.28, -2.3
+    rider_x, rider_z = -0.8, -1.1
     shadow = Image.new("RGBA", (160, 520), (0, 0, 0, 0))
     sd = ImageDraw.Draw(shadow)
     sd.ellipse((58, 460, 102, 510), fill=(8, 8, 14, 190))
@@ -534,27 +640,12 @@ def build(size) -> Image.Image:
     sd.rectangle((70, 380, 90, 520), fill=(0, 0, 0, 0))
     shadow = shadow.filter(ImageFilter.GaussianBlur(5)).transpose(Image.FLIP_TOP_BOTTOM)
     far, near = -0.06, rider_z
-    drift = -1.1
+    drift = -0.9
     scene.face([(rider_x - 0.34 + drift, 0.003, far), (rider_x + 0.34 + drift, 0.003, far), (rider_x + 0.2, 0.003, near), (rider_x - 0.2, 0.003, near)],
                (0, 0, 0), texture=shadow, layer=1)
 
     canvas = Image.new("RGBA", size, (176, 206, 238, 255))
     canvas = scene.render(canvas)
-
-    # ---- depth of field: the shops next door are out of focus
-    soft = canvas.filter(ImageFilter.GaussianBlur(w / 190))
-    mask = Image.new("L", size, 0)
-    md = ImageDraw.Draw(mask)
-    for quad in quads:
-        pts = [camera.project(p)[:2] for p in quad]
-        if all(camera.project(p)[2] > 0.2 for p in quad):
-            md.polygon(pts, fill=255)
-    # Not over the TV shop itself, the pole or the pavement.
-    for part in ((gx0, 0.0, gx1, 6.2),):
-        corners = [camera.project(p)[:2] for p in ((part[0], part[3], 0.0), (part[2], part[3], 0.0), (part[2], part[1], 0.0), (part[0], part[1], 0.0))]
-        md.polygon(corners, fill=0)
-    mask = mask.filter(ImageFilter.GaussianBlur(w / 220))
-    canvas = Image.composite(soft, canvas, mask)
 
     # ---- two overhead wires from the pole, sagging, over the street
     wires = Image.new("RGBA", size, (0, 0, 0, 0))
@@ -568,8 +659,8 @@ def build(size) -> Image.Image:
         wd.line(pts, fill=(18, 18, 22, 235), width=max(int(w / 420), 2), joint="curve")
     canvas.alpha_composite(wires.filter(ImageFilter.GaussianBlur(0.9)))
 
-    # ---- the rider, seen from behind and a little to the right, close to the camera: only his
-    # helmet, shoulders and the top of his bag are in the picture. He is a touch out of focus.
+    # ---- the rider, seen from behind and a little to the right, near the glass: the shop's sets
+    # stay in view past his shoulder.
     rider = rider_back.rider_back()
     foot = camera.project((rider_x, 0.0, rider_z))
     scale = camera.pixels_for(1.75, foot[2]) / rider.height
@@ -579,9 +670,9 @@ def build(size) -> Image.Image:
     px[..., :3] *= (0.94 + 0.12 * ramp)[..., None]   # a little more sun on the side nearest the street
     px[..., 2] += (1 - ramp) * 10                      # a cool bounce from the shop on the other side
     sprite = Image.fromarray(np.clip(px, 0, 255).astype(np.uint8), "RGBA")
-    alpha = sprite.getchannel("A")
-    sprite = sprite.filter(ImageFilter.GaussianBlur(w / 900))
-    sprite.putalpha(alpha.filter(ImageFilter.GaussianBlur(w / 1100)))
+    contact = Image.new("RGBA", size, (0, 0, 0, 0))
+    ImageDraw.Draw(contact).ellipse((foot[0] - sprite.width * 0.42, foot[1] - 10, foot[0] + sprite.width * 0.42, foot[1] + 14), fill=(10, 10, 14, 120))
+    canvas.alpha_composite(contact.filter(ImageFilter.GaussianBlur(7)))
     canvas.alpha_composite(sprite, (int(foot[0] - sprite.width / 2), int(foot[1] - sprite.height)))
     return canvas
 

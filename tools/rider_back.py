@@ -67,7 +67,7 @@ def _union(*masks):
     return out
 
 
-def _solid(mask, color, bulge=26.0, shine=0.0, glossy=18.0, ambient=0.42, fabric=0.035, seed=1, tint=None):
+def _solid(mask, color, bulge=26.0, shine=0.0, glossy=18.0, ambient=0.42, fabric=0.035, seed=1, tint=None, rim=0.16):
     """Colours a mask as a rounded solid: the blurred mask is a height map, its slope is the
     surface direction, and the sun lights it. Returns an RGBA layer."""
     m = np.asarray(mask).astype(np.float32) / 255.0
@@ -88,6 +88,12 @@ def _solid(mask, color, bulge=26.0, shine=0.0, glossy=18.0, ambient=0.42, fabric
     rgb = base * (light[..., None] + weave[..., None])
     if tint is not None:
         rgb = rgb * np.array(tint, np.float32)[None, None, :]
+    if rim > 0:
+        # A thin bright edge where the surface turns away on the sun's side: separates him from the
+        # background and gives the roundness of a body.
+        edge = np.clip(1.0 - nz, 0, 1) ** 2.2
+        toward = np.clip(nx * SUN[0] + ny * SUN[1], 0, 1)
+        rgb = rgb + (edge * toward * rim)[..., None] * np.array([1.0, 0.92, 0.8], np.float32)[None, None, :]
     if shine > 0:
         half = SUN + np.array([0, 0, 1.0])
         half = half / np.linalg.norm(half)
@@ -136,10 +142,10 @@ def rider_back() -> Image.Image:
     c = _canvas()
 
     # ---- legs: the left leg carries the weight, the right is relaxed and turned out
-    left_leg = _poly([(158, 700), (300, 700), (296, 1000), (282, 1336), (178, 1336), (160, 1000)], smooth=7)
-    right_leg = _poly([(300, 700), (446, 700), (462, 1004), (452, 1336), (338, 1336), (304, 1004)], smooth=7)
+    left_leg = _poly([(154, 700), (300, 700), (298, 860), (292, 1000), (284, 1180), (282, 1336), (178, 1336), (172, 1180), (160, 1000), (150, 860)], smooth=7)
+    right_leg = _poly([(300, 700), (450, 700), (454, 860), (462, 1004), (460, 1180), (452, 1336), (338, 1336), (326, 1180), (306, 1004), (302, 860)], smooth=7)
     for leg, seed in ((left_leg, 3), (right_leg, 4)):
-        c.alpha_composite(_solid(leg, NAVY, bulge=56, ambient=0.36, seed=seed))
+        c.alpha_composite(_solid(leg, NAVY, bulge=66, ambient=0.34, seed=seed))
     legs = _union(left_leg, right_leg)
     c = _strokes(c, [_curve((172, 1010), (224, 1040), (286, 1012)), _curve((316, 1014), (386, 1048), (456, 1016)),
                      _curve((176, 1190), (224, 1204), (284, 1190)), _curve((344, 1190), (400, 1206), (452, 1192)),
@@ -165,13 +171,13 @@ def rider_back() -> Image.Image:
         c.alpha_composite(_solid(cuff, (24, 32, 66), bulge=8, ambient=0.5, seed=8))
 
     # ---- arms: the right hangs; the left is bent, its hand in the jacket pocket
-    right_arm = _poly([(466, 318), (522, 352), (556, 520), (552, 690), (536, 760), (474, 760), (480, 690), (484, 540), (460, 400)], smooth=8)
-    left_arm = _poly([(134, 322), (74, 358), (46, 500), (62, 590), (120, 654), (176, 676), (170, 610), (130, 556), (124, 440)], smooth=8)
-    torso = _poly([(256, 280), (344, 280), (470, 322), (466, 470), (452, 640), (468, 724), (132, 724), (148, 640), (136, 470), (130, 318)], smooth=14)
+    right_arm = _poly([(470, 330), (530, 358), (552, 470), (554, 560), (548, 690), (534, 760), (474, 760), (480, 690), (484, 560), (478, 440)], smooth=8)
+    left_arm = _poly([(130, 330), (70, 360), (48, 470), (46, 540), (66, 600), (120, 654), (176, 676), (170, 610), (132, 556), (122, 440)], smooth=8)
+    torso = _poly([(262, 270), (338, 270), (372, 284), (420, 300), (462, 322), (484, 346), (476, 470), (456, 600), (452, 724), (148, 724), (144, 600), (124, 470), (116, 346), (138, 322), (180, 300), (228, 284)], smooth=14)
     c = _shadow_under(c, torso, 0, 8, 12, 0.5)
     c.alpha_composite(_solid(right_arm, BLACK, bulge=40, ambient=0.28, fabric=0.05, seed=9))
     c.alpha_composite(_solid(left_arm, BLACK, bulge=40, ambient=0.28, fabric=0.05, seed=10))
-    c.alpha_composite(_solid(torso, BLACK, bulge=70, ambient=0.28, fabric=0.05, seed=11))
+    c.alpha_composite(_solid(torso, BLACK, bulge=84, ambient=0.26, fabric=0.05, seed=11))
     jacket = _union(torso, left_arm, right_arm)
     c = _strokes(c, [_curve((482, 540), (520, 558), (556, 534)), _curve((484, 612), (520, 628), (554, 606)),
                      _curve((46, 520), (84, 548), (62, 590)), _curve((72, 410), (60, 450), (50, 490)),
@@ -182,7 +188,9 @@ def rider_back() -> Image.Image:
                      _curve((460, 520), (440, 600), (456, 700)), _curve((140, 520), (160, 600), (146, 700))],
                  (4, 4, 6), 4, 2.4, 0.5, jacket)
     # Shoulder sheen: satin catches the sun on top of the shoulders.
-    sheen = _union(_poly([(350, 296), (466, 326), (440, 350), (352, 316)], smooth=6))
+    c = _strokes(c, [_curve((176, 388), (210, 440), (232, 520)), _curve((424, 388), (392, 440), (370, 520)),
+                     _curve((150, 560), (200, 600), (262, 640)), _curve((450, 560), (400, 600), (338, 640))],
+                 (150, 150, 168), 4, 6, 0.16, torso)
     c = _strokes(c, [_curve((352, 300), (410, 306), (462, 328))], (170, 172, 190), 10, 6, 0.28, torso)
     hem = _round_rect(130, 690, 470, 730, 14)
     c.alpha_composite(_solid(hem, (20, 20, 25), bulge=12, ambient=0.3, fabric=0.08, seed=12))
