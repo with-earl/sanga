@@ -8,10 +8,10 @@ police car, so they have a true camera angle, perspective and light.
   Father Eli in an inmate's orange shirt, facing us.
 - padala_jeep.png: inside a jeepney at night, from the back: red vinyl benches, chrome handrails,
   a painted ceiling, the city's lights streaking past the open windows, and Mercy on the bench.
-- tokhang_tv_news.png: a television shop in daylight seen through its front window from the
-  pavement: many sets of every size all showing the drug-war news, glass with reflections and sun
-  glare, and in the foreground a delivery rider (pink helmet, black jacket) seen from behind,
-  watching. Drawn by tv_store.py, with the rider from rider_back.py (new art, not the game's Peter).
+- tokhang_tv_news.png: over a delivery rider's shoulder, a television shop in daylight seen through its
+  front window: rows of identical tube sets all showing the drug-war news, glass with reflections and
+  sun glare, a thick wooden pole covered in posters, blurred shops on both sides. Drawn by tv_store.py,
+  with the rider from rider_back.py (new art, not the game's Peter).
 - prologue_booth.png: inside the confessional, on the priest's side: dark wood, and through the
   lattice screen a faint candle glow and the shape of someone kneeling close.
 - padala_luggage.png / padala_luggage_closed.png: a hard suitcase on the apartment floor, open and
@@ -318,8 +318,8 @@ def padala_jeep(size, mercy: Image.Image) -> Image.Image:
 
 
 def tokhang_tv_news(size) -> Image.Image:
-    """The news scene: a television shop in daylight, seen from the pavement through its window,
-    with a delivery rider seen from behind watching the drug-war news (see tv_store.py)."""
+    """The news scene: over a delivery rider's shoulder, a television shop in daylight seen through
+    its window, showing the drug-war news (see tv_store.py)."""
     import tv_store
     return tv_store.draw(size)
 
