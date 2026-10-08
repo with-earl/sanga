@@ -356,7 +356,7 @@ def poster_image(w: int, h: int, kind: int, seed: int) -> Image.Image:
     return Image.fromarray(np.clip(px, 0, 255).astype(np.uint8), "RGBA")
 
 
-def utility_pole(scene, cx, cz, radius=0.3, height=7.0, facets=20):
+def utility_pole(scene, cx, cz, radius=0.3, height=7.0, facets=56):
     """A thick wooden pole as a many-sided prism, its facing side covered in posters pasted over one
     another. Posters are cut across the facets so they wrap round the trunk."""
     wood = wood_texture(facets * 64, 1500)
@@ -514,7 +514,7 @@ def neighbour_store(scene, x0, x1, front_z, kind: str, quads=None):
 def build(size) -> Image.Image:
     """The picture, seen over the rider's shoulder."""
     w, h = size
-    camera = s3.Camera((1.25, 1.5, -2.0), 0.0, -0.4, 70.0, size)
+    camera = s3.Camera((1.2, 1.5, -1.45), 0.0, -0.4, 70.0, size)
     scene = s3.Scene(camera, ambient=(168, 170, 178), sky_dir=(0.15, 1.0, -0.25))
     scene.light((9.0, 11.0, -9.0), SUN, 900.0, reach=22.0)
 
@@ -623,7 +623,7 @@ def build(size) -> Image.Image:
     scene.face([(1.22, 2.45, -0.015), (1.5, 2.45, -0.015), (1.5, 1.9, -0.015), (1.22, 1.9, -0.015)], (250, 245, 220), texture=notice, layer=5, emissive=True)
 
     # ---- the wooden pole at the kerb in front of the neighbouring shop, with its shadow
-    pole_x, pole_z = 2.12, -1.05
+    pole_x, pole_z = 1.78, -0.85
     utility_pole(scene, pole_x, pole_z)
     pole_shadow = Image.new("RGBA", (60, 400), (0, 0, 0, 0))
     ImageDraw.Draw(pole_shadow).rectangle((10, 0, 50, 400), fill=(8, 8, 14, 150))
@@ -632,7 +632,7 @@ def build(size) -> Image.Image:
                (0, 0, 0), texture=pole_shadow, layer=1)
 
     # ---- the rider's shadow, thrown towards the shop, away from the sun
-    rider_x, rider_z = 0.55, -1.3
+    rider_x, rider_z = 0.75, -1.0
     shadow = Image.new("RGBA", (160, 520), (0, 0, 0, 0))
     sd = ImageDraw.Draw(shadow)
     sd.ellipse((58, 460, 102, 510), fill=(8, 8, 14, 190))

@@ -169,6 +169,8 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **TV news scene, nearer (same branch):** camera moved to z -1.45 so the shop fills the picture, Peter is
+  nearer still (z -1.0) and blurred, the pole has 56 facets so it reads round.
 - **TV news scene, focus shot (same branch):** Peter is pushed to the left edge as a shoulder view and
   blurred (gaussian, premultiplied) so the lens focuses on the news; two shelves of three bigger sets
   (`crt_set(..., k=1.5)`) instead of three rows of five.
