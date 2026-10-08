@@ -216,6 +216,12 @@ Objectives (unchanged): Talk to Gloria → Choose a realistic toy gun → Talk t
 | Two hundred na lang, Ate? | **Gloria:** Ay naku, lugi na 'ko niyan... O sige na nga. Basta ikaw. |
 | Sige po, okay na. | **Gloria:** 'Yan ang gusto ko sa'yo. Hindi ka tumatawad. |
 
+Then, whatever was chosen, Gloria plants the priest before anyone has met him. On the first
+run it is small talk; once the player knows Father Eli, it is the first time he was near Peter's
+family:
+
+> **Gloria:** Para kay Ben ba 'yan? Naku, tuwing Sabado, takbo nang takbo 'yan sa simbahan. Si Father Eli lang ang nakakapagpatahimik diyan.
+
 **Revelation lines (Alaala 1 held):** as the buyer walks away.
 
 > **Gloria** **Mahina, sa cellphone**: ...Oo. Kakaalis lang. Naka-jacket. May dalang baril.
@@ -497,7 +503,13 @@ Usual: `padala_peter_arrives.png` — **Peter:** Ma'am? Delivery po— *(sees he
 
 Card: **Tanod** — *Nasagip si Mercy, at buhay si Peter.*
 
-**Keys (Main, existing):** `padala_escape.png`. Card: **Key** — *Nakatakas si Mercy.*
+**Keys (Main, existing):** first `padala_collar.png` *(new)*: at the door, Mercy glances back. On
+the bathroom door hangs a black shirt with a priest's white collar.
+> **Mercy:** ...Pari?
+
+Then `padala_escape.png`. Card: **Key** — *Nakatakas si Mercy.* (A first run that ends here still
+leaves with the question of who the man is, without the answer: the police poster ending gives the
+answer, the collar only the doubt.)
 
 **Outside (Kumpisal timeline, existing)** `padala_escape.png`, then `padala_still_manila.png`,
 caption *Still in Manila*:
@@ -556,6 +568,7 @@ Black. Title: **SANGA**.
 | `true_morning.png` (×4) | Peter and Gwen, Kulas, Mercy, Batista |
 | `true_visiting.png` | Eli behind the visiting-booth grille |
 | `prologue_booth.png` | The confessional's small door, in darkness |
+| `padala_collar.png` | A black clerical shirt with a white collar hanging on the bathroom door |
 
 ---
 

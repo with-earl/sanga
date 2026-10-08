@@ -497,6 +497,61 @@ def padala_eli_unlocks() -> Image.Image:
     return vignette(grade(c, 0.75, 0.75, (230, 220, 210), 0.25), 0.55)
 
 
+def clerical_shirt(width: int) -> Image.Image:
+    """A priest's black short-sleeved shirt on a wire hanger, drawn in code: soft folds, a darker
+    side away from the light, and the white collar tab at the throat."""
+    k = 4
+    w, h = width * k, int(width * 1.25) * k
+    shirt = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(shirt)
+    cx = w / 2
+    # The hanger: a hook and a thin bar the shoulders rest on.
+    d.arc((cx - w * 0.06, 0, cx + w * 0.06, h * 0.1), 180, 20, fill=(150, 150, 156, 255), width=3 * k)
+    d.line((cx, h * 0.09, cx - w * 0.36, h * 0.2), fill=(150, 150, 156, 255), width=3 * k)
+    d.line((cx, h * 0.09, cx + w * 0.36, h * 0.2), fill=(150, 150, 156, 255), width=3 * k)
+    # The shirt: shoulders, short sleeves hanging down, and the body narrowing a little.
+    body = [(cx - w * 0.2, h * 0.12), (cx - w * 0.38, h * 0.19), (cx - w * 0.47, h * 0.4), (cx - w * 0.36, h * 0.43),
+            (cx - w * 0.33, h * 0.33), (cx - w * 0.34, h * 0.98), (cx + w * 0.34, h * 0.98), (cx + w * 0.33, h * 0.33),
+            (cx + w * 0.36, h * 0.43), (cx + w * 0.47, h * 0.4), (cx + w * 0.38, h * 0.19), (cx + w * 0.2, h * 0.12)]
+    d.polygon(body, fill=(30, 30, 36, 255))
+    # Light from the room on the left side, the right side falling into shadow.
+    shade = Image.new("L", (w, h), 0)
+    sd = ImageDraw.Draw(shade)
+    for i in range(40):
+        x = cx - w * 0.36 + i * w * 0.018
+        sd.line((x, 0, x, h), fill=int(150 * max(0.0, 1 - i / 22)), width=int(w * 0.02) + 1)
+    light = Image.new("RGBA", (w, h), (120, 118, 130, 255))
+    mask = Image.composite(shade, Image.new("L", (w, h), 0), shirt.getchannel("A"))
+    shirt.paste(light, (0, 0), mask.filter(ImageFilter.GaussianBlur(6 * k)))
+    # Soft folds down the body.
+    for fx, top in ((-0.16, 0.45), (0.06, 0.5), (0.2, 0.42)):
+        d.line((cx + w * fx, h * top, cx + w * (fx + 0.02), h * 0.96), fill=(18, 18, 22, 255), width=2 * k)
+    # The button placket, and the collar band with its white tab.
+    d.line((cx, h * 0.2, cx, h * 0.97), fill=(18, 18, 22, 255), width=2 * k)
+    d.polygon([(cx - w * 0.2, h * 0.12), (cx, h * 0.2), (cx + w * 0.2, h * 0.12), (cx + w * 0.14, h * 0.1), (cx, h * 0.15), (cx - w * 0.14, h * 0.1)], fill=(20, 20, 26, 255))
+    d.rectangle((cx - w * 0.045, h * 0.135, cx + w * 0.045, h * 0.185), fill=(244, 244, 238, 255))
+    shirt = shirt.filter(ImageFilter.GaussianBlur(k * 0.6))
+    return shirt.resize((width, h // k), Image.LANCZOS)
+
+
+def padala_collar() -> Image.Image:
+    """Mercy's last look back: on the bathroom door hangs a priest's shirt."""
+    c = background("apartment_room_bath", crop=(0.58, 0.08, 0.42, 0.42))
+    c = grade(c, 0.8, 0.85, (230, 225, 235), 0.2)
+    shirt = clerical_shirt(300)
+    x, top, tall = 0.64, 0.16, 0.56
+    # A nail in the wall beside the bathroom door, and the shirt's soft shadow on the wall.
+    nail = ImageDraw.Draw(c)
+    nx, ny = x * W, top * H
+    nail.ellipse((nx - 7, ny - 7, nx + 7, ny + 7), fill=(60, 52, 46, 255))
+    shadow = silhouette(scaled(shirt, tall), (10, 20, 16)).filter(ImageFilter.GaussianBlur(14))
+    shadow.putalpha(shadow.getchannel("A").point(lambda a: int(a * 0.45)))
+    c.alpha_composite(shadow, (int(nx - shadow.width / 2 + 26), int(ny + 18)))
+    place(c, shirt, x, top + tall, tall, shadow=False)
+    c = glow(c, (0.62, 0.25), (255, 250, 240), 0.15, 0.3)
+    return vignette(c, 0.6)
+
+
 def prologue_booth() -> Image.Image:
     c = background("confessional", crop=(0.05, 0.05, 0.55, 0.6))
     c = grade(c, 0.45, 0.55)
@@ -583,6 +638,7 @@ SHOTS = {
     "padala_hide_dawn.png": padala_hide_dawn,
     "padala_eli_unlocks.png": padala_eli_unlocks,
     "prologue_booth.png": prologue_booth,
+    "padala_collar.png": padala_collar,
     "true_morning_family.png": true_morning_family,
     "true_morning_kulas.png": true_morning_kulas,
     "true_morning_mercy.png": true_morning_mercy,

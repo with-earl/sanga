@@ -358,7 +358,34 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
     scene (the car hides what is behind it). Leaving: lights off, tail lights down the street,
     the man watching from the door. Offered next, same way: the jeepney inside, Batista's badge
     on a desk, the prison visiting booth, the TV news.
-    **Next:** paint the cutscenes for real (user or artist), most important first: the reveals
+  - **Design audit and new plan (user approved "proceed"; dev tools stay).** Scores: first-run
+    reveal 6, starting-point twist 5, causality 4, variation 6, choice weight 3, system
+    interaction 5, replay friction 3, endings/goals 6, scope 8, theme 8, presentation 5, pacing 6.
+    The plan, one PR per phase, smoke test and playthrough must pass, no new places, characters
+    or endings:
+    - **A. First-run reveal** (DONE): Gloria plants Father Eli in Tokhang's pay scene (Ben runs
+      around the church; only Father Eli can calm him); the main key ending first shows
+      `padala_collar.png` (a priest's shirt on a nail by the bathroom door) and Mercy's
+      "...Pari?", so a key-ending first run leaves with the doubt, the police ending with the answer.
+    - **B. Respect replays:** fast-forward that skips only lines seen on this save and stops at new
+      ones; a faint ✦ glint on lines that memories added; "Dumiretso sa kumpisalan." in the nave
+      when every talk there was heard before and nothing in them changed.
+    - **C. Echoes:** 6-8 ordinary choices set run flags that change 1-2 later lines in the same run,
+      shown in the recap. New rule R9: echoes never change ending ids (playthrough checks it).
+    - **D. "Ayusin ayon sa oras" (signature):** after the recap, the book's pages reorder into
+      true time order (Kumpisal, Padala, Tokhang) and red threads draw from causes to effects;
+      replaces the time-order card. The chart gets a one-line cause per card on the run's path.
+    - **E. The priest's answer:** the starting point is chosen inside the prologue, the voice asking
+      "Saan po ako magsisimula, Padre?" and the player answering; stories show Past / Present /
+      Future after run 1; after non-true endings the voice says "Hindi pa po iyon ang buong
+      kumpisal, Padre."
+    - **F. Feel:** per-timeline colour grade and music variation; a memory chime and ripple when a
+      ✦ choice is taken; a clue after two wrong keys; a place hint on each memory book entry; a
+      different Kumpisal opening per timeline.
+    - **G. Playtest** with the checklist (revelation timing, causality, replay motivation).
+    - **Art in parallel:** object shots in 3D (jeepney, badge, visiting booth, TV news); ~10 key
+      character shots need an artist (or Higgsfield if the user allows).
+    **Art:** paint the cutscenes for real (user or artist), most important first: the reveals
     (`padala_reveal_eli`, `tokhang_trade`, `true_visiting`) and the deaths.
 - **No sound on iPhone** (user report). The game itself plays music (checked: player playing,
   buses not muted). Fix in the Web preset's `html/head_include`: it wraps `AudioContext` to keep

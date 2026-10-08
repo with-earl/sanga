@@ -356,6 +356,10 @@
 		},
 		{
 			"speaker": "Gloria",
+			"text": "Para kay Ben ba 'yan? Naku, tuwing Sabado, takbo nang takbo 'yan sa simbahan. Si Father Eli lang ang nakakapagpatahimik diyan."
+		},
+		{
+			"speaker": "Gloria",
 			"text": "*Mahina, sa cellphone* ...Oo. Kakaalis lang. Naka-jacket. May dalang baril.",
 			"needs": "laruang_baril"
 		}

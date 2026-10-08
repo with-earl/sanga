@@ -112,6 +112,15 @@
 			"id": "padala_key",
 			"steps": [
 				{
+					"image": "res://assets/cutscenes/padala_collar.png",
+					"lines": [
+						{
+							"speaker": "Mercy",
+							"text": "...Pari?"
+						}
+					]
+				},
+				{
 					"image": "res://assets/cutscenes/padala_escape.png",
 					"hold": 3.0
 				},
