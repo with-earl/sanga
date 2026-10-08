@@ -20,6 +20,9 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import street_scene  # noqa: E402  (beside this file)
+
 ROOT = Path(__file__).resolve().parent.parent
 CUTSCENES = ROOT / "assets" / "cutscenes"
 BACKGROUNDS = ROOT / "assets" / "backgrounds"
@@ -380,17 +383,16 @@ def padala_phone_call() -> Image.Image:
 
 
 def padala_police_car() -> Image.Image:
-    c = background("apartment_room", blur=2)
-    place(c, silhouette(person("batista", True), keep=0.2), 0.14, 1.04, 0.86)
-    place(c, silhouette(person("eli", False), keep=0.15), 0.4, 1.04, 0.84)
-    return vignette(police_lights(night(c), 0.55), 0.6)
+    """The police arrive at night: the car at the kerb under its flashing lights, and in the lit
+    doorway, Batista meeting the man who lives there (drawn in 3D, see street_scene.py)."""
+    people = [(person("batista", True), 3.75, 8.3, 1.74), (person("eli", False), 4.6, 7.4, 1.8)]
+    return street_scene.draw(SIZE, people=people)
 
 
 def padala_police_car_leaves() -> Image.Image:
-    c = night(background("public_market", blur=10))
-    c = glow(c, (0.72, 0.62), (230, 40, 40), 0.35, 0.18)
-    c = glow(c, (0.8, 0.62), (40, 90, 255), 0.35, 0.18)
-    return vignette(c, 0.75)
+    """The police car drives away down the street, lights off; the man watches from his doorway."""
+    people = [(person("eli", False), 4.6, 7.4, 1.8)]
+    return street_scene.draw(SIZE, car_at=(-0.8, 0.0, 30.0), car_yaw=4.0, leaving=True, people=people, bar_on=False)
 
 
 def padala_eli_attacks() -> Image.Image:

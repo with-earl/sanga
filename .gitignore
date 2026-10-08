@@ -23,3 +23,4 @@ desktop.ini
 
 # Local tools: Claude Code launch configs
 /.claude/
+__pycache__/

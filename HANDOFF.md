@@ -347,6 +347,17 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
     Each shot is one small function, so a single picture is easy to adjust:
     `python tools/draw_placeholders.py <name>`. Real paintings still replace them (save under the
     same name, remove the name from PLACEHOLDERS.txt).
+  - **Drawn in 3D with Pillow** (user asked why not new art with correct angle and perspective;
+    I explained Pillow can build objects and places but not anime characters in new poses, and
+    offered the shots whose subject is a thing; the user said draw the police car first):
+    `padala_police_car` and `padala_police_car_leaves` are now a real night street built in 3D
+    (`tools/scene3d.py`, `tools/street_scene.py`): Mercy's building with grilles and lit
+    windows, the lit doorway, poles and sagging wires, a sodium lamp, wet asphalt, and a PNP-style
+    white and blue police car (POLICE on the side) whose light bar washes the wall and road
+    pixel by pixel. Batista and the man stand at the doorway as backlit cut-outs inside the 3D
+    scene (the car hides what is behind it). Leaving: lights off, tail lights down the street,
+    the man watching from the door. Offered next, same way: the jeepney inside, Batista's badge
+    on a desk, the prison visiting booth, the TV news.
     **Next:** paint the cutscenes for real (user or artist), most important first: the reveals
     (`padala_reveal_eli`, `tokhang_trade`, `true_visiting`) and the deaths.
 - **No sound on iPhone** (user report). The game itself plays music (checked: player playing,
