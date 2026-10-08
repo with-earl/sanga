@@ -7,7 +7,6 @@ const SCENES := {
 	"confessional": "res://scenes/confessional.tscn",
 	"apartment_room": "res://scenes/apartment_room.tscn",
 	"public_market": "res://scenes/public_market.tscn",
-	"timeline_reveal": "res://scenes/timeline_reveal.tscn",
 	"run_recap": "res://scenes/run_recap.tscn",
 }
 

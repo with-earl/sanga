@@ -8,9 +8,6 @@ extends CanvasLayer
 const SHADER := preload("res://shaders/scene_vignette.gdshader")
 const BOOT_SCENE := "res://scenes/boot.tscn"
 const MAIN_SCENE := "res://scenes/main_menu.tscn"
-## Screens that are all text and diagram, with no art to soften: the overlay's edge blur would
-## only make them look out of focus.
-const SHARP_SCENES := ["res://scenes/timeline_reveal.tscn"]
 ## Layer for scenes whose buttons are part of the scene itself (layer 0): the overlay goes under them.
 const BEHIND_SCENE_LAYER := -8
 ## Layer for gameplay scenes: above their art (layer 0), below their HUD (layer 20).
@@ -50,5 +47,5 @@ func _on_node_added(node: Node) -> void:
 
 func _show_for(scene_path: String) -> void:
 	var is_menu_screen := scene_path == BOOT_SCENE or scene_path == MAIN_SCENE
-	visible = (is_menu_screen or SceneRouter.SCENES.values().has(scene_path)) and scene_path not in SHARP_SCENES
+	visible = (is_menu_screen or SceneRouter.SCENES.values().has(scene_path))
 	layer = BEHIND_SCENE_LAYER if is_menu_screen else ABOVE_ART_LAYER

@@ -2,9 +2,8 @@ class_name ChurchNave
 extends Location
 ## Kumpisal, in the church nave.
 ##
-## Who is in church, the route of objectives and the conversations depend on the timeline, and come
-## from story/kumpisal.json (see KumpisalStory). Some versions open with a short cutscene the first
-## time the nave is entered.
+## Who is in church, the route of objectives and the conversations come from story/kumpisal.json
+## (see KumpisalStory). The story opens with a short cutscene the first time the nave is entered.
 
 const OPENING_FLAG := "objective_kumpisal_opening_seen"
 ## On a replay where every conversation here was heard before and none of them has changed, Father
@@ -14,17 +13,17 @@ const STAY := "Kausapin muna sila."
 const SHORTCUT_FLAG := "objective_kumpisal_shortcut_offered"
 const CONFESSIONAL := "confessional"
 
-var _variant: Dictionary = {}
+var _story: Dictionary = {}
 
 
 func _ready() -> void:
-	_variant = KumpisalStory.load_variant()
-	objectives = PackedStringArray(_variant.get("objectives", []))
-	objective_targets = PackedStringArray(_variant.get("targets", []))
-	conversations = _variant.get("conversations", {})
+	_story = KumpisalStory.load_story()
+	objectives = PackedStringArray(_story.get("objectives", []))
+	objective_targets = PackedStringArray(_story.get("targets", []))
+	conversations = _story.get("conversations", {})
 	super._ready()
-	_leave_only_cast(_variant.get("cast", []))
-	var opening: Array = _variant.get("opening", [])
+	_leave_only_cast(_story.get("cast", []))
+	var opening: Array = _story.get("opening", [])
 	if not opening.is_empty() and not GameState.get_flag(OPENING_FLAG, false):
 		_play_opening.call_deferred(opening)
 	else:

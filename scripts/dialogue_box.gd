@@ -99,7 +99,7 @@ const CHOICE_GAP := 4.0
 const CHOICE_HEIGHT := 48.0
 const CHOICE_FADE_SECONDS := 0.22
 ## A short note above every choice, so the player knows what a decision can do.
-const CHOICE_HINT := "Your choice may change the timeline."
+const CHOICE_HINT := "Your choice may change what happens."
 const CHOICE_HINT_SIZE := 20
 const CHOICE_STAGGER_SECONDS := 0.07
 ## The gameplay text colours: golden ochre with a brown outline.

@@ -15,7 +15,7 @@ func _initialize() -> void:
 	_test_save_upgrade()
 	_test_story_order()
 	_test_choices_fit_one_line()
-	_test_timelines_chart()
+	_test_one_story()
 	_test_run_recap()
 	await _test_asset_preloader()
 	if _failures.is_empty():
@@ -33,25 +33,44 @@ const CHOICE_ROOM := 560.0
 const CHOICE_FONT_SIZE := 26
 
 
-## The timelines chart: every path uses real cards, every reality has its own name, and runs land
-## on exactly the reality they made (not on one that only shares some of its outcomes).
-func _test_timelines_chart() -> void:
-	var map_script: GDScript = load("res://scripts/timeline_map.gd")
-	var map: Dictionary = map_script.call("data")
-	var nodes: Dictionary = map.get("nodes", {})
-	var keys := {}
-	for reality in map.get("realities", []):
-		for id in reality.get("path", []):
-			_check(nodes.has(id), "timelines chart: unknown card %s" % id)
-		var key: String = map_script.call("key_of", reality)
-		_check(not keys.has(key), "timelines chart: two realities named %s" % key)
-		keys[key] = true
-		var found: Dictionary = map_script.call("reality_for", reality["timeline"], reality["needs"])
-		_check(found == reality, "timelines chart: %s matches another reality" % key)
-	var mixed: Dictionary = map_script.call("reality_for", "main", ["tokhang_peter", "kumpisal_sinamahan", "padala_key"])
-	_check(mixed.get("path", []).has("m_sinamahan"), "timelines chart: a saved Kulas shows on the chart")
-	var old: Array = map_script.call("realities_with", ["main:tokhang_peter+padala_key"])
-	_check(old.size() == 1, "timelines chart: an older save's reality is still found")
+## One story, three starting points: every order plays each story once, the run always goes on
+## around the same circle, and every ending the memories and threads name is a real ending.
+func _test_one_story() -> void:
+	var director := root.get_node("/root/StoryDirector")
+	var circle := ["tokhang", "kumpisal", "padala"]
+	for start in director.TIMELINES:
+		var order: Array = director.TIMELINES[start]
+		_check(order.size() == 3 and circle.all(func(story: String) -> bool: return story in order), "run %s plays each story once" % start)
+		for index in order.size():
+			_check(order[index] == circle[(circle.find(order[0]) + index) % 3], "run %s goes on around the circle" % start)
+	_check(director.is_true_ending(["kumpisal_sinamahan", "padala_pinalaya", "tokhang_safe"]), "nobody dead and Eli confessed is the true ending")
+	_check(not director.is_true_ending(["kumpisal_sinamahan", "padala_tanod", "tokhang_safe"]), "Mercy rescued without Eli's confession is not the true ending")
+	var endings := {}
+	for path in ["res://story/tokhang.json", "res://story/kumpisal.json", "res://story/padala.json"]:
+		_collect_ending_ids(JSON.parse_string(FileAccess.get_file_as_string(path)), endings)
+	for id in ["kumpisal_kulas", "kumpisal_sinamahan", "padala_tanod"]:
+		# Outcomes the scripts give rather than the story files.
+		endings[id] = true
+	var memories: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://story/alaala.json"))
+	for item in memories.get("alaala", []):
+		for id in item.get("from", []):
+			_check(endings.has(id), "memory %s comes from an ending that exists: %s" % [item.get("id", ""), id])
+	var links: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://story/threads.json"))
+	for link in links.get("threads", []):
+		for end in [link.get("from", {}), link.get("to", {})]:
+			for id in end.get("outcome", []):
+				_check(endings.has(id), "thread names an ending that exists: %s" % id)
+
+
+func _collect_ending_ids(data: Variant, found: Dictionary) -> void:
+	if data is Dictionary:
+		if data.get("id") is String and str(data["id"]).contains("_") and data.has("steps"):
+			found[str(data["id"])] = true
+		for value in data.values():
+			_collect_ending_ids(value, found)
+	elif data is Array:
+		for value in data:
+			_collect_ending_ids(value, found)
 
 
 ## The recap writes only what the run did, and always closes with the same line, so it never
@@ -72,8 +91,8 @@ func _test_run_recap() -> void:
 	_check(lines.size() == 7, "recap: one line per moment, two for a memory")
 	# In time order the past comes first, and a choice is joined to its echo and to its ending.
 	var played := [
-		{"story": "Tokhang"}, {"choice": "Sige, ako na'ng bibili."}, {"ending": "Peter", "line": "Namatay si Peter."}, {"outcome": "tokhang_peter"},
-		{"story": "Kumpisal"}, {"choice": "Huwag kang mag-alala, anak.", "flag": "run_echo_mercy_reassured"},
+		{"story": "Tokhang"}, {"choice": "Sige. Dadaanan ko na."}, {"ending": "Peter", "line": "Nanlaban daw."}, {"outcome": "tokhang_peter"},
+		{"story": "Kumpisal"}, {"choice": "Wala kang dapat ipag-alala, anak.", "flag": "run_echo_mercy_reassured"},
 		{"story": "Padala"}, {"echo": "Sabi niya.", "speaker": "Mercy", "flag": "run_echo_mercy_reassured"},
 	]
 	var threads_script: GDScript = load("res://scripts/time_threads.gd")
@@ -215,7 +234,7 @@ func _test_save_upgrade() -> void:
 	old.close()
 	var info: Dictionary = state.slot_summary(slot)
 	_check(info["exists"], "a version 1 save still loads")
-	_check(info["timeline"] == "main" and int(info["chapter"]) == 1, "a version 1 save in the church becomes the main timeline at Kumpisal")
+	_check(info["timeline"] == "main" and int(info["chapter"]) == 1, "a version 1 save in the church becomes a market run at Kumpisal")
 	state.delete_slot(slot)
 	state.current_slot = -1
 
@@ -230,5 +249,6 @@ func _test_story_order() -> void:
 	state.start_unsaved_game()
 	state.timeline = "main"
 	state.chapter = 1
-	_check(director.current_story() == "kumpisal" and director.variant() == "main/kumpisal", "main timeline chapter 2 is Kumpisal")
+	_check(director.current_story() == "kumpisal", "a run begun at the market plays Kumpisal second")
+	_check(director.played_before("tokhang") and not director.played_before("padala"), "a run knows which stories came before")
 	state.start_unsaved_game()

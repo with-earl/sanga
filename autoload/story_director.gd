@@ -1,17 +1,15 @@
 extends Node
 ## Runs the stories in order.
 ##
-## In story time, Kumpisal comes first (the past), then Padala (the present), then Tokhang (the
-## future). The main timeline plays them as future, past, present: the market first, so the
-## truth about Kumpisal and Padala is revealed the way a player would piece it together.
+## The three stories are one weekend in one parish, the same in every run. In story time Kumpisal
+## comes first (Saturday afternoon), then Padala (Saturday night), then Tokhang (Sunday afternoon).
+## A run plays all three, beginning with the story the player picks on the start screen and going
+## on around the circle: Tokhang, Kumpisal, Padala, Tokhang. Where a run begins only changes what
+## the player knows first, and which choices can still reach which story: a cause reaches only
+## stories later in story time that are played after it in this run (see docs/STORY_BIBLE.md, R10).
 ##
-## A timeline is an ordered list of stories (chapters). The first run of a save is always the main
-## timeline: Tokhang, then Kumpisal, then Padala. After that, the player chooses which story to
-## begin with, and that choice picks the timeline. A timeline must be finished before another can
-## be started. Progress is saved automatically at every step.
-##
-## Scenes ask `variant()` which version of themselves to play, for example the Kumpisal of the
-## Padala timeline, which has fewer people in it.
+## The first run of a save always begins with Tokhang, with no prologue. Progress is saved
+## automatically at every step.
 
 ## Each story: the title on its title card and the scene it starts in.
 const STORIES := {
@@ -19,24 +17,27 @@ const STORIES := {
 	"kumpisal": {"title": "Kumpisal", "scene": "church_nave"},
 	"padala": {"title": "Padala", "scene": "apartment_room"},
 }
-## The stories of each timeline, in the order they are played.
+## The order a run plays the stories in, by where it begins. The keys are the names saves already
+## use: "main" is the run that begins at the market.
 const TIMELINES := {
 	"main": ["tokhang", "kumpisal", "padala"],
-	"kumpisal": ["kumpisal", "padala"],
-	"padala": ["padala", "kumpisal", "tokhang"],
+	"kumpisal": ["kumpisal", "padala", "tokhang"],
+	"padala": ["padala", "tokhang", "kumpisal"],
 }
-## Which timeline each story begins when it is chosen first.
+## Which order each story begins when it is picked first.
 const TIMELINE_STARTING_WITH := {"tokhang": "main", "kumpisal": "kumpisal", "padala": "padala"}
-## The reality the last finished run made (see TimelineMap), for the timeline reveal.
-var last_reality: Dictionary = {}
+## The true ending: nobody dies at the church, in the room or at the market, and Father Eli
+## confessed. It is recorded as one more outcome of the run.
+const TRUE_ENDING := "walang_namatay"
+const TRUE_ENDING_NEEDS := ["kumpisal_sinamahan", "padala_pinalaya", "tokhang_safe"]
+## The outcomes of the last finished run, in the order they were reached, for its recap.
+var last_outcomes: Array = []
 ## What happened in the last finished run, for its recap (see GameState.run_log).
 var last_run_log: Array = []
-## The timeline the last finished run was on, so its recap knows where to go next.
-var last_timeline := ""
 
 const RUN_FLAG_PREFIX := "run_"
-## The voice in the dark confessional that opens a run (see docs/STORY_BIBLE.md). The main
-## timeline has none: it starts cold in the market, with no hint of what comes after.
+## The voice in the dark confessional that opens every run after the first, and the true
+## ending's epilogue (see docs/STORY_BIBLE.md).
 const PROLOGUE_FILE := "res://story/prologue.json"
 
 
@@ -48,34 +49,8 @@ func current_story() -> String:
 	return stories[GameState.chapter] if GameState.chapter < stories.size() else ""
 
 
-## Which version of the current story to play: "<timeline>/<story>", for example "padala/kumpisal".
-func variant() -> String:
-	return "%s/%s" % [GameState.timeline, current_story()]
-
-
 func story_title(story: String) -> String:
 	return STORIES.get(story, {}).get("title", story.capitalize())
-
-
-## The flag the priest's answer in the prologue sets: the story to begin with.
-const START_FLAG := "prologue_start"
-
-
-## Starts a run after the first the way the story frames it: the voice in the dark confessional
-## confesses and asks where to begin, the player answers as the priest, and that answer picks the
-## starting story, and so the timeline (see docs/STORY_BIBLE.md, section 6).
-func begin_from_confession() -> void:
-	var prologue := _prologue()
-	var image := str(prologue.get("image", ""))
-	GameState.clear_flags(START_FLAG)
-	var lines: Array = (prologue.get("lines", []) as Array) + (prologue.get("ask", []) as Array)
-	await Cutscene.play([{"image": image, "lines": lines}])
-	var story := str(GameState.get_flag(START_FLAG, "tokhang"))
-	GameState.clear_flags(START_FLAG)
-	var last: Variant = prologue.get("last_line", {}).get(story, null)
-	if last != null:
-		await Cutscene.play([{"image": image, "lines": [last]}])
-	begin_with(story, false)
 
 
 ## The voice's line after any ending but the true one, so the player knows the confession is not
@@ -89,8 +64,8 @@ func _prologue() -> Dictionary:
 	return parsed if parsed is Dictionary else {}
 
 
-## Starts the timeline that begins with `story` and plays its title card. With `prologue`, a run
-## that does not begin in the market first plays the confession that leads into it.
+## Starts a run that begins with `story` and plays its title card. With `prologue`, every run
+## after the first opens with the voice in the confessional, beginning where the player chose.
 func begin_with(story: String, prologue := true) -> void:
 	var timeline: String = TIMELINE_STARTING_WITH.get(story, "main")
 	GameState.timeline = timeline
@@ -99,7 +74,7 @@ func begin_with(story: String, prologue := true) -> void:
 	GameState.clear_flags(RUN_FLAG_PREFIX)
 	GameState.run_outcomes = []
 	GameState.run_log = []
-	if timeline != "main" and prologue:
+	if prologue and GameState.has_finished_first_run():
 		await Cutscene.play(_prologue_for(story))
 	_enter_chapter([])
 
@@ -117,8 +92,7 @@ func _prologue_for(story: String) -> Array:
 	return [{"image": str(prologue.get("image", "")), "lines": lines}]
 
 
-## Picks up a save where it left off. Between runs there is nothing to resume, so the caller shows
-## the story choice instead.
+## Picks up a save where it left off. Between runs there is nothing to resume.
 func resume() -> bool:
 	if not GameState.is_run_in_progress():
 		return false
@@ -126,7 +100,7 @@ func resume() -> bool:
 	return true
 
 
-## Called when the current story is finished. Moves to the next story of the timeline, or ends
+## Called when the current story is finished. Moves to the next story of the run, or ends
 ## the run after the last one. `lead_in` is an optional list of pictures played before the next
 ## title card, for example the cutscene that closes this story.
 func finish_story(lead_in: Array = [], outcome_id := "") -> void:
@@ -139,19 +113,21 @@ func finish_story(lead_in: Array = [], outcome_id := "") -> void:
 	_enter_chapter(lead_in)
 
 
-## Ends the run: records its ending and the reality it made on this save, then closes the run
-## with its recap, which puts the run in time order (see RunRecap); the other timelines then show
-## the timeline diagram of every reality this save has made. `title` and `line` are kept for a
-## plain ending card, which no timeline uses now.
+## Ends the run: plays the true ending if the run earned it, records the run's outcomes on this
+## save, then closes the run with its recap, which puts the run in time order (see RunRecap).
+## `title` and `line` are kept for a plain ending card, which no run uses now.
 func end_run(ending_id: String, title: String, line: String, lead_in: Array = []) -> void:
 	GameState.record_ending(ending_id)
 	await _remember(ending_id)
-	var finished_timeline := GameState.timeline
+	if is_true_ending(GameState.run_outcomes):
+		if Cutscene.visible:
+			Cutscene.hand_over()
+		await Cutscene.play(_prologue().get("epilogue", []))
+		GameState.record_ending(TRUE_ENDING)
 	last_run_log = GameState.run_log.duplicate(true)
-	last_timeline = finished_timeline
+	last_outcomes = GameState.run_outcomes.duplicate()
 	GameState.run_log = []
-	last_reality = TimelineMap.reality_for(finished_timeline, GameState.run_outcomes)
-	GameState.record_reality(TimelineMap.key_of(last_reality))
+	GameState.record_reality("%s:%s" % [GameState.timeline, "+".join(PackedStringArray(last_outcomes))])
 	GameState.run_outcomes = []
 	GameState.runs_finished += 1
 	GameState.timeline = ""
@@ -166,8 +142,26 @@ func end_run(ending_id: String, title: String, line: String, lead_in: Array = []
 	if title != "":
 		StoryCard.show_ending(title, line, lead_in)
 	else:
-		# Every run closes with its recap; the recap goes on to the time order or the chart.
+		# Every run closes with its recap.
 		StoryCard.show_ending("", "", lead_in, "run_recap")
+
+
+## True when these outcomes make the true ending (and it has not been recorded yet).
+func is_true_ending(outcomes: Array) -> bool:
+	if TRUE_ENDING in outcomes:
+		return false
+	for needed in TRUE_ENDING_NEEDS:
+		if needed not in outcomes:
+			return false
+	return true
+
+
+## True when `story` was already played earlier in the run in progress, so what happened there can
+## reach the story being played now.
+func played_before(story: String) -> bool:
+	var stories: Array = TIMELINES.get(GameState.timeline, [])
+	var index := stories.find(story)
+	return index >= 0 and index < GameState.chapter
 
 
 ## A death the player has seen for the first time becomes an Alaala: it is saved at once, and a

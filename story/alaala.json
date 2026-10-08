@@ -4,11 +4,10 @@
 		{
 			"id": "laruang_baril",
 			"name": "Ang Laruang Baril",
-			"memory": "Isang laruan. Isang tawag. Isang bala.",
+			"memory": "Isang laruan. Isang text. Isang bala.",
 			"from": [
 				"tokhang_peter",
-				"tokhang_gwen",
-				"tokhang_trade"
+				"tokhang_gwen"
 			],
 			"hint": "Sa palengke, may iba pang laruan."
 		},
@@ -17,17 +16,16 @@
 			"name": "Ang Pagtakbo ni Kulas",
 			"memory": "Tumakbo siya palabas ng simbahan. Hindi na siya nakarating sa kanto.",
 			"from": [
-				"tokhang_kulas",
-				"kumpisal_main"
+				"kumpisal_kulas"
 			],
-			"hint": "Sa kumpisal ni Kulas, may masasabi ka pa."
+			"hint": "Sa kumpisal ni Kulas, may masasabi pa siya."
 		},
 		{
 			"id": "father_eli",
 			"name": "Si Father Eli",
 			"memory": "Ang taong nakikinig sa lahat ng kasalanan... may sarili palang itinatago.",
 			"from": [
-				"padala_police_card"
+				"padala_police"
 			],
 			"hint": "Sa huling dasal ng pari, may maaamin pa."
 		},
@@ -38,16 +36,16 @@
 			"from": [
 				"padala_run"
 			],
-			"hint": "Sa labas, may ikatlong daan."
+			"hint": "Sa labas ng apartment, hindi lang pagtakbo ang daan."
 		},
 		{
 			"id": "rider",
 			"name": "Ang Rider",
-			"memory": "Dumating siya para tumulong. Mag-isa.",
+			"memory": "Dumating siya. Nakita niya ako. Umalis siya.",
 			"from": [
 				"padala_food"
 			],
-			"hint": "Sa tawag sa rider, may maidadagdag."
+			"hint": "Sa tawag sa delivery, may maidadagdag."
 		}
 	]
 }

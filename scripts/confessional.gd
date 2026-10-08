@@ -7,19 +7,17 @@ extends Location
 ## - When it is the objective, the confessions play one after another, each with a caption. Then
 ##   the ending cutscene plays, and the next story starts by itself, or the run ends.
 ##
-## Who confesses and how it ends depend on the timeline, and come from story/kumpisal.json.
+## Who confesses and how it ends come from story/kumpisal.json.
 ##
-## Two Alaala choices live here (see Alaala): in Kulas' confession, "Sasamahan kita" saves him
+## Two Alaala choices live here (see Alaala): in Kulas' confession, "Hintayin mo 'ko" saves him
 ## (the Sinamahan ending), and at the end Father Eli can confess his own sin, which changes how
-## Padala ends.
+## Padala ends when it is played after this in the run.
 
-## Set while Kulas is in danger after the confessions, so his confession offers the choice that
-## saves him, and while Mercy is in church, so Gloria can ask Father Eli to look after her.
-const KULAS_AT_RISK_FLAG := "objective_kumpisal_kulas_at_risk"
-const MERCY_HERE_FLAG := "objective_kumpisal_mercy_here"
-## Set for the rest of the run when Father Eli walks Kulas out instead of letting him run.
+## Set for the rest of the run when Father Eli walks Kulas out instead of letting him run. Tokhang,
+## played later in the run, finds Kulas alive at the market.
 const KULAS_SAFE_FLAG := "run_kulas_safe"
 const SINAMAHAN_OUTCOME := "kumpisal_sinamahan"
+const KULAS_SHOT_OUTCOME := "kumpisal_kulas"
 
 ## Where the church nave keeps its route progress. "Go to confessional booth" is its last step.
 @export var nave_step_flag := "objective_step:church_nave"
@@ -36,11 +34,11 @@ const TOO_EARLY_LINE := "No one is here yet. I should go back to the Church Nave
 var _caption_layer := CanvasLayer.new()
 var _caption_label := Label.new()
 var _caption_tween: Tween
-var _variant: Dictionary = {}
+var _story: Dictionary = {}
 
 
 func _ready() -> void:
-	_variant = KumpisalStory.load_variant()
+	_story = KumpisalStory.load_story()
 	super._ready()
 	# Nobody is in the booth in this scene.
 	var characters := get_node_or_null("Characters")
@@ -52,7 +50,7 @@ func _ready() -> void:
 
 func _begin() -> void:
 	var step := int(GameState.get_flag(nave_step_flag, 0))
-	if step != _booth_step() or _variant.get("confessions", []).is_empty():
+	if step != _booth_step() or _story.get("confessions", []).is_empty():
 		_say_alone(TOO_EARLY_LINE)
 		return
 	await _play_confessions()
@@ -68,9 +66,7 @@ func _play_confessions() -> void:
 	if _back_button != null:
 		_back_button.modulate.a = 0.0
 		_back_button.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	GameState.set_flag(KULAS_AT_RISK_FLAG, _variant.get("kulas_at_risk", false))
-	GameState.set_flag(MERCY_HERE_FLAG, "Mercy" in _variant.get("cast", []))
-	for confession in _variant.get("confessions", []):
+	for confession in _story.get("confessions", []):
 		_show_caption(str(confession.get("title", "")))
 		var who := str(confession.get("who", ""))
 		var lines: Array = confession.get("lines", [])
@@ -81,18 +77,14 @@ func _play_confessions() -> void:
 		_dialogue.say_lines(str((lines[0] as Dictionary).get("speaker", who)), lines)
 		await _dialogue.dismissed
 	GameState.set_flag(nave_step_flag, _booth_step() + 1)
-	await Cutscene.play(_variant.get("ending", []))
+	await Cutscene.play(_story.get("ending", []))
 	var kulas_safe: bool = GameState.get_flag(KULAS_SAFE_FLAG, false)
-	var run_ending := str(_variant.get("end_run", ""))
-	if run_ending != "":
-		StoryDirector.end_run(SINAMAHAN_OUTCOME if kulas_safe else run_ending, "", "")
-	else:
-		StoryDirector.finish_story([], SINAMAHAN_OUTCOME if kulas_safe else "kumpisal_" + KumpisalStory.variant_name())
+	StoryDirector.finish_story([], SINAMAHAN_OUTCOME if kulas_safe else KULAS_SHOT_OUTCOME)
 
 
 ## The step of the nave's route that is "Go to confessional booth": always the last one.
 func _booth_step() -> int:
-	return maxi(_variant.get("targets", []).size() - 1, 0)
+	return maxi(_story.get("targets", []).size() - 1, 0)
 
 
 func _build_caption() -> void:

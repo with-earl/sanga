@@ -1,15 +1,12 @@
 {
+	"_comment": "Tokhang, Sunday afternoon, see docs/STORY_BIBLE.md section 7. One version for every run. It is the latest story in time, so what was played before it in this run can reach it: Gwen's confession (an echo on the phone), Peter seen at Father Eli's door the night before (an echo, and the scene at the altar before the shooting), Mercy shot running (on the news), and Kulas alive (he warns the buyer, which offers the water gun without the memory). A story played before its causes shows only what is true in every version of the past.",
 	"intro": [
 		{
 			"image": "res://assets/cutscenes/tokhang_rider.png",
 			"lines": [
 				{
 					"speaker": "Peter",
-					"text": "Ako si Peter. Rider."
-				},
-				{
-					"speaker": "Peter",
-					"text": "Labindalawang oras sa kalsada, araw-araw. Init, usok, traffic. Sanay na 'ko."
+					"text": "Huling biyahe na 'to. Birthday ni Ben, bawal akong ma-late."
 				}
 			]
 		},
@@ -18,15 +15,17 @@
 			"lines": [
 				{
 					"speaker": "Reporter",
-					"text": "...tatlo ang patay sa operasyon kagabi. Ayon sa pulisya, nanlaban daw ang mga suspek."
+					"text": "...tatlo ang patay sa magkakahiwalay na operasyon kagabi dito sa Sampaloc. Nanlaban umano ang mga suspek, ayon sa pulisya."
+				},
+				{
+					"speaker": "Reporter",
+					"text": "Kabilang sa mga nasawi ang isang babaeng hindi pa nakikilala.",
+					"if_flag": "run_echo_mercy_ran",
+					"echo": true
 				},
 				{
 					"speaker": "Peter",
 					"text": "Nanlaban na naman."
-				},
-				{
-					"speaker": "Peter",
-					"text": "Delikado talaga ngayon. Pero wala namang choice. May binubuhay ako."
 				}
 			]
 		}
@@ -34,69 +33,69 @@
 	"phone": [
 		{
 			"speaker": "Peter",
-			"text": "Mahal, ano ulit 'yung pinapabili ni Ben?"
+			"text": "Mahal, ano nga ulit 'yung gusto ni Ben?"
 		},
 		{
 			"speaker": "Gwen",
-			"text": "Baril-barilan daw. Ewan ko ba diyan, biglang nahilig sa baril."
+			"text": "Baril. 'Yung parang sa pulis daw. Hindi ko alam kung saan niya napulot 'yan."
 		},
 		{
 			"speaker": "Ben",
-			"text": "'Yung mukhang totoo, Kuya! 'Yung pang-pulis!"
+			"text": "'Yung itim, Kuya! 'Yung mabigat!"
 		},
 		{
 			"speaker": "Gwen",
-			"text": "Narinig mo na. Bilisan mo, ha. May sasabihin din ako sa'yo mamaya."
+			"text": "Kay Aling Gloria ka na lang bumili, mura do'n."
 		},
 		{
 			"speaker": "Gwen",
-			"text": "Importante 'yon, mahal. Umuwi ka nang maaga, ha.",
+			"text": "Saka umuwi ka nang maaga, ha. May sasabihin ako. Importante.",
 			"if_flag": "run_echo_gwen_tell",
 			"echo": true
+		},
+		{
+			"speaker": "Peter",
+			"text": "Mahal... si Father Eli ba, may kasambahay?",
+			"if_flag": "run_peter_seen",
+			"echo": true
+		},
+		{
+			"speaker": "Gwen",
+			"text": "Ha? Bakit?",
+			"if_flag": "run_peter_seen"
+		},
+		{
+			"speaker": "Peter",
+			"text": "Wala. Mamaya na lang.",
+			"if_flag": "run_peter_seen"
 		}
 	],
 	"choices": [
 		{
 			"id": "peter",
-			"text": "Sige, ako na'ng bibili.",
+			"text": "Sige. Dadaanan ko na.",
 			"after_first_run_only": false,
 			"buyer": "Peter",
 			"after": [
 				{
 					"speaker": "Ben",
-					"text": "Yehey! Thank you, Kuya Peter!"
+					"text": "Yehey! Bilisan mo, Kuya!"
 				},
 				{
 					"speaker": "Gwen",
-					"text": "Pero kakain ka muna ng gulay bago mo makuha 'yan, ha."
-				},
-				{
-					"speaker": "Peter",
-					"text": "Sige na, mahal. Bye."
+					"text": "Ingat ka."
 				}
 			]
 		},
 		{
 			"id": "gwen",
-			"text": "Ikaw na lang. May delivery ako.",
+			"text": "Ikaw na lang muna. May pickup pa 'ko.",
 			"after_first_run_only": true,
 			"buyer": "Gwen",
 			"after": [
 				{
 					"speaker": "Gwen",
-					"text": "Ay, ako na naman. O sige. Ingat ka, ha."
-				}
-			]
-		},
-		{
-			"id": "kulas",
-			"text": "Mamaya, sabay na tayo.",
-			"after_first_run_only": true,
-			"buyer": "",
-			"after": [
-				{
-					"speaker": "Gwen",
-					"text": "Sige. Hintayin kita."
+					"text": "Ako na naman? Sige na nga. Ikaw maghuhugas ng pinggan mamaya."
 				}
 			]
 		}
@@ -109,33 +108,51 @@
 	"ask_gloria": [
 		{
 			"speaker": "$buyer",
-			"text": "Ate, may laruang baril po kayo?"
+			"text": "Ate, may laruang baril po kayo? 'Yung mukhang totoo."
 		},
 		{
 			"speaker": "Gloria",
-			"text": "Aba, meron, anak! Doon sa harap, pili ka lang. Dalhin mo dito, ako na'ng magbabalot."
+			"text": "Ay, meron, anak. Nandiyan sa harap, pili ka lang. Dalhin mo rito pag may napili ka na, ibabalot ko."
+		}
+	],
+	"kulas_warning": [
+		{
+			"speaker": "Kulas",
+			"text": "*Pabulong, dumaan sa likod* Huwag 'yung itim.",
+			"if_flag": "run_kulas_safe",
+			"echo": true
+		},
+		{
+			"speaker": "Kulas",
+			"text": "May mga nakabantay sa labasan. Kilala ko 'yung mga 'yan.",
+			"if_flag": "run_kulas_safe"
 		}
 	],
 	"guns": {
 		"pink_toy_gun": {
-			"text": "Bilhan ko rin kaya si Gwen nito? Joke lang.",
+			"text": "Pang-Barbie 'to. Iiyak si Ben.",
 			"buyers": [
 				"Peter"
 			]
 		},
 		"water_gun": {
-			"text": "Baka magtampo si Ben. \"Mukhang totoo\" raw, eh.",
+			"text": "Water gun. Mas bagay sana sa edad niya... pero 'yung itim ang gusto niya.",
 			"buyers": [
 				"Peter",
 				"Gwen"
 			],
-			"_comment": "With the Alaala 'laruang_baril', the buyer can choose this one instead. That leads to the Ligtas ending.",
+			"_comment": "The buyer can settle on this one with the Alaala 'laruang_baril', or without it when Kulas, alive this run, warned them. It leads to the Ligtas ending. The choice only shows when there is more than one option.",
 			"choice": {
-				"needs": "laruang_baril",
 				"choices": [
 					{
-						"text": "Ito na lang ang bilhin ko.",
+						"text": "Ito na lang. Ako na'ng bahala kay Ben.",
 						"needs": "laruang_baril",
+						"id": "water_gun"
+					},
+					{
+						"text": "Ito na lang. Ako na'ng bahala kay Ben.",
+						"needs_not": "laruang_baril",
+						"if_flag": "run_kulas_safe",
 						"id": "water_gun"
 					},
 					{
@@ -146,7 +163,7 @@
 			}
 		},
 		"realistic_toy_gun": {
-			"text": "Ito na. Matutuwa si Ben dito.",
+			"text": "Ito. Kahit malapitan, mukhang totoo.",
 			"buyers": [
 				"Peter",
 				"Gwen"
@@ -154,17 +171,72 @@
 			"chosen": true
 		}
 	},
-	"talk_first": "Kakausapin ko muna si Ate Gloria.",
+	"talk_first": "Magtatanong muna ako kay Aling Gloria.",
+	"pay": [
+		{
+			"speaker": "Gloria",
+			"text": "Two-fifty, anak. Matibay 'yan, hindi basta nababasag."
+		},
+		{
+			"choices": [
+				{
+					"text": "Dos na lang, Ate.",
+					"after": [
+						{
+							"speaker": "Gloria",
+							"text": "Naku, ikaw talaga. O sige na, para sa bata."
+						}
+					]
+				},
+				{
+					"text": "Sige po.",
+					"after": [
+						{
+							"speaker": "Gloria",
+							"text": "Buti ka pa, hindi tumatawad."
+						}
+					]
+				}
+			]
+		},
+		{
+			"speaker": "Gloria",
+			"text": "Para kay Ben 'yan, 'no? Nakita ko siya kahapon sa simbahan, takbo nang takbo. Si Father Eli lang ang nakakapagpaupo sa kanya."
+		},
+		{
+			"speaker": "Gloria",
+			"text": "*Mahina, sa cellphone* ...Oo. 'Yung may bitbit. Papalabas na.",
+			"needs": "laruang_baril"
+		}
+	],
 	"endings": {
 		"peter": {
 			"id": "tokhang_peter",
 			"steps": [
 				{
+					"image": "res://assets/cutscenes/tokhang_trade.png",
+					"if_flag": "run_peter_seen",
+					"lines": [
+						{
+							"speaker": "Batista",
+							"text": "'Yung rider kagabi. Sigurado kang namukhaan ka?"
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "Tinawag niya akong “Father.”"
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "Bibili raw siya ng laruan kay Gloria mamayang hapon. Para sa birthday ng bata."
+						}
+					]
+				},
+				{
 					"image": "res://assets/cutscenes/tokhang_peter_holding.png",
 					"lines": [
 						{
 							"speaker": "???",
-							"text": "Pigilan n'yo 'yan! May baril!",
+							"text": "May baril 'yan! May baril!",
 							"reveal": {
 								"needs": "father_eli",
 								"speaker": "Batista"
@@ -179,7 +251,7 @@
 				},
 				{
 					"card": "Peter",
-					"line": "Namatay si Peter."
+					"line": "Nanlaban daw."
 				}
 			]
 		},
@@ -191,7 +263,7 @@
 					"lines": [
 						{
 							"speaker": "???",
-							"text": "Pigilan n'yo 'yan! May baril!",
+							"text": "May baril 'yan! May baril!",
 							"reveal": {
 								"needs": "father_eli",
 								"speaker": "Batista"
@@ -206,7 +278,7 @@
 				},
 				{
 					"card": "Gwen",
-					"line": "Nakaligtas si Peter, pero namatay si Gwen."
+					"line": "Nanlaban daw."
 				},
 				{
 					"image": "res://assets/cutscenes/tokhang_flashback_ben.png",
@@ -214,80 +286,13 @@
 					"lines": [
 						{
 							"speaker": "Gwen",
-							"text": "Ben, 'pag hindi ka kumain ng gulay, hindi ka bibilhan ni Ate ng baril, ha."
+							"text": "Ben, ubusin mo 'yang gulay, kundi walang regalo bukas."
 						},
 						{
 							"speaker": "Ben",
-							"text": "Kakain na po!"
+							"text": "Inubos ko na po!"
 						}
 					]
-				}
-			]
-		},
-		"kulas": {
-			"id": "tokhang_kulas",
-			"steps": [
-				{
-					"image": "res://assets/cutscenes/tokhang_kulas_runs.png",
-					"lines": [
-						{
-							"speaker": "???",
-							"text": "Pigilan n'yo 'yan!",
-							"reveal": {
-								"needs": "father_eli",
-								"speaker": "Batista"
-							}
-						}
-					]
-				},
-				{
-					"image": "res://assets/cutscenes/tokhang_kulas_shot.png",
-					"gunshot": true,
-					"hold": 2.6
-				},
-				{
-					"card": "Kulas",
-					"line": "Ligtas sina Peter at Gwen, pero namatay si Kulas."
-				}
-			]
-		},
-		"trade": {
-			"id": "tokhang_trade",
-			"steps": [
-				{
-					"image": "res://assets/cutscenes/tokhang_trade.png",
-					"lines": [
-						{
-							"speaker": "Batista",
-							"text": "Naibalik ko na 'yung babae mo, pare. Ngayon, ikaw naman."
-						},
-						{
-							"speaker": "Father Eli",
-							"text": "Sa palengke. Mamayang hapon. Naka-gray na jacket."
-						}
-					]
-				},
-				{
-					"image": "res://assets/cutscenes/tokhang_peter_holding.png",
-					"lines": [
-						{
-							"speaker": "???",
-							"text": "Pigilan n'yo 'yan! May baril!",
-							"reveal": {
-								"needs": "father_eli",
-								"speaker": "Batista"
-							}
-						}
-					]
-				},
-				{
-					"image": "res://assets/cutscenes/tokhang_peter_shot.png",
-					"gunshot": true,
-					"hold": 2.6
-				},
-				{
-					"card": "Trade",
-					"line": "Namatay si Peter."
 				}
 			]
 		},
@@ -299,11 +304,11 @@
 					"lines": [
 						{
 							"speaker": "Batista",
-							"text": "Ano 'to? Laruan?!"
+							"text": "...Laruan."
 						},
 						{
 							"speaker": "Batista",
-							"text": "...Negative. Walang armado. Atras."
+							"text": "*Sa radyo* Negative. Tubig lang ang laman. Atras muna."
 						}
 					]
 				},
@@ -312,15 +317,15 @@
 					"lines": [
 						{
 							"speaker": "Ben",
-							"text": "Bang! Patay ka na, Kuya!"
+							"text": "*Binasa si Peter* Bang! Patay ka na, Kuya!"
 						},
 						{
 							"speaker": "Peter",
-							"text": "Ay, tinamaan ako. *Tumawa*"
+							"text": "Aray. Tinamaan ako. *Humiga sa sahig*"
 						},
 						{
 							"speaker": "Gwen",
-							"text": "Mahal... may sasabihin ako sa'yo."
+							"text": "Tumayo ka na diyan. May sasabihin ako."
 						}
 					]
 				},
@@ -330,44 +335,5 @@
 				}
 			]
 		}
-	},
-	"_comment_trade": "In the Padala timeline (police chain), Tokhang skips the choice and plays 'trade' after the phone call.",
-	"_comment_pay": "'pay' plays when the buyer brings the gun back to Gloria: a haggle (an ordinary choice), then, for a save that holds 'laruang_baril', Gloria's phone call as the buyer walks off.",
-	"pay": [
-		{
-			"speaker": "Gloria",
-			"text": "Para sa'yo, suki, two-fifty na lang. 'Yan na 'yung pinakamaganda."
-		},
-		{
-			"choices": [
-				{
-					"text": "Two hundred na lang, Ate?",
-					"after": [
-						{
-							"speaker": "Gloria",
-							"text": "Ay naku, lugi na 'ko niyan... O sige na nga. Basta ikaw."
-						}
-					]
-				},
-				{
-					"text": "Sige po, okay na.",
-					"after": [
-						{
-							"speaker": "Gloria",
-							"text": "'Yan ang gusto ko sa'yo. Hindi ka tumatawad."
-						}
-					]
-				}
-			]
-		},
-		{
-			"speaker": "Gloria",
-			"text": "Para kay Ben ba 'yan? Naku, tuwing Sabado, takbo nang takbo 'yan sa simbahan. Si Father Eli lang ang nakakapagpatahimik diyan."
-		},
-		{
-			"speaker": "Gloria",
-			"text": "*Mahina, sa cellphone* ...Oo. Kakaalis lang. Naka-jacket. May dalang baril.",
-			"needs": "laruang_baril"
-		}
-	]
+	}
 }

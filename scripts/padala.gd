@@ -1,24 +1,23 @@
 class_name Padala
 extends Location
-## Padala, in the apartment.
+## Padala, in the apartment, Saturday night.
 ##
-## Opening: Gloria, the luggage, the beating, and the man going for his bath. Then Mercy is alone
-## in the room while he bathes, and looks for a way out. What she can do depends on the timeline:
+## Opening: Gloria, the empty suitcase, the beating, and the man going for his bath. Then Mercy is
+## alone in the room while he bathes, and looks for a way out. There are three, the same in every
+## run:
 ##
-## - Main timeline: read the police emergency poster and use the telephone (Mercy dies), or find the
-##   right key among five (Mercy escapes).
-## - Kumpisal timeline: find the right key. Each wrong key, Father Eli speaks from the bathroom.
-##   Outside, she chooses to run or ride a jeep.
-## - Padala timeline: the man is revealed as Father Eli. There are no keys. Mercy takes the police
-##   emergency poster or the food delivery card (taking one puts the other out of reach) and calls.
-##   The card she called decides how the rest of the run goes.
+## - Read the police emergency poster and call: the police come, and the man at the door is their
+##   friend. Mercy dies.
+## - Take the food delivery flyer and call: a rider comes, sees, and is sent away. Mercy dies, and
+##   the rider (Peter) has been seen, which Tokhang remembers if it is played later in the run.
+## - Find the right key among five and get out into the street.
 ##
-## The words come from story/padala.json. The right key is picked at random for each run.
+## Taking one card puts the other out of reach. The words come from story/padala.json. The right
+## key is picked at random for each run.
 ##
-## The Alaala choices (see Alaala) are in the story file's cutscenes: hiding until morning, and
-## asking the rider to bring a tanod, which ends the run with Mercy rescued. And when Father Eli
-## confessed in Kumpisal this run, the first thing Mercy touches brings him to the door to let her
-## go (Pinalaya), or, if nobody died at the market or the church either, the true ending.
+## The Alaala choices (see Alaala) are in the story file's cutscenes: asking the rider to bring a
+## tanod, and hiding until morning outside. And when Father Eli confessed in Kumpisal earlier in
+## this run, the first thing Mercy touches brings him to the door to let her go (Pinalaya).
 
 const STORY_FILE := "res://story/padala.json"
 const KEY_COUNT := 5
@@ -36,13 +35,11 @@ const ELI_CONFESSED_FLAG := "run_eli_confessed"
 ## Set when Mercy asked the rider to bring a tanod.
 const TANOD_FLAG := "run_tanod"
 const TANOD_OUTCOME := "padala_tanod"
-## What this run must already hold for the true ending, besides Father Eli's confession.
-const SAFE_MARKET_OUTCOME := "tokhang_safe"
-const KULAS_SAFE_FLAG := "run_kulas_safe"
+## Set for the rest of the run when the rider saw Father Eli at the door and was sent away.
+const PETER_SEEN_FLAG := "run_peter_seen"
+const FOOD_OUTCOME := "padala_food"
 
 var _story: Dictionary = {}
-var _variant: Dictionary = {}
-var _variant_name := "main"
 var _busy := false
 ## True while a tap is still being handled, including the moment after its dialogue closes, so a
 ## quick second tap cannot take the other card or try another key before the first is done.
@@ -51,8 +48,6 @@ var _handling := false
 
 func _ready() -> void:
 	_story = _load_story()
-	_variant_name = GameState.timeline if _story.get("variants", {}).has(GameState.timeline) else "main"
-	_variant = _story["variants"][_variant_name]
 	if typeof(GameState.get_flag(CARD_FLAG, "")) == TYPE_BOOL:
 		# Saves from before there were two cards kept true for the police card.
 		GameState.set_flag(CARD_FLAG, "PoliceCard" if GameState.get_flag(CARD_FLAG, false) else "")
@@ -78,22 +73,20 @@ func _load_story() -> Dictionary:
 	return parsed
 
 
-## Shows only what this timeline uses, and hides what was already taken or tried.
+## Hides what was already taken or tried.
 func _arrange_room() -> void:
 	var tried: Array = GameState.get_flag(TRIED_FLAG, [])
-	var cards: Dictionary = _variant.get("cards", {})
 	var nothing_taken := _taken_card() == ""
 	for card in ["PoliceCard", "FoodDeliveryCard"]:
 		var slot := get_node("Props/" + card) as ArtSlot
 		if card == "PoliceCard":
 			# The police poster is taped to the wall: it stays up once read, but cannot be read twice.
-			slot.visible = cards.has(card)
 			slot.interactive = nothing_taken
 		else:
-			slot.visible = cards.has(card) and nothing_taken
+			slot.visible = nothing_taken
 	for index in range(1, KEY_COUNT + 1):
 		var key_node := get_node("Props/Keys%d" % index) as ArtSlot
-		key_node.visible = _variant.get("keys", false) and key_node.name not in tried
+		key_node.visible = key_node.name not in tried
 		var worn := tried.size() >= CLUE_AFTER and index == int(GameState.get_flag(RIGHT_KEY_FLAG, 1))
 		key_node.self_modulate = WORN_KEY if worn else Color.WHITE
 
@@ -104,21 +97,21 @@ func _taken_card() -> String:
 
 ## The objectives, with the card Mercy took struck through once she has it.
 func _show_padala_objectives(animate: bool) -> void:
-	var card: Dictionary = _variant.get("cards", {}).get(_taken_card(), {})
+	var card: Dictionary = _story.get("cards", {}).get(_taken_card(), {})
 	var lines := PackedStringArray()
 	var struck := 0
 	if not card.is_empty():
 		lines.append(str(card["objective"]))
 		struck = 1
-		lines.append_array(PackedStringArray(_variant["objectives_after_card"]))
+		lines.append_array(PackedStringArray(_story["objectives_after_card"]))
 	else:
-		lines.append_array(PackedStringArray(_variant["objectives"]))
+		lines.append_array(PackedStringArray(_story["objectives"]))
 	_objectives_panel.set_objectives(lines, struck, animate, OBJECTIVE_STRIKE_DELAY)
 
 
 func _play_opening() -> void:
 	_busy = true
-	await Cutscene.play(_story.get("intro", []) + _variant.get("intro_after", []))
+	await Cutscene.play(_story.get("intro", []))
 	await Cutscene.release()
 	GameState.set_flag(INTRO_FLAG, true)
 	# Undo stops here: the opening is not played again.
@@ -139,7 +132,7 @@ func _on_slot_interacted(slot: ArtSlot) -> void:
 func _handle_tap(slot: ArtSlot) -> void:
 	if GameState.get_flag(ELI_CONFESSED_FLAG, false):
 		# He confessed. The door opens before she can do anything.
-		await _play_ending("walang_namatay" if _nobody_died() else "pinalaya")
+		await _play_ending("pinalaya")
 		return
 	match slot.name:
 		"Door":
@@ -159,16 +152,10 @@ func _hint_names() -> PackedStringArray:
 	if _taken_card() != "":
 		return PackedStringArray(["Telephone"])
 	var names := PackedStringArray()
-	for card in _variant.get("cards", {}):
+	for card in _story.get("cards", {}):
 		names.append((get_node("Props/" + str(card)) as ArtSlot).display_name)
-	if _variant.get("keys", false):
-		names.append("Keys")
+	names.append("Keys")
 	return names
-
-
-## True when this run kept everyone at the market and the church alive.
-func _nobody_died() -> bool:
-	return SAFE_MARKET_OUTCOME in GameState.run_outcomes and GameState.get_flag(KULAS_SAFE_FLAG, false)
 
 
 func _take_card(slot: ArtSlot) -> void:
@@ -181,7 +168,7 @@ func _take_card(slot: ArtSlot) -> void:
 
 
 func _use_telephone() -> void:
-	var card: Dictionary = _variant.get("cards", {}).get(_taken_card(), {})
+	var card: Dictionary = _story.get("cards", {}).get(_taken_card(), {})
 	if card.has("call"):
 		await _play_ending(str(card["call"]))
 	else:
@@ -191,7 +178,7 @@ func _use_telephone() -> void:
 func _try_key(slot: ArtSlot) -> void:
 	var index := int(str(slot.name).trim_prefix("Keys"))
 	if index == int(GameState.get_flag(RIGHT_KEY_FLAG, 1)):
-		await _play_ending(str(_variant["escape"]))
+		await _play_ending("outside")
 		return
 	# A wrong key is put aside, so the search narrows down.
 	slot.visible = false
@@ -200,7 +187,11 @@ func _try_key(slot: ArtSlot) -> void:
 	GameState.set_flag(TRIED_FLAG, tried)
 	GameState.checkpoint()
 	GameState.save_current()
-	await _converse(_story.get("wrong_key", {}).get(_variant_name, []), false)
+	# The first wrong key is heard from the bathroom.
+	var lines: Array = _story.get("wrong_key", [])
+	if tried.size() == 1:
+		lines = lines + _story.get("wrong_key_first", [])
+	await _converse(lines, false)
 	if tried.size() == CLUE_AFTER:
 		_arrange_room()
 		await _say_mercy(str(_story.get("worn_key", "")))
@@ -221,11 +212,11 @@ func _play_ending(key: String) -> void:
 	if not choices.is_empty() and Cutscene.last_choice >= 0:
 		ending = _story["endings"].get(choices[Cutscene.last_choice], {})
 		await Cutscene.play(ending.get("steps", []))
+	var outcome := str(ending.get("id", ""))
 	if GameState.get_flag(TANOD_FLAG, false):
-		# Mercy is rescued and Father Eli is caught at the door: nothing more happens in this run.
-		StoryDirector.end_run(TANOD_OUTCOME, "", "")
-		return
-	if ending.has("chain"):
-		# Kumpisal and Tokhang play out differently depending on who Mercy called.
-		GameState.set_flag(KumpisalStory.PADALA_CHAIN_FLAG, str(ending["chain"]))
-	StoryDirector.finish_story([], str(ending.get("id", "")))
+		# The rider came back with the tanods, and Father Eli was caught at the door.
+		outcome = TANOD_OUTCOME
+	elif outcome == FOOD_OUTCOME:
+		# Father Eli read the rider's name on the receipt.
+		GameState.set_flag(PETER_SEEN_FLAG, true)
+	StoryDirector.finish_story([], outcome)
