@@ -395,9 +395,9 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
    mean by "Alternate 1 to 5".
 4. **Keep the main-screen gear** now that a Settings text row exists? We offered to remove it and
    got no answer.
-5. **There is no Android export preset** in the repo. The user said "keep the Android preset
-   untouched", but there never was one here; it may only exist on their desktop. If they add it
-   from the editor, it will sit next to the Web preset.
+5. **Android preset:** the repo now has one (`preset.1`, package `com.withearl.sanga`). The user
+   once said "keep the Android preset untouched", so they may have their own on their desktop.
+   If so, theirs wins: replace `preset.1` with it and keep their package name and keystore.
 
 ## Known issues and notes
 
