@@ -182,25 +182,36 @@ run to learn who is behind the door.
 
 ---
 
-## 6. Prologue (new, before every run except the Main Timeline)
+## 6. Prologue: the priest's answer (before every run after the first)
 
-The Main Timeline starts cold in the market, with no hint of what comes after it.
+The first run starts cold in the market, with no hint of what comes after it. Every run after it
+begins here, and this is where the player chooses where to start: not from a menu, but by
+answering, as the priest behind the grille.
 
-Black screen. The sound of a confessional's small door sliding open. Text only, no name plate.
+Black screen. The confessional's small door, a grille. Text only, no name plate.
 
 > **(Isang boses):** Basbasan n'yo po ako, Padre, dahil nagkasala ako.
 > **(Isang boses):** Matagal na po mula nung huli akong nangumpisal.
 > **(Isang boses):** Hindi ko po alam kung saan magsisimula.
+> **(Isang boses):** Saan po ako magsisimula, Padre?
 
-Last line depends on where the run starts:
+The player answers (each answer names the time and the place, so after the first run's time-order
+book the choice reads as choosing when the story begins):
 
-| Run starts with | Last line |
-|---|---|
-| Tokhang | **(Isang boses):** Siguro... sa palengke. |
-| Kumpisal | **(Isang boses):** Siguro... sa simbahan. |
-| Padala | **(Isang boses):** Siguro... sa kwarto. |
+| Answer | Starts | The voice takes it up |
+|---|---|---|
+| Sa nakaraan, anak. Sa simbahan. | Kumpisal (Kumpisal timeline) | Sa simbahan po. Isang Sabado ng hapon. |
+| Sa kasalukuyan, anak. Sa kwarto. | Padala (Padala timeline) | Sa kwarto po. Sa likod ng pintong nakakandado. |
+| Sa hinaharap, anak. Sa palengke. | Tokhang (Main timeline) | Sa palengke po. Isang hapon na parang wala lang. |
 
 Then the story's title card, as now.
+
+**After every ending but the true one**, once the book has shown the run in time order, the same
+voice speaks once over black, so the player knows there is more without being told how much:
+
+> **(Isang boses):** Hindi pa po iyon ang buong kumpisal, Padre.
+
+The true ending reveals who has been speaking, and who has been listening.
 
 ---
 

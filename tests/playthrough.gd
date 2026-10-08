@@ -45,7 +45,7 @@ const RUNS := [
 		"expect": ["kumpisal_kumpisal", "padala_run"], "gain": ["baril_ni_batista"], "echoes": 3},
 	{"name": "Kumpisal timeline, jeep", "begin": "kumpisal", "prefer": ["Keys", "Sumakay", "Dumiretso"],
 		"expect": ["kumpisal_kumpisal", "padala_ride_jeep"], "gain": []},
-	{"name": "Kumpisal timeline, hide", "begin": "kumpisal", "prefer": ["Keys", "Magtago", "Ano'ng maitutulong", "Ang Diyos lang", "Igalang"],
+	{"name": "Kumpisal timeline, hide", "begin": "confession", "answer": "Sa simbahan", "prefer": ["Keys", "Magtago", "Ano'ng maitutulong", "Ang Diyos lang", "Igalang"],
 		"expect": ["kumpisal_kumpisal", "padala_nagtago"], "gain": []},
 	{"name": "Kumpisal timeline, Eli confesses", "begin": "kumpisal", "prefer": ["Ama, aaminin", "Keys"],
 		"expect": ["kumpisal_kumpisal", "padala_pinalaya"], "gain": []},
@@ -53,7 +53,7 @@ const RUNS := [
 		"expect": ["padala_police", "kumpisal_padala_police", "tokhang_trade"], "gain": [], "echoes": 1},
 	{"name": "Padala timeline, food", "begin": "padala", "prefer": ["Food", "'Yun lang"],
 		"expect": ["padala_food", "kumpisal_sacrifice"], "gain": ["rider"]},
-	{"name": "Padala timeline, tanod", "begin": "padala", "prefer": ["Food", "Isama po"],
+	{"name": "Padala timeline, tanod", "begin": "confession", "answer": "Sa kwarto", "prefer": ["Food", "Isama po"],
 		"expect": ["padala_tanod"], "gain": []},
 	{"name": "Padala timeline, Kulas walked out", "begin": "padala", "prefer": ["Food", "'Yun lang", "Sasamahan"],
 		"expect": ["padala_food", "kumpisal_sinamahan"], "gain": []},
@@ -89,7 +89,11 @@ func _initialize() -> void:
 		var memories_before: Array = state.alaala.duplicate()
 		var finished_before: int = state.runs_finished
 		_transcript.append("\n=== %s ===" % run["name"])
-		director.begin_with(str(run["begin"]))
+		if run["begin"] == "confession":
+			# The way a player starts every run after the first: answering the voice as the priest.
+			director.begin_from_confession()
+		else:
+			director.begin_with(str(run["begin"]))
 		var frames := 0
 		while frames < MAX_FRAMES_PER_RUN and not _back_at_menu(state, finished_before):
 			await process_frame
@@ -217,7 +221,7 @@ func _pick(box: Control) -> void:
 ## first option that is not a ✦ one. In the church, the player talks to everyone unless the run
 ## says to take the shortcut, so the conversations stay covered.
 func _preferred(options: Array) -> int:
-	for wanted in _run.get("prefer", []) + ["Kausapin muna"]:
+	for wanted in [_run.get("answer", "-")] + _run.get("prefer", []) + ["Kausapin muna"]:
 		for index in options.size():
 			if str(wanted) in str(options[index]):
 				return index

@@ -391,10 +391,15 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
       time. The run log now also records `{"outcome": id}`. The old time-order card is removed
       (StoryCard.show_time_order); the main timeline goes back to the main screen after the book.
       Decided not to add cause lines to the chart: the threads already show causes.
-    - **E. The priest's answer:** the starting point is chosen inside the prologue, the voice asking
-      "Saan po ako magsisimula, Padre?" and the player answering; stories show Past / Present /
-      Future after run 1; after non-true endings the voice says "Hindi pa po iyon ang buong
-      kumpisal, Padre."
+    - **E. The priest's answer** (DONE): the main menu's "Choose Starting Point" list is gone. A
+      save offers "Continue Progress" and "Start a New Run" (confirmation when a run is in
+      progress). The first run still starts in the market; after it, a new run plays the prologue
+      (`StoryDirector.begin_from_confession`): the voice asks "Saan po ako magsisimula, Padre?"
+      and the player answers "Sa nakaraan / kasalukuyan / hinaharap, anak. Sa simbahan / kwarto
+      / palengke." (a line choice setting `prologue_start`), the voice takes it up, and the run
+      begins (`begin_with(story, false)`). After every ending but Walang Namatay, the recap ends
+      with the voice over black: "Hindi pa po iyon ang buong kumpisal, Padre." The playthrough
+      starts two runs this way.
     - **F. Feel:** per-timeline colour grade and music variation; a memory chime and ripple when a
       ✦ choice is taken; a clue after two wrong keys; a place hint on each memory book entry; a
       different Kumpisal opening per timeline.

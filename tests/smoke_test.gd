@@ -88,7 +88,7 @@ func _test_run_recap() -> void:
 
 func _test_choices_fit_one_line() -> void:
 	var font: Font = load("res://assets/fonts/Lora.ttf")
-	for path in ["res://story/tokhang.json", "res://story/kumpisal.json", "res://story/padala.json"]:
+	for path in ["res://story/tokhang.json", "res://story/kumpisal.json", "res://story/padala.json", "res://story/prologue.json"]:
 		var texts: Array[String] = []
 		_collect_choice_texts(JSON.parse_string(FileAccess.get_file_as_string(path)), texts)
 		for text in texts:

@@ -54,6 +54,9 @@ const CORNER := 10.0
 const THREAD_SECONDS := 0.8
 const THREAD_PAUSE_SECONDS := 0.25
 const REORDER_SECONDS := 0.45
+## After any ending but the true one, the voice from the confessional speaks once more.
+const TRUE_ENDING := "padala_walang_namatay"
+const VOICE_PICTURE := "res://assets/cutscenes/prologue_booth.png"
 
 ## Each page's lines, as [text, size, colour, gap above, centred].
 var _pages: Array = []
@@ -380,6 +383,10 @@ func _knot(at: Vector2) -> Polygon2D:
 ## other timeline goes on to the chart of the realities this save has made.
 func _continue() -> void:
 	create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT).tween_property(_hint, "modulate:a", 0.0, 0.3)
+	if TRUE_ENDING not in StoryDirector.last_reality.get("needs", []):
+		# The voice from the confessional, over black: the confession is not over yet.
+		await Cutscene.play([{"image": VOICE_PICTURE, "lines": [StoryDirector.more_to_tell()]}])
+		Cutscene.hand_over()
 	if StoryDirector.last_timeline == "main":
 		StoryCard.fade_to_scene("main_menu")
 	else:
