@@ -61,6 +61,21 @@ into.
 
 ---
 
+### The first run keeps its spine (rule R11)
+
+The first run of a save has real choices, but they only change how the story feels, never what
+happens. Fixed: Peter is shot at the market, Kulas is shot after the confessions, and Mercy dies
+with the man at the door, whichever way out she takes.
+
+- Tokhang's errand offers two ways to say yes (*Sige. Dadaanan ko na.* and *Sige. Anong oras ang
+  handaan?*); both send Peter.
+- In Padala on a save's first run, the poster ends at the door with Batista, the food flyer with
+  Eli answering the door, and the key with Eli coming out of the bath and catching her (ending
+  `padala_caught`). Each shows the man's face, so the reveal always lands. The poster and the key
+  give memory 3 (Si Father Eli). From the second run the key leads to the street (run or hide).
+
+---
+
 ## 3. The hidden truth (never shown all at once)
 
 Nobody in the game says all of it. The player pieces it together, the way a parish does.
@@ -137,7 +152,7 @@ voice speaks once over black: *"Hindi pa po iyon ang buong kumpisal, Padre."*
 |---|---|---|---|---|---|
 | 1 | **Ang Laruang Baril** | *Isang laruan. Isang text. Isang bala.* | Peter or Gwen shot (Tokhang) | Tokhang: the water gun | Tokhang: Gloria's phone call after the sale |
 | 2 | **Ang Pagtakbo ni Kulas** | *Tumakbo siya palabas ng simbahan. Hindi na siya nakarating sa kanto.* | Kulas shot (Kumpisal) | Kumpisal: *Hintayin mo 'ko. Sabay na tayong lumabas.* | Kumpisal: Kulas tells about the suitcase |
-| 3 | **Si Father Eli** | *Ang taong nakikinig sa lahat ng kasalanan... may sarili palang itinatago.* | Mercy dies (Padala, police) | Kumpisal: *Ama, aaminin ko na ang lahat.* | "???" becomes "Batista" in every shout; Eli's call before the gunshot |
+| 3 | **Si Father Eli** | *Ang taong nakikinig sa lahat ng kasalanan... may sarili palang itinatago.* | Mercy dies (Padala, police, or caught with the key on the first run) | Kumpisal: *Ama, aaminin ko na ang lahat.* | "???" becomes "Batista" in every shout; Eli's call before the gunshot |
 | 4 | **Ang Baril ni Batista** | *Sa dilim, lahat ng tumatakbo ay suspek.* | Mercy shot running (Padala) | Padala: *Magtago hanggang magliwanag.* | none |
 | 5 | **Ang Rider** | *Dumating siya. Nakita niya ako. Umalis siya.* | Food delivery (Padala) | Padala: *Pakisabi pong magsama siya ng tanod.* | none |
 

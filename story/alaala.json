@@ -25,7 +25,8 @@
 			"name": "Si Father Eli",
 			"memory": "Ang taong nakikinig sa lahat ng kasalanan... may sarili palang itinatago.",
 			"from": [
-				"padala_police"
+				"padala_police",
+				"padala_caught"
 			],
 			"hint": "Sa huling dasal ng pari, may maaamin pa."
 		},

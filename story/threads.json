@@ -92,6 +92,16 @@
 					"tokhang_peter"
 				]
 			}
+		},
+		{
+			"from": {
+				"choice": "Sige. Anong oras ang handaan?"
+			},
+			"to": {
+				"outcome": [
+					"tokhang_peter"
+				]
+			}
 		}
 	]
 }
