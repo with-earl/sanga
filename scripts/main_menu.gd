@@ -1,7 +1,8 @@
 extends Control
-## Main screen: Continue (when there is a save), New Game and Quit. Choosing a save, how to go on
-## with it, and deleting a save all happen in place: the menu buttons are swapped for a short list
-## or a question, in the same spot. Anything that would lose progress asks first and says so.
+## Main screen: Continue (when there is a save), New Game and Quit. Choosing a save and deleting a
+## save happen in place: the menu buttons are swapped for a short list or a question, in the same
+## spot. Opening a save shows its start screen over everything (see StartScreen). Anything that
+## would lose progress asks first and says so.
 
 const MONTHS := ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 const ROW_SIZE := Vector2(300, 52)
@@ -24,6 +25,8 @@ const MENU_WINDOW_MARGIN := Vector2(40.0, 24.0)
 
 ## What the Android back button does while the save panel is showing.
 var _back_action := Callable()
+## A save's start screen, while it is open.
+var _start_screen: StartScreen
 
 
 func _ready() -> void:
@@ -45,6 +48,8 @@ func _notification(what: int) -> void:
 		return
 	if _settings.is_open():
 		_settings.close()
+	elif _start_screen != null:
+		_start_screen.back()
 	elif _save_panel.visible:
 		_back_action.call()
 	else:
@@ -100,39 +105,16 @@ func _show_slots(delete_mode: bool) -> void:
 	_back_action = _show_slots.bind(false) if delete_mode else _show_main
 
 
-## A save's two ways on: carry on where the player left off, or start a new run. Where a new run
-## begins is not picked here: the voice in the confessional asks, and the player answers as the
-## priest (see StoryDirector.begin_from_confession).
+## Opening a save shows its start screen (see StartScreen): continue the run in progress, or begin
+## a new run at one of the three stories. The save list stays underneath, to come back to.
 func _open_save(slot: int) -> void:
 	if not GameState.load_slot(slot):
 		_show_message("That save can’t be opened")
 		return
-	_open_panel(_describe(slot))
-	if GameState.is_run_in_progress():
-		_add_row("Continue Progress", true, StoryDirector.resume)
-	_add_row("Start a New Run", true, _ask_new_run.bind(slot))
-	_add_row("Back", true, _show_slots.bind(false))
-	_back_action = _show_slots.bind(false)
-
-
-## A new run ends the run in progress, so this asks first and says what will be lost.
-func _ask_new_run(slot: int) -> void:
-	if not GameState.is_run_in_progress():
-		_begin_new_run()
-		return
-	_open_panel("Start a new run?")
-	_add_note("Your current progress in Slot %d will be lost." % (slot + 1))
-	_add_row("Start Over", true, _begin_new_run)
-	_add_row("Cancel", true, _open_save.bind(slot))
-	_back_action = _open_save.bind(slot)
-
-
-## The first run of a save always begins in the market; after it, the confession asks where.
-func _begin_new_run() -> void:
-	if GameState.has_finished_first_run():
-		StoryDirector.begin_from_confession()
-	else:
-		StoryDirector.begin_with("tokhang")
+	_start_screen = StartScreen.new()
+	add_child(_start_screen)
+	_start_screen.open(slot, _describe(slot))
+	_start_screen.closed.connect(func() -> void: _start_screen = null)
 
 
 ## New Game asks where to save progress. Picking a slot that already has a save asks first.

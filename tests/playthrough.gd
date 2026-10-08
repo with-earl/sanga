@@ -1,12 +1,13 @@
 extends SceneTree
 ## The full playthrough: plays the real game from a fresh save, the way a player would, through
-## every ending the timelines chart knows. It taps through dialogue, cutscenes, cards, the recap
-## and the chart, taps whatever the idle hint would point at, and picks choices by a plan for each
-## run. Each run must finish (nothing gets stuck), and must make exactly the reality the plan
-## expects, in order, with the memories the plan expects.
+## every ending of every story. It taps through dialogue, cutscenes, cards and the recap, taps
+## whatever the idle hint would point at, and picks choices by a plan for each run. Each run must
+## finish (nothing gets stuck), and must reach exactly the outcomes the plan expects, in order,
+## with the memories the plan expects.
 ##
-## The second run is the true ending, reached the way the story bible says a careful player can:
-## right after a first run that ends at the police poster.
+## The first run is New Game's, at the market. The second is the true ending, reached the way the
+## story bible says a careful player can: from the church, right after a first run that ends at
+## the police poster.
 ##
 ## Run: godot --headless --path . -s res://tests/playthrough.gd
 ## It prints PLAYTHROUGH PASSED, or what went wrong and where. It uses the last save slot and
@@ -29,34 +30,22 @@ const TAP_EVERY := 3
 ## Each run: which story it begins with, what to prefer at each choice and each thing to tap (the
 ## first preference found in an option's text or a thing's name wins), things to look at that the
 ## hint does not point to (tapped once at each step of a place's objectives, the way a curious
-## player would), whether to take every ✦ choice, the outcomes the run must make, and the memories
-## it must give.
+## player would), whether to take every ✦ choice, the outcomes the run must reach, the memories it
+## must give, and how many echoes must come back at least.
 const RUNS := [
-	{"name": "first run, police poster", "begin": "tokhang", "prefer": ["Sige, ako", "Police"],
-		"expect": ["tokhang_peter", "kumpisal_main", "padala_police_card"], "echoes": 3,
+	{"name": "first run, police poster", "begin": "tokhang", "prefer": ["Sige", "Police"],
+		"expect": ["tokhang_peter", "kumpisal_kulas", "padala_police"], "echoes": 3,
 		"gain": ["laruang_baril", "pagtakbo_ni_kulas", "father_eli"]},
-	{"name": "true ending", "begin": "tokhang", "prefer": ["Sige, ako"], "look": ["Water Gun"], "alaala": true,
-		"expect": ["tokhang_safe", "kumpisal_sinamahan", "padala_walang_namatay"], "gain": []},
-	{"name": "Gwen buys, key", "begin": "tokhang", "prefer": ["Ikaw na lang", "Keys", "Dumiretso"],
-		"expect": ["tokhang_gwen", "kumpisal_main", "padala_key"], "gain": []},
-	{"name": "later, Eli confesses", "begin": "tokhang", "prefer": ["Mamaya", "Ama, aaminin"],
-		"expect": ["tokhang_kulas", "kumpisal_main", "padala_pinalaya"], "gain": []},
-	{"name": "Kumpisal timeline, run", "begin": "kumpisal", "prefer": ["Keys", "Tumakbo", "Alam ng Diyos"],
-		"expect": ["kumpisal_kumpisal", "padala_run"], "gain": ["baril_ni_batista"], "echoes": 3},
-	{"name": "Kumpisal timeline, jeep", "begin": "kumpisal", "prefer": ["Keys", "Sumakay", "Dumiretso"],
-		"expect": ["kumpisal_kumpisal", "padala_ride_jeep"], "gain": []},
-	{"name": "Kumpisal timeline, hide", "begin": "confession", "answer": "Sa simbahan", "prefer": ["Keys", "Magtago", "Ano'ng maitutulong", "Ang Diyos lang", "Igalang"],
-		"expect": ["kumpisal_kumpisal", "padala_nagtago"], "gain": []},
-	{"name": "Kumpisal timeline, Eli confesses", "begin": "kumpisal", "prefer": ["Ama, aaminin", "Keys"],
-		"expect": ["kumpisal_kumpisal", "padala_pinalaya"], "gain": []},
-	{"name": "Padala timeline, police", "begin": "padala", "prefer": ["Police"],
-		"expect": ["padala_police", "kumpisal_padala_police", "tokhang_trade"], "gain": [], "echoes": 1},
-	{"name": "Padala timeline, food", "begin": "padala", "prefer": ["Food", "'Yun lang"],
-		"expect": ["padala_food", "kumpisal_sacrifice"], "gain": ["rider"]},
-	{"name": "Padala timeline, tanod", "begin": "confession", "answer": "Sa kwarto", "prefer": ["Food", "Isama po"],
-		"expect": ["padala_tanod"], "gain": []},
-	{"name": "Padala timeline, Kulas walked out", "begin": "padala", "prefer": ["Food", "'Yun lang", "Sasamahan"],
-		"expect": ["padala_food", "kumpisal_sinamahan"], "gain": []},
+	{"name": "true ending, from the church", "begin": "kumpisal", "look": ["Water Gun"], "alaala": true,
+		"expect": ["kumpisal_sinamahan", "padala_pinalaya", "tokhang_safe", "walang_namatay"], "echoes": 3, "gain": []},
+	{"name": "from the room, food, Gwen buys", "begin": "padala", "prefer": ["Food", "Ikaw na lang"],
+		"expect": ["padala_food", "tokhang_gwen", "kumpisal_kulas"], "echoes": 1, "gain": ["rider"]},
+	{"name": "from the room, key, run", "begin": "padala", "prefer": ["Keys", "Tumakbo"],
+		"expect": ["padala_run", "tokhang_peter", "kumpisal_kulas"], "echoes": 1, "gain": ["baril_ni_batista"]},
+	{"name": "from the church, key, hide", "begin": "kumpisal", "prefer": ["Keys", "Magtago", "May naghihintay", "Ang Diyos ang", "Hindi dito", "Walang kapatawaran"],
+		"expect": ["kumpisal_kulas", "padala_nagtago", "tokhang_peter"], "echoes": 3, "gain": []},
+	{"name": "from the market, tanod", "begin": "tokhang", "prefer": ["Ikaw na lang", "Food", "magsama siya", "Dumiretso"],
+		"expect": ["tokhang_gwen", "kumpisal_kulas", "padala_tanod"], "gain": []},
 ]
 
 var _failures: Array[String] = []
@@ -89,11 +78,7 @@ func _initialize() -> void:
 		var memories_before: Array = state.alaala.duplicate()
 		var finished_before: int = state.runs_finished
 		_transcript.append("\n=== %s ===" % run["name"])
-		if run["begin"] == "confession":
-			# The way a player starts every run after the first: answering the voice as the priest.
-			director.begin_from_confession()
-		else:
-			director.begin_with(str(run["begin"]))
+		director.begin_with(str(run["begin"]))
 		var frames := 0
 		while frames < MAX_FRAMES_PER_RUN and not _back_at_menu(state, finished_before):
 			await process_frame
@@ -104,7 +89,7 @@ func _initialize() -> void:
 		if frames >= MAX_FRAMES_PER_RUN:
 			_fail("stuck after %s (scene %s)" % [_last_action, current_scene.name if current_scene else "none"])
 			break
-		var outcomes: Array = director.last_reality.get("needs", [])
+		var outcomes: Array = director.last_outcomes
 		var expected: Array = run["expect"]
 		if outcomes != expected:
 			_fail("made %s, expected %s" % [outcomes, expected])
@@ -120,8 +105,6 @@ func _initialize() -> void:
 	var held: int = state.alaala.size()
 	if held != 5:
 		_failures.append("the save holds %d memories, expected all 5" % held)
-	if state.realities.size() != RUNS.size():
-		_failures.append("the save holds %d realities, expected %d" % [state.realities.size(), RUNS.size()])
 	state.delete_slot(slot)
 	Engine.time_scale = 1.0
 	var transcript_path := OS.get_environment("PLAYTHROUGH_TRANSCRIPT")
@@ -174,11 +157,10 @@ func _act() -> void:
 	if current_scene == null:
 		return
 	var path := current_scene.scene_file_path
-	if path.ends_with("run_recap.tscn") or path.ends_with("timeline_reveal.tscn"):
-		if path.ends_with("run_recap.tscn"):
-			_saw_recap = true
+	if path.ends_with("run_recap.tscn"):
+		_saw_recap = true
 		if current_scene._waiting:
-			_last_action = "the recap" if path.ends_with("run_recap.tscn") else "the chart"
+			_last_action = "the recap"
 			current_scene._gui_input(_click())
 		return
 	if current_scene.has_method("_hint_slots"):
@@ -221,7 +203,7 @@ func _pick(box: Control) -> void:
 ## first option that is not a ✦ one. In the church, the player talks to everyone unless the run
 ## says to take the shortcut, so the conversations stay covered.
 func _preferred(options: Array) -> int:
-	for wanted in [_run.get("answer", "-")] + _run.get("prefer", []) + ["Kausapin muna"]:
+	for wanted in _run.get("prefer", []) + ["Kausapin muna"]:
 		for index in options.size():
 			if str(wanted) in str(options[index]):
 				return index

@@ -19,9 +19,10 @@ var location := START_LOCATION
 var flags: Dictionary = {}
 var decisions: Array = []
 
-## The timeline being played ("main", "kumpisal" or "padala"), or "" between runs.
+## Where the run being played began, as StoryDirector.TIMELINES names it ("main" for the market,
+## "kumpisal" or "padala"), or "" between runs.
 var timeline := ""
-## Which story of the timeline is being played, counted from 0.
+## Which story of the run is being played, counted from 0.
 var chapter := 0
 ## How many runs this save has finished. The first run is the fixed one.
 var runs_finished := 0
@@ -29,7 +30,8 @@ var runs_finished := 0
 var endings: Array = []
 ## The outcomes reached so far in the run being played, in order.
 var run_outcomes: Array = []
-## Every reality (finished run) this save has made, by TimelineMap key, in the order made.
+## Every finished run this save has made, as "<start>:<outcome>+<outcome>...", once each, in the
+## order made.
 var realities: Array = []
 ## The Alaala (memories) this save holds, by id (see Alaala). Unlike flags, they are never reset
 ## between runs: they are what the player carries from one life to the next.

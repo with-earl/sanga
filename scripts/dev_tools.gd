@@ -1,9 +1,9 @@
 class_name DevTools
 extends Control
 ## Development only: the "Developer Tools" window, opened by the terminal icon next to the
-## settings gear, on the main screen and in every place. It lists the start of each story on each
-## timeline, and the screens a timeline ends on, so testers can reach any part without playing
-## from the start (see DevJump). Runs started here are never saved.
+## settings gear, on the main screen and in every place. It lists the start of each story, the
+## stories that react to what came before them in a run, and two run endings, so testers can reach
+## any part without playing from the start (see DevJump). Runs started here are never saved.
 ##
 ## It follows Apple's own design: a black, rounded sheet with a title at the
 ## top, grouped lists of rows on rounded dark cards with thin dividers and a grey chevron, small
@@ -40,6 +40,12 @@ const SECONDARY := Color(0.557, 0.557, 0.576, 1)
 const DIM := Color(0.0, 0.0, 0.0, 0.5)
 const TITLE := "Developer Tools"
 const ENDINGS_TITLE := "Endings"
+## Run endings to jump to: a name, where the run began, and the outcomes it reached. The first is
+## the usual first run; the second earns the true ending, so its epilogue plays.
+const ENDINGS := [
+	["First Run Ending", "main", ["tokhang_peter", "kumpisal_kulas", "padala_police"]],
+	["True Ending", "kumpisal", ["kumpisal_sinamahan", "padala_pinalaya", "tokhang_safe"]],
+]
 ## The Alaala (memories) a save holds open new choices. These rows give or take them all at once,
 ## to test those choices without dying first.
 const MEMORIES_TITLE := "Memories"
@@ -107,7 +113,7 @@ func _build_bar() -> MarginContainer:
 	return bar
 
 
-## One section per timeline, then the endings, in a scrolling area, with the footnote under the
+## One section per group of jump points, then the endings, in a scrolling area, with the footnote under the
 ## first section.
 func _build_lists() -> ScrollContainer:
 	var scroll := ScrollContainer.new()
@@ -132,10 +138,8 @@ func _build_lists() -> ScrollContainer:
 		if index == 0:
 			sections.add_child(_footnote())
 	var endings: Array = []
-	var realities := TimelineMap.endings()
-	for index in realities.size():
-		var name := "Main Ending" if index == 0 else "Alternate Ending %d" % index
-		endings.append([name, _show_ending.bind(realities[index])])
+	for ending in ENDINGS:
+		endings.append([str(ending[0]), _show_ending.bind(str(ending[1]), ending[2])])
 	_add_section(sections, ENDINGS_TITLE, endings)
 	_add_section(sections, MEMORIES_TITLE, [
 		["Remember All Memories", _set_all_memories.bind(true)],
@@ -299,11 +303,11 @@ func _jump(point: Dictionary) -> void:
 	DevJump.jump(point)
 
 
-## Ends an unsaved run as if it had reached this reality, so the timeline's closing screen plays
-## exactly as it does in the game.
-func _show_ending(reality: Dictionary) -> void:
+## Ends an unsaved run as if it had begun at `timeline` and reached `outcomes`, so the run's
+## closing (the true ending's epilogue, when earned, and the recap) plays as it does in the game.
+func _show_ending(timeline: String, outcomes: Array) -> void:
 	visible = false
 	GameState.start_unsaved_game()
-	GameState.timeline = str(reality.get("timeline", ""))
-	GameState.run_outcomes = (reality.get("needs", []) as Array).duplicate()
+	GameState.timeline = timeline
+	GameState.run_outcomes = outcomes.duplicate()
 	StoryDirector.end_run("", "", "")

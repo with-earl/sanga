@@ -1,33 +1,34 @@
 {
+	"_comment": "Padala, Saturday night, see docs/STORY_BIBLE.md section 9. One version for every run. Mercy is locked in the apartment across from the church while the man bathes. Three ways out: the police poster and the telephone, the food delivery flyer and the telephone, or the right key. Each ends in her death unless a memory (Alaala) changes it: bring a tanod (the delivery call), hide until morning (outside). When Father Eli confessed in Kumpisal earlier in this run, 'pinalaya' replaces the room: he opens the door. 'food' leaves Peter seen at the door, which Tokhang remembers when it comes later in the run.",
 	"intro": [
 		{
 			"image": "res://assets/cutscenes/padala_gloria_mercy.png",
 			"lines": [
 				{
 					"speaker": "Mercy",
-					"text": "Sabi ni Tita, may mabait na pari. May malinis na trabaho."
+					"text": "Sabi ni Tita, mabait daw ang pari. May kakilala raw siyang naghahanap ng kasambahay."
 				},
 				{
 					"speaker": "Mercy",
-					"text": "“Huwag kang mag-alala, anak.” 'Yan pa ang sabi niya sa'kin.",
+					"text": "“Wala kang dapat ipag-alala,” sabi niya.",
 					"if_flag": "run_echo_mercy_reassured",
 					"echo": true
 				},
 				{
 					"speaker": "Mercy",
-					"text": "Tinanong pa niya kung ano'ng maitutulong niya. Padala lang naman ang hiningi ko.",
+					"text": "Tinanong pa niya kung may naghihintay sa'kin sa probinsya. Akala ko, nag-aalala lang siya.",
 					"if_flag": "run_echo_mercy_asked",
 					"echo": true
 				},
 				{
 					"speaker": "Mercy",
-					"text": "Umiyak si Tita bago umalis. Hindi ko alam kung bakit.",
+					"text": "Umiyak si Tita nung iniwan niya ako. Hindi ko alam kung bakit.",
 					"if_flag": "run_echo_gloria_repent",
 					"echo": true
 				},
 				{
 					"speaker": "Mercy",
-					"text": "Ni hindi man lang lumingon si Tita.",
+					"text": "Hindi man lang lumingon si Tita.",
 					"if_flag": "run_echo_gloria_judged",
 					"echo": true
 				}
@@ -38,7 +39,7 @@
 			"lines": [
 				{
 					"speaker": "Mercy",
-					"text": "Hindi niya sinabing may maleta."
+					"text": "May maletang nakabukas sa sahig. Walang laman."
 				}
 			]
 		},
@@ -48,122 +49,71 @@
 		},
 		{
 			"image": "res://assets/cutscenes/padala_bath.png",
-			"hold": 3.0
-		}
-	],
-	"locked_door": "Naka-lock.",
-	"wrong_key": {
-		"main": [
-			{
-				"speaker": "Mercy",
-				"text": "Hindi ito."
-			}
-		],
-		"kumpisal": [
-			{
-				"speaker": "Father Eli",
-				"text": "Huwag mo nang subukan, Mercy.",
-				"offscreen": true
-			},
-			{
-				"speaker": "Father Eli",
-				"text": "Nakikita ka ng Diyos.",
-				"offscreen": true
-			}
-		]
-	},
-	"worn_key": "Teka... may gasgas 'yung isa. Parang laging ginagamit.",
-	"no_number": "Wala akong matatawagan.",
-	"variants": {
-		"main": {
-			"objectives": [
-				"Read the police emergency poster",
-				"Or find the right key"
-			],
-			"objectives_after_card": [
-				"Use the telephone",
-				"Or find the right key"
-			],
-			"cards": {
-				"PoliceCard": {
-					"objective": "Read the police emergency poster",
-					"call": "main_police"
-				}
-			},
-			"keys": true,
-			"escape": "main_key"
-		},
-		"kumpisal": {
-			"objectives": [
-				"Find the right key"
-			],
-			"objectives_after_card": [
-				"Find the right key"
-			],
-			"cards": {},
-			"keys": true,
-			"escape": "kumpisal_outside"
-		},
-		"padala": {
-			"intro_after": [
+			"lines": [
 				{
-					"image": "res://assets/cutscenes/padala_reveal_eli.png",
-					"caption": "Father Eli",
-					"hold": 3.4
-				}
-			],
-			"objectives": [
-				"Read the police emergency poster",
-				"Or the food delivery flyer"
-			],
-			"objectives_after_card": [
-				"Use the telephone"
-			],
-			"cards": {
-				"PoliceCard": {
-					"objective": "Read the police emergency poster",
-					"call": "padala_police"
-				},
-				"FoodDeliveryCard": {
-					"objective": "Get the food delivery flyer",
-					"call": "padala_food"
-				}
-			},
-			"keys": false
-		}
-	},
-	"endings": {
-		"main_key": {
-			"id": "padala_key",
-			"steps": [
-				{
-					"image": "res://assets/cutscenes/padala_collar.png",
-					"lines": [
-						{
-							"speaker": "Mercy",
-							"text": "...Pari?"
-						}
-					]
-				},
-				{
-					"image": "res://assets/cutscenes/padala_escape.png",
-					"hold": 3.0
-				},
-				{
-					"card": "Key",
-					"line": "Nakatakas si Mercy."
+					"speaker": "Mercy",
+					"text": "Naliligo siya. May oras pa ako."
 				}
 			]
+		}
+	],
+	"objectives": [
+		"Read the police emergency poster",
+		"Or the food delivery flyer",
+		"Or find the right key"
+	],
+	"objectives_after_card": [
+		"Use the telephone",
+		"Or find the right key"
+	],
+	"cards": {
+		"PoliceCard": {
+			"objective": "Read the police emergency poster",
+			"call": "police"
 		},
-		"main_police": {
-			"id": "padala_police_card",
+		"FoodDeliveryCard": {
+			"objective": "Get the food delivery flyer",
+			"call": "food"
+		}
+	},
+	"read": {
+		"PoliceCard": "May numero ng pulis.",
+		"FoodDeliveryCard": "Delivery. Kung may darating... may makakakita sa'kin."
+	},
+	"locked_door": "Naka-lock. Sa labas ang kandado.",
+	"no_number": "Wala akong kabisadong numero.",
+	"wrong_key": [
+		{
+			"speaker": "Mercy",
+			"text": "Hindi 'to."
+		}
+	],
+	"wrong_key_first": [
+		{
+			"speaker": "???",
+			"text": "*Sa banyo* Mercy? Ano 'yang ingay?",
+			"offscreen": true,
+			"reveal": {
+				"needs": "father_eli",
+				"speaker": "Father Eli"
+			}
+		},
+		{
+			"speaker": "Mercy",
+			"text": "W-wala po."
+		}
+	],
+	"worn_key": "Teka... 'yung isa, kupas na. Parang laging ginagamit.",
+	"endings": {
+		"police": {
+			"id": "padala_police",
 			"steps": [
 				{
 					"image": "res://assets/cutscenes/padala_phone_call.png",
 					"lines": [
 						{
 							"speaker": "Mercy",
-							"text": "Hello? Pulis po ba 'to? Tulungan n'yo po ako, nakakulong po ako—"
+							"text": "*Pabulong* Hello? Pulis po ba 'to? Tulungan n'yo po ako. Nakakulong po ako."
 						},
 						{
 							"speaker": "Boses",
@@ -171,11 +121,11 @@
 						},
 						{
 							"speaker": "Mercy",
-							"text": "Hindi ko po alam... may simbahan po sa tapat."
+							"text": "Hindi ko po alam ang address. May simbahan po sa tapat. Third floor po."
 						},
 						{
 							"speaker": "Boses",
-							"text": "...Sige. Diyan ka lang. Papunta na kami."
+							"text": "...Diyan ka lang. Papunta na kami."
 						}
 					]
 				},
@@ -184,17 +134,21 @@
 					"lines": [
 						{
 							"speaker": "Batista",
-							"text": "Oh, pare. Ikaw pala."
+							"text": "...Father?"
 						},
 						{
 							"speaker": "Batista",
-							"text": "Ingat daw ako, sabi mo kanina. Ikaw pala ang dapat mag-ingat.",
-							"if_flag": "run_echo_batista_blessed",
+							"text": "Ikaw pala 'yan, pare."
+						},
+						{
+							"speaker": "Batista",
+							"text": "Mag-ingat daw kami, sabi mo kanina.",
+							"if_flag": "run_echo_batista_careful",
 							"echo": true
 						},
 						{
 							"speaker": "Batista",
-							"text": "Bahay ng Diyos, ha? *Tumingin sa paligid* Ito pala ang bahay mo, pare.",
+							"text": "Hindi raw doon pinag-uusapan. *Tumingin sa loob* Dito na lang pala.",
 							"if_flag": "run_echo_batista_warned",
 							"echo": true
 						}
@@ -210,7 +164,7 @@
 				},
 				{
 					"card": "Police Poster",
-					"line": "Namatay si Mercy."
+					"line": "Hindi na nakauwi si Mercy."
 				},
 				{
 					"image": "res://assets/cutscenes/padala_dressing.png",
@@ -228,164 +182,19 @@
 				}
 			]
 		},
-		"kumpisal_outside": {
-			"steps": [
-				{
-					"image": "res://assets/cutscenes/padala_escape.png",
-					"hold": 2.4
-				},
-				{
-					"image": "res://assets/cutscenes/padala_still_manila.png",
-					"caption": "Still in Manila",
-					"lines": [
-						{
-							"speaker": "Mercy",
-							"text": "Nasa Maynila pa rin ako. Saan ako pupunta?"
-						}
-					]
-				},
-				{
-					"image": "res://assets/cutscenes/padala_still_manila.png",
-					"caption": "Still in Manila",
-					"choose": [
-						{
-							"text": "Tumakbo"
-						},
-						{
-							"text": "Sumakay ng jeep"
-						},
-						{
-							"text": "Magtago hanggang umaga.",
-							"needs": "baril_ni_batista"
-						}
-					]
-				}
-			],
-			"choices": [
-				"kumpisal_run",
-				"kumpisal_jeep",
-				"kumpisal_hide"
-			]
-		},
-		"kumpisal_run": {
-			"id": "padala_run",
-			"steps": [
-				{
-					"image": "res://assets/cutscenes/padala_run.png",
-					"hold": 2.8
-				},
-				{
-					"image": "res://assets/cutscenes/padala_run_shot.png",
-					"gunshot": true,
-					"hold": 2.8,
-					"lines": [
-						{
-							"speaker": "Batista",
-							"text": "Diyos ko... ipagdasal n'yo ako.",
-							"if_flag": "run_echo_batista_pray",
-							"echo": true
-						},
-						{
-							"speaker": "Batista",
-							"text": "...Alam ng Diyos ang dahilan ko.",
-							"if_flag": "run_echo_batista_reason",
-							"echo": true
-						}
-					]
-				},
-				{
-					"card": "Run",
-					"line": "Aksidenteng nabaril ni Batista si Mercy."
-				}
-			]
-		},
-		"kumpisal_jeep": {
-			"id": "padala_ride_jeep",
-			"steps": [
-				{
-					"image": "res://assets/cutscenes/padala_jeep.png",
-					"hold": 2.6
-				},
-				{
-					"image": "res://assets/cutscenes/padala_police_laugh.png",
-					"lines": [
-						{
-							"speaker": "Pulis",
-							"text": "Si Father Eli? *Nagtawanan*"
-						},
-						{
-							"speaker": "Pulis",
-							"text": "Ineng, umuwi ka na."
-						}
-					]
-				},
-				{
-					"card": "Ride Jeep",
-					"line": "Nagsumbong si Mercy, pero pinagtawanan lang siya ng pulis."
-				}
-			]
-		},
-		"padala_police": {
-			"id": "padala_police",
-			"chain": "police",
-			"steps": [
-				{
-					"image": "res://assets/cutscenes/padala_phone_call.png",
-					"lines": [
-						{
-							"speaker": "Mercy",
-							"text": "Hello? Pulis po ba 'to? Tulungan n'yo po ako, nakakulong po ako—"
-						},
-						{
-							"speaker": "Boses",
-							"text": "Saan ka?"
-						},
-						{
-							"speaker": "Mercy",
-							"text": "Hindi ko po alam... may simbahan po sa tapat."
-						},
-						{
-							"speaker": "Boses",
-							"text": "...Sige. Diyan ka lang. Papunta na kami."
-						}
-					]
-				},
-				{
-					"image": "res://assets/cutscenes/padala_police_car.png",
-					"lines": [
-						{
-							"speaker": "Father Eli",
-							"text": "Oh, pare. Ikaw pala."
-						}
-					]
-				},
-				{
-					"image": "res://assets/cutscenes/padala_eyes_widen.png",
-					"hold": 2.4
-				},
-				{
-					"image": "res://assets/cutscenes/padala_eli_attacks.png",
-					"hold": 2.6
-				},
-				{
-					"image": "res://assets/cutscenes/padala_police_car_leaves.png",
-					"hold": 2.8
-				},
-				{
-					"card": "Police Poster"
-				}
-			]
-		},
-		"padala_food": {
+		"food": {
 			"id": "padala_food",
-			"chain": "food",
 			"steps": [
 				{
 					"image": "res://assets/cutscenes/padala_phone_call.png",
 					"lines": [
 						{
 							"speaker": "Mercy",
-							"text": "Hello, isang order po. Pakisabi po sa rider... tulungan n'yo po ako. Room 3B."
+							"text": "Hello po? Magpapadeliver po ako. Kahit ano po."
+						},
+						{
+							"speaker": "Mercy",
+							"text": "*Pabulong* Pakisabi po sa rider, tulungan n'yo po ako. Room 3B, sa tapat ng simbahan."
 						}
 					]
 				},
@@ -397,7 +206,7 @@
 							"text": "'Yun lang po."
 						},
 						{
-							"text": "Isama po niya ang tanod.",
+							"text": "Pakisabi pong magsama siya ng tanod.",
 							"needs": "rider",
 							"flag": "run_tanod"
 						}
@@ -409,27 +218,38 @@
 					"lines": [
 						{
 							"speaker": "Peter",
-							"text": "Ma'am? Delivery po—"
+							"text": "Delivery po!"
+						},
+						{
+							"speaker": "???",
+							"text": "*Binuksan ang pinto* Ako na."
 						},
 						{
 							"speaker": "Peter",
-							"text": "Teka. Ano'ng nangyayari dito?"
+							"text": "...Father Eli? Kayo po pala."
+						},
+						{
+							"speaker": "Peter",
+							"text": "Pasensya na po. Parang may sumigaw po kasi sa loob—"
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "TV lang 'yon, hijo. Salamat. Ingat ka sa daan."
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "*Binasa ang resibo* ...Peter."
 						}
 					]
 				},
 				{
-					"image": "res://assets/cutscenes/padala_peter_fights.png",
+					"image": "res://assets/cutscenes/padala_luggage_closed.png",
 					"unless_flag": "run_tanod",
-					"hold": 2.8
-				},
-				{
-					"image": "res://assets/cutscenes/padala_peter_stabbed.png",
-					"unless_flag": "run_tanod",
-					"hold": 3.0
+					"hold": 2.6
 				},
 				{
 					"card": "Food Delivery",
-					"line": "Sinaksak si Peter.",
+					"line": "Umalis ang rider. Hindi na nakauwi si Mercy.",
 					"unless_flag": "run_tanod"
 				},
 				{
@@ -438,22 +258,110 @@
 					"lines": [
 						{
 							"speaker": "Peter",
-							"text": "Ma'am? Delivery po. Dito po 'yung sinabi ko."
+							"text": "Delivery po. *Lumingon sa tanod* Dito po, Kuya."
 						},
 						{
 							"speaker": "Tanod",
-							"text": "Father? Ano'ng ginagawa n'yo rito?"
+							"text": "Barangay po. Pakibuksan ang pinto."
+						},
+						{
+							"speaker": "Tanod",
+							"text": "...Father?"
 						}
 					]
 				},
 				{
 					"card": "Tanod",
-					"line": "Nasagip si Mercy, at buhay si Peter.",
+					"line": "Nakalabas si Mercy.",
 					"if_flag": "run_tanod"
 				}
 			]
 		},
-		"kumpisal_hide": {
+		"outside": {
+			"steps": [
+				{
+					"image": "res://assets/cutscenes/padala_collar.png",
+					"lines": [
+						{
+							"speaker": "Mercy",
+							"text": "...Pari?"
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/padala_escape.png",
+					"hold": 2.4
+				},
+				{
+					"image": "res://assets/cutscenes/padala_still_manila.png",
+					"lines": [
+						{
+							"speaker": "Mercy",
+							"text": "Hindi ko alam kung nasaan ako. May mga ilaw sa dulo ng kalye."
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/padala_still_manila.png",
+					"choose": [
+						{
+							"text": "Tumakbo papunta sa ilaw.",
+							"flag": "run_echo_mercy_ran"
+						},
+						{
+							"text": "Magtago hanggang magliwanag.",
+							"needs": "baril_ni_batista"
+						}
+					]
+				}
+			],
+			"choices": [
+				"run",
+				"hide"
+			]
+		},
+		"run": {
+			"id": "padala_run",
+			"steps": [
+				{
+					"image": "res://assets/cutscenes/padala_run.png",
+					"lines": [
+						{
+							"speaker": "???",
+							"text": "Hoy! Huminto ka!",
+							"reveal": {
+								"needs": "father_eli",
+								"speaker": "Batista"
+							}
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/padala_run_shot.png",
+					"gunshot": true,
+					"hold": 2.8,
+					"lines": [
+						{
+							"speaker": "Batista",
+							"text": "*Hinihingal* ...Sino'ng tutuloy kung hihinto ako.",
+							"if_flag": "run_echo_batista_stop",
+							"echo": true
+						},
+						{
+							"speaker": "Batista",
+							"text": "Alam ng Diyos ang bigat nito. Alam Niya.",
+							"if_flag": "run_echo_batista_weight",
+							"echo": true
+						}
+					]
+				},
+				{
+					"card": "Run",
+					"line": "Nanlaban daw."
+				}
+			]
+		},
+		"hide": {
 			"id": "padala_nagtago",
 			"steps": [
 				{
@@ -461,7 +369,11 @@
 					"lines": [
 						{
 							"speaker": "Mercy",
-							"text": "'Nay? ...Uuwi na po ako."
+							"text": "'Nay? ...Ako po 'to."
+						},
+						{
+							"speaker": "Mercy",
+							"text": "Uuwi na po ako."
 						}
 					]
 				},
@@ -479,15 +391,15 @@
 					"lines": [
 						{
 							"speaker": "Mercy",
-							"text": "...Huwag po. Huwag po."
+							"text": "Huwag po... huwag po."
 						},
 						{
 							"speaker": "Father Eli",
-							"text": "Hindi na kita sasaktan."
+							"text": "*Iniwan ang susi sa sahig* Nasa baba ang mga tanod. Sinabi ko na sa kanila ang lahat."
 						},
 						{
 							"speaker": "Father Eli",
-							"text": "Umuwi ka na, Mercy. Patawarin mo ako. Kahit hindi mo kaya."
+							"text": "Umuwi ka na, Mercy."
 						}
 					]
 				},
@@ -496,83 +408,6 @@
 					"line": "Pinalaya si Mercy."
 				}
 			]
-		},
-		"walang_namatay": {
-			"id": "padala_walang_namatay",
-			"steps": [
-				{
-					"image": "res://assets/cutscenes/padala_eli_unlocks.png",
-					"lines": [
-						{
-							"speaker": "Mercy",
-							"text": "...Huwag po. Huwag po."
-						},
-						{
-							"speaker": "Father Eli",
-							"text": "Hindi na kita sasaktan."
-						},
-						{
-							"speaker": "Father Eli",
-							"text": "Umuwi ka na, Mercy. Patawarin mo ako. Kahit hindi mo kaya."
-						}
-					]
-				},
-				{
-					"image": "res://assets/cutscenes/true_morning_family.png",
-					"lines": [
-						{
-							"speaker": "Gwen",
-							"text": "Mahal... buntis ako."
-						},
-						{
-							"speaker": "Peter",
-							"text": "...Talaga?! *Tumawa at naiyak*"
-						}
-					]
-				},
-				{
-					"image": "res://assets/cutscenes/true_morning_kulas.png",
-					"hold": 3.2
-				},
-				{
-					"image": "res://assets/cutscenes/true_morning_mercy.png",
-					"hold": 3.2
-				},
-				{
-					"image": "res://assets/cutscenes/true_morning_batista.png",
-					"hold": 3.2
-				},
-				{
-					"image": "res://assets/cutscenes/true_visiting.png",
-					"lines": [
-						{
-							"speaker": "Father Eli",
-							"text": "Basbasan n'yo po ako, Padre, dahil nagkasala ako."
-						},
-						{
-							"speaker": "Father Eli",
-							"text": "Kayo po ang nakarinig ng lahat. Lahat ng bersyon."
-						},
-						{
-							"speaker": "Father Eli",
-							"text": "Kayo lang po ang nakaalala."
-						},
-						{
-							"speaker": "Father Eli",
-							"text": "Ano po'ng penitensya ko?"
-						}
-					]
-				},
-				{
-					"card": "Walang Namatay",
-					"line": "SANGA"
-				}
-			]
 		}
-	},
-	"_comment": "Padala, see docs/STORY_BIBLE.md section 9. Three Alaala choices live here: hide until morning (outside, Kumpisal timeline), bring a tanod (the food delivery call), and, when Father Eli confessed in Kumpisal this run, 'pinalaya' replaces the room: he opens the door. With Ligtas and Sinamahan also reached this run, 'walang_namatay' (the true ending) plays instead.",
-	"read": {
-		"PoliceCard": "Pulis. Tama... pulis.",
-		"FoodDeliveryCard": "Delivery. May pupunta rito."
 	}
 }

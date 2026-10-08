@@ -1,8 +1,7 @@
 extends Node
 ## Background music: five looping tracks, crossfading as the player moves between them.
 ##
-##   main            the title (boot) screen, the main screen, a story's ending card and the
-##                   timeline ending
+##   main            the title (boot) screen, the main screen and a story's ending card
 ##   church nave     from the Kumpisal title card and its intro montage, through the nave
 ##   confessional, apartment room, public market   each its own
 ##
@@ -16,9 +15,6 @@ const CROSSFADE_SECONDS := 2.0
 ## Well below full scale, so the soft piano stays in the background, under the dialogue and
 ## sound effects.
 const VOLUME_DB := -24.0
-## How each timeline's music is pitched: the Kumpisal timeline a little lower, the Padala timeline
-## lower still, so the same pieces feel heavier the further the run is from the main timeline.
-const TIMELINE_PITCH := {"kumpisal": 0.97, "padala": 0.94}
 const SILENT_DB := -60.0
 
 const MAIN_TRACK := "res://assets/music/menu.wav"
@@ -26,7 +22,6 @@ const MAIN_TRACK := "res://assets/music/menu.wav"
 const TRACKS := {
 	"res://scenes/boot.tscn": MAIN_TRACK,
 	"res://scenes/main_menu.tscn": MAIN_TRACK,
-	"res://scenes/timeline_reveal.tscn": MAIN_TRACK,
 	"res://scenes/public_market.tscn": "res://assets/music/market.wav",
 	"res://scenes/church_nave.tscn": "res://assets/music/church.wav",
 	"res://scenes/confessional.tscn": "res://assets/music/confessional.wav",
@@ -86,9 +81,6 @@ func current_track() -> String:
 
 ## Crossfades to `track`, a path to a looping audio file, or out to silence with "".
 func play(track: String) -> void:
-	# Each timeline sounds a little different: the same pieces, played a shade lower away from the
-	# main timeline (see TIMELINE_PITCH).
-	_players[_current].pitch_scale = TIMELINE_PITCH.get(GameState.timeline, 1.0)
 	if track == _track:
 		return
 	_track = track
@@ -97,7 +89,6 @@ func play(track: String) -> void:
 		return
 	_current = 1 - _current
 	var player := _players[_current]
-	player.pitch_scale = TIMELINE_PITCH.get(GameState.timeline, 1.0)
 	player.stream = _looping(load(track))
 	player.volume_db = SILENT_DB
 	player.play()

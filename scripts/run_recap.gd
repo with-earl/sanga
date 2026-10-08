@@ -11,8 +11,7 @@ extends Control
 ## When the writing is longer than two pages, a tap turns to the next spread. After the last one,
 ## "Ayusin ayon sa oras": the ink fades and the run is written again in true time order (Kumpisal
 ## the past, Padala the present, Tokhang the future), and red threads draw themselves from each cause
-## to its effect (see TimeThreads). A last tap goes on: to the main screen (the main timeline) or
-## to the timeline chart (any other timeline).
+## to its effect (see TimeThreads). A last tap goes back to the main screen.
 
 const BOOK_PICTURE := preload("res://assets/ui/book_spread.png")
 ## Where the words go on the two pages, in the picture's own pixels (the same as the memory book).
@@ -55,7 +54,6 @@ const THREAD_SECONDS := 0.8
 const THREAD_PAUSE_SECONDS := 0.25
 const REORDER_SECONDS := 0.45
 ## After any ending but the true one, the voice from the confessional speaks once more.
-const TRUE_ENDING := "padala_walang_namatay"
 const VOICE_PICTURE := "res://assets/cutscenes/prologue_booth.png"
 
 ## Each page's lines, as [text, size, colour, gap above, centred].
@@ -379,15 +377,11 @@ func _knot(at: Vector2) -> Polygon2D:
 	return knot
 
 
-## The main timeline goes back to the main screen (the book has just shown its time order); any
-## other timeline goes on to the chart of the realities this save has made.
+## Back to the main screen, the book having shown the run in time order.
 func _continue() -> void:
 	create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT).tween_property(_hint, "modulate:a", 0.0, 0.3)
-	if TRUE_ENDING not in StoryDirector.last_reality.get("needs", []):
+	if StoryDirector.TRUE_ENDING not in StoryDirector.last_outcomes:
 		# The voice from the confessional, over black: the confession is not over yet.
 		await Cutscene.play([{"image": VOICE_PICTURE, "lines": [StoryDirector.more_to_tell()]}])
 		Cutscene.hand_over()
-	if StoryDirector.last_timeline == "main":
-		StoryCard.fade_to_scene("main_menu")
-	else:
-		StoryCard.fade_to_scene("timeline_reveal")
+	StoryCard.fade_to_scene("main_menu")

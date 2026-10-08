@@ -1,18 +1,17 @@
 class_name Tokhang
 extends Location
-## Tokhang, at the public market.
+## Tokhang, at the public market, Sunday afternoon.
 ##
-## Opening: Peter's introduction, then a phone call with Gwen and a choice. The first choice
-## (Peter goes to the market) is the only one on the first run; the other two appear in later runs.
-## At the market the buyer talks to Gloria, picks the realistic toy gun, and brings it back to
-## Gloria, which leads to the shooting and the story's outcome. The words all come from
-## story/tokhang.json.
+## Opening: Peter on his last delivery, the news, then a phone call with Gwen and a choice: Peter
+## goes to the market, or (from the second run) Gwen does. At the market the buyer talks to
+## Gloria, picks the realistic toy gun, and brings it back to Gloria to pay, which leads to the
+## shooting. The words all come from story/tokhang.json.
 ##
-## In the Padala timeline, after Mercy called the police, there is no choice: after the phone call
-## Father Eli trades Kulas' whereabouts to Batista for Mercy, and Peter dies.
-##
-## With the Alaala "Ang Laruang Baril" the buyer can take the water gun instead (an Alaala choice).
-## Paying for it with Gloria then leads to the Ligtas ending: nobody is shot.
+## Tokhang is the latest story in time, so what happened earlier in this run can reach it (the
+## story file marks those lines with run flags). The one that changes how it ends: Kulas, walked
+## home alive from the church, is at the market and warns the buyer away from the realistic gun.
+## That offers the water gun, the same choice the Alaala "Ang Laruang Baril" offers. Settling on
+## the water gun leads to the Ligtas ending: nobody is shot.
 
 const STORY_FILE := "res://story/tokhang.json"
 ## Saved progress: who went to the market, "" until the phone call is over.
@@ -23,6 +22,8 @@ const STEP_CHOOSE := 1
 const STEP_RETURN := 2
 ## Saved progress: "water" once the buyer settled on the water gun (an Alaala choice).
 const GUN_FLAG := "objective_tokhang_gun"
+## Set in Kumpisal earlier in this run when Father Eli walked Kulas home.
+const KULAS_SAFE_FLAG := "run_kulas_safe"
 
 var _story: Dictionary = {}
 var _buyer := ""
@@ -75,10 +76,6 @@ func _play_opening() -> void:
 	await Cutscene.release()
 	# The phone call: Peter on the left, Gwen (and Ben, when he speaks) on the right.
 	left_character = "Peter"
-	if StoryDirector.variant() == "padala/tokhang":
-		await _converse(_story.get("phone", []), false)
-		await _play_outcome("trade")
-		return
 	await _converse(_story.get("phone", []), true)
 	var choices: Array = []
 	for choice in _story.get("choices", []):
@@ -93,10 +90,6 @@ func _play_opening() -> void:
 	await _converse(picked.get("after", []), false)
 	_busy = false
 	var buyer := str(picked.get("buyer", ""))
-	if buyer == "":
-		# Nobody goes to the market today.
-		await _play_outcome(str(picked["id"]))
-		return
 	GameState.set_flag(BUYER_FLAG, buyer)
 	# Undo stops here: the opening and the choice are not played again.
 	GameState.checkpoint(true)
@@ -126,6 +119,9 @@ func _tap_gloria(slot: ArtSlot) -> void:
 		STEP_GLORIA:
 			_hide_characters(_only_if_character(slot))
 			await _converse(_with_buyer(asking), false)
+			if GameState.get_flag(KULAS_SAFE_FLAG, false):
+				# Kulas, alive, knows who is waiting at the market's exit.
+				await _converse(_story.get("kulas_warning", []), false)
 			_advance_step()
 		STEP_CHOOSE:
 			# Gloria repeats where the toys are.
@@ -146,7 +142,8 @@ func _tap_gun(slot: ArtSlot, gun: Dictionary) -> void:
 		return
 	var lines: Array = [{"speaker": _buyer, "text": gun.get("text", "")}]
 	var picked := [""]
-	if _step == STEP_CHOOSE and gun.has("choice"):
+	if _step == STEP_CHOOSE and gun.has("choice") and Alaala.prepare_options(gun["choice"]["choices"]).size() > 1:
+		# The choice is offered only when something makes it possible: the memory, or Kulas' warning.
 		lines.append(gun["choice"])
 	var remember := func(id: String) -> void: picked[0] = id
 	_dialogue.line_choice_made.connect(remember)
@@ -161,7 +158,7 @@ func _tap_gun(slot: ArtSlot, gun: Dictionary) -> void:
 		_advance_step()
 
 
-## Plays the outcome cutscene for `outcome` ("peter", "gwen" or "kulas"), then goes on to the
+## Plays the outcome cutscene for `outcome` ("peter", "gwen" or "safe"), then goes on to the
 ## next story.
 func _play_outcome(outcome: String) -> void:
 	_busy = true

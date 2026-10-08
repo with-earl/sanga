@@ -92,6 +92,7 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
    - Claude Code's auto-mode safety check blocked the rewrite and a push once, and the user pushed
      manually. Later pushes worked.
 6. **v0.3.3 Timeline ending screen fixed and rebuilt.**
+   *SUPERSEDED by one-truth rework: the timelines chart and its ending screen were deleted.*
    - **Bug:** the close-up phase of `timeline_reveal` was black. The diagram was a zero-size
      `Control`, and a Control is culled when its own rect leaves the screen. It is now a `Node2D`.
    - **Rebuilt from nodes:** Panels with `StyleBoxFlat`, Labels and `Line2D`. Text is laid out
@@ -167,6 +168,24 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
     - `feat(ui)` HUD: soft top shade behind the HUD, place name fades in, new objectives glow.
 
 ## Where we stopped
+
+### One-truth story rework (branch claude/one-truth-story, not merged yet)
+
+- **What changed:** the game is now ONE story in one fixed story time, not three stories on many timelines with a timelines chart. Kumpisal is Saturday afternoon, Padala Saturday night, Tokhang Sunday afternoon.
+- **Starting points:** a save can start from three places. A run plays all three stories going round the circle from the start: market = Tokhang, Kumpisal, Padala; church = Kumpisal, Padala, Tokhang; room = Padala, Tokhang, Kumpisal. The first run of a save always starts at the market.
+- **Echoes and flags reach forward in story time:** Kulas alive (`run_kulas_safe`) warns the buyer in Tokhang and offers the water gun; Peter seen at Eli's door (`run_peter_seen`); Mercy shot running (news in Tokhang).
+- **True ending** (`walang_namatay`: `kumpisal_sinamahan` + `padala_pinalaya` + `tokhang_safe`) plays an epilogue at the end of any run that earns it.
+- **After a run:** "Ang Nangyari", then "Ayusin ayon sa oras", then the main screen. The timeline chart is deleted: `scenes/timeline_reveal.tscn`, `scripts/timeline_reveal.gd`, `scripts/timeline_map.gd`, `story/timelines.json`.
+- **Start screen** (`scripts/start_screen.gd`, class `StartScreen`): opening a save shows a Continue card (3:4, upright), a hairline, then "Select your starting point" with three 3:4 story cards. The Kumpisal and Padala cards stay closed until the first run is finished.
+- **Dev tools:** jump points are "Start Points" and "Later In A Run"; the Endings list has "First Run Ending" and "True Ending".
+- **Removed:** the per-timeline music pitch and tint (`MusicDirector`, `StageLife`).
+- **Tests:** `tests/playthrough.gd` plays 6 runs (was 12).
+- **Story text:** fully rewritten in `story/*.json`.
+- **Not merged.** The changes are still uncommitted in the working tree of `claude/one-truth-story`.
+- **Remaining steps:**
+  1. Rewrite `docs/STORY_BIBLE.md` to the new script (being done separately).
+  2. Re-check the cutscene artwork (`assets/cutscenes`, `PLACEHOLDERS.txt`) against the new lines.
+  3. Visual check of the start screen in a windowed run (screenshot), phone upright.
 
 - **The cloud session cannot push to `main` or push tags** (HTTP 403). Work goes to a
   `claude/...` branch and a PR the user merges on GitHub. Decision 12 landed as PR #1, and Pages
@@ -297,7 +316,7 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
     Walang Namatay). Run flags: `run_kulas_safe`, `run_eli_confessed`, `run_tanod`.
   - Art: 46 stand-in cutscenes from `tools/draw_placeholders.py`
     (`assets/cutscenes/PLACEHOLDERS.txt` lists them). Painting them is the main art task.
-  - **Phase 4 done (timelines chart):** `story/timelines.json` has cards for every new ending
+  - **Phase 4 done (timelines chart):** SUPERSEDED by one-truth rework: the chart and `story/timelines.json` were deleted. `story/timelines.json` has cards for every new ending
     (main: Ligtas, Sinamahan, Pinalaya, Walang Namatay; kumpisal: Nagtago, Pinalaya; padala:
     Tanod, Sinamahan) and 32 realities, each listing every outcome of its run. `TimelineMap
     .reality_for` matches exactly (same outcomes, no more, no fewer). Older saves' reality names
@@ -315,7 +334,7 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
     `GameState.run_log` (saved per slot), filled by `StoryDirector._enter_chapter`,
     `DialogueBox.choose`, `Cutscene` ending cards (memory cards skipped) and
     `StoryDirector._remember`. The smoke test checks the recap.
-  - **Phase 5 done (full playthrough):** `tests/playthrough.gd` plays the real game from a fresh
+  - **Phase 5 done (full playthrough):** SUPERSEDED by one-truth rework: the playthrough now plays 6 runs, not 12. `tests/playthrough.gd` plays the real game from a fresh
     save, tapping what the idle hint points at and choosing by a plan, through 12 runs that reach
     all 20 outcomes (12 of the 32 realities), with the true ending on run 2
     (right after a police-poster first run, as the bible says). Each run must finish, make the
@@ -400,7 +419,7 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
       begins (`begin_with(story, false)`). After every ending but Walang Namatay, the recap ends
       with the voice over black: "Hindi pa po iyon ang buong kumpisal, Padre." The playthrough
       starts two runs this way.
-    - **F. Feel** (DONE): a `CanvasModulate` tint per timeline in StageLife (Kumpisal timeline
+    - **F. Feel** (DONE): SUPERSEDED in part by one-truth rework: the per-timeline tint and music pitch were removed. a `CanvasModulate` tint per timeline in StageLife (Kumpisal timeline
       candle-amber, Padala timeline cold blue; HUD untouched) and music pitch per timeline
       (`MusicDirector.TIMELINE_PITCH`, 0.97 / 0.94); taking a ✦ choice plays `memory.wav` (new in
       `compose_sounds.py`) and a golden ring across the screen (`Sfx.memory`,
@@ -482,7 +501,7 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
    landed: PRs they merge, or granting the session push access to `main`. (Pages itself is
    solved: the repo is public and the source is GitHub Actions.)
 2. **Is the music quiet enough now?** If not, lower `MusicDirector.VOLUME_DB` further.
-3. **Alternate ending numbering** (table above) is an assumption. Ask if it matches what they
+3. SUPERSEDED by one-truth rework: there are no Alternate endings any more. **Alternate ending numbering** (table above) is an assumption. Ask if it matches what they
    mean by "Alternate 1 to 5".
 4. **Keep the main-screen gear** now that a Settings text row exists? We offered to remove it and
    got no answer.

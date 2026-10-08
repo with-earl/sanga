@@ -1,5 +1,5 @@
 {
-	"_comment": "Plays before every run after the first, on a dark confessional. The voice has no name plate; in the true ending it turns out to be Father Eli. It asks where to begin, and the player, as the priest behind the grille, answers: that answer picks the starting story and so the timeline. 'last_line' is the voice taking up the answer; 'more' is what the voice says after any ending but the true one. See docs/STORY_BIBLE.md, section 6.",
+	"_comment": "Plays before every run after the first, on a dark confessional, once the player has picked where to start on the start screen. The voice has no name plate; in the true ending it turns out to be Father Eli. 'last_line' is the voice beginning where the player chose. 'more' is what the voice says after any ending but the true one. 'epilogue' is the true ending, played when a run ends with nobody dead and Father Eli's own confession. See docs/STORY_BIBLE.md, sections 6 and 10.",
 	"image": "res://assets/cutscenes/prologue_booth.png",
 	"lines": [
 		{
@@ -9,53 +9,72 @@
 		{
 			"speaker": "",
 			"text": "Matagal na po mula nung huli akong nangumpisal."
-		},
-		{
-			"speaker": "",
-			"text": "Hindi ko po alam kung saan magsisimula."
 		}
 	],
 	"last_line": {
 		"tokhang": {
 			"speaker": "",
-			"text": "Sa palengke po. Isang hapon na parang wala lang."
+			"text": "Magsisimula po ako sa palengke. Linggo ng hapon."
 		},
 		"kumpisal": {
 			"speaker": "",
-			"text": "Sa simbahan po. Isang Sabado ng hapon."
+			"text": "Magsisimula po ako sa simbahan. Sabado, bago magdilim."
 		},
 		"padala": {
 			"speaker": "",
-			"text": "Sa kwarto po. Sa likod ng pintong nakakandado."
+			"text": "Magsisimula po ako sa kwarto. Sa likod ng pintong nakakandado."
 		}
 	},
-	"ask": [
-		{
-			"speaker": "",
-			"text": "Saan po ako magsisimula, Padre?"
-		},
-		{
-			"choices": [
-				{
-					"text": "Sa nakaraan, anak. Sa simbahan.",
-					"flag": "prologue_start",
-					"value": "kumpisal"
-				},
-				{
-					"text": "Sa kasalukuyan, anak. Sa kwarto.",
-					"flag": "prologue_start",
-					"value": "padala"
-				},
-				{
-					"text": "Sa hinaharap, anak. Sa palengke.",
-					"flag": "prologue_start",
-					"value": "tokhang"
-				}
-			]
-		}
-	],
 	"more": {
 		"speaker": "",
 		"text": "Hindi pa po iyon ang buong kumpisal, Padre."
-	}
+	},
+	"epilogue": [
+		{
+			"image": "res://assets/cutscenes/true_morning_family.png",
+			"lines": [
+				{
+					"speaker": "Gwen",
+					"text": "Mahal... buntis ako."
+				},
+				{
+					"speaker": "Peter",
+					"text": "...Seryoso? *Tumawa, tapos naiyak*"
+				}
+			]
+		},
+		{
+			"image": "res://assets/cutscenes/true_morning_kulas.png",
+			"hold": 3.2
+		},
+		{
+			"image": "res://assets/cutscenes/true_morning_mercy.png",
+			"hold": 3.2
+		},
+		{
+			"image": "res://assets/cutscenes/true_morning_batista.png",
+			"hold": 3.2
+		},
+		{
+			"image": "res://assets/cutscenes/true_visiting.png",
+			"lines": [
+				{
+					"speaker": "Father Eli",
+					"text": "Basbasan n'yo po ako, Padre, dahil nagkasala ako."
+				},
+				{
+					"speaker": "Father Eli",
+					"text": "Matagal na po mula nung huli akong nangumpisal."
+				},
+				{
+					"speaker": "Father Eli",
+					"text": "Ito na po ang buong kumpisal."
+				}
+			]
+		},
+		{
+			"card": "Walang Namatay",
+			"line": "SANGA"
+		}
+	]
 }
