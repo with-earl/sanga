@@ -1,5 +1,5 @@
 {
-	"_comment": "Padala, Saturday night, see docs/STORY_BIBLE.md section 9. One version for every run. Mercy is locked in the apartment across from the church while the man bathes. Three ways out: the police poster and the telephone, the food delivery flyer and the telephone, or the right key. Each ends in her death unless a memory (Alaala) changes it: bring a tanod (the delivery call), hide until morning (outside). When Father Eli confessed in Kumpisal earlier in this run, 'pinalaya' replaces the room: he opens the door. 'food' leaves Peter seen at the door, which Tokhang remembers when it comes later in the run.",
+	"_comment": "Padala, Saturday night, see docs/STORY_BIBLE.md section 9. One version for every run. Mercy is locked in the apartment across from the church while the man bathes. Three ways out: the police poster and the telephone, the food delivery flyer and the telephone, or the right key. Each ends in her death unless a memory (Alaala) changes it: bring a tanod (the delivery call), hide until morning (outside). When Father Eli confessed in Kumpisal earlier in this run, 'pinalaya' replaces the room: he opens the door. 'food' leaves Peter seen at the door, which Tokhang remembers when it comes later in the run. On the first run of a save the key leads to 'caught' (Eli comes out of the bath and catches her) instead of the street, so every first-run way out ends with the man at the door and the player seeing him.",
 	"intro": [
 		{
 			"image": "res://assets/cutscenes/padala_gloria_mercy.png",
@@ -253,6 +253,12 @@
 					"unless_flag": "run_tanod"
 				},
 				{
+					"image": "res://assets/cutscenes/padala_reveal_eli.png",
+					"caption": "Father Eli",
+					"hold": 3.4,
+					"unless_flag": "run_tanod"
+				},
+				{
 					"image": "res://assets/cutscenes/padala_tanod.png",
 					"if_flag": "run_tanod",
 					"lines": [
@@ -406,6 +412,46 @@
 				{
 					"card": "Pinalaya",
 					"line": "Pinalaya si Mercy."
+				}
+			]
+		},
+		"caught": {
+			"id": "padala_caught",
+			"steps": [
+				{
+					"image": "res://assets/cutscenes/padala_collar.png",
+					"lines": [
+						{
+							"speaker": "Mercy",
+							"text": "...Pari?"
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/padala_eyes_widen.png",
+					"hold": 2.4
+				},
+				{
+					"image": "res://assets/cutscenes/padala_eli_attacks.png",
+					"hold": 2.6
+				},
+				{
+					"card": "Key",
+					"line": "Hindi na nakauwi si Mercy."
+				},
+				{
+					"image": "res://assets/cutscenes/padala_dressing.png",
+					"lines": [
+						{
+							"speaker": "Father Eli",
+							"text": "Panginoon... patawarin Mo ako."
+						}
+					]
+				},
+				{
+					"image": "res://assets/cutscenes/padala_reveal_eli.png",
+					"caption": "Father Eli",
+					"hold": 3.4
 				}
 			]
 		}

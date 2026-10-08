@@ -169,6 +169,11 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **First-run spine (branch claude/first-run-spine, stacked on calm/text menu):** Tokhang's errand now
+  has two ways to say yes on the first run (both send Peter); in Padala on a save's first run the key
+  ends with Eli catching Mercy (`padala_caught`, gives Si Father Eli), and the food ending shows the
+  man's face, so every first-run way out shows the reveal. Bible rule R11.
+
 - **Calm scenes (branch claude/calm-scenes, stacked on one-truth-story):** the camera drift, the
   breathing of people and portraits, the 21 Hz flame flutter and the turning of the hint glint were
   removed because on a phone they read as everything vibrating. `stage_life.gd` now only adds the

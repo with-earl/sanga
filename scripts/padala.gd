@@ -10,7 +10,8 @@ extends Location
 ##   friend. Mercy dies.
 ## - Take the food delivery flyer and call: a rider comes, sees, and is sent away. Mercy dies, and
 ##   the rider (Peter) has been seen, which Tokhang remembers if it is played later in the run.
-## - Find the right key among five and get out into the street.
+## - Find the right key among five and get out. On a save's first run Father Eli comes out of the
+##   bath and catches her at the door; from the second run she reaches the street.
 ##
 ## Taking one card puts the other out of reach. The words come from story/padala.json. The right
 ## key is picked at random for each run.
@@ -178,7 +179,9 @@ func _use_telephone() -> void:
 func _try_key(slot: ArtSlot) -> void:
 	var index := int(str(slot.name).trim_prefix("Keys"))
 	if index == int(GameState.get_flag(RIGHT_KEY_FLAG, 1)):
-		await _play_ending("outside")
+		# On a save's first run every way out ends with the man at the door, so the reveal always
+		# lands; from the second run the street is open.
+		await _play_ending("outside" if GameState.has_finished_first_run() else "caught")
 		return
 	# A wrong key is put aside, so the search narrows down.
 	slot.visible = false
