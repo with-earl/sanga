@@ -23,11 +23,11 @@ const CARD_RADIUS := 14
 ## Where the cards' top edge sits, and the heading above them.
 const CARDS_TOP := 236.0
 const HEADING_GAP := 46.0
-const DIM := Color(0.035, 0.02, 0.03, 0.82)
+const DIM := Color(0.035, 0.02, 0.03, 0.94)
 const LINE := Color(1.0, 0.953, 0.839, 0.32)
 const BORDER := Color(1.0, 0.953, 0.839, 0.7)
 const SHADE := Color(0.05, 0.025, 0.035, 0.92)
-const CLOSED_SHADE := Color(0.05, 0.025, 0.035, 0.62)
+const CLOSED_SHADE := Color(0.03, 0.02, 0.03, 0.8)
 const TITLE_SIZE := 34
 const SMALL_SIZE := 17
 const HEADING_SIZE := 24
@@ -37,14 +37,14 @@ const STORIES := [
 	{"story": "tokhang", "image": "res://assets/backgrounds/public_market.png",
 		"when": "Linggo ng hapon", "who": "Peter · ang palengke"},
 	{"story": "kumpisal", "image": "res://assets/backgrounds/church_nave.png",
-		"when": "Sabado ng hapon", "who": "Father Eli · ang simbahan"},
+		"when": "Sabado ng hapon", "who": "Eli · ang simbahan"},
 	{"story": "padala", "image": "res://assets/backgrounds/apartment_room.png",
 		"when": "Sabado ng gabi", "who": "Mercy · ang kwarto"},
 ]
 const CONTINUE_TITLE := "Continue"
 const NO_RUN := "No run in progress"
 const HEADING := "Select your starting point"
-const LOCKED := "Opens after your first run"
+const LOCKED := "Opens after run 1"
 const BACK := "‹  Back"
 const CONFIRM_TITLE := "Start a new run?"
 const CONFIRM_NOTE := "Your current progress in Slot %d will be lost."
@@ -98,7 +98,8 @@ func _add_top_bar(description: String) -> void:
 	back_button.theme_type_variation = &"TextButton"
 	back_button.text = BACK
 	back_button.focus_mode = Control.FOCUS_NONE
-	back_button.position = Vector2(36, 26)
+	# Beside the gear and terminal icons that sit at the top left, not under them.
+	back_button.position = Vector2(180, 26)
 	back_button.pressed.connect(back)
 	add_child(back_button)
 	var title := _text(description, SMALL_SIZE + 3, false)
@@ -188,8 +189,12 @@ func _card(at: Vector2, image: String, title: String, top_line: String, bottom_l
 	var words := VBoxContainer.new()
 	words.add_theme_constant_override("separation", 2)
 	words.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	words.position = Vector2(16, CARD_SIZE.y - 92)
-	words.size = Vector2(CARD_SIZE.x - 32, 78)
+	# Fixed to the bottom of the card, so a line that wraps grows upwards and never past the edge.
+	words.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	words.offset_left = 16
+	words.offset_right = -16
+	words.offset_top = 14
+	words.offset_bottom = -16
 	words.alignment = BoxContainer.ALIGNMENT_END
 	var name_label := Label.new()
 	name_label.text = title
