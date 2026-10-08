@@ -169,6 +169,9 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **TV news scene, focus shot (same branch):** Peter is pushed to the left edge as a shoulder view and
+  blurred (gaussian, premultiplied) so the lens focuses on the news; two shelves of three bigger sets
+  (`crt_set(..., k=1.5)`) instead of three rows of five.
 - **TV news scene, super close (branch claude/tv-store-closeup, on claude/tv-store-shoulder):** the camera
   is right at the glass; the rider is seen from head to chest only, large at the left; the tube sets, the
   double door with its OPEN sign and the posted pole fill the rest. `tools/tv_store.py` (`build`).

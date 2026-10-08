@@ -20,6 +20,7 @@ import math
 from pathlib import Path
 
 import numpy as np
+from scipy.ndimage import gaussian_filter
 from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 
 import rider_back
@@ -151,14 +152,14 @@ def turned_box(scene, centre_xz, y0, y1, w, d, yaw, color, layer=2, skip=()):
             scene.face(_turned(points, centre_xz, yaw), color, layer=layer)
 
 
-def crt_set(scene, cx, y0, cz, frame: Image.Image, bezel=(26, 26, 30), layer=2):
+def crt_set(scene, cx, y0, cz, frame: Image.Image, bezel=(26, 26, 30), layer=2, k=1.0):
     """A regular tube television, 50 cm wide and 40 cm high with a deep boxy body, standing on a
     shelf at (cx, cz) and facing the street. All the shop's sets are this size. Its screen glows
     with the news, and the body's sides and top catch the light so it reads as a solid."""
-    w, h, depth = 0.50, 0.40, 0.42
+    w, h, depth = 0.50 * k, 0.40 * k, 0.42 * k
     turned_box(scene, (cx, cz + depth / 2), y0, y0 + h, w, depth, 0, (52, 52, 58), layer)
     # The bulge of the tube at the back, narrower than the front.
-    turned_box(scene, (cx, cz + depth + 0.14), y0 + 0.05, y0 + h - 0.05, w * 0.62, 0.28, 0, (40, 40, 46), layer)
+    turned_box(scene, (cx, cz + depth + 0.14 * k), y0 + 0.05 * k, y0 + h - 0.05 * k, w * 0.62, 0.28 * k, 0, (40, 40, 46), layer)
     # The front: a bezel around a screen, and a control strip with two knobs and a speaker grille.
     scene.face([(cx - w / 2, y0 + h, cz - 0.002), (cx + w / 2, y0 + h, cz - 0.002), (cx + w / 2, y0, cz - 0.002), (cx - w / 2, y0, cz - 0.002)],
                bezel, layer=layer + 1)
@@ -565,25 +566,25 @@ def build(size) -> Image.Image:
     scene.box(1.7, 2.9, 0.95, 0.99, 3.75, 4.55, (210, 210, 214), layer=1)
     # Three shelves, each a row of five identical tube sets side by side with a clear gap between.
     plank = (118, 92, 66)
-    shelf_tops = (0.42, 1.04, 1.66)
+    shelf_tops = (0.55, 1.4)
     shelf_x0, shelf_x1 = -2.0, 1.5
     for top in shelf_tops:
-        scene.box(shelf_x0, shelf_x1, top - 0.03, top, 0.5, 1.3, plank, layer=1)
+        scene.box(shelf_x0, shelf_x1, top - 0.03, top, 0.5, 1.9, plank, layer=1)
     for ux in (shelf_x0, shelf_x1):
-        scene.box(ux - 0.02, ux + 0.02, 0.0, 2.15, 0.5, 1.3, (70, 72, 82), layer=1)
-    scene.box(shelf_x0, shelf_x1, 0.0, 0.39, 0.55, 1.25, (44, 46, 54), layer=1)
-    pitch = (shelf_x1 - shelf_x0) / 5
+        scene.box(ux - 0.02, ux + 0.02, 0.0, 2.15, 0.5, 1.9, (70, 72, 82), layer=1)
+    scene.box(shelf_x0, shelf_x1, 0.0, 0.52, 0.55, 1.85, (44, 46, 54), layer=1)
+    pitch = (shelf_x1 - shelf_x0) / 3
     bezels = [(26, 26, 30), (176, 178, 184)]
     frame_no = 0
     for row, top in enumerate(shelf_tops):
-        for col in range(5):
+        for col in range(3):
             cx = shelf_x0 + pitch * (col + 0.5)
-            crt_set(scene, cx, top, 0.6, broadcast(640, 360, frame_no % 5), bezel=bezels[(row + col) % 2])
+            crt_set(scene, cx, top, 0.6, broadcast(640, 360, frame_no % 5), bezel=bezels[(row + col) % 2], k=1.5)
             frame_no += 1 + (row == 1)
 
     # ---- the window: aluminium frames between the sets, the double glass door, then the glass sheet
     frame_c = (176, 180, 188)
-    for fx in (gx0, shelf_x0 + pitch * 2 - 0.02, shelf_x0 + pitch * 4 - 0.1, door_x0, gx1):
+    for fx in (gx0, shelf_x0 + pitch, shelf_x0 + pitch * 2, door_x0, gx1):
         scene.box(fx - 0.035, fx + 0.035, gy0 if fx < door_x0 else 0.0, gy1, -0.06, 0.03, frame_c, layer=4)
     scene.box(gx0, gx1, gy1 - 0.03, gy1 + 0.03, -0.06, 0.03, frame_c, layer=4)
     scene.box(gx0, door_x0, gy0 - 0.03, gy0 + 0.03, -0.06, 0.03, frame_c, layer=4)
@@ -631,7 +632,7 @@ def build(size) -> Image.Image:
                (0, 0, 0), texture=pole_shadow, layer=1)
 
     # ---- the rider's shadow, thrown towards the shop, away from the sun
-    rider_x, rider_z = 0.8, -1.45
+    rider_x, rider_z = 0.55, -1.3
     shadow = Image.new("RGBA", (160, 520), (0, 0, 0, 0))
     sd = ImageDraw.Draw(shadow)
     sd.ellipse((58, 460, 102, 510), fill=(8, 8, 14, 190))
@@ -673,7 +674,14 @@ def build(size) -> Image.Image:
     x0, y0 = max(left, 0), max(top, 0)
     x1, y1 = min(left + sprite.width, w), min(top + sprite.height, h)
     if x1 > x0 and y1 > y0:
-        canvas.alpha_composite(sprite.crop((x0 - left, y0 - top, x1 - left, y1 - top)), (x0, y0))
+        near = sprite.crop((x0 - left, y0 - top, x1 - left, y1 - top))
+        # Out of focus: he is much closer than the shop, so the lens softens him (premultiplied, so no dark fringe).
+        a = np.asarray(near).astype(np.float32)
+        a[..., :3] *= a[..., 3:4] / 255.0
+        a = np.stack([gaussian_filter(a[..., i], 7.0) for i in range(4)], axis=-1)
+        a[..., :3] = a[..., :3] / np.maximum(a[..., 3:4] / 255.0, 1e-3)
+        near = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), "RGBA")
+        canvas.alpha_composite(near, (x0, y0))
     return canvas
 
 
