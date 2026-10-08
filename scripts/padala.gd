@@ -27,6 +27,10 @@ const INTRO_FLAG := "objective_padala_intro_seen"
 const CARD_FLAG := "objective_padala_card_taken"
 const RIGHT_KEY_FLAG := "objective_padala_right_key"
 const TRIED_FLAG := "objective_padala_tried_keys"
+## After two wrong keys Mercy notices which key is worn from use, and it catches the light, so the
+## search is a little less blind.
+const CLUE_AFTER := 2
+const WORN_KEY := Color(1.25, 1.15, 0.92)
 ## Set in Kumpisal this run when Father Eli confessed his own sin.
 const ELI_CONFESSED_FLAG := "run_eli_confessed"
 ## Set when Mercy asked the rider to bring a tanod.
@@ -90,6 +94,8 @@ func _arrange_room() -> void:
 	for index in range(1, KEY_COUNT + 1):
 		var key_node := get_node("Props/Keys%d" % index) as ArtSlot
 		key_node.visible = _variant.get("keys", false) and key_node.name not in tried
+		var worn := tried.size() >= CLUE_AFTER and index == int(GameState.get_flag(RIGHT_KEY_FLAG, 1))
+		key_node.self_modulate = WORN_KEY if worn else Color.WHITE
 
 
 func _taken_card() -> String:
@@ -195,6 +201,9 @@ func _try_key(slot: ArtSlot) -> void:
 	GameState.checkpoint()
 	GameState.save_current()
 	await _converse(_story.get("wrong_key", {}).get(_variant_name, []), false)
+	if tried.size() == CLUE_AFTER:
+		_arrange_room()
+		await _say_mercy(str(_story.get("worn_key", "")))
 
 
 func _say_mercy(text: String) -> void:

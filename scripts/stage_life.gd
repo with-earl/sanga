@@ -10,9 +10,14 @@ extends Node
 ## - The light lives (see shaders/stage_light.gdshader): candles and lamps flicker, dust floats in
 ##   the sun, steam drifts from the bathroom, and cloud shadows pass over.
 ##
+## - Each timeline has its own light: the main timeline as painted, the Kumpisal timeline a little
+##   warmer, like candlelight, and the Padala timeline a little colder, like a night outside.
+##
 ## Everything is kept small on purpose: the player should feel it more than see it.
 
 const LIGHT_SHADER := preload("res://shaders/stage_light.gdshader")
+## The tint over the whole place, by timeline (the HUD and dialogue are not tinted).
+const TIMELINE_TINT := {"kumpisal": Color(1.0, 0.94, 0.84), "padala": Color(0.86, 0.91, 1.0)}
 ## How far the camera drifts: sideways and up and down in pixels, and in and out as a share of
 ## the size. One slow cycle takes this many seconds; the two directions are out of step, so the
 ## path never repeats exactly.
@@ -83,6 +88,10 @@ func _build(location_key: String) -> void:
 			slot.pivot_offset = Vector2(slot.size.x / 2.0, slot.size.y)
 			breathe(slot)
 	_add_light(location_key)
+	if TIMELINE_TINT.has(GameState.timeline):
+		var tint := CanvasModulate.new()
+		tint.color = TIMELINE_TINT[GameState.timeline]
+		_place.add_child(tint)
 
 
 func _add_layer(layer: Control, depth: float, pivot: Vector2, overscan := true) -> void:

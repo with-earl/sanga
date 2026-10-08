@@ -106,7 +106,10 @@ choice fits on one line. Stage directions inside a line are Tagalog, between ast
   run.
 - **R6.** No timers, no meters, no hidden stats, no stealth. The player cannot fail a choice.
 - **R7.** No new places, no new characters.
-- **R8.** An Alaala choice shows a faint **✦** before its text. Gaining an Alaala shows one
+- **R8.** An Alaala choice shows a faint **✦** before its text, and taking one plays a soft
+  remembered chime with a golden ring across the screen. Each Alaala in the memory book has a faint
+  hint of where it matters (for example *"Sa palengke, may iba pang laruan."*), never what it
+  changes. Gaining an Alaala shows one
   line on the end-of-run screen: **"Hindi mo na ito makakalimutan."** and the Alaala's name.
 - **R9. Echoes.** An ordinary choice can come back later in the same run as an **echo**: one
   line, somewhere else, that answers what was said. Echoes flow forward in story time as well as
@@ -327,6 +330,15 @@ Card: **Ligtas** — *Walang nabaril sa palengke.*
 
 ## 8. KUMPISAL (player: Father Eli)
 
+**Each timeline opens Kumpisal its own way**, after the three opening lines, so the player feels
+what came before in that run:
+
+| Timeline | Added to the opening |
+|---|---|
+| Kumpisal (the run starts here, in the past) | **Father Eli:** *Tumingin sa relo* Mamaya pa ang dating ng pinapadala ni Gloria. *(after)* |
+| Padala, after the police call | **Father Eli:** *May kalmot sa kamay* Pasensya na. Nahuli ako ng dating. *(before)* |
+| Padala, after the food delivery | **Father Eli:** *Hinuhugasan ang kamay sa agua bendita* ...Matagal bago natanggal. *(before)* |
+
 ### 8.1 Opening (existing montage pictures)
 
 > **Father Eli:** Tuwing Sabado ng hapon, bukas ang kumpisalan.
@@ -543,6 +555,9 @@ Usual: `padala_peter_arrives.png` — **Peter:** Ma'am? Delivery po— *(sees he
 > **Tanod:** Father? Ano'ng ginagawa n'yo rito?
 
 Card: **Tanod** — *Nasagip si Mercy, at buhay si Peter.*
+
+**Searching the keys:** after two wrong keys, Mercy notices the right one: *"Teka... may gasgas
+'yung isa. Parang laging ginagamit."*, and that key catches the light, so the search is not blind.
 
 **Keys (Main, existing):** first `padala_collar.png` *(new)*: at the door, Mercy glances back. On
 the bathroom door hangs a black shirt with a priest's white collar.

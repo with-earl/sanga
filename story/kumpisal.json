@@ -556,6 +556,10 @@
 						{
 							"speaker": "Father Eli",
 							"text": "At lahat ng sinasabi rito... dito lang."
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "*Tumingin sa relo* Mamaya pa ang dating ng pinapadala ni Gloria."
 						}
 					]
 				}
@@ -600,6 +604,10 @@
 					"lines": [
 						{
 							"speaker": "Father Eli",
+							"text": "*May kalmot sa kamay* Pasensya na. Nahuli ako ng dating."
+						},
+						{
+							"speaker": "Father Eli",
 							"text": "Tuwing Sabado ng hapon, bukas ang kumpisalan."
 						},
 						{
@@ -619,6 +627,10 @@
 				{
 					"image": "res://assets/backgrounds/church_nave.png",
 					"lines": [
+						{
+							"speaker": "Father Eli",
+							"text": "*Hinuhugasan ang kamay sa agua bendita* ...Matagal bago natanggal."
+						},
 						{
 							"speaker": "Father Eli",
 							"text": "Tuwing Sabado ng hapon, bukas ang kumpisalan."

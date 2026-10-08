@@ -400,9 +400,13 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
       begins (`begin_with(story, false)`). After every ending but Walang Namatay, the recap ends
       with the voice over black: "Hindi pa po iyon ang buong kumpisal, Padre." The playthrough
       starts two runs this way.
-    - **F. Feel:** per-timeline colour grade and music variation; a memory chime and ripple when a
-      ✦ choice is taken; a clue after two wrong keys; a place hint on each memory book entry; a
-      different Kumpisal opening per timeline.
+    - **F. Feel** (DONE): a `CanvasModulate` tint per timeline in StageLife (Kumpisal timeline
+      candle-amber, Padala timeline cold blue; HUD untouched) and music pitch per timeline
+      (`MusicDirector.TIMELINE_PITCH`, 0.97 / 0.94); taking a ✦ choice plays `memory.wav` (new in
+      `compose_sounds.py`) and a golden ring across the screen (`Sfx.memory`,
+      `shaders/memory_ripple.gdshader`); after two wrong keys Mercy says the worn key is used
+      often and it catches the light; each memory in the book shows a faint "↳" hint
+      (`alaala.json` "hint"); Kumpisal's opening gains one line per timeline (bible section 8).
     - **G. Playtest** with the checklist (revelation timing, causality, replay motivation).
     - **Art in parallel:** object shots in 3D (jeepney, badge, visiting booth, TV news); ~10 key
       character shots need an artist (or Higgsfield if the user allows).
