@@ -42,7 +42,7 @@ godot --headless --path . --export-release "Web" build/web/index.html  # web bui
 python tools/compose_music.py [name]                                 # regenerate music (numpy, scipy)
 python tools/compose_sounds.py                                       # regenerate sound effects
 python tools/draw_props.py                                           # redraw props, telephone, HUD icons (gear, terminal, book, clipboard) (needs Pillow, numpy)
-python tools/draw_placeholders.py                                    # placeholder cutscenes for art not painted yet
+python tools/draw_placeholders.py                                    # stand-in cutscenes (composed from the game art) for art not painted yet
 tools/next_version.sh                                                # next version from the commits
 ```
 

@@ -68,7 +68,9 @@ and `_2`, `_3` and so on for other expressions. `_2` is the sad expression, show
 ## assets/cutscenes/
 
 Full-screen pictures for cutscenes (16:9, 1672 x 941 or larger). Every one except `tokhang_rider.png`
-is a labelled placeholder: replace it with the real picture under the same filename.
+and `padala_bath.png` is a stand-in that `tools/draw_placeholders.py` composes from the game's own art
+(listed in `PLACEHOLDERS.txt`). Replace it with the real picture under the same filename, and remove its
+name from `PLACEHOLDERS.txt` so the tool never draws over it.
 
 | File | Shows |
 | --- | --- |
