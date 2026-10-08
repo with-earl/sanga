@@ -124,6 +124,9 @@ func _test_save_roundtrip() -> void:
 	state.flags = {"trusted_gloria": true}
 	state.decisions = [{"id": "d1", "choice": "yes", "location": "public_market"}]
 	state.run_log = [{"story": "Tokhang"}, {"choice": "Oo."}]
+	state.seen_lines = {}
+	_check(not state.see_line("Gloria", "Aba, meron, anak!"), "a new line is not seen yet")
+	_check(state.see_line("Gloria", "Aba, meron, anak!"), "a line shown before is seen")
 	_check(state.save_to_slot(slot), "save_to_slot returns true")
 	state.run_log = []
 	state.location = "church_nave"
@@ -134,6 +137,7 @@ func _test_save_roundtrip() -> void:
 	_check(state.flags.get("trusted_gloria") == true, "flags restored")
 	_check(state.decisions.size() == 1, "decisions restored")
 	_check(state.run_log.size() == 2, "run log restored")
+	_check(state.seen_lines.size() == 1, "seen lines restored")
 	_check(state.delete_slot(slot), "delete_slot returns true")
 	_check(not state.has_slot(slot), "slot is gone after delete")
 	_check(not state.load_slot(99), "invalid slot is rejected")

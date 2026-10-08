@@ -37,13 +37,13 @@ const RUNS := [
 		"gain": ["laruang_baril", "pagtakbo_ni_kulas", "father_eli"]},
 	{"name": "true ending", "begin": "tokhang", "prefer": ["Sige, ako"], "look": ["Water Gun"], "alaala": true,
 		"expect": ["tokhang_safe", "kumpisal_sinamahan", "padala_walang_namatay"], "gain": []},
-	{"name": "Gwen buys, key", "begin": "tokhang", "prefer": ["Ikaw na lang", "Keys"],
+	{"name": "Gwen buys, key", "begin": "tokhang", "prefer": ["Ikaw na lang", "Keys", "Dumiretso"],
 		"expect": ["tokhang_gwen", "kumpisal_main", "padala_key"], "gain": []},
 	{"name": "later, Eli confesses", "begin": "tokhang", "prefer": ["Mamaya", "Ama, aaminin"],
 		"expect": ["tokhang_kulas", "kumpisal_main", "padala_pinalaya"], "gain": []},
 	{"name": "Kumpisal timeline, run", "begin": "kumpisal", "prefer": ["Keys", "Tumakbo"],
 		"expect": ["kumpisal_kumpisal", "padala_run"], "gain": ["baril_ni_batista"]},
-	{"name": "Kumpisal timeline, jeep", "begin": "kumpisal", "prefer": ["Keys", "Sumakay"],
+	{"name": "Kumpisal timeline, jeep", "begin": "kumpisal", "prefer": ["Keys", "Sumakay", "Dumiretso"],
 		"expect": ["kumpisal_kumpisal", "padala_ride_jeep"], "gain": []},
 	{"name": "Kumpisal timeline, hide", "begin": "kumpisal", "prefer": ["Keys", "Magtago"],
 		"expect": ["kumpisal_kumpisal", "padala_nagtago"], "gain": []},
@@ -215,9 +215,10 @@ func _pick(box: Control) -> void:
 
 
 ## The first option matching this run's preferences, else a ✦ option on an Alaala run, else the
-## first option that is not a ✦ one.
+## first option that is not a ✦ one. In the church, the player talks to everyone unless the run
+## says to take the shortcut, so the conversations stay covered.
 func _preferred(options: Array) -> int:
-	for wanted in _run.get("prefer", []):
+	for wanted in _run.get("prefer", []) + ["Kausapin muna"]:
 		for index in options.size():
 			if str(wanted) in str(options[index]):
 				return index

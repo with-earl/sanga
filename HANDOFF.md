@@ -367,9 +367,13 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
       around the church; only Father Eli can calm him); the main key ending first shows
       `padala_collar.png` (a priest's shirt on a nail by the bathroom door) and Mercy's
       "...Pari?", so a key-ending first run leaves with the doubt, the police ending with the answer.
-    - **B. Respect replays:** fast-forward that skips only lines seen on this save and stops at new
-      ones; a faint ✦ glint on lines that memories added; "Dumiretso sa kumpisalan." in the nave
-      when every talk there was heard before and nothing in them changed.
+    - **B. Respect replays** (DONE): `GameState.seen_lines` (saved per slot, kept across runs)
+      remembers every line shown. While a line seen before is on screen, a "Skip ▸▸" tab sits on
+      the dialogue box's top right; tapping it races through seen lines and stops by itself at
+      the first new line or choice. A line a memory added shows "✦" after the speaker's name. In
+      the nave, once per visit, if every conversation there was heard before (one answer per
+      choice is enough) and nothing in them changed, Father Eli is offered "Dumiretso sa
+      kumpisalan." / "Kausapin muna sila." The playthrough takes the shortcut in two runs.
     - **C. Echoes:** 6-8 ordinary choices set run flags that change 1-2 later lines in the same run,
       shown in the recap. New rule R9: echoes never change ending ids (playthrough checks it).
     - **D. "Ayusin ayon sa oras" (signature):** after the recap, the book's pages reorder into
