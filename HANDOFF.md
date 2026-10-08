@@ -312,7 +312,17 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
     `GameState.run_log` (saved per slot), filled by `StoryDirector._enter_chapter`,
     `DialogueBox.choose`, `Cutscene` ending cards (memory cards skipped) and
     `StoryDirector._remember`. The smoke test checks the recap.
-    **Next: Phase 5**, a full playthrough from a fresh save to the true ending.
+  - **Phase 5 done (full playthrough):** `tests/playthrough.gd` plays the real game from a fresh
+    save, tapping what the idle hint points at and choosing by a plan, through 12 runs that reach
+    all 20 outcomes (12 of the 32 realities), with the true ending on run 2
+    (right after a police-poster first run, as the bible says). Each run must finish, make the
+    expected reality, give the expected memories, and show the recap; no placeholder line may
+    show. All 5 memories and 12 realities end up on the save. It found one bug, now fixed: a
+    quick second tap in Tokhang or Padala, in the moment after a dialogue closes, could act
+    before the first tap finished (picking the realistic gun right after choosing the water gun
+    lost the Ligtas ending; taking both Padala cards). Both scenes now ignore taps until the
+    last one is handled (`_handling`). A read of the full transcript found no story problems.
+    **Next:** paint the 13 placeholder cutscenes, then 2.5D staging.
 - **No sound on iPhone** (user report). The game itself plays music (checked: player playing,
   buses not muted). Fix in the Web preset's `html/head_include`: it wraps `AudioContext` to keep
   every context the engine makes and resumes them on each `touchend`/`pointerup`/`click`

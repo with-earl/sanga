@@ -32,6 +32,7 @@ Windows machine it is
 ```bash
 godot --headless --path . --import                                   # import assets (after adding files)
 godot --headless --path . -s res://tests/smoke_test.gd               # smoke test: must print SMOKE TEST PASSED
+godot --headless --path . -s res://tests/playthrough.gd              # full playthrough, every ending: must print PLAYTHROUGH PASSED
 godot --headless --path . --export-release "Web" build/web/index.html  # web build
 python tools/compose_music.py [name]                                 # regenerate music (numpy, scipy)
 python tools/compose_sounds.py                                       # regenerate sound effects
@@ -57,6 +58,7 @@ picture. Delete the temporary script afterwards. The `--headless` runs print RID
 | `assets/` | Art (see `assets/README.md`), `music/`, `sounds/`, `fonts/Lora.ttf` (and DejaVu Sans Mono for the developer tools), `videos/main_screen.ogv` |
 | `tools/` | `next_version.sh`, `compose_music.py`, `compose_sounds.py`, `draw_props.py`, `draw_placeholders.py`, `cloud_setup.sh`. Has a `.gdignore`, so Godot skips it |
 | `tests/smoke_test.gd` | Headless smoke test |
+| `tests/playthrough.gd` | Plays a fresh save through 12 runs that reach every ending, the true ending second (about a minute). Set `PLAYTHROUGH_TRANSCRIPT=<file>` to write out every line and choice. Run it after any story or scene change |
 
 ## Conventions
 
