@@ -340,11 +340,6 @@ def padala_gloria_mercy() -> Image.Image:
     return vignette(grade(c, 1.0, 0.95, (255, 225, 190), 0.25), 0.4)
 
 
-def padala_luggage(dark: float = 0.55) -> Image.Image:
-    c = background("apartment_room", crop=(0.36, 0.06, 0.26, 0.26))
-    return grain(vignette(grade(c, dark, 0.5, (190, 150, 140), 0.4), 0.8), 8)
-
-
 def padala_beaten() -> Image.Image:
     c = background("apartment_room", blur=4)
     place(c, tinted(person("mercy", True), (160, 110, 110), 0.45), 0.35, 1.25, 0.95, shadow=False)
@@ -532,13 +527,6 @@ def padala_collar() -> Image.Image:
     return vignette(c, 0.6)
 
 
-def prologue_booth() -> Image.Image:
-    c = background("confessional", crop=(0.05, 0.05, 0.55, 0.6))
-    c = grade(c, 0.45, 0.55)
-    c = glow(c, (0.5, 0.4), (120, 80, 40), 0.25, 0.4)
-    return grain(vignette(grille(c, color=(10, 6, 4, 210)), 0.7), 7)
-
-
 def true_morning_family() -> Image.Image:
     c = background("public_market", blur=3)
     place(c, person("peter", True), 0.36, 1.03, 0.84)
@@ -580,8 +568,8 @@ SHOTS = {
     "kumpisal_eli_forgiveness.png": kumpisal_eli_forgiveness,
     "kumpisal_eli_sacrifice.png": kumpisal_eli_sacrifice,
     "padala_gloria_mercy.png": padala_gloria_mercy,
-    "padala_luggage.png": padala_luggage,
-    "padala_luggage_closed.png": lambda: padala_luggage(0.3),
+    "padala_luggage.png": lambda: object_scenes.padala_luggage(SIZE),
+    "padala_luggage_closed.png": lambda: object_scenes.padala_luggage(SIZE, closed=True),
     "padala_beaten.png": padala_beaten,
     "padala_dressing.png": padala_dressing,
     "padala_eyes_widen.png": padala_eyes_widen,
@@ -602,7 +590,7 @@ SHOTS = {
     "padala_tanod.png": padala_tanod,
     "padala_hide_dawn.png": padala_hide_dawn,
     "padala_eli_unlocks.png": padala_eli_unlocks,
-    "prologue_booth.png": prologue_booth,
+    "prologue_booth.png": lambda: object_scenes.prologue_booth(SIZE, person("eli")),
     "padala_collar.png": padala_collar,
     "true_morning_family.png": true_morning_family,
     "true_morning_kulas.png": true_morning_kulas,
