@@ -169,6 +169,8 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **TV news pole:** the pole now stands right at the shop front (x 1.72, z -0.42) so nearly all of its
+  width shows, round and covered in posters.
 - **TV news scene, nearer (same branch):** camera moved to z -1.45 so the shop fills the picture, Peter is
   nearer still (z -1.0) and blurred, the pole has 56 facets so it reads round.
 - **TV news scene, focus shot (same branch):** Peter is pushed to the left edge as a shoulder view and

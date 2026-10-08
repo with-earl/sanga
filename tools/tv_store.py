@@ -623,7 +623,7 @@ def build(size) -> Image.Image:
     scene.face([(1.22, 2.45, -0.015), (1.5, 2.45, -0.015), (1.5, 1.9, -0.015), (1.22, 1.9, -0.015)], (250, 245, 220), texture=notice, layer=5, emissive=True)
 
     # ---- the wooden pole at the kerb in front of the neighbouring shop, with its shadow
-    pole_x, pole_z = 1.78, -0.85
+    pole_x, pole_z = 1.72, -0.42
     utility_pole(scene, pole_x, pole_z)
     pole_shadow = Image.new("RGBA", (60, 400), (0, 0, 0, 0))
     ImageDraw.Draw(pole_shadow).rectangle((10, 0, 50, 400), fill=(8, 8, 14, 150))
