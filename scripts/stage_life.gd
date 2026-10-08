@@ -1,35 +1,13 @@
 class_name StageLife
 extends Node
-## Gives a place the 2.5D staging from docs/STORY_BIBLE.md, section 12, without new art:
+## Gives a place its living light (see shaders/stage_light.gdshader): candles and lamps glow,
+## dust floats in the sun, steam drifts from the bathroom, and cloud shadows pass over.
 ##
-## - The camera drifts very slowly, in and out and a little to the side. The people, and things
-##   drawn out of focus in front, move a touch more than the room behind them, so the room has
-##   depth, like a camera with layers.
-## - The people standing in the place breathe: each rises and settles very slightly, on their own
-##   rhythm, so nobody looks like a cut-out.
-## - The light lives (see shaders/stage_light.gdshader): candles and lamps flicker, dust floats in
-##   the sun, steam drifts from the bathroom, and cloud shadows pass over.
-##
-## Everything is kept small on purpose: the player should feel it more than see it.
+## Only the light moves. The room, its things and its people stay perfectly still, and so do the
+## portraits: drifting cameras and breathing people were tried, and at the size of a phone screen
+## they only read as everything trembling.
 
 const LIGHT_SHADER := preload("res://shaders/stage_light.gdshader")
-## How far the camera drifts: sideways and up and down in pixels, and in and out as a share of
-## the size. One slow cycle takes this many seconds; the two directions are out of step, so the
-## path never repeats exactly.
-const DRIFT_PIXELS := Vector2(6.0, 3.0)
-const DRIFT_ZOOM := 0.012
-## Every layer is shown this much larger all the time, so the drift never shows an empty edge.
-const OVERSCAN := 0.014
-const DRIFT_SECONDS := Vector2(29.0, 23.0)
-const ZOOM_SECONDS := 37.0
-## How much more than the room the people and the near, blurred things move.
-const CHARACTER_DEPTH := 1.35
-const FOREGROUND_DEPTH := 1.9
-## One breath: how much taller a person gets (a share of their height), and how long it takes.
-## Each person's breath is a little faster or slower than the others'.
-const BREATH_RISE := 0.007
-const BREATH_SECONDS := 4.2
-const BREATH_SPREAD := 0.7
 ## The light of each place. Positions are shares of the place's width and height, read off the
 ## background art: flames are [x, y, size, strength]; areas are [x, y, width, height].
 const LIGHTS := {
@@ -46,9 +24,6 @@ const LIGHTS := {
 }
 
 var _place: Control
-## Each moving layer, with where it rests and how strongly it moves.
-var _layers: Array = []
-var _time := 0.0
 
 
 ## Brings `place` to life: call once the place is set up.
@@ -57,47 +32,8 @@ static func add_to(place: Control, location_key: String) -> StageLife:
 	life.name = "StageLife"
 	life._place = place
 	place.add_child(life)
-	life._build(location_key)
+	life._add_light(location_key)
 	return life
-
-
-func _build(location_key: String) -> void:
-	var center := ScreenFit.DESIGN_SIZE / 2.0
-	# Every part of the room moves: the background, the things in it, the doors and hotspots. The
-	# menu does not, and neither does the HUD (it is on its own layer).
-	for child in _place.get_children():
-		if not child is Control or child is GameMenu:
-			continue
-		var layer := child as Control
-		var depth := CHARACTER_DEPTH if layer.name == "Characters" else 1.0
-		_add_layer(layer, depth, center - layer.position)
-		# Things drawn out of focus sit in front of everything, so they move the most.
-		for node in layer.find_children("*", "ArtSlot", true, false):
-			var slot := node as ArtSlot
-			if slot.depth_blur > 0.0:
-				# It already moves with its layer; this is only the extra on top.
-				_add_layer(slot, FOREGROUND_DEPTH - depth, slot.size / 2.0, false)
-	for node in _place.find_children("*", "ArtSlot", true, false):
-		var slot := node as ArtSlot
-		if slot.category == "characters":
-			slot.pivot_offset = Vector2(slot.size.x / 2.0, slot.size.y)
-			breathe(slot)
-	_add_light(location_key)
-
-
-func _add_layer(layer: Control, depth: float, pivot: Vector2, overscan := true) -> void:
-	layer.pivot_offset = pivot
-	_layers.append({"node": layer, "rest": layer.position, "depth": depth, "base": 1.0 + (OVERSCAN if overscan else 0.0)})
-
-
-## Rises and settles around its pivot (set it at the feet first), forever, starting at a random
-## point of the breath. Used for the people in a place and the portraits by the dialogue box.
-static func breathe(person: Control) -> void:
-	var seconds := BREATH_SECONDS + randf_range(-BREATH_SPREAD, BREATH_SPREAD)
-	var breath := person.create_tween().set_loops().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	breath.tween_property(person, "scale", Vector2(1.0 - BREATH_RISE * 0.3, 1.0 + BREATH_RISE), seconds / 2.0)
-	breath.tween_property(person, "scale", Vector2.ONE, seconds / 2.0)
-	breath.custom_step(randf() * seconds)
 
 
 func _add_light(location_key: String) -> void:
@@ -129,14 +65,3 @@ func _add_light(location_key: String) -> void:
 	var characters := _place.get_node_or_null("Characters")
 	if characters != null:
 		_place.move_child(light, characters.get_index() + 1)
-
-
-func _process(delta: float) -> void:
-	_time += delta
-	var sway := Vector2(sin(TAU * _time / DRIFT_SECONDS.x), sin(TAU * _time / DRIFT_SECONDS.y))
-	var zoom := 0.5 - 0.5 * cos(TAU * _time / ZOOM_SECONDS)
-	for layer in _layers:
-		var node: Control = layer["node"]
-		var depth: float = layer["depth"]
-		node.position = (layer["rest"] as Vector2) + sway * DRIFT_PIXELS * depth
-		node.scale = Vector2.ONE * (float(layer["base"]) + DRIFT_ZOOM * depth * zoom)

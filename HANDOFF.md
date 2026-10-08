@@ -169,6 +169,11 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **Calm scenes (branch claude/calm-scenes, stacked on one-truth-story):** the camera drift, the
+  breathing of people and portraits, the 21 Hz flame flutter and the turning of the hint glint were
+  removed because on a phone they read as everything vibrating. `stage_life.gd` now only adds the
+  living light (slow candle glow, dust, steam, clouds). The room, props and people are still.
+
 ### One-truth story rework (branch claude/one-truth-story, not merged yet)
 
 - **What changed:** the game is now ONE story in one fixed story time, not three stories on many timelines with a timelines chart. Kumpisal is Saturday afternoon, Padala Saturday night, Tokhang Sunday afternoon.

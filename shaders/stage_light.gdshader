@@ -64,8 +64,9 @@ void fragment() {
 		vec4 flame = flames[i];
 		vec2 away = (uv - flame.xy) * vec2(aspect, 1.0);
 		float seed = float(i) * 7.31;
-		// A quick uneven flutter on top of a slower sway, like a real flame in still air.
-		float flicker = 0.72 + 0.22 * noise(vec2(TIME * 5.0 + seed, seed)) + 0.06 * sin(TIME * 21.0 + seed);
+		// A slow, gentle swell, like a flame in still air. Anything quicker reads as a flicker or
+		// a buzz on a small screen.
+		float flicker = 0.84 + 0.16 * noise(vec2(TIME * 0.45 + seed, seed));
 		light += flame_color * flame.w * flicker * exp(-dot(away, away) / (flame.z * flame.z));
 	}
 	if (motes > 0.0) {
