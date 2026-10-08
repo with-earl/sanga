@@ -169,6 +169,11 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **One Peter (branch claude/intro-peter):** the intro picture `tokhang_rider.png` was its own
+  drawing of Peter, unlike the portrait every other scene uses. It was deleted and redrawn by
+  `tools/draw_placeholders.py` from the portrait (`peter_1.png`), the market and the motor prop, and
+  is now in `PLACEHOLDERS.txt` like the other stand-ins. A real painting should replace it later.
+
 - **Main screen and saves GUI (branch claude/menu-polish):** the menu words are plain text centred
   under the logo, gold when pressed; Continue and New Game open `scripts/save_slots.gd`, a
   left-aligned list of rows (4:3 picture of the place the save stopped in, details beside it),

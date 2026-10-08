@@ -1,6 +1,6 @@
 """Draws stand-in cutscene pictures for scenes whose final art is not painted yet.
 
-Each stand-in is put together from the game's own art, the way tokhang_rider.png is: a place's
+Each stand-in is put together from the game's own art: a place's
 background (cropped, blurred or recoloured for the moment: night, dawn, police lights, a
 flashback), the characters' full-body pictures placed in it (their sad pictures where it fits,
 dark silhouettes for someone not yet revealed), and props (the keys, the telephone, the toy guns
@@ -234,6 +234,15 @@ def frame_around(inner: Image.Image, box, outer: Image.Image, border=(18, 16, 18
 
 
 # ---------------------------------------------------------------- the shots
+
+
+def tokhang_rider() -> Image.Image:
+    """The opening picture: Peter, the rider, with his motorbike, on the blurred market behind
+    him. He is the same drawing as in the dialogue and in every other scene."""
+    c = background("public_market", blur=9)
+    place(c, person("peter", True), 0.3, 1.03, 0.84)
+    place(c, prop("motor"), 0.7, 1.0, 0.5)
+    return vignette(grade(c, 1.0, 1.05), 0.35)
 
 
 def shot_market_holding(buyer: str) -> Image.Image:
@@ -550,6 +559,7 @@ def true_morning_mercy() -> Image.Image:
 
 
 SHOTS = {
+    "tokhang_rider.png": tokhang_rider,
     "tokhang_tv_news.png": lambda: object_scenes.tokhang_tv_news(SIZE),
     "tokhang_peter_holding.png": lambda: shot_market_holding("peter"),
     "tokhang_peter_shot.png": lambda: shot_market_down("peter"),
