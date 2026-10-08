@@ -42,7 +42,7 @@ godot --headless --path . --export-release "Web" build/web/index.html  # web bui
 python tools/compose_music.py [name]                                 # regenerate music (numpy, scipy)
 python tools/compose_sounds.py                                       # regenerate sound effects
 python tools/draw_props.py                                           # redraw props, telephone, HUD icons (gear, terminal, book, clipboard) (needs Pillow, numpy)
-python tools/draw_placeholders.py                                    # placeholder cutscenes for art not painted yet
+python tools/draw_placeholders.py                                    # stand-in cutscenes (composed from the game art) for art not painted yet
 tools/next_version.sh                                                # next version from the commits
 ```
 
@@ -61,7 +61,7 @@ picture. Delete the temporary script afterwards. The `--headless` runs print RID
 | `story/*.json` | All story text, conversations and choices. `timelines.json` is the timelines chart: cards, sections and realities. `alaala.json` lists the Alaala (memories) and the endings that give them; `prologue.json` is the confession that opens every run |
 | `docs/STORY_BIBLE.md` | The design (the Alaala mechanic, rules R1-R8), the hidden truth, and every line of the script. It wins over the story files when they disagree |
 | `assets/` | Art (see `assets/README.md`), `music/`, `sounds/`, `fonts/Lora.ttf` (and DejaVu Sans Mono for the developer tools), `videos/main_screen.ogv` |
-| `tools/` | `next_version.sh`, `compose_music.py`, `compose_sounds.py`, `draw_props.py`, `draw_placeholders.py`, `cloud_setup.sh`. Has a `.gdignore`, so Godot skips it |
+| `tools/` | `next_version.sh`, `compose_music.py`, `compose_sounds.py`, `draw_props.py`, `draw_placeholders.py` (with `scene3d.py`, a tiny 3D drawing kit lit pixel by pixel, and `street_scene.py`, the night street with the police car), `cloud_setup.sh`. Has a `.gdignore`, so Godot skips it |
 | `tests/smoke_test.gd` | Headless smoke test |
 | `tests/playthrough.gd` | Plays a fresh save through 12 runs that reach every ending, the true ending second (about a minute). Set `PLAYTHROUGH_TRANSCRIPT=<file>` to write out every line and choice. Run it after any story or scene change |
 

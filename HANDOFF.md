@@ -295,7 +295,7 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
     `padala.json` (nave talks, confessions with choices, revelation lines, the five Alaala
     choices, endings Ligtas, Sinamahan, Pinalaya, Tanod, Nagtago and the true ending
     Walang Namatay). Run flags: `run_kulas_safe`, `run_eli_confessed`, `run_tanod`.
-  - Art: 13 placeholder cutscenes from `tools/draw_placeholders.py`
+  - Art: 46 stand-in cutscenes from `tools/draw_placeholders.py`
     (`assets/cutscenes/PLACEHOLDERS.txt` lists them). Painting them is the main art task.
   - **Phase 4 done (timelines chart):** `story/timelines.json` has cards for every new ending
     (main: Ligtas, Sinamahan, Pinalaya, Walang Namatay; kumpisal: Nagtago, Pinalaya; padala:
@@ -335,7 +335,31 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
     pictures already pushed in. Checked in screenshots; smoke test and playthrough pass.
     **Left of section 12, needs art:** each place split into background / middle / foreground
     layers, and the key cutscene reveals split into layers.
-    **Next:** paint the 13 placeholder cutscenes (user or artist).
+  - **Stand-in cutscenes** (user: "better placeholder art", without Higgsfield): all 46 cutscenes
+    that were grey "Placeholder" text cards (not only the 13 listed; only `padala_bath` and
+    `tokhang_rider` are real paintings) are now composed by `tools/draw_placeholders.py` from the
+    game's own art, the way `tokhang_rider.png` is: a background cropped and graded for the
+    moment (night, dawn, police lights, sepia flashback, a gunshot's red flash), the characters'
+    full pictures (sad ones where it fits, silhouettes for anyone not yet revealed or nameless,
+    such as the tanods), props (keys, telephone, the toy guns cut from the market stall), motion
+    blur, a confessional grille, a TV, bus and jeep windows. No text. Saved at 1280x720 in 256
+    dithered colours (23.8 MB for all, less than the old cards); the web build shrank a little.
+    Each shot is one small function, so a single picture is easy to adjust:
+    `python tools/draw_placeholders.py <name>`. Real paintings still replace them (save under the
+    same name, remove the name from PLACEHOLDERS.txt).
+  - **Drawn in 3D with Pillow** (user asked why not new art with correct angle and perspective;
+    I explained Pillow can build objects and places but not anime characters in new poses, and
+    offered the shots whose subject is a thing; the user said draw the police car first):
+    `padala_police_car` and `padala_police_car_leaves` are now a real night street built in 3D
+    (`tools/scene3d.py`, `tools/street_scene.py`): Mercy's building with grilles and lit
+    windows, the lit doorway, poles and sagging wires, a sodium lamp, wet asphalt, and a PNP-style
+    white and blue police car (POLICE on the side) whose light bar washes the wall and road
+    pixel by pixel. Batista and the man stand at the doorway as backlit cut-outs inside the 3D
+    scene (the car hides what is behind it). Leaving: lights off, tail lights down the street,
+    the man watching from the door. Offered next, same way: the jeepney inside, Batista's badge
+    on a desk, the prison visiting booth, the TV news.
+    **Next:** paint the cutscenes for real (user or artist), most important first: the reveals
+    (`padala_reveal_eli`, `tokhang_trade`, `true_visiting`) and the deaths.
 - **No sound on iPhone** (user report). The game itself plays music (checked: player playing,
   buses not muted). Fix in the Web preset's `html/head_include`: it wraps `AudioContext` to keep
   every context the engine makes and resumes them on each `touchend`/`pointerup`/`click`
