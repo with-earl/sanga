@@ -90,7 +90,7 @@ func _ready() -> void:
 	column.add_child(_divider(0))
 	column.add_child(_build_lists())
 	# The same note as the game's windows, in the sheet's own crisp grey letters.
-	var hint := UiSkin.add_close_hint(self, SECONDARY, Color.TRANSPARENT)
+	var hint := UiSkin.add_close_hint(self, SECONDARY, Color.TRANSPARENT, sheet)
 	hint.add_to_group(&"crisp_text")
 	hint.material = null
 	hint.add_theme_font_override("font", MONO)

@@ -1,13 +1,17 @@
 extends Control
-## Main screen: Continue (when there is a save), New Game and Quit. Choosing a save and deleting a
-## save happen in place: the menu buttons are swapped for a short list or a question, in the same
-## spot. Opening a save shows its start screen over everything (see StartScreen). Anything that
-## would lose progress asks first and says so.
+## Main screen: Continue (when there is a save), New Game and Quit. Continue and New Game open the
+## list of saves over everything (see SaveSlots), and opening a save shows its start screen (see
+## StartScreen). The Quit question and short messages swap in for the buttons, in the same spot.
+## Anything that would lose progress asks first and says so.
 
-const MONTHS := ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 const ROW_SIZE := Vector2(300, 52)
-## The size of the note under a question.
-const NOTE_SIZE := 20
+## Where the lists sit, in the screen's own terms: their centre line is the logo's (the logo is part
+## of the main screen's picture, centred about 258 px from the right edge), and their top is just
+## under it (344 px from the top of a 720 px screen).
+const MENU_CENTER_FROM_RIGHT := -258.0
+const MENU_TOP_FROM_BOTTOM := -376.0
+## The least room kept between a list and the screen's right and bottom edges.
+const MENU_EDGE_MARGIN := Vector2(40.0, 24.0)
 
 @onready var _menu: Control = $Buttons
 @onready var _quit_confirm: Control = %QuitConfirm
@@ -22,14 +26,15 @@ const NOTE_SIZE := 20
 
 ## What the Android back button does while the save panel is showing.
 var _back_action := Callable()
-## A save's start screen, while it is open.
+## A save's start screen, and the list of saves, while they are open.
 var _start_screen: StartScreen
+var _slots: SaveSlots
 
 
 func _ready() -> void:
 	_continue_button.visible = GameState.latest_slot() >= 0
-	_continue_button.pressed.connect(_show_slots.bind(false))
-	_new_button.pressed.connect(_show_new_game_slots)
+	_continue_button.pressed.connect(_open_slots.bind(SaveSlots.Mode.LOAD))
+	_new_button.pressed.connect(_open_slots.bind(SaveSlots.Mode.NEW))
 	_quit_button.pressed.connect(_show_quit_confirm.bind(true))
 	# A web page cannot close itself, so the browser build has no Quit.
 	_quit_button.visible = not OS.has_feature("web")
@@ -47,6 +52,8 @@ func _notification(what: int) -> void:
 		_settings.close()
 	elif _start_screen != null:
 		_start_screen.back()
+	elif _slots != null:
+		_slots.back()
 	elif _save_panel.visible:
 		_back_action.call()
 	else:
@@ -54,8 +61,9 @@ func _notification(what: int) -> void:
 
 
 ## Sets up one of the right-hand lists as plain words, with no box behind them: every line is
-## centred, and the list hugs its contents above the bottom right corner. The words stay readable
-## on the busy picture through their thick dark outline and soft shadow (see the theme).
+## centred, and the list is kept centred on the logo's axis, just under the logo, whatever its
+## width and however many lines it has. The words stay readable on the busy picture through their
+## thick dark outline and soft shadow (see the theme).
 func _put_on_window(panel: VBoxContainer) -> void:
 	for child in panel.get_children():
 		if child is Button:
@@ -63,7 +71,14 @@ func _put_on_window(panel: VBoxContainer) -> void:
 		elif child is Label:
 			(child as Label).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var hug := func() -> void:
-		panel.offset_top = panel.offset_bottom - panel.get_combined_minimum_size().y
+		var size := panel.get_combined_minimum_size()
+		# A wide list (a long save line) slides left, and a tall one up, to stay on the screen.
+		var centre := minf(MENU_CENTER_FROM_RIGHT, -MENU_EDGE_MARGIN.x - size.x / 2.0)
+		var top := minf(MENU_TOP_FROM_BOTTOM, -MENU_EDGE_MARGIN.y - size.y)
+		panel.offset_left = centre - size.x / 2.0
+		panel.offset_right = centre + size.x / 2.0
+		panel.offset_top = top
+		panel.offset_bottom = top + size.y
 	panel.minimum_size_changed.connect(hug)
 	hug.call()
 
@@ -74,32 +89,34 @@ func _show_quit_confirm(asking: bool) -> void:
 	_menu.visible = not asking
 
 
+## Continue and New Game both open the list of saves (see SaveSlots). Continue's list opens the
+## slot that is chosen; New Game's starts a new game in it.
+func _open_slots(mode: SaveSlots.Mode) -> void:
+	_slots = SaveSlots.new()
+	add_child(_slots)
+	_slots.open(mode)
+	_slots.picked.connect(_slot_picked.bind(mode))
+	_slots.closed.connect(_slots_closed)
+
+
+func _slot_picked(slot: int, mode: SaveSlots.Mode) -> void:
+	if mode == SaveSlots.Mode.LOAD:
+		_open_save(slot)
+	else:
+		# The first run of a save always begins at the market.
+		GameState.new_game(slot)
+		StoryDirector.begin_with("tokhang")
+
+
+func _slots_closed() -> void:
+	_slots = null
+	_continue_button.visible = GameState.latest_slot() >= 0
+
+
 func _show_main() -> void:
 	_save_panel.visible = false
 	_quit_confirm.visible = false
 	_menu.visible = true
-
-
-## Continue lists the saves. Picking one opens it, and asks how to go on.
-## In delete mode, picking a save asks to delete it instead.
-func _show_slots(delete_mode: bool) -> void:
-	var any_saves := false
-	for slot in GameState.SLOT_COUNT:
-		any_saves = any_saves or GameState.has_slot(slot)
-	if not any_saves:
-		_show_message("No saved games yet")
-		return
-	_open_panel("Delete which save?" if delete_mode else "Choose a save")
-	for slot in GameState.SLOT_COUNT:
-		var filled := GameState.has_slot(slot)
-		var action := _ask_delete.bind(slot) if delete_mode else _open_save.bind(slot)
-		_add_row(_describe(slot), filled, action)
-	if delete_mode:
-		_add_row("Back", true, _show_slots.bind(false))
-	else:
-		_add_row("Delete a Save", true, _show_slots.bind(true))
-		_add_row("Back", true, _show_main)
-	_back_action = _show_slots.bind(false) if delete_mode else _show_main
 
 
 ## Opening a save shows its start screen (see StartScreen): continue the run in progress, or begin
@@ -110,47 +127,8 @@ func _open_save(slot: int) -> void:
 		return
 	_start_screen = StartScreen.new()
 	add_child(_start_screen)
-	_start_screen.open(slot, _describe(slot))
+	_start_screen.open(slot, SaveSlots.describe(slot))
 	_start_screen.closed.connect(func() -> void: _start_screen = null)
-
-
-## New Game asks where to save progress. Picking a slot that already has a save asks first.
-func _show_new_game_slots() -> void:
-	_open_panel("Save progress to which slot?")
-	for slot in GameState.SLOT_COUNT:
-		_add_row(_describe(slot), true, _pick_new_game_slot.bind(slot))
-	_add_row("Back", true, _show_main)
-	_back_action = _show_main
-
-
-func _pick_new_game_slot(slot: int) -> void:
-	if GameState.has_slot(slot):
-		_open_panel("Replace Slot %d?" % (slot + 1))
-		_add_note("The save already in this slot will be lost.")
-		_add_row("Replace", true, _start_new_game.bind(slot))
-		_add_row("Cancel", true, _show_new_game_slots)
-		_back_action = _show_new_game_slots
-	else:
-		_start_new_game(slot)
-
-
-## The first run of a save always begins with Tokhang.
-func _start_new_game(slot: int) -> void:
-	GameState.new_game(slot)
-	StoryDirector.begin_with("tokhang")
-
-
-func _ask_delete(slot: int) -> void:
-	_open_panel("Delete Slot %d?" % (slot + 1))
-	_add_note("This can’t be undone.")
-	_add_row("Delete", true, _delete_slot.bind(slot))
-	_add_row("Cancel", true, _show_slots.bind(true))
-	_back_action = _show_slots.bind(true)
-
-
-func _delete_slot(slot: int) -> void:
-	GameState.delete_slot(slot)
-	_show_slots(true)
 
 
 func _show_message(text: String) -> void:
@@ -176,19 +154,6 @@ func _open_panel(prompt: String) -> void:
 	_save_panel.add_child(label)
 
 
-## A smaller line under the question, saying what the choice will do.
-func _add_note(text: String) -> void:
-	var note := Label.new()
-	note.theme_type_variation = &"MenuPrompt"
-	note.text = text
-	note.add_theme_font_size_override("font_size", NOTE_SIZE)
-	note.modulate.a = 0.8
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	note.custom_minimum_size.x = ROW_SIZE.x
-	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_save_panel.add_child(note)
-
-
 func _add_row(text: String, enabled: bool, action: Callable) -> void:
 	var row := Button.new()
 	row.theme_type_variation = &"TextButton"
@@ -201,31 +166,3 @@ func _add_row(text: String, enabled: bool, action: Callable) -> void:
 	_save_panel.add_child(row)
 
 
-## "Slot 1 · Kumpisal · Oct 4, 7:23 PM", "Slot 2 · New story · ...", or "Slot 3 · Empty".
-func _describe(slot: int) -> String:
-	var title := "Slot %d" % (slot + 1)
-	var info := GameState.slot_summary(slot)
-	if not info["exists"]:
-		return "%s · Empty" % title
-	var where := "New story"
-	if str(info["timeline"]) != "":
-		var stories: Array = StoryDirector.TIMELINES.get(info["timeline"], [])
-		if int(info["chapter"]) < stories.size():
-			where = StoryDirector.story_title(stories[int(info["chapter"])])
-	return "%s · %s · %s" % [title, where, _format_time(info["saved_at"])]
-
-
-## Turns "2026-10-04T19:23:13" into "Oct 4, 7:23 PM", adding the year when it is not this year.
-func _format_time(saved_at: String) -> String:
-	var unix := Time.get_unix_time_from_datetime_string(saved_at)
-	if unix <= 0:
-		return ""
-	var when := Time.get_datetime_dict_from_unix_time(int(unix))
-	var hour: int = when["hour"] % 12
-	if hour == 0:
-		hour = 12
-	var meridiem := "AM" if when["hour"] < 12 else "PM"
-	var year := ""
-	if when["year"] != Time.get_date_dict_from_system()["year"]:
-		year = ", %d" % when["year"]
-	return "%s %d%s, %d:%02d %s" % [MONTHS[when["month"] - 1], when["day"], year, hour, when["minute"], meridiem]

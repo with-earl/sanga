@@ -110,14 +110,19 @@ static func style_label(label: Label, font_size := TEXT_SIZE) -> void:
 	label.add_theme_font_size_override("font_size", font_size)
 
 
-## Every window closes by tapping outside it. This note at the bottom centre of the screen says so.
+## Every window closes by tapping outside it. This note says so, right under the window.
 const CLOSE_HINT := "Tap outside to close"
 const CLOSE_HINT_SIZE := 22
-const CLOSE_HINT_BOTTOM := 28.0
+## The room between the window and the note under it.
+const CLOSE_HINT_GAP := 14.0
+## How close to the bottom of the screen the note may get when the window is tall.
+const CLOSE_HINT_FLOOR := 10.0
 
 
-## Adds the "Tap outside to close" note to a full-screen window, at the bottom centre.
-static func add_close_hint(window: Control, color := Color(1.0, 0.953, 0.839, 0.85), outline := Color(0.165, 0.086, 0.031, 1)) -> Label:
+## Adds the "Tap outside to close" note to a full-screen window. With `below`, the note sits right
+## under that control (the window's visible sheet), centred on it, and follows it when it grows,
+## shrinks or moves (see keep_hint_below); without it, the note sits at the bottom centre.
+static func add_close_hint(window: Control, color := Color(1.0, 0.953, 0.839, 0.85), outline := Color(0.165, 0.086, 0.031, 1), below: Control = null) -> Label:
 	var hint := Label.new()
 	hint.text = CLOSE_HINT
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -127,9 +132,31 @@ static func add_close_hint(window: Control, color := Color(1.0, 0.953, 0.839, 0.
 	hint.add_theme_color_override("font_outline_color", outline)
 	hint.add_theme_constant_override("outline_size", OUTLINE_SIZE if outline.a > 0.0 else 0)
 	window.add_child(hint)
-	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE)
-	hint.position.y -= CLOSE_HINT_BOTTOM
+	if below != null:
+		keep_hint_below(hint, below)
+	else:
+		hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE)
+		hint.position.y -= 28.0
 	return hint
+
+
+## Puts `hint` right under `sheet` and keeps it there while the sheet changes. Works for a sheet
+## that is scaled, and keeps the note on the screen when the sheet is nearly as tall as it.
+static func keep_hint_below(hint: Label, sheet: Control) -> void:
+	var place := func() -> void:
+		if not sheet.is_inside_tree() or not hint.is_inside_tree():
+			return
+		var shown: Rect2 = sheet.get_global_transform() * Rect2(Vector2.ZERO, sheet.size)
+		if sheet is SoftWindow:
+			# The soft window's own rectangle includes room for its shadow.
+			shown = shown.grow(-SoftWindow.PAD)
+		var room := hint.get_viewport_rect().size
+		hint.reset_size()
+		var top := minf(shown.end.y + CLOSE_HINT_GAP, room.y - hint.size.y - CLOSE_HINT_FLOOR)
+		hint.global_position = Vector2(shown.get_center().x - hint.size.x / 2.0, top)
+	for signal_name in [&"item_rect_changed", &"resized", &"visibility_changed"]:
+		sheet.connect(signal_name, place)
+	place.call_deferred()
 
 
 ## A plain icon in the same cream with a dark outline as the button text.

@@ -79,9 +79,9 @@ func _ready() -> void:
 	_apply_dialog_look()
 	_modal.visible = false
 	_menu_icon.pressed.connect(open)
-	# No close button: tapping outside closes the window, and a note at the bottom says so.
+	# No close button: tapping outside closes the window, and a note under it says so.
 	_close_button.visible = false
-	UiSkin.add_close_hint(_modal)
+	UiSkin.add_close_hint(_modal, Color(1.0, 0.953, 0.839, 0.85), Color(0.165, 0.086, 0.031, 1), _panel)
 	_dim.gui_input.connect(_on_dim_input)
 	_sound_toggle.toggled.connect(_switch_volume.bind(Settings.set_sound_volume))
 	_music_toggle.toggled.connect(_switch_volume.bind(Settings.set_music_volume))

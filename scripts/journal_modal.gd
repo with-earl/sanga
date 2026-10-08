@@ -20,7 +20,7 @@ const RULE_GAP := 46.0
 ## The book and clipboard are drawn a little smaller, so they fit above the note at the bottom.
 const BOOK_SCALE := 0.9
 const CLIPBOARD_SCALE := 0.86
-## Room kept free at the bottom of the screen for the "Tap outside to close" note.
+## Room kept free at the bottom of the screen for the "Tap outside to close" note under the book.
 const NOTE_ROOM := 64.0
 ## Pen ink on paper, and the same ink faded for what is done or not yet known.
 const INK := Color(0.2, 0.12, 0.07, 1.0)
@@ -39,6 +39,8 @@ const NOTHING_REMEMBERED := "Wala ka pang naaalala."
 const LEFT_PAGE_MEMORIES := 2
 
 var _holder := Control.new()
+## The "Tap outside to close" note, kept right under whatever is open.
+var _hint: Label
 var _tween: Tween
 
 
@@ -53,7 +55,7 @@ func _ready() -> void:
 	add_child(dim)
 	_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_holder)
-	UiSkin.add_close_hint(self)
+	_hint = UiSkin.add_close_hint(self)
 
 
 ## The objectives as a checklist on the clipboard, finished ones ticked and struck through.
@@ -144,6 +146,7 @@ func _start(picture: Texture2D, scale_by: float) -> TextureRect:
 	var room := Vector2(screen.x, screen.y - NOTE_ROOM)
 	shown.position = (room - picture.get_size() * scale_by) / 2.0
 	_holder.add_child(shown)
+	UiSkin.keep_hint_below(_hint, shown)
 	return shown
 
 

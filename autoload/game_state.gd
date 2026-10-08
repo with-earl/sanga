@@ -351,6 +351,7 @@ func slot_summary(slot: int) -> Dictionary:
 		"chapter": data["chapter"],
 		"runs_finished": data["runs_finished"],
 		"endings": data["endings"].size(),
+		"alaala": (data.get("alaala", []) as Array).size(),
 		"play_seconds": data["play_seconds"],
 	}
 
