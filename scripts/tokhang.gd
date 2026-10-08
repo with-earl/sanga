@@ -27,6 +27,10 @@ const GUN_FLAG := "objective_tokhang_gun"
 var _story: Dictionary = {}
 var _buyer := ""
 var _busy := false
+## True while a tap is still being handled, including the moment after its dialogue closes, so a
+## quick second tap cannot act on the story before the first one has finished (for example, taking
+## the realistic gun right after choosing the water gun).
+var _handling := false
 
 
 func _ready() -> void:
@@ -105,13 +109,15 @@ func _hint_names() -> PackedStringArray:
 
 
 func _on_slot_interacted(slot: ArtSlot) -> void:
-	if _busy or _dialogue.visible or _buyer == "":
+	if _busy or _handling or _dialogue.visible or _buyer == "":
 		return
 	var guns: Dictionary = _story.get("guns", {})
+	_handling = true
 	if slot.display_name == "Gloria":
-		_tap_gloria(slot)
+		await _tap_gloria(slot)
 	elif guns.has(slot.asset_id):
-		_tap_gun(slot, guns[slot.asset_id])
+		await _tap_gun(slot, guns[slot.asset_id])
+	_handling = false
 
 
 func _tap_gloria(slot: ArtSlot) -> void:
