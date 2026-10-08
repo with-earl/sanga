@@ -61,14 +61,14 @@ func _test_run_recap() -> void:
 	var run_log := [
 		{"story": "Tokhang"},
 		{"choice": "Oo."},
-		{"ending": "Peter", "line": "Peter dies."},
+		{"ending": "Peter", "line": "Namatay si Peter."},
 		{"alaala": "laruang_baril"},
 	]
 	var lines: Array = recap.call("lines_for", run_log)
 	var words: Array = lines.map(func(line: Array) -> String: return str(line[0]))
 	_check(words[0] == recap.get("TITLE"), "recap: starts with its title")
 	_check(words[-1] == recap.get("CLOSING_LINE"), "recap: ends with the closing line")
-	_check(words.has("Tokhang") and words.has("“Oo.”") and words.has("Peter dies."), "recap: writes the story, the choice and the ending")
+	_check(words.has("Tokhang") and words.has("“Oo.”") and words.has("Namatay si Peter."), "recap: writes the story, the choice and the ending")
 	_check(lines.size() == 7, "recap: one line per moment, two for a memory")
 	var empty: Array = recap.call("lines_for", [])
 	_check(empty.size() == 2, "recap: an empty run shows only the title and the closing line")

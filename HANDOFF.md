@@ -395,9 +395,13 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
    mean by "Alternate 1 to 5".
 4. **Keep the main-screen gear** now that a Settings text row exists? We offered to remove it and
    got no answer.
-5. **There is no Android export preset** in the repo. The user said "keep the Android preset
-   untouched", but there never was one here; it may only exist on their desktop. If they add it
-   from the editor, it will sit next to the Web preset.
+5. **Android preset:** the repo now has one (`preset.1`, package `com.withearl.sanga`). The user
+   once said "keep the Android preset untouched", so they may have their own on their desktop.
+   If so, theirs wins: replace `preset.1` with it and keep their package name and keystore.
+6. ~~Ending lines in Filipino?~~ Done: the user chose to translate them. Every ending card's
+   line (and so the recap book) is natural modern Filipino, e.g. "Namatay si Peter.", in the
+   story files and the bible. Card titles stay as they were. The timelines chart's own card
+   descriptions stay English, like the rest of the UI text.
 
 ## Known issues and notes
 

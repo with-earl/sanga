@@ -240,12 +240,12 @@ Objectives (unchanged): Talk to Gloria → Choose a realistic toy gun → Talk t
 **Peter (existing, lines rewritten)**
 `tokhang_peter_holding.png` — **???** *(Batista with Alaala 3)*: Pigilan n'yo 'yan! May baril!
 `tokhang_peter_shot.png` — gunshot.
-Card: **Peter** — *Peter dies.* → Alaala 1.
+Card: **Peter** — *Namatay si Peter.* → Alaala 1.
 
 **Gwen (existing)**
 `tokhang_gwen_holding.png` — **???** *(Batista)*: Pigilan n'yo 'yan! May baril!
 `tokhang_gwen_shot.png` — gunshot.
-Card: **Gwen** — *Peter survives, but Gwen dies.*
+Card: **Gwen** — *Nakaligtas si Peter, pero namatay si Gwen.*
 `tokhang_flashback_ben.png`, caption *Flashback* —
 > **Gwen:** Ben, 'pag hindi ka kumain ng gulay, hindi ka bibilhan ni Ate ng baril, ha.
 > **Ben:** Kakain na po!
@@ -255,14 +255,14 @@ Card: **Gwen** — *Peter survives, but Gwen dies.*
 **Kulas (existing)**
 `tokhang_kulas_runs.png` — **???** *(Batista)*: Pigilan n'yo 'yan!
 `tokhang_kulas_shot.png` — gunshot.
-Card: **Kulas** — *Peter and Gwen survive, but Kulas dies.* → Alaala 2.
+Card: **Kulas** — *Ligtas sina Peter at Gwen, pero namatay si Kulas.* → Alaala 2.
 
 **Trade (existing, Padala timeline, police chain)**
 `tokhang_trade.png` (Eli and Batista at the altar)
 > **Batista:** Naibalik ko na 'yung babae mo, pare. Ngayon, ikaw naman.
 > **Father Eli:** Sa palengke. Mamayang hapon. Naka-gray na jacket.
 
-Then Peter holding → shot. Card: **Trade** — *Peter dies.* → Alaala 1.
+Then Peter holding → shot. Card: **Trade** — *Namatay si Peter.* → Alaala 1.
 
 **Ligtas (new, Alaala 1)**
 `tokhang_safe_market.png` *(new)*: police at the stall, Batista holding up the water gun.
@@ -274,7 +274,7 @@ Then Peter holding → shot. Card: **Trade** — *Peter dies.* → Alaala 1.
 > **Peter:** Ay, tinamaan ako. *Tumawa*
 > **Gwen:** Mahal... may sasabihin ako sa'yo.
 
-Card: **Ligtas** — *Nobody is shot at the market.*
+Card: **Ligtas** — *Walang nabaril sa palengke.*
 
 ---
 
@@ -415,7 +415,7 @@ Eli alone in the booth.
 `kumpisal_eli_sacrifice.png`, before the card:
 > **Father Eli:** Hindi siya, Batista. Ako.
 
-Card: **Sacrifice** — *Father Eli died.*
+Card: **Sacrifice** — *Namatay si Father Eli.*
 
 **Sinamahan (new, Alaala 2)**
 `kumpisal_eli_kulas_walk.png` *(new)*: Eli walking Kulas out of the church, Batista's men at the gate.
@@ -424,7 +424,7 @@ Card: **Sacrifice** — *Father Eli died.*
 > **Batista:** ...Sigurado ka?
 > **Father Eli:** Hindi siya, Batista. Umuwi na kayo.
 
-Card: **Sinamahan** — *Kulas lives.*
+Card: **Sinamahan** — *Buhay si Kulas.*
 
 ---
 
@@ -467,7 +467,7 @@ Card: **Sinamahan** — *Kulas lives.*
 > **Batista:** Oh, pare. Ikaw pala.
 
 `padala_eyes_widen.png`, `padala_luggage_closed.png` — hold.
-Card: **Police Poster** — *Mercy dies.*
+Card: **Police Poster** — *Namatay si Mercy.*
 `padala_dressing.png` — **Father Eli:** Panginoon... patawarin Mo ako.
 `padala_reveal_eli.png`, caption *Father Eli*. → Alaala 3.
 
@@ -488,16 +488,16 @@ Then `padala_eli_attacks.png`, `padala_police_car_leaves.png`. Card: **Police Po
 | Isama po niya ang tanod. | ✦ Ending: **Tanod**. |
 
 Usual: `padala_peter_arrives.png` — **Peter:** Ma'am? Delivery po— *(sees her)* Teka. Ano'ng nangyayari dito?
-`padala_peter_fights.png`, `padala_peter_stabbed.png`. Card: **Food Delivery** — *Peter is stabbed.* → Alaala 5.
+`padala_peter_fights.png`, `padala_peter_stabbed.png`. Card: **Food Delivery** — *Sinaksak si Peter.* → Alaala 5.
 
 **Tanod (new, Alaala 5)**
 `padala_tanod.png` *(new)*: Peter at the door with two barangay tanods, Eli in the hallway.
 > **Peter:** Ma'am? Delivery po. *(lilingon sa tanod)* Dito po 'yung sinabi ko.
 > **Tanod:** Father? Ano'ng ginagawa n'yo rito?
 
-Card: **Tanod** — *Mercy is rescued, and Peter lives.*
+Card: **Tanod** — *Nasagip si Mercy, at buhay si Peter.*
 
-**Keys (Main, existing):** `padala_escape.png`. Card: **Key** — *Mercy escapes.*
+**Keys (Main, existing):** `padala_escape.png`. Card: **Key** — *Nakatakas si Mercy.*
 
 **Outside (Kumpisal timeline, existing)** `padala_escape.png`, then `padala_still_manila.png`,
 caption *Still in Manila*:
@@ -505,9 +505,9 @@ caption *Still in Manila*:
 
 | Choice | Effect |
 |---|---|
-| Tumakbo | Existing ending **Run**: `padala_run.png`, `padala_run_shot.png`. Card: *Batista accidentally shoots Mercy.* → Alaala 4. |
-| Sumakay ng jeep | Existing ending **Ride Jeep**: `padala_jeep.png`, `padala_police_laugh.png`. **Pulis:** Si Father Eli? *Nagtawanan* Ineng, umuwi ka na. Card: *Mercy reports him, but the police laugh.* |
-| Magtago hanggang umaga. | ✦ (Alaala 4) Ending **Nagtago**: `padala_hide_dawn.png` *(new)*: Mercy in a jeepney terminal at dawn, phone to her ear. **Mercy:** 'Nay? ...Uuwi na po ako. Card: *Mercy goes home.* |
+| Tumakbo | Existing ending **Run**: `padala_run.png`, `padala_run_shot.png`. Card: *Aksidenteng nabaril ni Batista si Mercy.* → Alaala 4. |
+| Sumakay ng jeep | Existing ending **Ride Jeep**: `padala_jeep.png`, `padala_police_laugh.png`. **Pulis:** Si Father Eli? *Nagtawanan* Ineng, umuwi ka na. Card: *Nagsumbong si Mercy, pero pinagtawanan lang siya ng pulis.* |
+| Magtago hanggang umaga. | ✦ (Alaala 4) Ending **Nagtago**: `padala_hide_dawn.png` *(new)*: Mercy in a jeepney terminal at dawn, phone to her ear. **Mercy:** 'Nay? ...Uuwi na po ako. Card: *Umuwi si Mercy.* |
 
 **Pinalaya (new, Alaala 3 choice made in Kumpisal this run, Main or Kumpisal timeline)** —
 plays as soon as Mercy has looked around the room (after the first objective), instead of
@@ -517,7 +517,7 @@ any call or escape.
 > **Father Eli:** Hindi na kita sasaktan.
 > **Father Eli:** Umuwi ka na, Mercy. Patawarin mo ako. Kahit hindi mo kaya.
 
-Card: **Pinalaya** — *Mercy is set free.*
+Card: **Pinalaya** — *Pinalaya si Mercy.*
 
 ---
 

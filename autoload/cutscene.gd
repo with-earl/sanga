@@ -7,7 +7,7 @@ extends CanvasLayer
 ##   {"image": path, "hold": seconds}                             a picture on its own
 ##   {"image": path, "gunshot": true, ...}                        with a flash, shake and buzz
 ##   {"image": path, "caption": "Flashback", ...}                 with a small caption
-##   {"card": "Peter", "line": "Peter dies."}                     a title card on black
+##   {"card": "Peter", "line": "Namatay si Peter."}                     a title card on black
 ##   {"image": path, "choose": ["Run", "Ride Jeep"]}              a picture with a choice;
 ##                                                                the answer is in `last_choice`
 ## A choice's options can also be {"text": ..., "needs": alaala, "flag": "run_x", "then": [steps]}:

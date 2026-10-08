@@ -173,7 +173,7 @@
 				},
 				{
 					"card": "Peter",
-					"line": "Peter dies."
+					"line": "Namatay si Peter."
 				}
 			]
 		},
@@ -200,7 +200,7 @@
 				},
 				{
 					"card": "Gwen",
-					"line": "Peter survives, but Gwen dies."
+					"line": "Nakaligtas si Peter, pero namatay si Gwen."
 				},
 				{
 					"image": "res://assets/cutscenes/tokhang_flashback_ben.png",
@@ -241,7 +241,7 @@
 				},
 				{
 					"card": "Kulas",
-					"line": "Peter and Gwen survive, but Kulas dies."
+					"line": "Ligtas sina Peter at Gwen, pero namatay si Kulas."
 				}
 			]
 		},
@@ -281,7 +281,7 @@
 				},
 				{
 					"card": "Trade",
-					"line": "Peter dies."
+					"line": "Namatay si Peter."
 				}
 			]
 		},
@@ -320,7 +320,7 @@
 				},
 				{
 					"card": "Ligtas",
-					"line": "Nobody is shot at the market."
+					"line": "Walang nabaril sa palengke."
 				}
 			]
 		}

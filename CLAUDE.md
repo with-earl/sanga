@@ -15,8 +15,13 @@ different timelines. Text is in English and Filipino.
   - [export_presets.cfg](export_presets.cfg) holds only the **Web** preset: threads off, so it
     runs on GitHub Pages without special headers. Its `html/head_include` script turns the game
     sideways on a phone or tablet held upright (canvas rotated 90°, `canvas_resize_policy=0` so
-    the page sets the canvas size, touch and mouse positions turned before the game reads them). There is no Android preset in the repo yet. If
-    one is added, keep the Web preset as it is.
+    the page sets the canvas size, touch and mouse positions turned before the game reads them).
+  - It also holds the **Android** preset: package `com.withearl.sanga`, arm64 and armv7,
+    immersive, the vibrate permission (for `Settings.vibrate`), no Gradle build. Building it needs
+    the Android export templates, the Android SDK in Editor Settings, and a release keystore
+    (left empty in the preset, never commit one). Raise `version/code` for every Play upload.
+    Keep the Web preset as it is. Phones turn the game to either landscape side
+    (`display/window/handheld/orientation=4`, sensor landscape).
   - Every push to `main` builds the Web export and deploys it to GitHub Pages
     ([.github/workflows/web.yml](.github/workflows/web.yml)).
 - Platform-specific behaviour is guarded with `OS.has_feature()`: vibration only on
