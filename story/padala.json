@@ -117,7 +117,7 @@
 				},
 				{
 					"card": "Key",
-					"line": "Mercy escapes."
+					"line": "Nakatakas si Mercy."
 				}
 			]
 		},
@@ -164,7 +164,7 @@
 				},
 				{
 					"card": "Police Poster",
-					"line": "Mercy dies."
+					"line": "Namatay si Mercy."
 				},
 				{
 					"image": "res://assets/cutscenes/padala_dressing.png",
@@ -235,7 +235,7 @@
 				},
 				{
 					"card": "Run",
-					"line": "Batista accidentally shoots Mercy."
+					"line": "Aksidenteng nabaril ni Batista si Mercy."
 				}
 			]
 		},
@@ -261,7 +261,7 @@
 				},
 				{
 					"card": "Ride Jeep",
-					"line": "Mercy reports him, but the police laugh."
+					"line": "Nagsumbong si Mercy, pero pinagtawanan lang siya ng pulis."
 				}
 			]
 		},
@@ -369,7 +369,7 @@
 				},
 				{
 					"card": "Food Delivery",
-					"line": "Peter is stabbed.",
+					"line": "Sinaksak si Peter.",
 					"unless_flag": "run_tanod"
 				},
 				{
@@ -388,7 +388,7 @@
 				},
 				{
 					"card": "Tanod",
-					"line": "Mercy is rescued, and Peter lives.",
+					"line": "Nasagip si Mercy, at buhay si Peter.",
 					"if_flag": "run_tanod"
 				}
 			]
@@ -407,7 +407,7 @@
 				},
 				{
 					"card": "Nagtago",
-					"line": "Mercy goes home."
+					"line": "Umuwi si Mercy."
 				}
 			]
 		},
@@ -433,7 +433,7 @@
 				},
 				{
 					"card": "Pinalaya",
-					"line": "Mercy is set free."
+					"line": "Pinalaya si Mercy."
 				}
 			]
 		},

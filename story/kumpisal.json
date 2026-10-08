@@ -428,7 +428,7 @@
 				},
 				{
 					"card": "Sinamahan",
-					"line": "Kulas lives.",
+					"line": "Buhay si Kulas.",
 					"if_flag": "run_kulas_safe"
 				},
 				{
@@ -688,7 +688,7 @@
 				},
 				{
 					"card": "Sacrifice",
-					"line": "Father Eli died.",
+					"line": "Namatay si Father Eli.",
 					"unless_flag": "run_kulas_safe"
 				},
 				{
@@ -715,7 +715,7 @@
 				},
 				{
 					"card": "Sinamahan",
-					"line": "Kulas lives.",
+					"line": "Buhay si Kulas.",
 					"if_flag": "run_kulas_safe"
 				}
 			],
