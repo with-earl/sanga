@@ -8,9 +8,6 @@ const MONTHS := ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", 
 const ROW_SIZE := Vector2(300, 52)
 ## The size of the note under a question.
 const NOTE_SIZE := 20
-## The main buttons, the save list and the quit question each sit on a soft window, hugging their
-## contents above the bottom right corner.
-const MENU_WINDOW_MARGIN := Vector2(40.0, 24.0)
 
 @onready var _menu: Control = $Buttons
 @onready var _quit_confirm: Control = %QuitConfirm
@@ -56,10 +53,10 @@ func _notification(what: int) -> void:
 		_show_quit_confirm(not _quit_confirm.visible)
 
 
-## Gives one of the right-hand lists a soft window that grows and shrinks with what is in it,
-## with its buttons centred on it.
+## Sets up one of the right-hand lists as plain words, with no box behind them: every line is
+## centred, and the list hugs its contents above the bottom right corner. The words stay readable
+## on the busy picture through their thick dark outline and soft shadow (see the theme).
 func _put_on_window(panel: VBoxContainer) -> void:
-	SoftWindow.behind(panel, SoftWindow.Look.WINDOW, MENU_WINDOW_MARGIN)
 	for child in panel.get_children():
 		if child is Button:
 			(child as Button).alignment = HORIZONTAL_ALIGNMENT_CENTER

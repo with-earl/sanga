@@ -72,7 +72,7 @@ picture. Delete the temporary script afterwards. The `--headless` runs print RID
   that explains *why*, written for a reader who is not a programmer. Match the comment density
   of the surrounding code. Constants go at the top, in UPPER_CASE.
 - **UI text style:** gameplay text (HUD, dialogue, in-game menu) is golden ochre `#D9A441` with
-  a brown outline `#4A2A12`. The main menu's own buttons stay cream with a blue outline.
+  a brown outline `#4A2A12`. The main menu's own buttons are plain cream words with no box, a thick near-black brown outline and a soft shadow so they read on the picture.
 - **Audio:** music and sounds are original and synthesised by the Python tools. Never add
   copyrighted music or arrangements of existing songs. Music plays on the `Music` bus at
   `MusicDirector.VOLUME_DB` (-24 dB) and must stay subtle. Effects play on the `Sound` bus at
