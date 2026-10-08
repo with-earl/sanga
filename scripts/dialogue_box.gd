@@ -153,9 +153,6 @@ func _ready() -> void:
 	add_child(_portrait_companion)
 	# Behind the first person on the right.
 	move_child(_portrait_companion, _portrait_right.get_index())
-	# The people beside the box breathe, like the people in the place (see StageLife).
-	for portrait in [_portrait_left, _portrait_right, _portrait_companion]:
-		StageLife.breathe(portrait)
 	_fit_panel()
 	resized.connect(_fit_panel)
 	var box_style := StyleBoxEmpty.new()

@@ -55,9 +55,8 @@ const HINT_IDLE_SECONDS := 8.0
 ## One slow breath of the glint: fade in, glow, fade out.
 const HINT_PULSE_SECONDS := 3.4
 const HINT_GLINT_SIZE := 48
-## The glint grows a little as it brightens, and turns very slightly.
+## The glint grows a little as it brightens, and does not turn.
 const HINT_GROW := 0.25
-const HINT_TURN := 0.18
 ## Where on the art the glint sits: the visible pixel nearest this point of the slot (0 to 1).
 const HINT_SPOT := Vector2(0.5, 0.68)
 ## Above the scene and its vignette (layer 10), below the dialogue backdrop (layer 15).
@@ -410,7 +409,6 @@ func _show_glints(slots: Array[ArtSlot]) -> void:
 		shown.position = slot.get_global_transform() * _glint_spot(slot) - shown.pivot_offset
 		shown.modulate.a = breath
 		shown.scale = Vector2.ONE * (1.0 - HINT_GROW + HINT_GROW * breath)
-		shown.rotation = HINT_TURN * sin(TAU * _hint_seconds / (HINT_PULSE_SECONDS * 2.0))
 
 
 func _hide_glints() -> void:
