@@ -1,0 +1,17 @@
+{
+	"_comment": "Cause and effect for 'Ayusin ayon sa oras' (see scripts/time_threads.gd): after the recap, the run's moments are put in true time order and a red thread joins each cause to its effect. A thread is drawn only when both ends happened in this run, and only forward in story time. Echoes are tied to the choice that set their flag on their own; these are the other links. A 'choice' is matched by its words, an 'outcome' by its ending id.",
+	"threads": [
+		{"from": {"choice": "Sige, ako na'ng bibili."}, "to": {"outcome": ["tokhang_peter"]}},
+		{"from": {"choice": "Ikaw na lang. May delivery ako."}, "to": {"outcome": ["tokhang_gwen"]}},
+		{"from": {"choice": "Mamaya, sabay na tayo."}, "to": {"outcome": ["tokhang_kulas"]}},
+		{"from": {"choice": "Ito na lang ang bilhin ko."}, "to": {"outcome": ["tokhang_safe"]}},
+		{"from": {"choice": "Sasamahan kita, anak."}, "to": {"outcome": ["kumpisal_sinamahan"]}},
+		{"from": {"choice": "Ama, aaminin ko na ang lahat."}, "to": {"outcome": ["padala_pinalaya", "padala_walang_namatay"]}},
+		{"from": {"choice": "Tumakbo"}, "to": {"outcome": ["padala_run"]}},
+		{"from": {"choice": "Sumakay ng jeep"}, "to": {"outcome": ["padala_ride_jeep"]}},
+		{"from": {"choice": "Magtago hanggang umaga."}, "to": {"outcome": ["padala_nagtago"]}},
+		{"from": {"choice": "Isama po niya ang tanod."}, "to": {"outcome": ["padala_tanod"]}},
+		{"from": {"outcome": ["kumpisal_sinamahan"]}, "to": {"outcome": ["padala_walang_namatay"]}},
+		{"from": {"outcome": ["padala_police"]}, "to": {"outcome": ["tokhang_trade"]}}
+	]
+}

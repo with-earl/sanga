@@ -463,7 +463,7 @@ func _show_next_line(default_speaker: String) -> void:
 	var seen_before := GameState.see_line(who, text)
 	if line is Dictionary and (line as Dictionary).get("echo", false):
 		# An earlier choice of this run coming back: the recap shows it as a reply to that choice.
-		GameState.log_moment({"echo": text, "speaker": who})
+		GameState.log_moment({"echo": text, "speaker": who, "flag": str(line.get("if_flag", ""))})
 	_skip.visible = seen_before
 	_type_out(text)
 	if _skipping:

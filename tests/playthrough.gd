@@ -166,10 +166,6 @@ func _act() -> void:
 		cutscene._tapped = true
 		return
 	if card.visible:
-		if card._waiting_for_tap:
-			_last_action = "the time-order card"
-			card._waiting_for_tap = false
-			card._tapped.emit()
 		return
 	if current_scene == null:
 		return

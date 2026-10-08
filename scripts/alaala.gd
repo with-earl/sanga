@@ -120,3 +120,6 @@ static func prepare_options(options: Array) -> Array:
 static func apply_option(option: Dictionary) -> void:
 	if option.has("flag"):
 		GameState.set_flag(str(option["flag"]), option.get("value", true))
+		# The recap ties this choice to whatever it later causes (see TimeThreads).
+		if not GameState.run_log.is_empty() and (GameState.run_log[-1] as Dictionary).has("choice"):
+			GameState.run_log[-1]["flag"] = str(option["flag"])

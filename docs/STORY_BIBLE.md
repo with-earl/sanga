@@ -114,6 +114,17 @@ choice fits on one line. Stage directions inside a line are Tagalog, between ast
   the starting point decides which words reach which story. An echo never changes an ending,
   never adds a choice, and is quoted in the run's recap under the story it reached, marked ↳.
 
+### The end of a run: "Ang Nangyari", then "Ayusin ayon sa oras"
+
+Every run ends in the old book. First **Ang Nangyari**: the run as it was played (stories, the
+player's choices, echoes, endings, memories), closing with *"Ito ang nangyari. Hindi ito ang
+tanging maaaring mangyari."* Then the ink fades and the book writes the run again **in true time
+order**: *Kumpisal · Nakaraan*, *Padala · Kasalukuyan*, *Tokhang · Hinaharap*. Red threads draw
+themselves down the margins from each cause to its effect: a choice to its echo, a choice to the
+ending it led to, Mercy's call to the trade at the market. A thread is drawn only between two things
+the player saw in this run, and only forward in time, so it explains without revealing. (This
+replaces the old time-order card; the links are in `story/threads.json`.)
+
 ### The echoes
 
 | Choice (Kumpisal) | Echo | Where it comes back |

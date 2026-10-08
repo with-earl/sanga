@@ -109,8 +109,8 @@ func finish_story(lead_in: Array = [], outcome_id := "") -> void:
 	_enter_chapter(lead_in)
 
 
-## Ends the run: records its ending and the reality it made on this save, then closes the run.
-## The main timeline closes by showing when each story happens; the other timelines close with
+## Ends the run: records its ending and the reality it made on this save, then closes the run
+## with its recap, which puts the run in time order (see RunRecap); the other timelines then show
 ## the timeline diagram of every reality this save has made. `title` and `line` are kept for a
 ## plain ending card, which no timeline uses now.
 func end_run(ending_id: String, title: String, line: String, lead_in: Array = []) -> void:

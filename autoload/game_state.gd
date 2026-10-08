@@ -39,7 +39,8 @@ var alaala: Array = []
 var seen_lines: Dictionary = {}
 ## What happened in the run being played, in order, for the recap at its end ("Ang Nangyari"):
 ## {"story": title}, {"choice": words}, {"ending": title, "line": words}, {"alaala": id}, and
-## {"echo": words, "speaker": name} when an earlier choice comes back later in the run.
+## {"echo": words, "speaker": name, "flag": flag} when an earlier choice comes back later in the
+## run, and {"outcome": id} when a story ends. A choice that sets a flag carries it too.
 var run_log: Array = []
 ## Seconds played in this save.
 var play_seconds := 0.0
@@ -159,6 +160,7 @@ func log_moment(entry: Dictionary) -> void:
 func record_ending(ending_id: String) -> void:
 	if ending_id == "":
 		return
+	log_moment({"outcome": ending_id})
 	run_outcomes.append(ending_id)
 	if ending_id not in endings:
 		endings.append(ending_id)

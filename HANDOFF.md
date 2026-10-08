@@ -381,9 +381,16 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
       story time only (the Tokhang haggle cannot echo into the past). DialogueBox logs them; the
       recap shows them as "↳ Speaker: line". The playthrough checks echo counts in three runs and
       picks the other answers in two Kumpisal-timeline runs.
-    - **D. "Ayusin ayon sa oras" (signature):** after the recap, the book's pages reorder into
-      true time order (Kumpisal, Padala, Tokhang) and red threads draw from causes to effects;
-      replaces the time-order card. The chart gets a one-line cause per card on the run's path.
+    - **D. "Ayusin ayon sa oras"** (DONE, the signature): after the recap's last page the ink
+      fades and the run is written again in time order ("Kumpisal · Nakaraan", "Padala ·
+      Kasalukuyan", "Tokhang · Hinaharap"), keeping only linked moments and each story's ending;
+      red threads draw down the page margins (or the gutter) in their own lanes, with a knot at each
+      end. `scripts/time_threads.gd` finds them: a choice and its echo share a flag (Alaala.
+      apply_option now writes the flag on the logged choice), plus `story/threads.json` (choice to
+      outcome, outcome to outcome). Only threads whose two ends happened this run, only forward in
+      time. The run log now also records `{"outcome": id}`. The old time-order card is removed
+      (StoryCard.show_time_order); the main timeline goes back to the main screen after the book.
+      Decided not to add cause lines to the chart: the threads already show causes.
     - **E. The priest's answer:** the starting point is chosen inside the prologue, the voice asking
       "Saan po ako magsisimula, Padre?" and the player answering; stories show Past / Present /
       Future after run 1; after non-true endings the voice says "Hindi pa po iyon ang buong

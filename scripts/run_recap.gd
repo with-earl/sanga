@@ -8,9 +8,11 @@ extends Control
 ## are, or what else could have happened, so the player is left to find those by playing again. The
 ## last line says only that this was not the only way it could have gone.
 ##
-## When the writing is longer than two pages, a tap turns to the next spread. After the last one, a
-## tap goes on: to the card that puts the three stories in time order (the main timeline), or to
-## the timeline chart (any other timeline).
+## When the writing is longer than two pages, a tap turns to the next spread. After the last one,
+## "Ayusin ayon sa oras": the ink fades and the run is written again in true time order (Kumpisal
+## the past, Padala the present, Tokhang the future), and red threads draw themselves from each cause
+## to its effect (see TimeThreads). A last tap goes on: to the main screen (the main timeline) or
+## to the timeline chart (any other timeline).
 
 const BOOK_PICTURE := preload("res://assets/ui/book_spread.png")
 ## Where the words go on the two pages, in the picture's own pixels (the same as the memory book).
@@ -39,6 +41,19 @@ const HINT_DELAY_SECONDS := 0.8
 
 ## A memory's line sits this close under its name, and the two always stay on the same page.
 const UNDER_NAME_GAP := 2.0
+## The time-order pages: their title, and the red thread that joins a cause to its effect.
+const TIME_TITLE := "Ayon sa Oras"
+const THREAD_COLOR := Color(0.62, 0.09, 0.1, 0.85)
+const THREAD_WIDTH := 3.0
+const KNOT_RADIUS := 5.0
+## Threads run down the page margins (or the gutter between the pages), each in its own lane so
+## none lie on top of another, turning neat rounded corners. How long each takes to draw.
+const LANE_START := 16.0
+const LANE_GAP := 9.0
+const CORNER := 10.0
+const THREAD_SECONDS := 0.8
+const THREAD_PAUSE_SECONDS := 0.25
+const REORDER_SECONDS := 0.45
 
 ## Each page's lines, as [text, size, colour, gap above, centred].
 var _pages: Array = []
@@ -49,6 +64,10 @@ var _right := VBoxContainer.new()
 var _hint: TapHint
 var _waiting := false
 var _font: Font
+## True once the pages show the run in time order, with its threads.
+var _in_time := false
+var _threads: Array = []
+var _thread_layer := Node2D.new()
 
 
 func _ready() -> void:
@@ -74,6 +93,7 @@ func _ready() -> void:
 		column.add_theme_constant_override("separation", 0)
 		column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_book.add_child(column)
+	_book.add_child(_thread_layer)
 	_hint = TapHint.make(self, StoryCard.SKIP_HINT)
 	_pages = paginate(lines_for(StoryDirector.last_run_log), LEFT_PAGE.size.x, LEFT_PAGE.size.y)
 	_show_spread()
@@ -103,6 +123,31 @@ static func lines_for(run_log: Array) -> Array:
 				lines.append(["%s%s" % [Alaala.MARK, item.get("name", "")], TEXT_SIZE, INK, GAP, false])
 				lines.append([str(item.get("memory", "")), SMALL_SIZE, FADED_INK, UNDER_NAME_GAP, false])
 	lines.append([CLOSING_LINE, TEXT_SIZE, INK, STORY_GAP * 2.0, true])
+	return lines
+
+
+## The time-order pages: each story of the run under its place in time, keeping only the moments
+## a thread joins and each story's ending, so cause and effect stand out. Each line also carries the
+## run-log position of its moment, so its thread can find it.
+static func lines_in_time(run_log: Array, threads: Array) -> Array:
+	var linked := {}
+	for pair in threads:
+		linked[pair[0]] = true
+		linked[pair[1]] = true
+	var lines: Array = [[TIME_TITLE, TITLE_SIZE, INK, 0.0, false, -1]]
+	for section in TimeThreads.sections(run_log):
+		var story := str(section["story"])
+		var when: int = TimeThreads.STORY_TIME.get(story, 0)
+		lines.append(["%s · %s" % [story, TimeThreads.TIME_WORDS[when]], STORY_SIZE, INK, STORY_GAP, false, -1])
+		for index in section["moments"]:
+			var moment: Dictionary = run_log[index]
+			if moment.has("ending"):
+				var words := str(moment.get("line", ""))
+				lines.append([words if words != "" else str(moment["ending"]), TEXT_SIZE, FADED_INK, GAP, false, index])
+			elif linked.has(index) and moment.has("choice"):
+				lines.append(["“%s”" % str(moment["choice"]), TEXT_SIZE, INK, GAP, false, index])
+			elif linked.has(index) and moment.has("echo"):
+				lines.append(["↳ %s: %s" % [moment.get("speaker", ""), moment["echo"]], SMALL_SIZE, FADED_INK, UNDER_NAME_GAP + 4.0, false, index])
 	return lines
 
 
@@ -141,7 +186,9 @@ func _show_spread() -> void:
 			child.queue_free()
 		if int(pair[1]) < _pages.size():
 			for line in _pages[int(pair[1])]:
-				column.add_child(_ink(line, column.get_child_count() == 0))
+				var label := _ink(line, column.get_child_count() == 0)
+				label.set_meta(&"line", line)
+				column.add_child(label)
 
 
 ## One line of handwriting: dark ink, no outline, none of the retro blur.
@@ -177,6 +224,9 @@ func _gui_input(event: InputEvent) -> void:
 		if (_spread + 1) * 2 < _pages.size():
 			await _turn_page()
 			_waiting = true
+		elif not _in_time:
+			await _put_in_time_order()
+			_waiting = true
 		else:
 			_continue()
 
@@ -188,17 +238,149 @@ func _turn_page() -> void:
 	await out.finished
 	_spread += 1
 	_show_spread()
+	_clear_threads()
 	var back := create_tween().set_trans(Tween.TRANS_SINE)
 	back.tween_property(_left, "modulate:a", 1.0, PAGE_TURN_SECONDS / 2.0)
 	back.parallel().tween_property(_right, "modulate:a", 1.0, PAGE_TURN_SECONDS / 2.0)
 	await back.finished
+	if _in_time:
+		await _draw_threads()
 
 
-## The main timeline goes on to the card that puts the stories in time order; any other timeline
-## goes on to the chart of the realities this save has made.
+## The ink fades, the run is written again in time order, and the threads draw themselves.
+func _put_in_time_order() -> void:
+	create_tween().set_trans(Tween.TRANS_SINE).tween_property(_hint, "modulate:a", 0.0, 0.3)
+	var out := create_tween().set_trans(Tween.TRANS_SINE).set_parallel(true)
+	out.tween_property(_left, "modulate:a", 0.0, REORDER_SECONDS)
+	out.tween_property(_right, "modulate:a", 0.0, REORDER_SECONDS)
+	await out.finished
+	var run_log: Array = StoryDirector.last_run_log
+	_threads = TimeThreads.threads(run_log)
+	_pages = paginate(lines_in_time(run_log, _threads), LEFT_PAGE.size.x, LEFT_PAGE.size.y)
+	_spread = 0
+	_in_time = true
+	_show_spread()
+	var back := create_tween().set_trans(Tween.TRANS_SINE).set_parallel(true)
+	back.tween_property(_left, "modulate:a", 1.0, REORDER_SECONDS)
+	back.tween_property(_right, "modulate:a", 1.0, REORDER_SECONDS)
+	await back.finished
+	await _draw_threads()
+	create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT).tween_property(_hint, "modulate:a", 1.0, 0.6)
+
+
+func _clear_threads() -> void:
+	for child in _thread_layer.get_children():
+		child.queue_free()
+
+
+## Draws, one after another, each thread whose two ends are on this spread: from the cause, along
+## a lane in the margin (or, from the left page to the right, in the gutter), into its effect, with
+## a small knot at each end.
+func _draw_threads() -> void:
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var ends := {}
+	for column in [_left, _right]:
+		for label in (column as VBoxContainer).get_children():
+			var line: Array = label.get_meta(&"line", [])
+			if line.size() > 5 and int(line[5]) >= 0:
+				ends[int(line[5])] = _anchor(label as Label, line, column as Control)
+	var lanes := {"left": 0, "right": 0, "gutter": 0}
+	for pair in _threads:
+		if not (ends.has(pair[0]) and ends.has(pair[1])):
+			continue
+		var cause: Dictionary = ends[pair[0]]
+		var effect: Dictionary = ends[pair[1]]
+		var points: Array
+		if cause["column"] == effect["column"]:
+			# Down the margin beside the page's writing.
+			var side := "left" if cause["column"] == _left else "right"
+			var lane: float = cause["margin"].x - (lanes[side] + 1) * LANE_GAP
+			lanes[side] += 1
+			points = _route(cause["margin"], effect["margin"], lane)
+		else:
+			# From the end of the cause's words, down the gutter, into the effect's margin.
+			var lane: float = LEFT_PAGE.end.x + LANE_START + lanes["gutter"] * LANE_GAP
+			lanes["gutter"] += 1
+			points = _route(cause["after"], effect["margin"], lane)
+		await _draw_thread(points)
+		await get_tree().create_timer(THREAD_PAUSE_SECONDS).timeout
+
+
+## Where a thread can meet a line, at the height of its first row: in the margin just before it,
+## and just past the end of its words.
+func _anchor(label: Label, line: Array, column: Control) -> Dictionary:
+	var top := column.position.y + label.position.y + label.size.y - _tall(line, LEFT_PAGE.size.x)
+	var width := minf(_font.get_string_size(str(line[0]), HORIZONTAL_ALIGNMENT_LEFT, -1, int(line[1])).x, LEFT_PAGE.size.x)
+	var y := top + _font.get_height(int(line[1])) * 0.55
+	return {"column": column, "margin": Vector2(column.position.x - LANE_START * 0.5, y), "after": Vector2(column.position.x + width + 8.0, y)}
+
+
+## A path from `a` across to the lane at `lane_x`, along it, and across to `b`, with rounded corners.
+func _route(a: Vector2, b: Vector2, lane_x: float) -> Array:
+	var down := signf(b.y - a.y) if b.y != a.y else 1.0
+	var r := minf(CORNER, absf(b.y - a.y) / 2.0)
+	var out: Array = [a]
+	out.append_array(_corner(Vector2(lane_x, a.y), signf(lane_x - a.x), down, r))
+	out.append_array(_corner(Vector2(lane_x, b.y), down, signf(b.x - lane_x), r, true))
+	out.append(b)
+	return out
+
+
+## Points rounding a right-angle corner at `at`: coming in going `first` (sideways, or down when
+## `vertical_first`), leaving going `second`.
+func _corner(at: Vector2, first: float, second: float, r: float, vertical_first := false) -> Array:
+	var points: Array = []
+	for i in 7:
+		var t := i / 6.0
+		var p := Vector2.ZERO
+		if vertical_first:
+			# Coming down (or up) the lane, turning out sideways.
+			var start := at - Vector2(0, first * r)
+			var finish := at + Vector2(second * r, 0)
+			p = start.lerp(at, t).lerp(at.lerp(finish, t), t)
+		else:
+			var start := at - Vector2(first * r, 0)
+			var finish := at + Vector2(0, second * r)
+			p = start.lerp(at, t).lerp(at.lerp(finish, t), t)
+		points.append(p)
+	return points
+
+
+func _draw_thread(curve: Array) -> void:
+	_thread_layer.add_child(_knot(curve[0]))
+	var thread := Line2D.new()
+	thread.width = THREAD_WIDTH
+	thread.default_color = THREAD_COLOR
+	thread.joint_mode = Line2D.LINE_JOINT_ROUND
+	thread.begin_cap_mode = Line2D.LINE_CAP_ROUND
+	thread.end_cap_mode = Line2D.LINE_CAP_ROUND
+	thread.antialiased = true
+	_thread_layer.add_child(thread)
+	var grow := func(amount: float) -> void:
+		var shown := maxi(int(amount * (curve.size() - 1)) + 1, 2)
+		thread.points = PackedVector2Array(curve.slice(0, shown))
+	var tween := create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_method(grow, 0.0, 1.0, THREAD_SECONDS)
+	await tween.finished
+	_thread_layer.add_child(_knot(curve[-1]))
+
+
+func _knot(at: Vector2) -> Polygon2D:
+	var knot := Polygon2D.new()
+	var points := PackedVector2Array()
+	for i in 12:
+		points.append(at + Vector2.from_angle(TAU * i / 12.0) * KNOT_RADIUS)
+	knot.polygon = points
+	knot.color = THREAD_COLOR
+	return knot
+
+
+## The main timeline goes back to the main screen (the book has just shown its time order); any
+## other timeline goes on to the chart of the realities this save has made.
 func _continue() -> void:
 	create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT).tween_property(_hint, "modulate:a", 0.0, 0.3)
 	if StoryDirector.last_timeline == "main":
-		StoryCard.show_time_order()
+		StoryCard.fade_to_scene("main_menu")
 	else:
 		StoryCard.fade_to_scene("timeline_reveal")

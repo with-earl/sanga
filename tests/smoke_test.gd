@@ -70,6 +70,18 @@ func _test_run_recap() -> void:
 	_check(words[-1] == recap.get("CLOSING_LINE"), "recap: ends with the closing line")
 	_check(words.has("Tokhang") and words.has("“Oo.”") and words.has("Namatay si Peter."), "recap: writes the story, the choice and the ending")
 	_check(lines.size() == 7, "recap: one line per moment, two for a memory")
+	# In time order the past comes first, and a choice is joined to its echo and to its ending.
+	var played := [
+		{"story": "Tokhang"}, {"choice": "Sige, ako na'ng bibili."}, {"ending": "Peter", "line": "Namatay si Peter."}, {"outcome": "tokhang_peter"},
+		{"story": "Kumpisal"}, {"choice": "Huwag kang mag-alala, anak.", "flag": "run_echo_mercy_reassured"},
+		{"story": "Padala"}, {"echo": "Sabi niya.", "speaker": "Mercy", "flag": "run_echo_mercy_reassured"},
+	]
+	var threads_script: GDScript = load("res://scripts/time_threads.gd")
+	var order: Array = threads_script.call("sections", played).map(func(section: Dictionary) -> String: return section["story"])
+	_check(order == ["Kumpisal", "Padala", "Tokhang"], "time order: past, present, future (got %s)" % [order])
+	var threads: Array = threads_script.call("threads", played)
+	_check([5, 7] in threads, "time order: a choice is joined to its echo")
+	_check([1, 2] in threads, "time order: a choice is joined to the ending it caused")
 	var empty: Array = recap.call("lines_for", [])
 	_check(empty.size() == 2, "recap: an empty run shows only the title and the closing line")
 
