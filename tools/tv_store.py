@@ -324,31 +324,86 @@ def wood_texture(w: int, h: int) -> Image.Image:
     return Image.fromarray(np.clip(px, 0, 255).astype(np.uint8), "RGBA")
 
 
+def _fit(d: ImageDraw.ImageDraw, xy, words: str, width: float, size: int, fill, font_path=FONT_BLACK, anchor="mm") -> None:
+    """Draws `words` as large as `size` allows without going wider than `width` pixels."""
+    size = max(size, 8)
+    font = ImageFont.truetype(font_path, size)
+    while d.textlength(words, font=font) > width and size > 7:
+        size -= 1
+        font = ImageFont.truetype(font_path, size)
+    d.text(xy, words, font=font, fill=fill, anchor=anchor)
+
+
 def poster_image(w: int, h: int, kind: int, seed: int) -> Image.Image:
-    """A flyer or notice stuck on the pole: a coloured sheet with a big word, some small print,
-    and torn edges."""
-    schemes = [((250, 224, 60), (170, 30, 36)), ((245, 245, 240), (30, 60, 150)), ((70, 130, 220), (255, 255, 255)),
-               ((236, 90, 120), (255, 255, 255)), ((120, 190, 110), (24, 56, 30)), ((250, 160, 60), (60, 20, 10)),
-               ((240, 230, 200), (60, 30, 20)), ((210, 40, 40), (255, 240, 200))]
-    words = ["FOR RENT", "LOAD", "ROOM FOR RENT", "LOST DOG", "PROMO!", "BAWAL MAGTAPON", "FOR SALE", "CASH LOAN", "TUTOR", "SALE"]
-    bg, fg = schemes[kind % len(schemes)]
-    img = Image.new("RGBA", (w, h), bg + (255,))
+    """A flyer stuck on the pole, one of six kinds: septic siphoning service, job hiring (call
+    Gloria), an election poster, a drug watchlist, a police poster and a food delivery flyer.
+    Each has torn edges and tape so it reads as pasted by hand."""
+    kind %= 6
+    bgs = [(250, 224, 60), (245, 245, 238), (70, 140, 70), (236, 232, 218), (28, 60, 140), (236, 80, 120)]
+    img = Image.new("RGBA", (w, h), bgs[kind] + (255,))
     d = ImageDraw.Draw(img)
-    word = words[(kind * 3 + seed) % len(words)]
-    size = max(int(h * 0.2), 12)
-    font = ImageFont.truetype(FONT_BLACK, size)
-    while d.textlength(word, font=font) > w * 0.9 and size > 8:
-        size -= 2
-        font = ImageFont.truetype(FONT_BLACK, size)
-    d.text((w // 2, int(h * 0.2)), word, font=font, fill=fg + (255,), anchor="mm")
     rng = np.random.default_rng(seed + kind * 7)
-    for line in range(int(rng.integers(4, 8))):
-        y = int(h * 0.38) + line * int(h * 0.075)
-        d.rectangle((int(w * 0.1), y, int(w * rng.uniform(0.5, 0.9)), y + max(int(h * 0.025), 2)), fill=fg + (200,))
-    d.rectangle((int(w * 0.1), int(h * 0.86), int(w * 0.5), int(h * 0.92)), fill=fg + (255,))
-    # Torn bottom edge with strips, and tape at the corners.
+    bw = w * 0.88
+    cx = w // 2
+    dark, white, red = (30, 30, 36, 255), (255, 255, 255, 255), (190, 28, 34, 255)
+    if kind == 0:   # septic siphoning
+        _fit(d, (cx, h * 0.12), "SEPTIC TANK", bw, int(h * 0.13), red)
+        _fit(d, (cx, h * 0.26), "SIPHONING", bw, int(h * 0.17), dark)
+        _fit(d, (cx, h * 0.38), "SERVICE", bw, int(h * 0.12), dark)
+        d.rectangle((w * 0.14, h * 0.46, w * 0.86, h * 0.66), fill=(40, 120, 170, 255))
+        d.rectangle((w * 0.3, h * 0.52, w * 0.7, h * 0.62), fill=(230, 230, 232, 255))
+        d.ellipse((w * 0.2, h * 0.62, w * 0.34, h * 0.7), fill=dark)
+        d.ellipse((w * 0.66, h * 0.62, w * 0.8, h * 0.7), fill=dark)
+        _fit(d, (cx, h * 0.78), "24 HRS  MURA", bw, int(h * 0.075), dark, FONT_BOLD)
+        _fit(d, (cx, h * 0.88), "0900-000-0000", bw, int(h * 0.09), red)
+    elif kind == 1:   # job hiring
+        d.rectangle((0, 0, w, h * 0.24), fill=(190, 28, 34, 255))
+        _fit(d, (cx, h * 0.12), "HIRING!", bw, int(h * 0.17), white)
+        _fit(d, (cx, h * 0.33), "TAUHAN SA TINDAHAN", bw, int(h * 0.07), dark, FONT_BOLD)
+        for i, t in enumerate(["Cashier", "Rider", "Kasambahay", "Bantay"]):
+            _fit(d, (w * 0.14, h * (0.43 + i * 0.075)), "\u2022 " + t, bw * 0.8, int(h * 0.06), dark, FONT_BOLD, "lm")
+        _fit(d, (cx, h * 0.77), "CALL GLORIA", bw, int(h * 0.11), (30, 60, 150, 255))
+        _fit(d, (cx, h * 0.89), "0900-000-0001", bw, int(h * 0.08), dark)
+    elif kind == 2:   # election
+        _fit(d, (cx, h * 0.09), "BOTO 2025", bw, int(h * 0.1), (250, 224, 60, 255))
+        d.ellipse((w * 0.3, h * 0.2, w * 0.7, h * 0.46), fill=(214, 168, 130, 255))
+        d.pieslice((w * 0.12, h * 0.44, w * 0.88, h * 0.9), 180, 360, fill=(240, 240, 238, 255))
+        d.polygon([(w * 0.42, h * 0.45), (w * 0.58, h * 0.45), (w * 0.5, h * 0.6)], fill=(190, 28, 34, 255))
+        d.rectangle((w * 0.28, h * 0.15, w * 0.72, h * 0.2), fill=(20, 20, 24, 255))
+        d.rectangle((0, h * 0.7, w, h * 0.84), fill=(250, 224, 60, 255))
+        _fit(d, (cx, h * 0.77), "R. DELA CRUZ", bw, int(h * 0.075), dark)
+        _fit(d, (cx, h * 0.91), "PARA SA BAYAN", bw, int(h * 0.075), white, FONT_BOLD)
+    elif kind == 3:   # drug watchlist
+        d.rectangle((0, 0, w, h * 0.2), fill=dark)
+        _fit(d, (cx, h * 0.1), "DRUG WATCHLIST", bw, int(h * 0.11), (250, 224, 60, 255))
+        _fit(d, (cx, h * 0.26), "BRGY. SAN ROQUE", bw, int(h * 0.06), dark, FONT_BOLD)
+        for i in range(4):
+            y = h * (0.33 + i * 0.13)
+            d.rectangle((w * 0.1, y, w * 0.3, y + h * 0.11), fill=(120, 110, 100, 255))
+            d.ellipse((w * 0.15, y + h * 0.01, w * 0.25, y + h * 0.065), fill=(80, 74, 68, 255))
+            d.rectangle((w * 0.36, y + h * 0.02, w * rng.uniform(0.7, 0.9), y + h * 0.05), fill=dark)
+            d.rectangle((w * 0.36, y + h * 0.07, w * rng.uniform(0.5, 0.65), y + h * 0.09), fill=(110, 110, 114, 255))
+        _fit(d, (cx, h * 0.92), "IPAGBIGAY SA PUNONG BARANGAY", bw, int(h * 0.05), red, FONT_BOLD)
+    elif kind == 4:   # police
+        d.polygon([(cx, h * 0.04), (w * 0.8, h * 0.12), (w * 0.8, h * 0.3), (cx, h * 0.42), (w * 0.2, h * 0.3), (w * 0.2, h * 0.12)], fill=(250, 224, 60, 255))
+        d.ellipse((w * 0.36, h * 0.12, w * 0.64, h * 0.32), fill=(28, 60, 140, 255))
+        _fit(d, (cx, h * 0.22), "PNP", w * 0.2, int(h * 0.09), white)
+        _fit(d, (cx, h * 0.52), "MAGING ALERTO", bw, int(h * 0.1), white)
+        _fit(d, (cx, h * 0.63), "BAWAL ANG ILEGAL", bw, int(h * 0.07), (250, 224, 60, 255), FONT_BOLD)
+        d.rectangle((w * 0.1, h * 0.7, w * 0.9, h * 0.72), fill=(250, 224, 60, 255))
+        _fit(d, (cx, h * 0.8), "MAGSUMBONG", bw, int(h * 0.09), white)
+        _fit(d, (cx, h * 0.91), "TAWAG 911", bw, int(h * 0.1), (250, 224, 60, 255))
+    else:   # food delivery
+        _fit(d, (cx, h * 0.12), "KAIN NA!", bw, int(h * 0.16), white)
+        d.ellipse((w * 0.18, h * 0.24, w * 0.82, h * 0.6), fill=(250, 250, 248, 255))
+        d.ellipse((w * 0.27, h * 0.29, w * 0.73, h * 0.55), fill=(150, 80, 40, 255))
+        d.ellipse((w * 0.4, h * 0.34, w * 0.6, h * 0.46), fill=(240, 200, 90, 255))
+        _fit(d, (cx, h * 0.7), "ADOBO MEAL \u20b199", bw, int(h * 0.085), white)
+        d.rectangle((w * 0.1, h * 0.78, w * 0.9, h * 0.9), fill=white)
+        _fit(d, (cx, h * 0.84), "LIBRENG DELIVERY", w * 0.8, int(h * 0.07), (200, 30, 80, 255))
+    # Tape at the corners and a torn bottom edge.
     for i in range(0, w, max(w // 6, 6)):
-        d.rectangle((i, int(h * 0.94), i + max(w // 12, 3), h), fill=(0, 0, 0, 0))
+        d.rectangle((i, int(h * 0.965), i + max(w // 12, 3), h), fill=(0, 0, 0, 0))
     d.polygon([(0, 0), (int(w * 0.16), 0), (0, int(h * 0.05))], fill=(236, 232, 210, 220))
     d.polygon([(w, 0), (int(w * 0.84), 0), (w, int(h * 0.05))], fill=(236, 232, 210, 220))
     px = np.asarray(img).astype(np.float32)
@@ -356,7 +411,7 @@ def poster_image(w: int, h: int, kind: int, seed: int) -> Image.Image:
     return Image.fromarray(np.clip(px, 0, 255).astype(np.uint8), "RGBA")
 
 
-def utility_pole(scene, cx, cz, radius=0.3, height=7.0, facets=56):
+def utility_pole(scene, cx, cz, radius=0.22, height=7.0, facets=56):
     """A thick wooden pole as a many-sided prism, its facing side covered in posters pasted over one
     another. Posters are cut across the facets so they wrap round the trunk."""
     wood = wood_texture(facets * 64, 1500)
@@ -380,9 +435,10 @@ def utility_pole(scene, cx, cz, radius=0.3, height=7.0, facets=56):
               (-40, 0.28, 2.05, 0.38), (-10, 0.24, 2.0, 0.30), (16, 0.30, 2.1, 0.40), (-22, 0.20, 2.5, 0.26), (6, 0.24, 2.45, 0.32)]
     for k, (deg, width, y0, hh) in enumerate(layout):
         tilt = float(rng.uniform(-0.035, 0.035))
-        px_w, px_h = int(width * 600), int(hh * 600)
-        poster = poster_image(px_w, px_h, k + int(rng.integers(0, 8)), k)
-        a_left = math.radians(deg)
+        width, hh = width * radius / 0.3, hh * radius / 0.3 * 1.15   # keep the same angle round a thinner trunk
+        px_w, px_h = int(width * 900), int(hh * 900)
+        poster = poster_image(px_w, px_h, k, k)
+        a_left = math.radians(deg - 14)
         a_right = a_left + width / radius
         for i in range(facets):
             a0, a1 = i * step - math.pi, (i + 1) * step - math.pi
@@ -620,6 +676,16 @@ def build(size) -> Image.Image:
     _text(nd, (100, 130), "INSTALLMENT", 26, (30, 30, 40, 255), FONT_BOLD, "mm")
     _text(nd, (100, 190), "UP TO", 22, (30, 30, 40, 255), FONT_BOLD, "mm")
     _text(nd, (100, 228), "12 MOS.", 34, (190, 24, 30, 255), FONT_BLACK, "mm")
+    # Payment stickers on the glass, stacked beside the promo notice.
+    for n, (words, bg, fg, y_top) in enumerate([("BCash payment available", (24, 84, 200), (255, 255, 255), 2.45),
+                                              ("HouseCredit available", (200, 30, 40), (255, 255, 255), 2.21),
+                                              ("Loro payment", (12, 12, 14), (60, 220, 100), 1.97)]):
+        tag = Image.new("RGBA", (360, 150), bg + (255,))
+        td = ImageDraw.Draw(tag)
+        parts = words.split(" ", 1)
+        _fit(td, (180, 52), parts[0], 320, 72, fg + (255,))
+        _fit(td, (180, 112), parts[1], 320, 44, fg + (255,), FONT_BOLD)
+        scene.face([(0.86, y_top, -0.015), (1.18, y_top, -0.015), (1.18, y_top - 0.2, -0.015), (0.86, y_top - 0.2, -0.015)], bg, texture=tag, layer=5, emissive=True)
     scene.face([(1.22, 2.45, -0.015), (1.5, 2.45, -0.015), (1.5, 1.9, -0.015), (1.22, 1.9, -0.015)], (250, 245, 220), texture=notice, layer=5, emissive=True)
 
     # ---- the wooden pole at the kerb in front of the neighbouring shop, with its shadow

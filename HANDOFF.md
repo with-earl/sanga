@@ -169,6 +169,9 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **TV news pole and glass:** the pole is thinner (radius 0.22); its posters are septic siphoning, job
+  hiring (call Gloria), election, drug watchlist, police and food delivery flyers (`poster_image`). Three
+  payment stickers sit beside the 0% promo notice: BCash (blue), HouseCredit (red), Loro (black, green text).
 - **TV news pole:** the pole now stands right at the shop front (x 1.72, z -0.42) so nearly all of its
   width shows, round and covered in posters.
 - **TV news scene, nearer (same branch):** camera moved to z -1.45 so the shop fills the picture, Peter is
