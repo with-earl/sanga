@@ -169,6 +169,13 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **TV news scene redone (branch claude/tv-store):** `tokhang_tv_news.png` is now a daylight TV shop
+  seen through its glass front from an oblique angle (`tools/tv_store.py`): 14 sets of every size
+  showing drug-war headlines, reflections and sun glare on the glass, the sign, awning, shutter, and
+  a parked delivery bike; in the foreground a rider seen from behind (`tools/rider_back.py`, drawn
+  from scratch: pink helmet, black jacket, pink delivery bag, soft-lit solids, not the game's Peter).
+  Rendering takes about 75 seconds (the street footage is cached in /tmp). Still a stand-in.
+
 - **One Peter (branch claude/intro-peter):** the intro picture `tokhang_rider.png` was its own
   drawing of Peter, unlike the portrait every other scene uses. It was deleted and redrawn by
   `tools/draw_placeholders.py` from the portrait (`peter_1.png`), the market and the motor prop, and
