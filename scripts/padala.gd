@@ -40,6 +40,9 @@ var _story: Dictionary = {}
 var _variant: Dictionary = {}
 var _variant_name := "main"
 var _busy := false
+## True while a tap is still being handled, including the moment after its dialogue closes, so a
+## quick second tap cannot take the other card or try another key before the first is done.
+var _handling := false
 
 
 func _ready() -> void:
@@ -120,8 +123,14 @@ func _play_opening() -> void:
 
 
 func _on_slot_interacted(slot: ArtSlot) -> void:
-	if _busy or _dialogue.visible or not GameState.get_flag(INTRO_FLAG, false):
+	if _busy or _handling or _dialogue.visible or not GameState.get_flag(INTRO_FLAG, false):
 		return
+	_handling = true
+	await _handle_tap(slot)
+	_handling = false
+
+
+func _handle_tap(slot: ArtSlot) -> void:
 	if GameState.get_flag(ELI_CONFESSED_FLAG, false):
 		# He confessed. The door opens before she can do anything.
 		await _play_ending("walang_namatay" if _nobody_died() else "pinalaya")

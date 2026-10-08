@@ -368,7 +368,7 @@ func _play() -> void:
 
 func _finish() -> void:
 	await get_tree().create_timer(HINT_DELAY_SECONDS).timeout
-	create_tween().tween_property(_hint, "modulate:a", 1.0, 0.6)
+	create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT).tween_property(_hint, "modulate:a", 1.0, 0.6)
 	_waiting = true
 
 

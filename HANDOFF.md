@@ -208,10 +208,13 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   - **GUI polish**: plate behind the scene title, soft window behind objectives and the title
     screen's lists, `TapHint` pill, `TitleOrnament` on title/ending cards, and a restyled,
     larger timeline ending (plum sky, window-coloured cards). Open question 4 (keep the gear) is answered.
-- Phases 1 to 4 of the GUI plan are done and checked in screenshots at 16:9, 19.5:9 and 4:3.
-  Left from the plan: **Phase 5** (a lighter text blur that is the same on every screen, and the
-  title/ending cards moved fully onto the window palette) and **Phase 6** polish (consistent
-  easing, a small press bounce). Both are optional.
+- All 6 phases of the GUI plan are done. Phase 5: the retro text blur (`retro_text.gdshader`) is
+  lighter (0.7, boost 1.2) and measured in the game's 1280x720 pixels (`screen_scale`, kept up to
+  date by RetroText), so text is equally soft on a small window and a big phone screen; the
+  title and ending cards already used the window palette's cream lettering and ornament. Phase 6:
+  every fade uses the same gentle sine curve (only the typewriter, push-ins, pans, flash and
+  shake stay steady), and every button sinks to 95% while held and springs back when let go
+  (`UiSkin.add_press_bounce`, given by RetroText; the developer tools keep their plain look).
 - **Coaches now have the Pages link.** So (PR after #9): the main screen's dev window is folded into
   one cool-blue "DEV · Developer tools" button (opens a window with a DEV badge, a note that the
   shortcuts are for testing and save nothing, and a Hide button), with a "DEVELOPMENT PREVIEW"
@@ -312,7 +315,27 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
     `GameState.run_log` (saved per slot), filled by `StoryDirector._enter_chapter`,
     `DialogueBox.choose`, `Cutscene` ending cards (memory cards skipped) and
     `StoryDirector._remember`. The smoke test checks the recap.
-    **Next: Phase 5**, a full playthrough from a fresh save to the true ending.
+  - **Phase 5 done (full playthrough):** `tests/playthrough.gd` plays the real game from a fresh
+    save, tapping what the idle hint points at and choosing by a plan, through 12 runs that reach
+    all 20 outcomes (12 of the 32 realities), with the true ending on run 2
+    (right after a police-poster first run, as the bible says). Each run must finish, make the
+    expected reality, give the expected memories, and show the recap; no placeholder line may
+    show. All 5 memories and 12 realities end up on the save. It found one bug, now fixed: a
+    quick second tap in Tokhang or Padala, in the moment after a dialogue closes, could act
+    before the first tap finished (picking the realistic gun right after choosing the water gun
+    lost the Ligtas ending; taking both Padala cards). Both scenes now ignore taps until the
+    last one is handled (`_handling`). A read of the full transcript found no story problems.
+  - **2.5D staging, the code part (story bible section 12):** `scripts/stage_life.gd`, added to
+    every place by `Location._ready`. The camera drifts slowly (±6 px, up to 1.2% zoom, cycles
+    of 23-37 s); people move 1.35× and blurred near things (market motor, a key) 1.9× as much as
+    the room, so there is depth with the existing art; every layer is 1.4% larger so no edge
+    shows. People and dialogue portraits breathe (0.7% taller, about 4 s, each on their own
+    rhythm). `shaders/stage_light.gdshader` adds flickering altar candles and wall lamps in the
+    church, dust in the sunlight, steam from the bathroom door, and slow cloud shadows. Cutscene
+    pictures already pushed in. Checked in screenshots; smoke test and playthrough pass.
+    **Left of section 12, needs art:** each place split into background / middle / foreground
+    layers, and the key cutscene reveals split into layers.
+    **Next:** paint the 13 placeholder cutscenes (user or artist).
 - **No sound on iPhone** (user report). The game itself plays music (checked: player playing,
   buses not muted). Fix in the Web preset's `html/head_include`: it wraps `AudioContext` to keep
   every context the engine makes and resumes them on each `touchend`/`pointerup`/`click`

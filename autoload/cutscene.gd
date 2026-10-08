@@ -197,7 +197,7 @@ func _play_card(title: String, line: String) -> void:
 	if line != "":
 		await _tween_alpha(_card_line, 1.0, FADE_SECONDS * 1.5)
 	await _hold(CARD_HOLD)
-	var out := create_tween().set_parallel(true)
+	var out := create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	out.tween_property(_card_title, "modulate:a", 0.0, FADE_SECONDS)
 	out.tween_property(_card_line, "modulate:a", 0.0, FADE_SECONDS)
 	await out.finished

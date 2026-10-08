@@ -32,6 +32,7 @@ Windows machine it is
 ```bash
 godot --headless --path . --import                                   # import assets (after adding files)
 godot --headless --path . -s res://tests/smoke_test.gd               # smoke test: must print SMOKE TEST PASSED
+godot --headless --path . -s res://tests/playthrough.gd              # full playthrough, every ending: must print PLAYTHROUGH PASSED
 godot --headless --path . --export-release "Web" build/web/index.html  # web build
 python tools/compose_music.py [name]                                 # regenerate music (numpy, scipy)
 python tools/compose_sounds.py                                       # regenerate sound effects
@@ -51,12 +52,13 @@ picture. Delete the temporary script afterwards. The `--headless` runs print RID
 |---|---|
 | `autoload/` | Global singletons (order in `project.godot`): GameState (saves, flags, undo history), Settings (volumes, vibration, `settings.cfg`), SceneRouter, StoryDirector (story and timeline order, endings), SaveNote, RetroText, MenuVideo (main-screen video, audio muted), SceneVignette, AssetPreloader, StoryCard (title, ending and time-order cards), Cutscene, MusicDirector (music per scene, crossfades), Sfx (button click, objective strike) |
 | `scenes/` | `boot`, `main_menu`, the four locations (`public_market`, `church_nave`, `confessional`, `apartment_room`), `run_recap` ("Ang Nangyari": the run just finished, written in the book, with no hint of other branches), `timeline_reveal`. `components/` holds `dialogue_box`, `game_menu`, `objectives_panel`. In a place the HUD is: gear, terminal, place name at the top left; the old open book (memories) and the blue clipboard (objectives) at the top right, opening `scripts/journal_modal.gd`. The objectives list itself stays off screen |
-| `scripts/` | `location.gd` is the base of every playable place (objectives route, conversations, hints). `alaala.gd` is the memory system: lines, cutscene steps and choice options with `needs` / `needs_not` / `if_flag` / `unless_flag` show only when allowed, Alaala choices get a ✦, and a `choices` entry can sit inside any lines. Each story has its own subclass: `tokhang.gd`, `church_nave.gd`/`confessional.gd` (with `kumpisal_story.gd`), `padala.gd` |
+| `scripts/` | `location.gd` is the base of every playable place (objectives route, conversations, hints). `alaala.gd` is the memory system: lines, cutscene steps and choice options with `needs` / `needs_not` / `if_flag` / `unless_flag` show only when allowed, Alaala choices get a ✦, and a `choices` entry can sit inside any lines. Each story has its own subclass: `tokhang.gd`, `church_nave.gd`/`confessional.gd` (with `kumpisal_story.gd`), `padala.gd`. `stage_life.gd` is the 2.5D staging every place gets: a slow drifting camera with depth, breathing people (and portraits), and living light (`shaders/stage_light.gdshader`: flickering candles, dust, steam, cloud shadows; positions per place in `StageLife.LIGHTS`) |
 | `story/*.json` | All story text, conversations and choices. `timelines.json` is the timelines chart: cards, sections and realities. `alaala.json` lists the Alaala (memories) and the endings that give them; `prologue.json` is the confession that opens every run |
 | `docs/STORY_BIBLE.md` | The design (the Alaala mechanic, rules R1-R8), the hidden truth, and every line of the script. It wins over the story files when they disagree |
 | `assets/` | Art (see `assets/README.md`), `music/`, `sounds/`, `fonts/Lora.ttf` (and DejaVu Sans Mono for the developer tools), `videos/main_screen.ogv` |
 | `tools/` | `next_version.sh`, `compose_music.py`, `compose_sounds.py`, `draw_props.py`, `draw_placeholders.py`, `cloud_setup.sh`. Has a `.gdignore`, so Godot skips it |
 | `tests/smoke_test.gd` | Headless smoke test |
+| `tests/playthrough.gd` | Plays a fresh save through 12 runs that reach every ending, the true ending second (about a minute). Set `PLAYTHROUGH_TRANSCRIPT=<file>` to write out every line and choice. Run it after any story or scene change |
 
 ## Conventions
 

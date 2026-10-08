@@ -92,7 +92,7 @@ func _show_content_warning() -> void:
 	button.custom_minimum_size = Vector2(300, 60)
 	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	column.add_child(button)
-	create_tween().tween_property(shade, "modulate:a", 1.0, WARNING_FADE_SECONDS)
+	create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT).tween_property(shade, "modulate:a", 1.0, WARNING_FADE_SECONDS)
 	button.pressed.connect(func() -> void:
 		button.disabled = true
 		Settings.content_warning_seen = true

@@ -142,6 +142,9 @@ func _ready() -> void:
 	add_child(_portrait_companion)
 	# Behind the first person on the right.
 	move_child(_portrait_companion, _portrait_right.get_index())
+	# The people beside the box breathe, like the people in the place (see StageLife).
+	for portrait in [_portrait_left, _portrait_right, _portrait_companion]:
+		StageLife.breathe(portrait)
 	_fit_panel()
 	resized.connect(_fit_panel)
 	var box_style := StyleBoxEmpty.new()
@@ -317,7 +320,7 @@ func choose(options: Array) -> int:
 		_portrait_right.visible = false
 		_portrait_companion.visible = false
 		show()
-	create_tween().tween_property(_choices, "modulate:a", 1.0, CHOICE_FADE_SECONDS)
+	create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT).tween_property(_choices, "modulate:a", 1.0, CHOICE_FADE_SECONDS)
 	# Each choice fades in a moment after the one above it.
 	var buttons := _choices.get_children().filter(func(child: Node) -> bool: return child is Button)
 	for index in buttons.size():
@@ -440,6 +443,8 @@ func _place_portrait(portrait: TextureRect, picture: Texture2D, on_left: bool, _
 	var x := _panel.offset_left + PORTRAIT_INSET if on_left else size.x + _panel.offset_right - PORTRAIT_INSET - drawn.x
 	portrait.position = Vector2(x, size.y - drawn.y)
 	portrait.size = drawn
+	# Breathes from the bottom of the screen, where the body is cut off.
+	portrait.pivot_offset = Vector2(drawn.x / 2.0, drawn.y)
 	return drawn.x
 
 

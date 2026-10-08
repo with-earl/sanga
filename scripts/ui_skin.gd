@@ -24,6 +24,27 @@ const BUTTON_TEXT := Color(1.0, 0.953, 0.839, 1)
 const BUTTON_OUTLINE := Color(0.165, 0.086, 0.031, 1)
 ## Pressed text and icons dim a little, so a tap is felt.
 const PRESSED_TEXT := Color(0.74, 0.70, 0.62, 1)
+## A pressed button sinks to this size at once, and springs back with a small overshoot when let
+## go, so every tap feels like pressing something real.
+const PRESS_SCALE := 0.95
+const PRESS_IN_SECONDS := 0.06
+const PRESS_OUT_SECONDS := 0.22
+
+
+## Makes a button sink a little while held and spring back when let go. RetroText gives every
+## button this (the developer tools keep their own plain look).
+static func add_press_bounce(button: BaseButton) -> void:
+	if button.has_meta(&"press_bounce"):
+		return
+	button.set_meta(&"press_bounce", true)
+	var press := func(down: bool) -> void:
+		# The middle of the button, wherever its size is now.
+		button.pivot_offset = button.size / 2.0
+		var tween := button.create_tween().set_ease(Tween.EASE_OUT)
+		tween.set_trans(Tween.TRANS_SINE if down else Tween.TRANS_BACK)
+		tween.tween_property(button, "scale", Vector2.ONE * (PRESS_SCALE if down else 1.0), PRESS_IN_SECONDS if down else PRESS_OUT_SECONDS)
+	button.button_down.connect(press.bind(true))
+	button.button_up.connect(press.bind(false))
 
 
 ## Gives a button the shared look: a soft 90s window with cream text and a dark outline.
@@ -74,7 +95,7 @@ static func _add_cursor(button: Button) -> void:
 	cursor.offset_top = -h / 2.0
 	cursor.offset_bottom = h / 2.0
 	var show_cursor := func(on: bool) -> void:
-		cursor.create_tween().tween_property(cursor, "modulate:a", 1.0 if on else 0.0, CURSOR_FADE_SECONDS)
+		cursor.create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT).tween_property(cursor, "modulate:a", 1.0 if on else 0.0, CURSOR_FADE_SECONDS)
 	button.button_down.connect(show_cursor.bind(true))
 	button.button_up.connect(show_cursor.bind(false))
 	button.mouse_entered.connect(show_cursor.bind(true))
