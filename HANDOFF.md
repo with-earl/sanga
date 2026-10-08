@@ -171,8 +171,9 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 - **Main screen and saves GUI (branch claude/menu-polish):** the menu words are plain text centred
   under the logo, gold when pressed; Continue and New Game open `scripts/save_slots.gd`, a
-  left-aligned list of rows (4:3 picture of the place the save stopped in, details beside it,
-  Delete per row, replace/delete questions as small windows); the "Tap outside to close" note now
+  left-aligned list of rows (4:3 picture of the place the save stopped in, details beside it),
+  tap a row to select, Load and Delete buttons at the right bottom-aligned with Back, each with a
+  confirmation window; empty slots are a grey void; the "Tap outside to close" note now
   sits right under the open modal (settings, book, clipboard, dev tools, the questions).
 
 - **First-run spine (branch claude/first-run-spine, stacked on calm/text menu):** Tokhang's errand now

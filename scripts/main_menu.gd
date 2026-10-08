@@ -92,6 +92,8 @@ func _show_quit_confirm(asking: bool) -> void:
 ## Continue and New Game both open the list of saves (see SaveSlots). Continue's list opens the
 ## slot that is chosen; New Game's starts a new game in it.
 func _open_slots(mode: SaveSlots.Mode) -> void:
+	# The list covers the screen, so the main words step aside rather than show through it.
+	_menu.visible = false
 	_slots = SaveSlots.new()
 	add_child(_slots)
 	_slots.open(mode)
@@ -110,6 +112,7 @@ func _slot_picked(slot: int, mode: SaveSlots.Mode) -> void:
 
 func _slots_closed() -> void:
 	_slots = null
+	_menu.visible = true
 	_continue_button.visible = GameState.latest_slot() >= 0
 
 
