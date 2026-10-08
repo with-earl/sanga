@@ -79,6 +79,14 @@ const NEXT_CURSOR_MARGIN := Vector2(26.0, 20.0)
 const NEXT_CURSOR_BOB := 4.0
 const NEXT_CURSOR_BOB_SECONDS := 0.5
 const RETRO_TEXT_SHADER := preload("res://shaders/retro_text.gdshader")
+## The fast-forward tab on the box's top edge, shown while the line on screen was read in an
+## earlier run. It races through lines read before and stops by itself at the first new line or
+## choice, so skipping can never hide something a memory added.
+const SKIP_TEXT := "Skip ▸▸"
+const SKIP_STEP_SECONDS := 0.1
+const SKIP_INSET := 28.0
+## Shown after the speaker's name on a line that a memory (Alaala) added to the story.
+const MEMORY_MARK := "  ✦"
 const LISTENER_BRIGHTNESS := 0.55
 const PORTRAIT_FADE_SECONDS := 0.15
 ## When two people stand together on the right (such as Ben and Gwen), the first stands in front
@@ -123,6 +131,9 @@ var _keep_open := false
 var _choosing := false
 var _choices := VBoxContainer.new()
 var _choice_hint := Label.new()
+var _skip := PanelContainer.new()
+var _skip_label := Label.new()
+var _skipping := false
 ## Extra room kept free at each edge for a phone's notch or rounded corners (left, top, right,
 ## bottom), set by the location.
 var _insets := Vector4.ZERO
@@ -156,6 +167,7 @@ func _ready() -> void:
 	SoftWindow.behind(_panel)
 	_panel.gui_input.connect(_on_panel_gui_input)
 	_build_plate()
+	_build_skip()
 	_build_next_cursor()
 	_choices.add_theme_constant_override("separation", int(CHOICE_GAP))
 	_choices.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -200,6 +212,54 @@ func _build_plate() -> void:
 	add_child(_plate)
 	_plate.resized.connect(_place_plate)
 	_panel.item_rect_changed.connect(_place_plate)
+
+
+## The "Skip ▸▸" tab: a small window like the name plate, on the right of the box's top edge.
+func _build_skip() -> void:
+	var style := StyleBoxEmpty.new()
+	style.content_margin_left = PLATE_PADDING.x
+	style.content_margin_right = PLATE_PADDING.x
+	style.content_margin_top = PLATE_PADDING.y
+	style.content_margin_bottom = PLATE_PADDING.y
+	_skip.add_theme_stylebox_override("panel", style)
+	_skip.mouse_filter = Control.MOUSE_FILTER_STOP
+	SoftWindow.behind(_skip, SoftWindow.Look.PLATE)
+	_skip_label.text = SKIP_TEXT
+	_skip_label.add_theme_font_size_override("font_size", _speaker.get_theme_font_size("font_size"))
+	_skip_label.add_theme_color_override("font_color", _speaker.get_theme_color("font_color"))
+	_skip_label.add_theme_color_override("font_outline_color", _speaker.get_theme_color("font_outline_color"))
+	_skip_label.add_theme_constant_override("outline_size", _speaker.get_theme_constant("outline_size"))
+	_skip.add_child(_skip_label)
+	_skip.visible = false
+	_skip.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			accept_event()
+			_set_skipping(not _skipping))
+	add_child(_skip)
+	_skip.resized.connect(_place_skip)
+	_panel.item_rect_changed.connect(_place_skip)
+
+
+func _place_skip() -> void:
+	_skip.reset_size()
+	_skip.position = _panel.position + Vector2(_panel.size.x - _skip.size.x - SKIP_INSET, -_skip.size.y * PLATE_RISE)
+
+
+## Starts or stops racing through lines read before; the tab dims while it races.
+func _set_skipping(on: bool) -> void:
+	_skipping = on
+	_skip.modulate.a = 0.6 if on else 1.0
+	if on and not _choosing:
+		_skip_ahead()
+
+
+func _skip_ahead() -> void:
+	if not _skipping or _choosing or not visible:
+		return
+	_finish_typing()
+	await get_tree().create_timer(SKIP_STEP_SECONDS).timeout
+	if _skipping and not _choosing and visible:
+		advance()
 
 
 func _place_plate() -> void:
@@ -289,6 +349,8 @@ func has_more_lines() -> bool:
 
 func close() -> void:
 	if visible:
+		_set_skipping(false)
+		_skip.visible = false
 		_pending_lines.clear()
 		_keep_open = false
 		_clear_choices()
@@ -300,6 +362,8 @@ func close() -> void:
 ## Shows the options above the box and waits for one to be tapped. Returns its index.
 func choose(options: Array) -> int:
 	_clear_choices()
+	_set_skipping(false)
+	_skip.visible = false
 	_choosing = true
 	_finish_typing()
 	_show_next_cursor(false)
@@ -394,9 +458,20 @@ func _show_next_line(default_speaker: String) -> void:
 		offscreen = bool(line.get("offscreen", false))
 	else:
 		text = str(line)
-	_speaker.text = who
+	_speaker.text = who + (MEMORY_MARK if line is Dictionary and (line as Dictionary).has("needs") else "")
 	_plate.visible = who != ""
+	var seen_before := GameState.see_line(who, text)
+	if line is Dictionary and (line as Dictionary).get("echo", false):
+		# An earlier choice of this run coming back: the recap shows it as a reply to that choice.
+		GameState.log_moment({"echo": text, "speaker": who, "flag": str(line.get("if_flag", ""))})
+	_skip.visible = seen_before
 	_type_out(text)
+	if _skipping:
+		if seen_before:
+			_skip_ahead()
+		else:
+			# Something new: stop here so it is read.
+			_set_skipping(false)
 	if offscreen:
 		_highlight("")
 		return

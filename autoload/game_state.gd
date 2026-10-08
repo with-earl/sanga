@@ -34,8 +34,13 @@ var realities: Array = []
 ## The Alaala (memories) this save holds, by id (see Alaala). Unlike flags, they are never reset
 ## between runs: they are what the player carries from one life to the next.
 var alaala: Array = []
+## Every line of dialogue this save has already shown, so a replay can skip what was read before
+## and stop at anything new (see DialogueBox). Kept across runs, like the memories.
+var seen_lines: Dictionary = {}
 ## What happened in the run being played, in order, for the recap at its end ("Ang Nangyari"):
-## {"story": title}, {"choice": words}, {"ending": title, "line": words}, {"alaala": id}.
+## {"story": title}, {"choice": words}, {"ending": title, "line": words}, {"alaala": id}, and
+## {"echo": words, "speaker": name, "flag": flag} when an earlier choice comes back later in the
+## run, and {"outcome": id} when a story ends. A choice that sets a flag carries it too.
 var run_log: Array = []
 ## Seconds played in this save.
 var play_seconds := 0.0
@@ -84,6 +89,7 @@ func _reset() -> void:
 	run_outcomes = []
 	realities = []
 	alaala = []
+	seen_lines = {}
 	run_log = []
 	play_seconds = 0.0
 	history = []
@@ -132,6 +138,19 @@ func record_decision(decision_id: String, choice: String) -> void:
 	state_changed.emit()
 
 
+## A short name for a line of dialogue, the same every time the line is shown.
+static func line_key(speaker: String, text: String) -> String:
+	return str(("%s|%s" % [speaker, text]).hash())
+
+
+## Remembers that a line was shown, and says whether it had been shown before.
+func see_line(speaker: String, text: String) -> bool:
+	var key := line_key(speaker, text)
+	var before := seen_lines.has(key)
+	seen_lines[key] = true
+	return before
+
+
 ## Adds a moment to this run's recap.
 func log_moment(entry: Dictionary) -> void:
 	if timeline != "":
@@ -141,6 +160,7 @@ func log_moment(entry: Dictionary) -> void:
 func record_ending(ending_id: String) -> void:
 	if ending_id == "":
 		return
+	log_moment({"outcome": ending_id})
 	run_outcomes.append(ending_id)
 	if ending_id not in endings:
 		endings.append(ending_id)
@@ -207,6 +227,7 @@ func save_to_slot(slot: int) -> bool:
 		"run_outcomes": run_outcomes,
 		"realities": realities,
 		"alaala": alaala,
+		"seen_lines": seen_lines,
 		"run_log": run_log,
 		"play_seconds": play_seconds,
 		"history": history,
@@ -239,6 +260,7 @@ func load_slot(slot: int) -> bool:
 	run_outcomes = data["run_outcomes"]
 	realities = data["realities"]
 	alaala = data["alaala"]
+	seen_lines = data["seen_lines"]
 	run_log = data["run_log"]
 	play_seconds = data["play_seconds"]
 	history = data["history"]
@@ -288,6 +310,8 @@ func read_slot(slot: int) -> Dictionary:
 	data["runs_finished"] = int(data.get("runs_finished", 0))
 	data["play_seconds"] = float(data.get("play_seconds", 0.0))
 	# Saves made before realities were recorded simply have none yet.
+	if not data.get("seen_lines") is Dictionary:
+		data["seen_lines"] = {}
 	for list_key in ["run_outcomes", "realities", "alaala", "run_log", "history"]:
 		if not data.get(list_key) is Array:
 			data[list_key] = []

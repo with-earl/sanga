@@ -5,6 +5,7 @@ kumpisal_eli_penitent.png
 kumpisal_eli_sacrifice.png
 kumpisal_gunshot.png
 padala_beaten.png
+padala_collar.png
 padala_dressing.png
 padala_eli_attacks.png
 padala_eli_unlocks.png

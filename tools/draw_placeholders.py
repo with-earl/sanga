@@ -21,7 +21,8 @@ import numpy as np
 from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import street_scene  # noqa: E402  (beside this file)
+import object_scenes  # noqa: E402  (beside this file)
+import street_scene  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CUTSCENES = ROOT / "assets" / "cutscenes"
@@ -251,16 +252,6 @@ def shot_market_down(who: str) -> Image.Image:
     return grain(vignette(grade(c, 0.6, 0.35, (200, 70, 60), 0.35), 0.75, (40, 0, 0)))
 
 
-def tokhang_tv_news() -> Image.Image:
-    news = police_lights(night(background("public_market", crop=(0.1, 0.1, 0.8, 0.8))), 0.45)
-    bar = ImageDraw.Draw(news)
-    bar.rectangle((0, int(H * 0.8), W, int(H * 0.9)), fill=(150, 20, 24, 255))
-    bar.rectangle((0, int(H * 0.9), W, H), fill=(18, 18, 30, 255))
-    room = grade(background("apartment_room", blur=8), 0.35, 0.6)
-    c = frame_around(news, (0.24, 0.16, 0.76, 0.66), room)
-    return vignette(glow(c, (0.5, 0.41), (120, 150, 220), 0.25, 0.6), 0.6)
-
-
 def tokhang_flashback_ben() -> Image.Image:
     c = background("church_nave", crop=(0.2, 0.08, 0.6, 0.6), blur=2)
     place(c, person("ben", True), 0.36, 0.98, 0.5)
@@ -435,17 +426,6 @@ def padala_run_shot() -> Image.Image:
     return grain(vignette(night(c), 0.8, (30, 0, 0)))
 
 
-def padala_jeep() -> Image.Image:
-    road = night(background("public_market", blur=16))
-    for x in (0.2, 0.45, 0.7, 0.9):
-        road = glow(road, (x, 0.5), (255, 200, 120), 0.18, 0.12)
-    road = motion(road, 40)
-    wall = Image.new("RGBA", SIZE, (30, 30, 38, 255))
-    c = frame_around(road, (0.05, 0.08, 0.95, 0.6), wall, border=(58, 60, 66), width=16, radius=14)
-    place(c, tinted(bust("mercy_praying"), (150, 160, 200), 0.35), 0.42, 1.0, 0.62, shadow=False)
-    return vignette(c, 0.6)
-
-
 def padala_police_laugh() -> Image.Image:
     c = night(background("public_market", blur=12))
     c = glow(c, (0.3, 0.1), (230, 235, 255), 0.3, 0.45)
@@ -497,6 +477,61 @@ def padala_eli_unlocks() -> Image.Image:
     return vignette(grade(c, 0.75, 0.75, (230, 220, 210), 0.25), 0.55)
 
 
+def clerical_shirt(width: int) -> Image.Image:
+    """A priest's black short-sleeved shirt on a wire hanger, drawn in code: soft folds, a darker
+    side away from the light, and the white collar tab at the throat."""
+    k = 4
+    w, h = width * k, int(width * 1.25) * k
+    shirt = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(shirt)
+    cx = w / 2
+    # The hanger: a hook and a thin bar the shoulders rest on.
+    d.arc((cx - w * 0.06, 0, cx + w * 0.06, h * 0.1), 180, 20, fill=(150, 150, 156, 255), width=3 * k)
+    d.line((cx, h * 0.09, cx - w * 0.36, h * 0.2), fill=(150, 150, 156, 255), width=3 * k)
+    d.line((cx, h * 0.09, cx + w * 0.36, h * 0.2), fill=(150, 150, 156, 255), width=3 * k)
+    # The shirt: shoulders, short sleeves hanging down, and the body narrowing a little.
+    body = [(cx - w * 0.2, h * 0.12), (cx - w * 0.38, h * 0.19), (cx - w * 0.47, h * 0.4), (cx - w * 0.36, h * 0.43),
+            (cx - w * 0.33, h * 0.33), (cx - w * 0.34, h * 0.98), (cx + w * 0.34, h * 0.98), (cx + w * 0.33, h * 0.33),
+            (cx + w * 0.36, h * 0.43), (cx + w * 0.47, h * 0.4), (cx + w * 0.38, h * 0.19), (cx + w * 0.2, h * 0.12)]
+    d.polygon(body, fill=(30, 30, 36, 255))
+    # Light from the room on the left side, the right side falling into shadow.
+    shade = Image.new("L", (w, h), 0)
+    sd = ImageDraw.Draw(shade)
+    for i in range(40):
+        x = cx - w * 0.36 + i * w * 0.018
+        sd.line((x, 0, x, h), fill=int(150 * max(0.0, 1 - i / 22)), width=int(w * 0.02) + 1)
+    light = Image.new("RGBA", (w, h), (120, 118, 130, 255))
+    mask = Image.composite(shade, Image.new("L", (w, h), 0), shirt.getchannel("A"))
+    shirt.paste(light, (0, 0), mask.filter(ImageFilter.GaussianBlur(6 * k)))
+    # Soft folds down the body.
+    for fx, top in ((-0.16, 0.45), (0.06, 0.5), (0.2, 0.42)):
+        d.line((cx + w * fx, h * top, cx + w * (fx + 0.02), h * 0.96), fill=(18, 18, 22, 255), width=2 * k)
+    # The button placket, and the collar band with its white tab.
+    d.line((cx, h * 0.2, cx, h * 0.97), fill=(18, 18, 22, 255), width=2 * k)
+    d.polygon([(cx - w * 0.2, h * 0.12), (cx, h * 0.2), (cx + w * 0.2, h * 0.12), (cx + w * 0.14, h * 0.1), (cx, h * 0.15), (cx - w * 0.14, h * 0.1)], fill=(20, 20, 26, 255))
+    d.rectangle((cx - w * 0.045, h * 0.135, cx + w * 0.045, h * 0.185), fill=(244, 244, 238, 255))
+    shirt = shirt.filter(ImageFilter.GaussianBlur(k * 0.6))
+    return shirt.resize((width, h // k), Image.LANCZOS)
+
+
+def padala_collar() -> Image.Image:
+    """Mercy's last look back: on the bathroom door hangs a priest's shirt."""
+    c = background("apartment_room_bath", crop=(0.58, 0.08, 0.42, 0.42))
+    c = grade(c, 0.8, 0.85, (230, 225, 235), 0.2)
+    shirt = clerical_shirt(300)
+    x, top, tall = 0.64, 0.16, 0.56
+    # A nail in the wall beside the bathroom door, and the shirt's soft shadow on the wall.
+    nail = ImageDraw.Draw(c)
+    nx, ny = x * W, top * H
+    nail.ellipse((nx - 7, ny - 7, nx + 7, ny + 7), fill=(60, 52, 46, 255))
+    shadow = silhouette(scaled(shirt, tall), (10, 20, 16)).filter(ImageFilter.GaussianBlur(14))
+    shadow.putalpha(shadow.getchannel("A").point(lambda a: int(a * 0.45)))
+    c.alpha_composite(shadow, (int(nx - shadow.width / 2 + 26), int(ny + 18)))
+    place(c, shirt, x, top + tall, tall, shadow=False)
+    c = glow(c, (0.62, 0.25), (255, 250, 240), 0.15, 0.3)
+    return vignette(c, 0.6)
+
+
 def prologue_booth() -> Image.Image:
     c = background("confessional", crop=(0.05, 0.05, 0.55, 0.6))
     c = grade(c, 0.45, 0.55)
@@ -526,23 +561,8 @@ def true_morning_mercy() -> Image.Image:
     return vignette(c, 0.45)
 
 
-def true_morning_batista() -> Image.Image:
-    c = background("church_nave", crop=(0.55, 0.0, 0.45, 0.6), blur=6)
-    place(c, person("batista_sad", True), 0.45, 1.12, 1.0, shadow=False)
-    return vignette(morning(c), 0.45)
-
-
-def true_visiting() -> Image.Image:
-    c = grade(background("confessional", blur=4), 0.6, 0.6)
-    place(c, person("eli", True), 0.5, 1.45, 1.25, shadow=False)
-    c = glow(c, (0.5, 0.2), (200, 210, 230), 0.2, 0.5)
-    glass = Image.new("RGBA", SIZE, (180, 200, 220, 40))
-    c.alpha_composite(glass)
-    return vignette(grille(c, spacing=60, width=6, color=(40, 40, 46, 200)), 0.55)
-
-
 SHOTS = {
-    "tokhang_tv_news.png": tokhang_tv_news,
+    "tokhang_tv_news.png": lambda: object_scenes.tokhang_tv_news(SIZE),
     "tokhang_peter_holding.png": lambda: shot_market_holding("peter"),
     "tokhang_peter_shot.png": lambda: shot_market_down("peter"),
     "tokhang_gwen_holding.png": lambda: shot_market_holding("gwen"),
@@ -574,7 +594,7 @@ SHOTS = {
     "padala_still_manila.png": padala_still_manila,
     "padala_run.png": padala_run,
     "padala_run_shot.png": padala_run_shot,
-    "padala_jeep.png": padala_jeep,
+    "padala_jeep.png": lambda: object_scenes.padala_jeep(SIZE, person("mercy", True)),
     "padala_police_laugh.png": padala_police_laugh,
     "padala_peter_arrives.png": padala_peter_arrives,
     "padala_peter_fights.png": padala_peter_fights,
@@ -583,11 +603,12 @@ SHOTS = {
     "padala_hide_dawn.png": padala_hide_dawn,
     "padala_eli_unlocks.png": padala_eli_unlocks,
     "prologue_booth.png": prologue_booth,
+    "padala_collar.png": padala_collar,
     "true_morning_family.png": true_morning_family,
     "true_morning_kulas.png": true_morning_kulas,
     "true_morning_mercy.png": true_morning_mercy,
-    "true_morning_batista.png": true_morning_batista,
-    "true_visiting.png": true_visiting,
+    "true_morning_batista.png": lambda: object_scenes.true_morning_batista(SIZE),
+    "true_visiting.png": lambda: object_scenes.true_visiting(SIZE, object_scenes.in_jail_orange(person("eli"), 112, (150, 115, 195, 150))),
 }
 
 

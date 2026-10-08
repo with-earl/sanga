@@ -34,8 +34,6 @@ var last_run_log: Array = []
 ## The timeline the last finished run was on, so its recap knows where to go next.
 var last_timeline := ""
 
-## Story order shown to the player when choosing where to begin.
-const STORY_ORDER := ["tokhang", "kumpisal", "padala"]
 const RUN_FLAG_PREFIX := "run_"
 ## The voice in the dark confessional that opens a run (see docs/STORY_BIBLE.md). The main
 ## timeline has none: it starts cold in the market, with no hint of what comes after.
@@ -59,8 +57,41 @@ func story_title(story: String) -> String:
 	return STORIES.get(story, {}).get("title", story.capitalize())
 
 
-## Starts the timeline that begins with `story` and plays its title card.
-func begin_with(story: String) -> void:
+## The flag the priest's answer in the prologue sets: the story to begin with.
+const START_FLAG := "prologue_start"
+
+
+## Starts a run after the first the way the story frames it: the voice in the dark confessional
+## confesses and asks where to begin, the player answers as the priest, and that answer picks the
+## starting story, and so the timeline (see docs/STORY_BIBLE.md, section 6).
+func begin_from_confession() -> void:
+	var prologue := _prologue()
+	var image := str(prologue.get("image", ""))
+	GameState.clear_flags(START_FLAG)
+	var lines: Array = (prologue.get("lines", []) as Array) + (prologue.get("ask", []) as Array)
+	await Cutscene.play([{"image": image, "lines": lines}])
+	var story := str(GameState.get_flag(START_FLAG, "tokhang"))
+	GameState.clear_flags(START_FLAG)
+	var last: Variant = prologue.get("last_line", {}).get(story, null)
+	if last != null:
+		await Cutscene.play([{"image": image, "lines": [last]}])
+	begin_with(story, false)
+
+
+## The voice's line after any ending but the true one, so the player knows the confession is not
+## over, without being told how much is left.
+func more_to_tell() -> Dictionary:
+	return _prologue().get("more", {})
+
+
+func _prologue() -> Dictionary:
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(PROLOGUE_FILE))
+	return parsed if parsed is Dictionary else {}
+
+
+## Starts the timeline that begins with `story` and plays its title card. With `prologue`, a run
+## that does not begin in the market first plays the confession that leads into it.
+func begin_with(story: String, prologue := true) -> void:
 	var timeline: String = TIMELINE_STARTING_WITH.get(story, "main")
 	GameState.timeline = timeline
 	GameState.chapter = 0
@@ -68,7 +99,7 @@ func begin_with(story: String) -> void:
 	GameState.clear_flags(RUN_FLAG_PREFIX)
 	GameState.run_outcomes = []
 	GameState.run_log = []
-	if timeline != "main":
+	if timeline != "main" and prologue:
 		await Cutscene.play(_prologue_for(story))
 	_enter_chapter([])
 
@@ -76,10 +107,9 @@ func begin_with(story: String) -> void:
 ## The prologue for a run that begins with `story`: the same confession each time, ending on where
 ## the voice decides to start.
 func _prologue_for(story: String) -> Array:
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(PROLOGUE_FILE))
-	if typeof(parsed) != TYPE_DICTIONARY:
+	var prologue := _prologue()
+	if prologue.is_empty():
 		return []
-	var prologue: Dictionary = parsed
 	var lines: Array = (prologue.get("lines", []) as Array).duplicate()
 	var last: Variant = prologue.get("last_line", {}).get(story, null)
 	if last != null:
@@ -109,8 +139,8 @@ func finish_story(lead_in: Array = [], outcome_id := "") -> void:
 	_enter_chapter(lead_in)
 
 
-## Ends the run: records its ending and the reality it made on this save, then closes the run.
-## The main timeline closes by showing when each story happens; the other timelines close with
+## Ends the run: records its ending and the reality it made on this save, then closes the run
+## with its recap, which puts the run in time order (see RunRecap); the other timelines then show
 ## the timeline diagram of every reality this save has made. `title` and `line` are kept for a
 ## plain ending card, which no timeline uses now.
 func end_run(ending_id: String, title: String, line: String, lead_in: Array = []) -> void:

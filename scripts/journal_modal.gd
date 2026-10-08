@@ -110,6 +110,11 @@ func open_memories() -> void:
 		var memory := _ink(str(item.get("memory", "")), SMALL_SIZE, INK)
 		memory.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		entry.add_child(memory)
+		# Where the memory matters, faintly, so it can be followed without being spelled out.
+		if str(item.get("hint", "")) != "":
+			var hint := _ink("↳ " + str(item["hint"]), SMALL_SIZE, FADED_INK)
+			hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			entry.add_child(hint)
 		(left if index < LEFT_PAGE_MEMORIES else right).add_child(entry)
 	_show()
 

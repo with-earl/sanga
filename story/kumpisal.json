@@ -63,7 +63,8 @@
 								"speaker": "Mercy",
 								"text": "Salamat po, Father. Kahit ano pong trabaho, kakayanin ko."
 							}
-						]
+						],
+						"flag": "run_echo_mercy_reassured"
 					},
 					{
 						"text": "Ano'ng maitutulong ko, anak?",
@@ -76,7 +77,8 @@
 								"speaker": "Father Eli",
 								"text": "Padala. Naiintindihan ko."
 							}
-						]
+						],
+						"flag": "run_echo_mercy_asked"
 					}
 				]
 			},
@@ -115,7 +117,8 @@
 								"speaker": "Batista",
 								"text": "Ako pa. Ikaw ang mag-ingat, pare. Ikaw ang maraming alam."
 							}
-						]
+						],
+						"flag": "run_echo_batista_blessed"
 					},
 					{
 						"text": "Igalang mo ang bahay ng Diyos.",
@@ -124,7 +127,8 @@
 								"speaker": "Batista",
 								"text": "Siyempre naman. Respeto. Sa labas lang."
 							}
-						]
+						],
+						"flag": "run_echo_batista_warned"
 					}
 				]
 			}
@@ -156,7 +160,8 @@
 									"speaker": "Gwen",
 									"text": "Ngayong gabi po... Sige po. Kakayanin ko."
 								}
-							]
+							],
+							"flag": "run_echo_gwen_tell"
 						},
 						{
 							"text": "Ipagdasal mo muna, anak.",
@@ -216,7 +221,8 @@
 									"speaker": "Batista",
 									"text": "Ipagdasal... Sige."
 								}
-							]
+							],
+							"flag": "run_echo_batista_pray"
 						},
 						{
 							"text": "Alam ng Diyos ang dahilan mo.",
@@ -229,7 +235,8 @@
 									"speaker": "Batista",
 									"text": "...Joke lang, pare."
 								}
-							]
+							],
+							"flag": "run_echo_batista_reason"
 						}
 					]
 				},
@@ -264,7 +271,8 @@
 									"speaker": "Gloria",
 									"text": "Gusto ko po, Father. Pero sino po'ng magpapakain sa'kin?"
 								}
-							]
+							],
+							"flag": "run_echo_gloria_repent"
 						},
 						{
 							"text": "Ang Diyos lang ang huhusga sa'yo.",
@@ -273,7 +281,8 @@
 									"speaker": "Gloria",
 									"text": "Salamat po, Father. Gumaan po ang loob ko."
 								}
-							]
+							],
+							"flag": "run_echo_gloria_judged"
 						}
 					]
 				},
@@ -547,6 +556,10 @@
 						{
 							"speaker": "Father Eli",
 							"text": "At lahat ng sinasabi rito... dito lang."
+						},
+						{
+							"speaker": "Father Eli",
+							"text": "*Tumingin sa relo* Mamaya pa ang dating ng pinapadala ni Gloria."
 						}
 					]
 				}
@@ -591,6 +604,10 @@
 					"lines": [
 						{
 							"speaker": "Father Eli",
+							"text": "*May kalmot sa kamay* Pasensya na. Nahuli ako ng dating."
+						},
+						{
+							"speaker": "Father Eli",
 							"text": "Tuwing Sabado ng hapon, bukas ang kumpisalan."
 						},
 						{
@@ -610,6 +627,10 @@
 				{
 					"image": "res://assets/backgrounds/church_nave.png",
 					"lines": [
+						{
+							"speaker": "Father Eli",
+							"text": "*Hinuhugasan ang kamay sa agua bendita* ...Matagal bago natanggal."
+						},
 						{
 							"speaker": "Father Eli",
 							"text": "Tuwing Sabado ng hapon, bukas ang kumpisalan."

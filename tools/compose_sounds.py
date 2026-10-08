@@ -1,9 +1,10 @@
 """Makes SANGA's sound effects and writes them to assets/sounds/*.wav.
 
-There are only two, and both are quiet so they sit under the piano:
+There are only three, and all are quiet so they sit under the piano:
 
     click   a soft felt tap, for every button
     strike  a pencil stroke across paper with a faint chime, for a finished objective
+    memory  a breath drawn in, then three soft bells, when a choice only a memory allows is taken
 
 Like the music, they are synthesised here, so there is nothing to license.
 
@@ -70,7 +71,25 @@ def strike():
     return normalise(sound, -12)
 
 
-SOUNDS = {"click": click, "strike": strike}
+def memory():
+    """A breath drawn in (soft noise swelling), then three bells rising, ringing on together, like
+    something remembered."""
+    rng = np.random.default_rng(3)
+    t = times(2.6)
+    swell = band(rng.normal(0, 1, len(t)), 600, 4000) * np.clip(t / 0.45, 0, 1) ** 2 * np.clip((0.55 - t) / 0.1, 0, 1)
+    bells = np.zeros_like(t)
+    for start, freq in ((0.5, 659.25), (0.62, 830.61), (0.74, 987.77)):
+        s = int(start * SR)
+        bt = t[: len(t) - s]
+        for ratio, amp, decay in ((1.0, 1.0, 1.6), (2.0, 0.25, 3.0), (2.76, 0.1, 5.0)):
+            bells[s:] += amp * np.sin(2 * np.pi * freq * ratio * bt) * np.exp(-decay * bt) * np.clip(bt / 0.004, 0, 1)
+    shimmer = 1 + 0.06 * np.sin(2 * np.pi * 5.5 * t)
+    sound = lowpass(swell * 0.25 + bells * 0.5 * shimmer, 5000)
+    sound[-int(0.2 * SR):] *= np.linspace(1, 0, int(0.2 * SR))
+    return normalise(sound, -11)
+
+
+SOUNDS = {"click": click, "strike": strike, "memory": memory}
 
 
 def main():

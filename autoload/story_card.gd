@@ -19,14 +19,6 @@ const FADE_OUT_SECONDS := 0.5
 const TITLE_FADE_OUT_SECONDS := 0.25
 ## How long an ending card stays up before the main screen.
 const ENDING_HOLD_SECONDS := 3.5
-## The main timeline's closing screen: the three titles, then when each one happens.
-const TIME_ORDER := [["Tokhang", "Future"], ["Kumpisal", "Past"], ["Padala", "Present"]]
-const TIME_ORDER_COLUMN_WIDTH := 350.0
-const TIME_ORDER_STEP_SECONDS := 0.7
-const TIME_ORDER_PAUSE_SECONDS := 1.0
-const TIME_ORDER_RISE := 12.0
-const TIME_WORD_COLOR := Color(1.0, 0.953, 0.839, 0.62)
-
 ## How long the title takes to fade out into the first montage picture.
 const TITLE_REVEAL_SECONDS := 0.6
 
@@ -67,9 +59,6 @@ var _black := ColorRect.new()
 var _title := Label.new()
 var _hint: TapHint
 var _ending_line := Label.new()
-var _time_order := HBoxContainer.new()
-var _waiting_for_tap := false
-signal _tapped
 var _running := false
 var _montage_active := false
 var _skip_enabled := false
@@ -133,7 +122,6 @@ func _ready() -> void:
 	_ending_line.modulate.a = 0.0
 	_black.add_child(_ending_line)
 	_black.gui_input.connect(_on_card_input)
-	_build_time_order()
 
 	# The hint sits above the black, so it stays readable between pictures.
 	var hint_holder := Control.new()
@@ -240,10 +228,6 @@ func _wait_or_skip(seconds: float) -> void:
 ## Counts a tap during the montage. Two taps skip it only if they are quick and close together.
 func _on_card_input(event: InputEvent) -> void:
 	var tap := event as InputEventMouseButton
-	if _waiting_for_tap and tap != null and tap.pressed and tap.button_index == MOUSE_BUTTON_LEFT:
-		_waiting_for_tap = false
-		_tapped.emit()
-		return
 	if not _skip_enabled or tap == null or not tap.pressed or tap.button_index != MOUSE_BUTTON_LEFT:
 		return
 	var now := Time.get_ticks_msec() / 1000.0
@@ -309,53 +293,6 @@ func show_ending(title: String, line: String, lead_in: Array = [], next_scene :=
 	_running = false
 
 
-## The main timeline's last screen. "Tokhang", "Kumpisal" and "Padala" appear one by one from
-## left to right; then, one by one, when each happens: Future, Past and Present. A tap goes back
-## to the main screen.
-func show_time_order(lead_in: Array = []) -> void:
-	if _running:
-		return
-	_running = true
-	MusicDirector.play_main()
-	_title.modulate.a = 0.0
-	_black.modulate.a = 0.0
-	visible = true
-	await _fade(_black, 1.0, FADE_TO_BLACK_SECONDS)
-	if not lead_in.is_empty():
-		await _play_montage(lead_in)
-	_time_order.visible = true
-	for column in _time_order.get_children():
-		for label in column.get_children():
-			(label as Control).modulate.a = 0.0
-	for column in _time_order.get_children():
-		await _fade(column.get_child(0), 1.0, TIME_ORDER_STEP_SECONDS)
-	await get_tree().create_timer(TIME_ORDER_PAUSE_SECONDS).timeout
-	for column in _time_order.get_children():
-		var word := column.get_child(1) as Control
-		var rest_y := word.position.y
-		word.position.y = rest_y + TIME_ORDER_RISE
-		var rise := create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-		rise.tween_property(word, "modulate:a", 1.0, TIME_ORDER_STEP_SECONDS)
-		rise.tween_property(word, "position:y", rest_y, TIME_ORDER_STEP_SECONDS)
-		await rise.finished
-	_hint.text = SKIP_HINT
-	_fade_hint(1.0, SKIP_HINT_FADE_IN_SECONDS, Tween.EASE_OUT)
-	_waiting_for_tap = true
-	await _tapped
-	_fade_hint(0.0, 0.3)
-	var out := create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	out.tween_property(_time_order, "modulate:a", 0.0, FADE_OUT_SECONDS)
-	await out.finished
-	_time_order.visible = false
-	_time_order.modulate.a = 1.0
-	SceneRouter.go_to("main_menu")
-	await get_tree().process_frame
-	await get_tree().process_frame
-	await _fade(_black, 0.0, FADE_OUT_SECONDS * 2.0)
-	visible = false
-	_running = false
-
-
 ## Fades to black, plays any pictures, then opens `scene_key` and fades the black away.
 func fade_to_scene(scene_key: String, lead_in: Array = []) -> void:
 	if _running:
@@ -373,35 +310,6 @@ func fade_to_scene(scene_key: String, lead_in: Array = []) -> void:
 	await _fade(_black, 0.0, FADE_OUT_SECONDS)
 	visible = false
 	_running = false
-
-
-func _build_time_order() -> void:
-	_time_order.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_time_order.grow_vertical = Control.GROW_DIRECTION_BOTH
-	_time_order.alignment = BoxContainer.ALIGNMENT_CENTER
-	_time_order.add_theme_constant_override("separation", 0)
-	_time_order.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_time_order.visible = false
-	for pair in TIME_ORDER:
-		var column := VBoxContainer.new()
-		column.custom_minimum_size.x = TIME_ORDER_COLUMN_WIDTH
-		column.add_theme_constant_override("separation", 14)
-		column.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var story := Label.new()
-		story.theme_type_variation = &"StoryTitle"
-		story.text = pair[0]
-		story.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		column.add_child(story)
-		var when := Label.new()
-		when.theme_type_variation = &"HudHeading"
-		when.text = pair[1]
-		when.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		when.add_theme_color_override("font_color", TIME_WORD_COLOR)
-		when.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0))
-		column.add_child(when)
-		_time_order.add_child(column)
-	_black.add_child(_time_order)
-	_time_order.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
 
 
 ## True while the card's black screen fully covers everything.

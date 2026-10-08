@@ -106,8 +106,41 @@ choice fits on one line. Stage directions inside a line are Tagalog, between ast
   run.
 - **R6.** No timers, no meters, no hidden stats, no stealth. The player cannot fail a choice.
 - **R7.** No new places, no new characters.
-- **R8.** An Alaala choice shows a faint **✦** before its text. Gaining an Alaala shows one
+- **R8.** An Alaala choice shows a faint **✦** before its text, and taking one plays a soft
+  remembered chime with a golden ring across the screen. Each Alaala in the memory book has a faint
+  hint of where it matters (for example *"Sa palengke, may iba pang laruan."*), never what it
+  changes. Gaining an Alaala shows one
   line on the end-of-run screen: **"Hindi mo na ito makakalimutan."** and the Alaala's name.
+- **R9. Echoes.** An ordinary choice can come back later in the same run as an **echo**: one
+  line, somewhere else, that answers what was said. Echoes flow forward in story time as well as
+  in play order (Kumpisal, the past, can echo in Padala and Tokhang; nothing echoes backwards), so
+  the starting point decides which words reach which story. An echo never changes an ending,
+  never adds a choice, and is quoted in the run's recap under the story it reached, marked ↳.
+
+### The end of a run: "Ang Nangyari", then "Ayusin ayon sa oras"
+
+Every run ends in the old book. First **Ang Nangyari**: the run as it was played (stories, the
+player's choices, echoes, endings, memories), closing with *"Ito ang nangyari. Hindi ito ang
+tanging maaaring mangyari."* Then the ink fades and the book writes the run again **in true time
+order**: *Kumpisal · Nakaraan*, *Padala · Kasalukuyan*, *Tokhang · Hinaharap*. Red threads draw
+themselves down the margins from each cause to its effect: a choice to its echo, a choice to the
+ending it led to, Mercy's call to the trade at the market. A thread is drawn only between two things
+the player saw in this run, and only forward in time, so it explains without revealing. (This
+replaces the old time-order card; the links are in `story/threads.json`.)
+
+### The echoes
+
+| Choice (Kumpisal) | Echo | Where it comes back |
+|---|---|---|
+| Mercy: *Huwag kang mag-alala, anak.* | **Mercy:** “Huwag kang mag-alala, anak.” 'Yan pa ang sabi niya sa'kin. | Padala opening (Main, Kumpisal timelines) |
+| Mercy: *Ano'ng maitutulong ko, anak?* | **Mercy:** Tinanong pa niya kung ano'ng maitutulong niya. Padala lang naman ang hiningi ko. | Padala opening |
+| Gloria: *Talikuran mo na ang kasalanan.* | **Mercy:** Umiyak si Tita bago umalis. Hindi ko alam kung bakit. | Padala opening |
+| Gloria: *Ang Diyos lang ang huhusga sa'yo.* | **Mercy:** Ni hindi man lang lumingon si Tita. | Padala opening |
+| Batista: *Ingatan ka nawa ng Diyos.* | **Batista:** Ingat daw ako, sabi mo kanina. Ikaw pala ang dapat mag-ingat. | Padala, Police Poster ending, at the door |
+| Batista: *Igalang mo ang bahay ng Diyos.* | **Batista:** Bahay ng Diyos, ha? *Tumingin sa paligid* Ito pala ang bahay mo, pare. | Padala, Police Poster ending |
+| Batista's confession: *Ipagdasal mo ang kanilang kaluluwa.* | **Batista:** Diyos ko... ipagdasal n'yo ako. | Padala, Run ending, after the shot (Kumpisal timeline) |
+| Batista's confession: *Alam ng Diyos ang dahilan mo.* | **Batista:** ...Alam ng Diyos ang dahilan ko. | Padala, Run ending |
+| Gwen's confession: *Ipagtapat mo sa kanya, anak.* | **Gwen:** Importante 'yon, mahal. Umuwi ka nang maaga, ha. | Tokhang phone call (Padala timeline only, the one run where the past is played before the future) |
 
 ### The five Alaala
 
@@ -152,25 +185,36 @@ run to learn who is behind the door.
 
 ---
 
-## 6. Prologue (new, before every run except the Main Timeline)
+## 6. Prologue: the priest's answer (before every run after the first)
 
-The Main Timeline starts cold in the market, with no hint of what comes after it.
+The first run starts cold in the market, with no hint of what comes after it. Every run after it
+begins here, and this is where the player chooses where to start: not from a menu, but by
+answering, as the priest behind the grille.
 
-Black screen. The sound of a confessional's small door sliding open. Text only, no name plate.
+Black screen. The confessional's small door, a grille. Text only, no name plate.
 
 > **(Isang boses):** Basbasan n'yo po ako, Padre, dahil nagkasala ako.
 > **(Isang boses):** Matagal na po mula nung huli akong nangumpisal.
 > **(Isang boses):** Hindi ko po alam kung saan magsisimula.
+> **(Isang boses):** Saan po ako magsisimula, Padre?
 
-Last line depends on where the run starts:
+The player answers (each answer names the time and the place, so after the first run's time-order
+book the choice reads as choosing when the story begins):
 
-| Run starts with | Last line |
-|---|---|
-| Tokhang | **(Isang boses):** Siguro... sa palengke. |
-| Kumpisal | **(Isang boses):** Siguro... sa simbahan. |
-| Padala | **(Isang boses):** Siguro... sa kwarto. |
+| Answer | Starts | The voice takes it up |
+|---|---|---|
+| Sa nakaraan, anak. Sa simbahan. | Kumpisal (Kumpisal timeline) | Sa simbahan po. Isang Sabado ng hapon. |
+| Sa kasalukuyan, anak. Sa kwarto. | Padala (Padala timeline) | Sa kwarto po. Sa likod ng pintong nakakandado. |
+| Sa hinaharap, anak. Sa palengke. | Tokhang (Main timeline) | Sa palengke po. Isang hapon na parang wala lang. |
 
 Then the story's title card, as now.
+
+**After every ending but the true one**, once the book has shown the run in time order, the same
+voice speaks once over black, so the player knows there is more without being told how much:
+
+> **(Isang boses):** Hindi pa po iyon ang buong kumpisal, Padre.
+
+The true ending reveals who has been speaking, and who has been listening.
 
 ---
 
@@ -215,6 +259,12 @@ Objectives (unchanged): Talk to Gloria → Choose a realistic toy gun → Talk t
 |---|---|
 | Two hundred na lang, Ate? | **Gloria:** Ay naku, lugi na 'ko niyan... O sige na nga. Basta ikaw. |
 | Sige po, okay na. | **Gloria:** 'Yan ang gusto ko sa'yo. Hindi ka tumatawad. |
+
+Then, whatever was chosen, Gloria plants the priest before anyone has met him. On the first
+run it is small talk; once the player knows Father Eli, it is the first time he was near Peter's
+family:
+
+> **Gloria:** Para kay Ben ba 'yan? Naku, tuwing Sabado, takbo nang takbo 'yan sa simbahan. Si Father Eli lang ang nakakapagpatahimik diyan.
 
 **Revelation lines (Alaala 1 held):** as the buyer walks away.
 
@@ -279,6 +329,15 @@ Card: **Ligtas** — *Walang nabaril sa palengke.*
 ---
 
 ## 8. KUMPISAL (player: Father Eli)
+
+**Each timeline opens Kumpisal its own way**, after the three opening lines, so the player feels
+what came before in that run:
+
+| Timeline | Added to the opening |
+|---|---|
+| Kumpisal (the run starts here, in the past) | **Father Eli:** *Tumingin sa relo* Mamaya pa ang dating ng pinapadala ni Gloria. *(after)* |
+| Padala, after the police call | **Father Eli:** *May kalmot sa kamay* Pasensya na. Nahuli ako ng dating. *(before)* |
+| Padala, after the food delivery | **Father Eli:** *Hinuhugasan ang kamay sa agua bendita* ...Matagal bago natanggal. *(before)* |
 
 ### 8.1 Opening (existing montage pictures)
 
@@ -497,7 +556,16 @@ Usual: `padala_peter_arrives.png` — **Peter:** Ma'am? Delivery po— *(sees he
 
 Card: **Tanod** — *Nasagip si Mercy, at buhay si Peter.*
 
-**Keys (Main, existing):** `padala_escape.png`. Card: **Key** — *Nakatakas si Mercy.*
+**Searching the keys:** after two wrong keys, Mercy notices the right one: *"Teka... may gasgas
+'yung isa. Parang laging ginagamit."*, and that key catches the light, so the search is not blind.
+
+**Keys (Main, existing):** first `padala_collar.png` *(new)*: at the door, Mercy glances back. On
+the bathroom door hangs a black shirt with a priest's white collar.
+> **Mercy:** ...Pari?
+
+Then `padala_escape.png`. Card: **Key** — *Nakatakas si Mercy.* (A first run that ends here still
+leaves with the question of who the man is, without the answer: the police poster ending gives the
+answer, the collar only the doubt.)
 
 **Outside (Kumpisal timeline, existing)** `padala_escape.png`, then `padala_still_manila.png`,
 caption *Still in Manila*:
@@ -556,6 +624,7 @@ Black. Title: **SANGA**.
 | `true_morning.png` (×4) | Peter and Gwen, Kulas, Mercy, Batista |
 | `true_visiting.png` | Eli behind the visiting-booth grille |
 | `prologue_booth.png` | The confessional's small door, in darkness |
+| `padala_collar.png` | A black clerical shirt with a white collar hanging on the bathroom door |
 
 ---
 

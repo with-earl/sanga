@@ -358,7 +358,70 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
     scene (the car hides what is behind it). Leaving: lights off, tail lights down the street,
     the man watching from the door. Offered next, same way: the jeepney inside, Batista's badge
     on a desk, the prison visiting booth, the TV news.
-    **Next:** paint the cutscenes for real (user or artist), most important first: the reveals
+  - **Design audit and new plan (user approved "proceed"; dev tools stay).** Scores: first-run
+    reveal 6, starting-point twist 5, causality 4, variation 6, choice weight 3, system
+    interaction 5, replay friction 3, endings/goals 6, scope 8, theme 8, presentation 5, pacing 6.
+    The plan, one PR per phase, smoke test and playthrough must pass, no new places, characters
+    or endings:
+    - **A. First-run reveal** (DONE): Gloria plants Father Eli in Tokhang's pay scene (Ben runs
+      around the church; only Father Eli can calm him); the main key ending first shows
+      `padala_collar.png` (a priest's shirt on a nail by the bathroom door) and Mercy's
+      "...Pari?", so a key-ending first run leaves with the doubt, the police ending with the answer.
+    - **B. Respect replays** (DONE): `GameState.seen_lines` (saved per slot, kept across runs)
+      remembers every line shown. While a line seen before is on screen, a "Skip ▸▸" tab sits on
+      the dialogue box's top right; tapping it races through seen lines and stops by itself at
+      the first new line or choice. A line a memory added shows "✦" after the speaker's name. In
+      the nave, once per visit, if every conversation there was heard before (one answer per
+      choice is enough) and nothing in them changed, Father Eli is offered "Dumiretso sa
+      kumpisalan." / "Kausapin muna sila." The playthrough takes the shortcut in two runs.
+    - **C. Echoes** (DONE): bible rule R9 and table. Five Kumpisal choices (Mercy, Gloria,
+      Batista's talk, Batista's and Gwen's confessions) set `run_echo_*` flags; nine echo lines
+      (`"echo": true` + `if_flag`) come back in Padala's opening, the Police Poster ending, the Run
+      ending and, only when the run starts in Padala, Tokhang's phone call. Echoes flow forward in
+      story time only (the Tokhang haggle cannot echo into the past). DialogueBox logs them; the
+      recap shows them as "↳ Speaker: line". The playthrough checks echo counts in three runs and
+      picks the other answers in two Kumpisal-timeline runs.
+    - **D. "Ayusin ayon sa oras"** (DONE, the signature): after the recap's last page the ink
+      fades and the run is written again in time order ("Kumpisal · Nakaraan", "Padala ·
+      Kasalukuyan", "Tokhang · Hinaharap"), keeping only linked moments and each story's ending;
+      red threads draw down the page margins (or the gutter) in their own lanes, with a knot at each
+      end. `scripts/time_threads.gd` finds them: a choice and its echo share a flag (Alaala.
+      apply_option now writes the flag on the logged choice), plus `story/threads.json` (choice to
+      outcome, outcome to outcome). Only threads whose two ends happened this run, only forward in
+      time. The run log now also records `{"outcome": id}`. The old time-order card is removed
+      (StoryCard.show_time_order); the main timeline goes back to the main screen after the book.
+      Decided not to add cause lines to the chart: the threads already show causes.
+    - **E. The priest's answer** (DONE): the main menu's "Choose Starting Point" list is gone. A
+      save offers "Continue Progress" and "Start a New Run" (confirmation when a run is in
+      progress). The first run still starts in the market; after it, a new run plays the prologue
+      (`StoryDirector.begin_from_confession`): the voice asks "Saan po ako magsisimula, Padre?"
+      and the player answers "Sa nakaraan / kasalukuyan / hinaharap, anak. Sa simbahan / kwarto
+      / palengke." (a line choice setting `prologue_start`), the voice takes it up, and the run
+      begins (`begin_with(story, false)`). After every ending but Walang Namatay, the recap ends
+      with the voice over black: "Hindi pa po iyon ang buong kumpisal, Padre." The playthrough
+      starts two runs this way.
+    - **F. Feel** (DONE): a `CanvasModulate` tint per timeline in StageLife (Kumpisal timeline
+      candle-amber, Padala timeline cold blue; HUD untouched) and music pitch per timeline
+      (`MusicDirector.TIMELINE_PITCH`, 0.97 / 0.94); taking a ✦ choice plays `memory.wav` (new in
+      `compose_sounds.py`) and a golden ring across the screen (`Sfx.memory`,
+      `shaders/memory_ripple.gdshader`); after two wrong keys Mercy says the worn key is used
+      often and it catches the light; each memory in the book shows a faint "↳" hint
+      (`alaala.json` "hint"); Kumpisal's opening gains one line per timeline (bible section 8).
+    - **G. Playtest** with the checklist (revelation timing, causality, replay motivation). The
+      user's to run.
+    - **Art, object shots in 3D** (DONE for four): `tools/object_scenes.py` draws
+      `tokhang_tv_news` (an old set in a dark room; on screen the police street from
+      street_scene, a red bar "OPERASYON: 3 PATAY", LIVE, scan lines), `padala_jeep` (inside a
+      jeepney from the back: red benches, chrome rails, painted ceiling, city lights streaking past
+      the windows, a dark driver, Mercy seated looking out), `true_morning_batista` (morning sun
+      through blinds on a desk: the badge, a generic gold "PULIS" shield, on a handwritten
+      "Pagbibitiw" letter, and a cold coffee) and `true_visiting` (a visiting booth from the
+      visitor's chair: counter, green partition, glass with reflections, a round speaking grille;
+      Father Eli behind it in an inmate's orange shirt, made by recolouring his black clothes,
+      `in_jail_orange`). Still stand-ins for real paintings.
+    - **Art in parallel:** object shots in 3D (jeepney, badge, visiting booth, TV news); ~10 key
+      character shots need an artist (or Higgsfield if the user allows).
+    **Art:** paint the cutscenes for real (user or artist), most important first: the reveals
     (`padala_reveal_eli`, `tokhang_trade`, `true_visiting`) and the deaths.
 - **No sound on iPhone** (user report). The game itself plays music (checked: player playing,
   buses not muted). Fix in the Web preset's `html/head_include`: it wraps `AudioContext` to keep

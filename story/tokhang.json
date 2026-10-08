@@ -47,6 +47,12 @@
 		{
 			"speaker": "Gwen",
 			"text": "Narinig mo na. Bilisan mo, ha. May sasabihin din ako sa'yo mamaya."
+		},
+		{
+			"speaker": "Gwen",
+			"text": "Importante 'yon, mahal. Umuwi ka nang maaga, ha.",
+			"if_flag": "run_echo_gwen_tell",
+			"echo": true
 		}
 	],
 	"choices": [
@@ -353,6 +359,10 @@
 					]
 				}
 			]
+		},
+		{
+			"speaker": "Gloria",
+			"text": "Para kay Ben ba 'yan? Naku, tuwing Sabado, takbo nang takbo 'yan sa simbahan. Si Father Eli lang ang nakakapagpatahimik diyan."
 		},
 		{
 			"speaker": "Gloria",

@@ -33,27 +33,27 @@ const TAP_EVERY := 3
 ## it must give.
 const RUNS := [
 	{"name": "first run, police poster", "begin": "tokhang", "prefer": ["Sige, ako", "Police"],
-		"expect": ["tokhang_peter", "kumpisal_main", "padala_police_card"],
+		"expect": ["tokhang_peter", "kumpisal_main", "padala_police_card"], "echoes": 3,
 		"gain": ["laruang_baril", "pagtakbo_ni_kulas", "father_eli"]},
 	{"name": "true ending", "begin": "tokhang", "prefer": ["Sige, ako"], "look": ["Water Gun"], "alaala": true,
 		"expect": ["tokhang_safe", "kumpisal_sinamahan", "padala_walang_namatay"], "gain": []},
-	{"name": "Gwen buys, key", "begin": "tokhang", "prefer": ["Ikaw na lang", "Keys"],
+	{"name": "Gwen buys, key", "begin": "tokhang", "prefer": ["Ikaw na lang", "Keys", "Dumiretso"],
 		"expect": ["tokhang_gwen", "kumpisal_main", "padala_key"], "gain": []},
 	{"name": "later, Eli confesses", "begin": "tokhang", "prefer": ["Mamaya", "Ama, aaminin"],
 		"expect": ["tokhang_kulas", "kumpisal_main", "padala_pinalaya"], "gain": []},
-	{"name": "Kumpisal timeline, run", "begin": "kumpisal", "prefer": ["Keys", "Tumakbo"],
-		"expect": ["kumpisal_kumpisal", "padala_run"], "gain": ["baril_ni_batista"]},
-	{"name": "Kumpisal timeline, jeep", "begin": "kumpisal", "prefer": ["Keys", "Sumakay"],
+	{"name": "Kumpisal timeline, run", "begin": "kumpisal", "prefer": ["Keys", "Tumakbo", "Alam ng Diyos"],
+		"expect": ["kumpisal_kumpisal", "padala_run"], "gain": ["baril_ni_batista"], "echoes": 3},
+	{"name": "Kumpisal timeline, jeep", "begin": "kumpisal", "prefer": ["Keys", "Sumakay", "Dumiretso"],
 		"expect": ["kumpisal_kumpisal", "padala_ride_jeep"], "gain": []},
-	{"name": "Kumpisal timeline, hide", "begin": "kumpisal", "prefer": ["Keys", "Magtago"],
+	{"name": "Kumpisal timeline, hide", "begin": "confession", "answer": "Sa simbahan", "prefer": ["Keys", "Magtago", "Ano'ng maitutulong", "Ang Diyos lang", "Igalang"],
 		"expect": ["kumpisal_kumpisal", "padala_nagtago"], "gain": []},
 	{"name": "Kumpisal timeline, Eli confesses", "begin": "kumpisal", "prefer": ["Ama, aaminin", "Keys"],
 		"expect": ["kumpisal_kumpisal", "padala_pinalaya"], "gain": []},
 	{"name": "Padala timeline, police", "begin": "padala", "prefer": ["Police"],
-		"expect": ["padala_police", "kumpisal_padala_police", "tokhang_trade"], "gain": []},
+		"expect": ["padala_police", "kumpisal_padala_police", "tokhang_trade"], "gain": [], "echoes": 1},
 	{"name": "Padala timeline, food", "begin": "padala", "prefer": ["Food", "'Yun lang"],
 		"expect": ["padala_food", "kumpisal_sacrifice"], "gain": ["rider"]},
-	{"name": "Padala timeline, tanod", "begin": "padala", "prefer": ["Food", "Isama po"],
+	{"name": "Padala timeline, tanod", "begin": "confession", "answer": "Sa kwarto", "prefer": ["Food", "Isama po"],
 		"expect": ["padala_tanod"], "gain": []},
 	{"name": "Padala timeline, Kulas walked out", "begin": "padala", "prefer": ["Food", "'Yun lang", "Sasamahan"],
 		"expect": ["padala_food", "kumpisal_sinamahan"], "gain": []},
@@ -89,7 +89,11 @@ func _initialize() -> void:
 		var memories_before: Array = state.alaala.duplicate()
 		var finished_before: int = state.runs_finished
 		_transcript.append("\n=== %s ===" % run["name"])
-		director.begin_with(str(run["begin"]))
+		if run["begin"] == "confession":
+			# The way a player starts every run after the first: answering the voice as the priest.
+			director.begin_from_confession()
+		else:
+			director.begin_with(str(run["begin"]))
 		var frames := 0
 		while frames < MAX_FRAMES_PER_RUN and not _back_at_menu(state, finished_before):
 			await process_frame
@@ -109,6 +113,9 @@ func _initialize() -> void:
 			_fail("gained memories %s, expected %s" % [gained, run["gain"]])
 		if not _saw_recap:
 			_fail("the recap did not show")
+		var echoes: int = director.last_run_log.filter(func(moment: Dictionary) -> bool: return moment.has("echo")).size()
+		if echoes < int(run.get("echoes", 0)):
+			_fail("%d echoes came back, expected at least %d" % [echoes, run["echoes"]])
 		print("run %-36s %s" % [run["name"], ", ".join(outcomes)])
 	var held: int = state.alaala.size()
 	if held != 5:
@@ -163,10 +170,6 @@ func _act() -> void:
 		cutscene._tapped = true
 		return
 	if card.visible:
-		if card._waiting_for_tap:
-			_last_action = "the time-order card"
-			card._waiting_for_tap = false
-			card._tapped.emit()
 		return
 	if current_scene == null:
 		return
@@ -215,9 +218,10 @@ func _pick(box: Control) -> void:
 
 
 ## The first option matching this run's preferences, else a ✦ option on an Alaala run, else the
-## first option that is not a ✦ one.
+## first option that is not a ✦ one. In the church, the player talks to everyone unless the run
+## says to take the shortcut, so the conversations stay covered.
 func _preferred(options: Array) -> int:
-	for wanted in _run.get("prefer", []):
+	for wanted in [_run.get("answer", "-")] + _run.get("prefer", []) + ["Kausapin muna"]:
 		for index in options.size():
 			if str(wanted) in str(options[index]):
 				return index

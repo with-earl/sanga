@@ -70,13 +70,25 @@ func _test_run_recap() -> void:
 	_check(words[-1] == recap.get("CLOSING_LINE"), "recap: ends with the closing line")
 	_check(words.has("Tokhang") and words.has("“Oo.”") and words.has("Namatay si Peter."), "recap: writes the story, the choice and the ending")
 	_check(lines.size() == 7, "recap: one line per moment, two for a memory")
+	# In time order the past comes first, and a choice is joined to its echo and to its ending.
+	var played := [
+		{"story": "Tokhang"}, {"choice": "Sige, ako na'ng bibili."}, {"ending": "Peter", "line": "Namatay si Peter."}, {"outcome": "tokhang_peter"},
+		{"story": "Kumpisal"}, {"choice": "Huwag kang mag-alala, anak.", "flag": "run_echo_mercy_reassured"},
+		{"story": "Padala"}, {"echo": "Sabi niya.", "speaker": "Mercy", "flag": "run_echo_mercy_reassured"},
+	]
+	var threads_script: GDScript = load("res://scripts/time_threads.gd")
+	var order: Array = threads_script.call("sections", played).map(func(section: Dictionary) -> String: return section["story"])
+	_check(order == ["Kumpisal", "Padala", "Tokhang"], "time order: past, present, future (got %s)" % [order])
+	var threads: Array = threads_script.call("threads", played)
+	_check([5, 7] in threads, "time order: a choice is joined to its echo")
+	_check([1, 2] in threads, "time order: a choice is joined to the ending it caused")
 	var empty: Array = recap.call("lines_for", [])
 	_check(empty.size() == 2, "recap: an empty run shows only the title and the closing line")
 
 
 func _test_choices_fit_one_line() -> void:
 	var font: Font = load("res://assets/fonts/Lora.ttf")
-	for path in ["res://story/tokhang.json", "res://story/kumpisal.json", "res://story/padala.json"]:
+	for path in ["res://story/tokhang.json", "res://story/kumpisal.json", "res://story/padala.json", "res://story/prologue.json"]:
 		var texts: Array[String] = []
 		_collect_choice_texts(JSON.parse_string(FileAccess.get_file_as_string(path)), texts)
 		for text in texts:
@@ -124,6 +136,9 @@ func _test_save_roundtrip() -> void:
 	state.flags = {"trusted_gloria": true}
 	state.decisions = [{"id": "d1", "choice": "yes", "location": "public_market"}]
 	state.run_log = [{"story": "Tokhang"}, {"choice": "Oo."}]
+	state.seen_lines = {}
+	_check(not state.see_line("Gloria", "Aba, meron, anak!"), "a new line is not seen yet")
+	_check(state.see_line("Gloria", "Aba, meron, anak!"), "a line shown before is seen")
 	_check(state.save_to_slot(slot), "save_to_slot returns true")
 	state.run_log = []
 	state.location = "church_nave"
@@ -134,6 +149,7 @@ func _test_save_roundtrip() -> void:
 	_check(state.flags.get("trusted_gloria") == true, "flags restored")
 	_check(state.decisions.size() == 1, "decisions restored")
 	_check(state.run_log.size() == 2, "run log restored")
+	_check(state.seen_lines.size() == 1, "seen lines restored")
 	_check(state.delete_slot(slot), "delete_slot returns true")
 	_check(not state.has_slot(slot), "slot is gone after delete")
 	_check(not state.load_slot(99), "invalid slot is rejected")

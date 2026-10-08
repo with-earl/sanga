@@ -16,6 +16,9 @@ const CROSSFADE_SECONDS := 2.0
 ## Well below full scale, so the soft piano stays in the background, under the dialogue and
 ## sound effects.
 const VOLUME_DB := -24.0
+## How each timeline's music is pitched: the Kumpisal timeline a little lower, the Padala timeline
+## lower still, so the same pieces feel heavier the further the run is from the main timeline.
+const TIMELINE_PITCH := {"kumpisal": 0.97, "padala": 0.94}
 const SILENT_DB := -60.0
 
 const MAIN_TRACK := "res://assets/music/menu.wav"
@@ -83,6 +86,9 @@ func current_track() -> String:
 
 ## Crossfades to `track`, a path to a looping audio file, or out to silence with "".
 func play(track: String) -> void:
+	# Each timeline sounds a little different: the same pieces, played a shade lower away from the
+	# main timeline (see TIMELINE_PITCH).
+	_players[_current].pitch_scale = TIMELINE_PITCH.get(GameState.timeline, 1.0)
 	if track == _track:
 		return
 	_track = track
@@ -91,6 +97,7 @@ func play(track: String) -> void:
 		return
 	_current = 1 - _current
 	var player := _players[_current]
+	player.pitch_scale = TIMELINE_PITCH.get(GameState.timeline, 1.0)
 	player.stream = _looping(load(track))
 	player.volume_db = SILENT_DB
 	player.play()
