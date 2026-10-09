@@ -176,10 +176,11 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   `tools/intro_frames.py`; the scooter, wheels and Peter are lofted shapes in `tools/bike_parts.py`
   (`loft`, `ellipsoid`, `limb`; no game art). `tokhang_rider.png` and its drawing function are gone. Frame 3
   has no line and holds 3.5 s. Stand-ins, listed in `PLACEHOLDERS.txt`. Frame 1's camera is super near the front wheel
-  (about 1.2 m away, low) with the legshield, headlight, rider's knee and boot, floorboard and handlebar still in view; frame 3's is close behind Peter and the street is a full palengke
+  (about 0.9 m away, low) with the legshield, headlight, rider's knee and boot, floorboard and handlebar still in view; frame 3's is close behind Peter and the street is a full palengke
   filled by `tools/market_parts.py` (vendors and shoppers, veg/fish/meat/fruit/rice/isaw stalls with price
-  cards and sign boards, tarpaulin roofs, tangled wires, a parked jeepney, crates and litter). Frame 3 takes
-  about 40 seconds to render.
+  cards and sign boards, tarpaulin roofs, tangled wires, a parked jeepney, crates and litter). Frame 3's camera is at waist level, with fog
+  (`Scene.fog`), a depth map (`Scene.track_depth`) for depth of field, coloured bounce lights under the tarps,
+  glowing bulbs, tarp shadows on the floor and beams of sun. It takes about 70 seconds to render.
 - **TV shop cards:** the HouseCredit promo and the BCash / Loro payment signs are now small horizontal
   acrylic cards hung inside the shop from suction-cup hooks, in a row high on the glass above the sets so
   the news stays the focus. `tools/tv_store.py` (`acrylic_card`).

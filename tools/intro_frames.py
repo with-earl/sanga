@@ -297,9 +297,9 @@ def vehicle_rear(w, h, body, stripe, seed):
 
 def build_skyway(size):
     w, h = size
-    cam_x, cam_z = 0.8, -0.85
-    camera = s3.Camera((cam_x, 0.3, cam_z), -33.0, 10.0, 74.0, size)
-    vp = camera.project((cam_x, 0.3, 100000.0))
+    cam_x, cam_z = 0.62, -0.62
+    camera = s3.Camera((cam_x, 0.27, cam_z), -40.0, 8.0, 72.0, size)
+    vp = camera.project((cam_x, 0.27, 100000.0))
     horizon_y, vp_x = int(vp[1]), int(vp[0])
 
     # ---- the backdrop: sky, clouds, Manila, and plain road colour below the horizon
@@ -310,9 +310,11 @@ def build_skyway(size):
     ground = np.zeros_like(arr)
     ys = np.arange(h, dtype=np.float32)
     t = np.clip((ys - horizon_y) / max(h - horizon_y, 1), 0, 1) ** 0.6
-    for c, (far_c, near_c) in enumerate(((176, 84), (166, 84), (156, 90))):
+    for c, (far_c, near_c) in enumerate(((112, 64), (110, 64), (116, 70))):
         ground[:, :, c] = (far_c + (near_c - far_c) * t)[:, None]
     mask = (ys >= horizon_y + 160)[:, None, None].astype(np.float32)   # only well below the horizon; the roofs sit above
+    grit = (0.8 + 0.4 * (noise(w, h, 40, 5) * 0.45 + noise(w, h, 9, 6) * 0.35 + noise(w, h, 2, 7) * 0.3))[..., None]   # tarmac grain, so the nearest road is not a flat grey
+    ground *= grit
     blend = np.clip((ys - horizon_y - 44 * w / 1672) / (40 * w / 1672), 0, 1)[:, None, None]
     arr = arr * (1 - blend) + ground * blend
     back = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8)).convert("RGBA")
@@ -329,10 +331,12 @@ def build_skyway(size):
         z_start = -3.0
         while z_start < 400 and min(camera.view((x, 0.0, z_start))[2] for x in (xa, xb)) < 0.3:
             z_start += 0.25
-        marks = [z_start] + [z for z in (z_start + 2.0, z_start + 7.0, 14.0, 40.0, 120.0, 400.0) if z > z_start]
+        z_start += 2.0   # the very nearest tarmac is left to the dark backdrop: its glancing light read as a pale wedge
+        marks = [z_start] + [z for z in (z_start + 5.0, 14.0, 40.0, 120.0, 400.0) if z > z_start]
         for zi in range(len(marks) - 1):
             env.face([(xa, 0.0, marks[zi + 1]), (xb, 0.0, marks[zi + 1]), (xb, 0.0, marks[zi]), (xa, 0.0, marks[zi])], (110, 110, 118),
-                     texture=asphalt(300, 300 if marks[zi + 1] - marks[zi] < 20 else 700, si * 5 + zi), layer=0, two_sided=True)
+                     texture=asphalt(300, 300 if marks[zi + 1] - marks[zi] < 20 else 700, si * 5 + zi,
+                                     (70, 70, 76) if zi == 0 else (86, 86, 92)), layer=0, two_sided=True)
     for lane_x in (1.75, 5.15):
         z = 0.5
         while z < 200:
@@ -396,6 +400,45 @@ def draw_skyway(size=SIZE):
 
 
 # ---------------------------------------------------------------- frame 3: the market
+
+
+def depth_of_field(img, depth, k, focus=(3.0, 7.0), far=(9.0, 22.0), mid_blur=2.0, far_blur=5.5):
+    """Softens the picture by distance with a depth map: sharp near the lens, a little soft in the middle
+    distance, soft far away (and the sky, which has no depth, as far as it gets)."""
+    def ramp(lo, hi):
+        t = np.clip((np.where(np.isfinite(depth), depth, 1e6) - lo) / (hi - lo), 0, 1)
+        return t * t * (3 - 2 * t)
+
+    mid = np.asarray(img.filter(ImageFilter.GaussianBlur(mid_blur * k)).convert("RGB")).astype(np.float32)
+    far_img = np.asarray(img.filter(ImageFilter.GaussianBlur(far_blur * k)).convert("RGB")).astype(np.float32)
+    base = np.asarray(img.convert("RGB")).astype(np.float32)
+    wm, wf = ramp(*focus)[..., None], ramp(*far)[..., None]
+    out = base * (1 - wm) + mid * wm
+    out = out * (1 - wf) + far_img * wf
+    return Image.fromarray(np.clip(out, 0, 255).astype(np.uint8)).convert("RGBA")
+
+
+def shade_polygons(img, polygons, factor, blur):
+    """Darkens soft-edged patches of the picture (shadows of the tarpaulins on the floor)."""
+    mask = Image.new("L", img.size, 0)
+    md = ImageDraw.Draw(mask)
+    for poly in polygons:
+        md.polygon(poly, fill=255)
+    m = np.asarray(mask.filter(ImageFilter.GaussianBlur(blur))).astype(np.float32)[..., None] / 255.0
+    px = np.asarray(img.convert("RGB")).astype(np.float32)
+    px = px * (1 - m * (1 - factor)) * (1 + m * np.array([-0.02, -0.01, 0.04]))
+    return Image.fromarray(np.clip(px, 0, 255).astype(np.uint8)).convert("RGBA")
+
+
+def light_shafts(img, k, starts):
+    """Slanting beams of dusty sunlight falling between the tarpaulins."""
+    layer = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    ld = ImageDraw.Draw(layer)
+    w, h = img.size
+    for x, width, strength in starts:
+        ld.polygon([(x, 0), (x + width, 0), (x + width - 330 * k, h), (x - 330 * k, h)], fill=(255, 218, 150, int(strength)))
+    return s3.add_light_layer(img, layer, 14 * k)
+
 
 
 def road_strips(env, camera, x0, x1, make_texture, tint=(120, 118, 122), count=12):
@@ -477,6 +520,7 @@ def entrance_banner_texture():
     return img
 
 
+MARKET_BLOCKS = [(-5.4, -2.8), (-2.0, 0.6), (1.4, 4.2), (5.0, 8.4), (9.2, 12.0), (12.8, 15.6), (16.4, 19.8), (20.6, 23.2), (24.0, 27.2), (28.0, 30.8), (31.6, 35.0)]
 STALL_KINDS = ["veg", "fish", "fruit", "meat", "rice", "veg", "cooked", "fish", "fruit", "veg", "meat", "rice"]
 BOARDS = {
     "veg": (("GULAY", "Sariwa! Mura!"), (40, 130, 70), (255, 250, 220)),
@@ -495,15 +539,14 @@ def market_fill(env, k):
     rng = np.random.default_rng(31)
     street_x1 = 4.4
     # Walls behind the stalls.
-    env.face([(-4.5, 4.4, 80), (-4.5, 4.4, 2.0), (-4.5, 0.0, 2.0), (-4.5, 0.0, 80)], (170, 150, 128), texture=concrete(900, 400, 55, (176, 160, 140)), layer=1, two_sided=True)
-    z = 2.0
-    for i in range(12):
+    env.face([(-4.5, 4.4, 80), (-4.5, 4.4, -12.0), (-4.5, 0.0, -12.0), (-4.5, 0.0, 80)], (170, 150, 128), texture=concrete(900, 400, 55, (176, 160, 140)), layer=1, two_sided=True)
+    z = -12.0
+    for i in range(16):
         env.face([(street_x1 + 0.1, 5.4, z + 6.0), (street_x1 + 0.1, 5.4, z), (street_x1 + 0.1, 0.0, z), (street_x1 + 0.1, 0.0, z + 6.0)], (200, 190, 170),
                  texture=shop_front_texture(i), layer=1, two_sided=True)
         z += 6.0
     # The stalls, left and right, in blocks with gaps for the cross lanes.
-    blocks = [(2.6, 5.2), (6.0, 9.0), (9.8, 12.4), (13.2, 16.6), (17.4, 20.0), (20.8, 24.0), (24.8, 27.6), (28.4, 31.8), (32.6, 35.4)]
-    for bi, (z0, z1) in enumerate(blocks):
+    for bi, (z0, z1) in enumerate(MARKET_BLOCKS):
         for side in (-1, 1):
             kind = STALL_KINDS[(bi * 2 + (0 if side < 0 else 1)) % len(STALL_KINDS)]
             if side < 0:
@@ -514,17 +557,21 @@ def market_fill(env, k):
             (name, line), bg_col, fg = BOARDS[kind]
             bx = x1 if side < 0 else x0
             tex = mp.sign_board((name, line), bg_col, fg)
-            env.face([(bx, 2.6, z0 + 0.05), (bx, 2.6, z1 - 0.05), (bx, 2.15, z1 - 0.05), (bx, 2.15, z0 + 0.05)], bg_col, texture=tex, layer=5, two_sided=True)
+            za, zb = (z0 + 0.05, z1 - 0.05) if side < 0 else (z1 - 0.05, z0 + 0.05)
+            env.face([(bx, 2.6, za), (bx, 2.6, zb), (bx, 2.15, zb), (bx, 2.15, za)], bg_col, texture=tex, layer=5, two_sided=True)
             for pz in (z0 + 0.05, z1 - 0.05):
                 bp.limb(env, (bx + side * 0.05, 0.0, pz), (bx + side * 0.05, 3.2, pz), 0.07, 0.07, (140, 108, 78), 4, n=8)
             # Hand-lettered price cards in front of the goods.
             if kind in ("veg", "fruit", "fish"):
                 for pi, texts in enumerate(((("KAMATIS", "₱80"), ("TALONG", "₱70")) if kind == "veg" else ((("SAGING", "₱60"), ("MANGGA", "₱120")) if kind == "fruit" else (("BANGUS", "₱180"), ("TILAPIA", "₱140"))))):
                     pz = z0 + 0.4 + pi * (z1 - z0 - 0.8)
-                    env.face([(bx - side * 0.0, 1.0, pz - 0.14), (bx - side * 0.0, 1.0, pz + 0.14), (bx - side * 0.0, 0.84, pz + 0.14), (bx - side * 0.0, 0.84, pz - 0.14)], (250, 248, 238),
+                    d0, d1 = (-0.14, 0.14) if side < 0 else (0.14, -0.14)
+                    env.face([(bx, 1.0, pz + d0), (bx, 1.0, pz + d1), (bx, 0.84, pz + d1), (bx, 0.84, pz + d0)], (250, 248, 238),
                              texture=mp.price_card(texts), layer=5, two_sided=True)
             # A vendor behind each table, and sometimes a customer at the front.
             vx = x0 + 0.15 if side < 0 else x1 - 0.15
+            if z1 < 1.0:   # the stalls beside and behind the camera stay empty of people
+                continue
             mp.person(env, vx - side * 0.5, (z0 + z1) / 2 - 0.2, 90 * side * -1, rng, 1.6, 3, "vendor", False)
             if rng.random() < 0.8:
                 mp.person(env, side * 1.75, (z0 + z1) / 2 + rng.uniform(-0.6, 0.6), -90 * side * -1 + 180 * (1 if side > 0 else 0), rng, 1.62, 3, "shopper", False)
@@ -535,7 +582,7 @@ def market_fill(env, k):
             xa, xb = (-4.3, -1.2) if side < 0 else (1.2, 4.3)
             mp.tarp(env, xa, xb, z0 - 0.3, z1 + 0.3, 3.5 + 0.1 * (bi % 3), c0, 6, 0.28, (c0, c1) if c0 != c1 else None)
     # Shoppers and workers in the aisle itself, a boy with a sack, a parked jeepney, wires and clutter.
-    walkers = [(0.95, 3.4, 0), (-1.1, 5.4, 180), (1.15, 7.6, 180), (-0.95, 10.2, 0), (0.9, 12.8, 180), (-1.2, 14.6, 0), (1.0, 17.2, 0), (-0.9, 19.8, 180),
+    walkers = [(1.5, 2.2, 180), (-1.55, 3.0, 160), (1.3, 4.6, 200), (-1.4, 6.6, 20), (0.95, 3.4, 0), (-1.1, 5.4, 180), (1.15, 7.6, 180), (-0.95, 10.2, 0), (0.9, 12.8, 180), (-1.2, 14.6, 0), (1.0, 17.2, 0), (-0.9, 19.8, 180),
                (1.2, 22.4, 180), (-1.1, 25.0, 0), (0.95, 28.0, 180), (-0.9, 30.4, 0), (0.3, 34.0, 180), (-0.4, 37.0, 0)]
     for wx, wz, wy in walkers:
         mp.person(env, wx, wz, wy, rng, rng.uniform(1.5, 1.72), 4, "shopper", True)
@@ -555,8 +602,8 @@ def market_fill(env, k):
 
 def build_market(size):
     w, h = size
-    cam_x, cam_y, cam_z = -0.62, 1.8, -1.78
-    camera = s3.Camera((cam_x, cam_y, cam_z), 21.0, -16.0, 66.0, size)
+    cam_x, cam_y, cam_z = -0.8, 1.02, -2.05
+    camera = s3.Camera((cam_x, cam_y, cam_z), 12.0, 10.0, 72.0, size)
     vp = camera.project((cam_x, cam_y, 100000.0))
     horizon_y, vp_x = int(vp[1]), int(vp[0])
     k = w / 1672.0
@@ -590,6 +637,12 @@ def build_market(size):
     # ---- the street
     env = s3.Scene(camera, ambient=(150, 146, 156))
     env.light((500, 520, 1400), (255, 214, 156), 1.2e6)
+    env.fog = ((238, 214, 178), 0.03)
+    env.track_depth(size)
+    # Coloured light bouncing under the tarpaulins: blue, orange, green and red washes along the aisle.
+    for li, lz in enumerate(range(3, 40, 4)):
+        tone = [(120, 160, 255), (255, 170, 80), (130, 220, 140), (255, 120, 110)][li % 4]
+        env.light((-1.1 if li % 2 == 0 else 1.1, 2.9, lz), tone, 3.2, 6.0)
     street_x0, street_x1 = -4.4, 4.4
     road_strips(env, camera, street_x0, street_x1, lambda i: concrete(300, 300, 30 + i, (178, 170, 158)))
     for gx in (-3.4, 3.1):   # gutters along both sides
@@ -610,8 +663,20 @@ def build_market(size):
         env.face([(lx - dx, 0.007, lz - dz), (lx + px_, 0.007, lz + pz_), (lx + dx, 0.007, lz + dz), (lx - px_, 0.007, lz - pz_)], tone, layer=1, two_sided=True)
     market_fill(env, k)
     bg = env.render(back)
-    # Shallow focus: everything past the wheel goes soft, the street's sun glare blooms.
-    bg = bg.filter(ImageFilter.GaussianBlur(3.2 * k))
+    # Soft shadows of the tarpaulins on the floor, hanging bulbs glowing, beams of sun, depth of field.
+    shadows = []
+    for (z0, z1) in MARKET_BLOCKS:
+        for xa, xb in ((-4.3, -1.2), (1.2, 4.3)):
+            pts = [camera.project((x, 0.0, z))[:2] for x, z in ((xa, z0 - 1.6), (xb, z0 - 1.6), (xb, z1 - 1.0), (xa, z1 - 1.0))]
+            shadows.append(pts)
+    bg = shade_polygons(bg, shadows, 0.74, 10 * k)
+    for bz in range(3, 38, 3):
+        for bx in (-2.3, 2.3):
+            sx, sy, sz = camera.project((bx, 2.75, bz))
+            if 0 < sx < w and 0 < sy < h:
+                bg = s3.add_glow(bg, (sx, sy), (255, 214, 140), max(60 * k * 6 / max(sz, 1.0), 6), 0.5)
+    bg = light_shafts(bg, k, ((vp_x + 140 * k, 90 * k, 34), (vp_x + 420 * k, 60 * k, 26), (vp_x - 30 * k, 70 * k, 24), (vp_x + 760 * k, 120 * k, 22)))
+    bg = depth_of_field(bg, env.depth, k)
 
     chase = s3.Scene(camera, ambient=(176, 170, 180))
     chase.light((500, 520, 1400), (255, 214, 156), 1.2e6)
