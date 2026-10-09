@@ -7,6 +7,8 @@ extends CanvasLayer
 ##   {"image": path, "hold": seconds}                             a picture on its own
 ##   {"image": path, "gunshot": true, ...}                        with a flash, shake and buzz
 ##   {"image": path, "caption": "Flashback", ...}                 with a small caption
+##   {"image": path, "sound": "engine_ride", ...}                 with a sound from assets/sounds: a looping
+##                                                                one ("engine_ride") fades out when the step ends
 ##   {"image": path, "zoom": true, ...}                           with a slow push-in (pictures hold still otherwise)
 ##   {"card": "Peter", "line": "Namatay si Peter."}                     a title card on black
 ##   {"image": path, "choose": ["Run", "Ride Jeep"]}              a picture with a choice;
@@ -26,6 +28,12 @@ const DEFAULT_HOLD := 2.5
 ## A hold can be tapped away once it has been up this long.
 const MIN_HOLD_BEFORE_TAP := 0.6
 const CARD_HOLD := 3.0
+## Sounds a step can play (see "sound" above), and the ones that loop until the step ends.
+const SOUND_FOLDER := "res://assets/sounds/"
+const LOOPING_SOUNDS := ["engine_ride"]
+const SOUND_FADE_IN := 0.8
+const SOUND_FADE_OUT := 0.45
+const SOUND_QUIET_DB := -40.0
 const SHAKE_PIXELS := 14.0
 const VIBRATE_MS := 220
 const SCREEN_SIZE := Vector2(1280, 720)
@@ -158,6 +166,7 @@ func _play_picture(data: Dictionary) -> Array:
 	var lines: Array = Alaala.prepare_lines(data.get("lines", []))
 	var next_steps: Array = []
 	var hold: float = float(data.get("hold", DEFAULT_HOLD))
+	var sound: Variant = _start_sound(str(data.get("sound", "")))
 	var zoom: Tween = null
 	if data.get("zoom", false):
 		zoom = create_tween()
@@ -191,7 +200,47 @@ func _play_picture(data: Dictionary) -> Array:
 	await _tween_alpha(_black, 1.0, FADE_SECONDS)
 	if zoom != null:
 		zoom.kill()
+	_stop_sound(sound)
 	return next_steps
+
+
+## Starts the step's sound on the Sound bus (so the Sound switch silences it) and returns its player, or
+## null for no sound. A looping sound fades in, and is faded out by `_stop_sound` when the step ends.
+func _start_sound(sound_name: String) -> Variant:
+	if sound_name == "":
+		return null
+	var stream := load(SOUND_FOLDER + sound_name + ".wav") as AudioStreamWAV
+	if stream == null:
+		return null
+	var player := AudioStreamPlayer.new()
+	player.bus = Settings.SOUND_BUS
+	var level := Sfx.VOLUME_DB + 4.0
+	if sound_name in LOOPING_SOUNDS:
+		stream = stream.duplicate() as AudioStreamWAV
+		stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		stream.loop_begin = 0
+		stream.loop_end = int(stream.get_length() * stream.mix_rate)
+		player.volume_db = SOUND_QUIET_DB
+		create_tween().tween_property(player, "volume_db", level, SOUND_FADE_IN)
+	else:
+		player.volume_db = level
+	player.stream = stream
+	add_child(player)
+	player.play()
+	if sound_name not in LOOPING_SOUNDS:
+		player.finished.connect(player.queue_free)
+	return player
+
+
+## Fades a step's looping sound out and removes it; a sound that plays once is left to finish.
+func _stop_sound(player: Variant) -> void:
+	if not is_instance_valid(player) or not player.playing:
+		return
+	if (player.stream as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED:
+		return
+	var fade := create_tween()
+	fade.tween_property(player, "volume_db", SOUND_QUIET_DB, SOUND_FADE_OUT)
+	fade.tween_callback(player.queue_free)
 
 
 func _play_card(title: String, line: String) -> void:

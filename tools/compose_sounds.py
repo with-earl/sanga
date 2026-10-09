@@ -1,10 +1,12 @@
 """Makes SANGA's sound effects and writes them to assets/sounds/*.wav.
 
-There are only three, and all are quiet so they sit under the piano:
+A few, and all are quiet so they sit under the piano:
 
-    click   a soft felt tap, for every button
-    strike  a pencil stroke across paper with a faint chime, for a finished objective
-    memory  a breath drawn in, then three soft bells, when a choice only a memory allows is taken
+    click        a soft felt tap, for every button
+    strike       a pencil stroke across paper with a faint chime, for a finished objective
+    memory       a breath drawn in, then three soft bells, when a choice only a memory allows is taken
+    engine_ride  a small motorbike engine at cruising speed with wind, made to loop (Tokhang's first intro frame)
+    engine_off   the key turned and the engine dying down to a few last beats and a tick (Tokhang's third intro frame)
 
 Like the music, they are synthesised here, so there is nothing to license.
 
@@ -89,7 +91,73 @@ def memory():
     return normalise(sound, -11)
 
 
-SOUNDS = {"click": click, "strike": strike, "memory": memory}
+def _pulse(length_seconds, pitch, decay):
+    """One exhaust beat of a single-cylinder engine: a low thump that rings down, with a puff of noise on it."""
+    rng = np.random.default_rng(int(pitch * 10))
+    t = times(length_seconds)
+    thump = np.sin(2 * np.pi * pitch * (1.0 + 0.5 * np.exp(-t * 40)) * t) * np.exp(-t * decay)
+    puff = band(rng.normal(0, 1, len(t)), 140, 900) * np.exp(-t * decay * 1.6) * 0.55
+    return thump + puff
+
+
+def _engine(total_seconds, rate_of, amp_of=None, wind=0.0, seed=7):
+    """An engine as a train of beats whose rate follows `rate_of(t)` beats a second and loudness `amp_of(t)`;
+    the beats are a little uneven, as a real single is. A muffler (low pass), a quiet mechanical tick and
+    some wind sit on top."""
+    rng = np.random.default_rng(seed)
+    n = int(total_seconds * SR)
+    out = np.zeros(n + int(0.3 * SR))
+    tick_track = np.zeros_like(out)
+    t = 0.0
+    while t < total_seconds:
+        rate = max(rate_of(t), 0.5)
+        pitch = 70.0 + 2.2 * rate
+        length = min(0.16, 0.9 / rate)
+        beat = _pulse(length, pitch, 38.0) * (amp_of(t) if amp_of else 1.0) * (0.85 + 0.3 * rng.random())
+        i = int(t * SR)
+        out[i : i + len(beat)] += beat[: len(out) - i]
+        if rate > 6.0:
+            tick = band(rng.normal(0, 1, 120), 1800, 4800) * np.exp(-np.arange(120) / SR * 900) * 0.05
+            tick_track[i : i + 120] += tick[: len(tick_track) - i]
+        t += (1.0 / rate) * (0.94 + 0.12 * rng.random())
+    sound = lowpass(out + tick_track, 1400)
+    if wind > 0.0:
+        noise = band(rng.normal(0, 1, len(out)), 160, 1700)
+        gust = 0.7 + 0.3 * np.sin(2 * np.pi * 0.35 * np.arange(len(out)) / SR)
+        sound = sound + noise * gust * wind
+    return sound[:n], sound[n:]
+
+
+def engine_ride():
+    """A small bike at cruising speed (about 3,600 rpm: thirty beats a second) with a slow swell as the rider
+    rolls the throttle, wind in the ear, and a seamless loop: the ring of the last beats is laid over the start."""
+    seconds = 4.0
+    body, tail = _engine(seconds, lambda t: 30.0 * (1.0 + 0.045 * np.sin(2 * np.pi * t / seconds)), wind=0.045)
+    # The last beats ring on past the end, so they are added over the start, as a loop's end runs into its beginning.
+    body[: len(tail)] += tail
+    return normalise(body, -6)
+
+
+def engine_off():
+    """The key is turned: a small click, then the engine stumbles down, beats slowing and weakening (from
+    about thirty a second to three), a last rattle of the stand, and a faint tick of the hot metal cooling."""
+    seconds = 2.2
+    rng = np.random.default_rng(11)
+    body, tail = _engine(seconds, lambda t: 30.0 * np.exp(-t * 2.5) + 2.5 * np.exp(-t * 0.6) * (1.0 if t < 1.5 else 0.0) + 1.0,
+                         amp_of=lambda t: float(np.exp(-t * 1.5)), wind=0.0, seed=13)
+    out = np.concatenate([body, tail[: int(0.2 * SR)]])
+    key = np.sin(2 * np.pi * 1700 * times(0.03)) * np.exp(-times(0.03) * 260) * 0.5 + band(rng.normal(0, 1, int(0.03 * SR)), 2200, 5200) * np.exp(-times(0.03) * 300) * 0.4
+    out[: len(key)] += key
+    # The hot metal cooling: three faint ticks, a little apart.
+    for at in (1.55, 1.82, 2.05):
+        i = int(at * SR)
+        tick = band(rng.normal(0, 1, 150), 2400, 5600) * np.exp(-np.arange(150) / SR * 700) * 0.12
+        out[i : i + len(tick)] += tick[: len(out) - i]
+    out[-int(0.05 * SR) :] *= np.linspace(1.0, 0.0, int(0.05 * SR))
+    return normalise(out, -8)
+
+
+SOUNDS = {"click": click, "strike": strike, "memory": memory, "engine_ride": engine_ride, "engine_off": engine_off}
 
 
 def main():
