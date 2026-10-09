@@ -2,8 +2,8 @@ extends Control
 ## Main screen: Story Mode, Shift Mode and Quit. Each mode has its own three save slots, listed over
 ## everything when the mode is chosen (see SaveSlots): an empty slot starts a new game, a save is
 ## opened. Story Mode is the one fixed run, from the market. Shift Mode, which stays locked until
-## Story Mode has been finished, opens a save's start screen (see StartScreen) to begin a run at any
-## of the three stories. The Quit question and short messages swap in for the buttons, in the same
+## Story Mode has been finished, first shows a carousel of the three stories (see StartScreen) and
+## then the three slots of the story chosen. The Quit question and short messages swap in for the buttons, in the same
 ## spot. Anything that would lose progress asks first and says so.
 
 const ROW_SIZE := Vector2(300, 52)
@@ -48,7 +48,7 @@ var _toast_tween: Tween
 
 
 func _ready() -> void:
-	_story_button.pressed.connect(_open_slots.bind(GameState.MODE_STORY))
+	_story_button.pressed.connect(_open_mode.bind(GameState.MODE_STORY))
 	_shift_button.pressed.connect(_shift_pressed)
 	_refresh_shift_lock()
 	_quit_button.pressed.connect(_show_quit_confirm.bind(true))
@@ -66,10 +66,10 @@ func _notification(what: int) -> void:
 		return
 	if _settings.is_open():
 		_settings.close()
-	elif _start_screen != null:
-		_start_screen.back()
 	elif _slots != null:
 		_slots.back()
+	elif _start_screen != null:
+		_start_screen.back()
 	elif _save_panel.visible:
 		_back_action.call()
 	else:
@@ -127,7 +127,7 @@ func _refresh_shift_lock() -> void:
 
 func _shift_pressed() -> void:
 	if GameState.story_finished():
-		_open_slots(GameState.MODE_SHIFT)
+		_open_mode(GameState.MODE_SHIFT)
 	else:
 		_toast(UNLOCK_NOTE)
 
@@ -195,12 +195,31 @@ func _show_quit_confirm(asking: bool) -> void:
 	_menu.visible = not asking
 
 
-## A mode was chosen: list that mode's three save slots (see SaveSlots). Tapping an empty slot starts
-## a new game in it; a save opens.
-func _open_slots(game_mode: String) -> void:
+## A mode was chosen. Story Mode lists its three save slots (see SaveSlots) at once. Shift Mode first
+## shows the story carousel (see StartScreen), and lists the three slots of the story that is chosen.
+func _open_mode(game_mode: String) -> void:
 	GameState.mode = game_mode
-	# The list covers the screen, so the main words step aside rather than show through it.
+	# The screens cover everything, so the main words step aside rather than show through them.
 	_menu.visible = false
+	if game_mode == GameState.MODE_SHIFT:
+		_start_screen = StartScreen.new()
+		add_child(_start_screen)
+		_start_screen.open()
+		_start_screen.picked.connect(_story_picked)
+		_start_screen.closed.connect(_start_screen_closed)
+	else:
+		_open_slots()
+
+
+func _story_picked(story: String) -> void:
+	GameState.shift_story = story
+	_open_slots()
+
+
+func _open_slots() -> void:
+	# The carousel waits out of sight underneath, to come back to.
+	if _start_screen != null:
+		_start_screen.visible = false
 	_slots = SaveSlots.new()
 	add_child(_slots)
 	_slots.open()
@@ -208,22 +227,34 @@ func _open_slots(game_mode: String) -> void:
 	_slots.closed.connect(_slots_closed)
 
 
+## An empty slot starts a new game in it; a save opens.
 func _slot_picked(slot: int) -> void:
 	if GameState.has_slot(slot):
 		_open_save(slot)
 		return
 	GameState.new_game(slot)
-	if GameState.mode == GameState.MODE_STORY:
-		# The story always begins at the market.
-		StoryDirector.begin_with("tokhang")
-	else:
-		_show_start_screen(slot)
+	_begin_run()
+
+
+## Starts a run for the slot in use: Story Mode always begins at the market; Shift Mode begins at the
+## story whose card was chosen.
+func _begin_run() -> void:
+	StoryDirector.begin_with("tokhang" if GameState.mode == GameState.MODE_STORY else GameState.shift_story)
 
 
 func _slots_closed() -> void:
 	_slots = null
-	_menu.visible = true
+	# Back from Shift Mode's slots lands on its carousel; from Story Mode's, on the main buttons.
+	if _start_screen == null:
+		_menu.visible = true
+	else:
+		_start_screen.visible = true
 	_refresh_shift_lock()
+
+
+func _start_screen_closed() -> void:
+	_start_screen = null
+	_menu.visible = true
 
 
 func _show_main() -> void:
@@ -232,28 +263,21 @@ func _show_main() -> void:
 	_menu.visible = true
 
 
-## Opening a save shows its start screen (see StartScreen). Story Mode's has only a Continue card
-## (the run in progress, or "Story complete"); Shift Mode's also asks where to begin a new run, with
-## the three story cards. The save list stays underneath, to come back to.
+## Opening a save carries it on: the run in progress resumes. Between runs, Shift Mode begins a new run
+## at the same story, and Story Mode says the story is complete.
 func _open_save(slot: int) -> void:
 	if not GameState.load_slot(slot):
 		_close_slots()
 		_show_message("That save can’t be opened")
 		return
-	# A Story Mode save that never began a run (or was left between runs unfinished) simply begins.
-	if GameState.mode == GameState.MODE_STORY and not GameState.is_run_in_progress() and GameState.runs_finished == 0:
-		StoryDirector.begin_with("tokhang")
-		return
-	# Both modes open the save's start screen: Story Mode's has only the Continue card, Shift Mode's
-	# adds the three starting points.
-	_show_start_screen(slot)
-
-
-func _show_start_screen(slot: int) -> void:
-	_start_screen = StartScreen.new()
-	add_child(_start_screen)
-	_start_screen.open(slot, SaveSlots.describe(slot))
-	_start_screen.closed.connect(func() -> void: _start_screen = null)
+	if GameState.is_run_in_progress():
+		StoryDirector.resume()
+	elif GameState.mode == GameState.MODE_SHIFT or GameState.runs_finished == 0:
+		_begin_run()
+	else:
+		_close_slots()
+		_refresh_shift_lock()
+		_show_message("Story complete. Shift Mode is open.")
 
 
 ## Takes the save list away, for a message that has to show on the main screen itself.

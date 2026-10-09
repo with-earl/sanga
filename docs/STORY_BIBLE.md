@@ -187,18 +187,19 @@ In Tokhang the water gun is offered either by memory 1 or, with no memory, by Ku
 The first run starts cold in the market, with no hint of what comes after it (New Game always
 starts at the market).
 
-**Two game modes**, chosen on the main screen, each with its own three save slots. **Story Mode** is the
-fixed first run, tapped through from the market to the end; opening its save shows only a **Continue** card,
-which carries on where it stopped and reads "Story complete" (closed) once finished. **Shift Mode** is locked (a padlock before its name, and tapping it says to finish
-Story Mode) until any Story Mode save has finished its run; the unlock is kept on the device, so deleting the
-finished save does not lock it again. Opening a Shift Mode save shows the **start screen**, which replaces the
-old "answer as the priest" menu, with all three starting points open (a Shift Mode save counts as past the
-first run). Three upright 3:4 cards:
+**Two game modes**, chosen on the main screen. **Story Mode** is the fixed first run, tapped through from
+the market to the end: three save slots, and a slot goes straight to Load or Delete (an empty one starts the
+story; a finished one says "Story complete"). **Shift Mode** is locked (a padlock before its name, and
+tapping it says to finish Story Mode) until any Story Mode save has finished its run; the unlock is kept on
+the device, so deleting the finished save does not lock it again. Shift Mode opens on a **story carousel**,
+"Select a starting point": Tokhang, Kumpisal and Padala as upright 3:4 cards, the middle one in front, the
+others smaller and dimmed behind it. A small round **i** button on the middle card flips it to a short
+summary of the story that gives nothing away (set-up only, no events). Choosing a card lists **that story's
+own three slots** (nine Shift Mode saves in all); a Shift Mode save counts as past the first run. Each card:
 
 | Card | Opens |
 |---|---|
-| **Continue** | The save as it stands (a run in progress, or the next run). |
-| **Tokhang** | Under the heading "Select your starting point": the run begins at the market. |
+| **Tokhang** | The run begins at the market. |
 | **Kumpisal** | The run begins at the church. |
 | **Padala** | The run begins in the room. |
 

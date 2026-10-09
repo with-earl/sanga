@@ -169,6 +169,13 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **Shift Mode carousel (branch claude/shift-carousel, from your sketch):** Story Mode is now Slot -> Load /
+  Delete (no Continue-only screen). Shift Mode is a story carousel (`scripts/start_screen.gd`: middle card in
+  front, side cards smaller and dimmed; swipe or tap to move, tap the middle to choose, dots below, heading
+  "Select a starting point") -> that story's own three slots (`GameState.shift_story`; files
+  `shift_<story>_<n>.json`) -> Load / Delete. Each card has a round "i" button that flips it to a short
+  no-spoiler summary (`STORIES[...].summary`; written by me, edit freely). There is no Continue card in Shift
+  Mode now: continuing is Load on a slot. Earlier `shift_<n>.json` saves (one set for all stories) are no longer read.
 - **Start screens per mode:** opening a Story Mode save shows only the Continue card (centred; "Story
   complete" and disabled once the story is finished); opening a Shift Mode save shows the Continue card plus
   the three story cards under "Select your starting point". A Story Mode save with no run yet just begins.

@@ -22,6 +22,9 @@ var current_slot := -1
 ## Which game mode the slots in use belong to: MODE_STORY or MODE_SHIFT. Set by the main screen before a
 ## slot list opens; the slot functions below all read and write that mode's own files.
 var mode := MODE_STORY
+## In Shift Mode, which story card the slots belong to ("tokhang", "kumpisal" or "padala"): every starting
+## point keeps its own three slots.
+var shift_story := "tokhang"
 var location := START_LOCATION
 var flags: Dictionary = {}
 var decisions: Array = []
@@ -394,9 +397,12 @@ func latest_slot() -> int:
 	return best
 
 
-## Story Mode's saves keep their old names (slot_0.json), Shift Mode's have their own (shift_0.json).
+## Story Mode's saves keep their old names (slot_0.json); each Shift Mode story has its own three
+## (shift_tokhang_0.json, shift_kumpisal_1.json, and so on).
 func slot_path(slot: int) -> String:
-	return "%s/%s_%d.json" % [SAVE_DIR, "slot" if mode == MODE_STORY else "shift", slot]
+	if mode == MODE_STORY:
+		return "%s/slot_%d.json" % [SAVE_DIR, slot]
+	return "%s/shift_%s_%d.json" % [SAVE_DIR, shift_story, slot]
 
 
 func _is_valid_slot(slot: int) -> bool:
