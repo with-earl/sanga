@@ -7,6 +7,8 @@ extends Control
 ## spot. Anything that would lose progress asks first and says so.
 
 const ROW_SIZE := Vector2(300, 52)
+## The padlock shown before "Shift Mode" while it is locked.
+const LOCK_ICON := "res://assets/ui/lock.png"
 ## Where the lists sit, in the screen's own terms: their centre line is the logo's (the logo is part
 ## of the main screen's picture, centred about 258 px from the right edge), and their top is just
 ## under it (344 px from the top of a 720 px screen).
@@ -85,19 +87,36 @@ func _put_on_window(panel: VBoxContainer) -> void:
 	hug.call()
 
 
-## Shift Mode looks dimmed and says "locked" until Story Mode has been finished; tapping it then
-## says what to do.
+## Shift Mode shows a lock icon before its name, dimmed, until Story Mode has been finished; tapping
+## it then says what to do.
 func _refresh_shift_lock() -> void:
 	var open := GameState.story_finished()
-	_shift_button.text = "Shift Mode" if open else "Shift Mode  ·  locked"
-	_shift_button.modulate.a = 1.0 if open else 0.5
+	_shift_button.text = "Shift Mode"
+	_shift_button.modulate.a = 1.0 if open else 0.6
+	var old := _shift_button.get_node_or_null("Lock")
+	if old != null:
+		old.queue_free()
+	if open:
+		return
+	# The padlock sits just before the centred words, so the whole line stays centred on the logo's axis.
+	var icon := TextureRect.new()
+	icon.name = "Lock"
+	icon.texture = load(LOCK_ICON) as Texture2D
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.size = Vector2(34, 34)
+	var font := _shift_button.get_theme_font("font", "Button")
+	var font_size := _shift_button.get_theme_font_size("font_size", "Button")
+	var text_width := font.get_string_size(_shift_button.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	icon.position = Vector2((ROW_SIZE.x - text_width) / 2.0 - icon.size.x - 12.0, (ROW_SIZE.y - icon.size.y) / 2.0)
+	_shift_button.add_child(icon)
 
 
 func _shift_pressed() -> void:
 	if GameState.story_finished():
 		_open_slots(GameState.MODE_SHIFT)
 	else:
-		_show_message("Finish Story Mode to open Shift Mode")
+		_show_message("Finish Story Mode\nto unlock Shift Mode")
 
 
 ## The question takes the place of the three menu buttons, in the same spot.

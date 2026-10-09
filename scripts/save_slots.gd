@@ -33,14 +33,15 @@ const TITLE_SIZE := 30
 const NAME_SIZE := 24
 const LINE_SIZE := 18
 const SMALL_SIZE := 15
-const BUTTON_FONT := 26
 const RADIUS := 12
 ## Back, Load and Delete are all this tall, so their bottoms line up exactly. The two actions sit in
 ## the empty space at the right of the list.
-const BUTTON_HEIGHT := 46.0
+const BUTTON_HEIGHT := 52.0
 const BUTTON_GAP := 8.0
-const ACTION_WIDTH := 240.0
-const ACTION_CENTER_X := 930.0
+## The two actions are the main screen's buttons in size and place: 300 x 52, centred on the logo's
+## line, 258 px in from the right edge.
+const ACTION_WIDTH := 300.0
+const ACTION_CENTER_X := 1280.0 - 258.0
 const DIM := Color(0.035, 0.02, 0.03, 0.9)
 const PLATE := Color(0.09, 0.05, 0.065, 0.82)
 const PLATE_SELECTED := Color(0.17, 0.1, 0.12, 0.92)
@@ -132,12 +133,15 @@ func _build() -> void:
 	title.text = "Story Mode" if GameState.mode == GameState.MODE_STORY else "Shift Mode"
 	UiSkin.style_label(title, TITLE_SIZE)
 	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	title.position = Vector2(LEFT, TITLE_TOP)
+	# The whole group (title, rows, buttons) is centred up and down on the screen.
+	var list_bottom := TOP + GameState.SLOT_COUNT * (ROW_SIZE.y + ROW_GAP) + 16.0 + BUTTON_HEIGHT
+	var shift := (ScreenFit.DESIGN_SIZE.y - (list_bottom - TITLE_TOP)) / 2.0 - TITLE_TOP
+	title.position = Vector2(LEFT, TITLE_TOP + shift)
 	add_child(title)
 	for slot in GameState.SLOT_COUNT:
-		_add_row(slot, Vector2(LEFT, TOP + slot * (ROW_SIZE.y + ROW_GAP)))
+		_add_row(slot, Vector2(LEFT, TOP + shift + slot * (ROW_SIZE.y + ROW_GAP)))
 	# Back, Load and Delete share one bottom edge, a little under the list.
-	var bottom := TOP + GameState.SLOT_COUNT * (ROW_SIZE.y + ROW_GAP) + 16.0 + BUTTON_HEIGHT
+	var bottom := list_bottom + shift
 	var back_button := _button(BACK, Vector2(150, BUTTON_HEIGHT))
 	back_button.position = Vector2(LEFT - 14.0, bottom - BUTTON_HEIGHT)
 	back_button.pressed.connect(back)
@@ -160,7 +164,6 @@ func _button(words: String, size: Vector2) -> Button:
 	button.theme_type_variation = &"TextButton"
 	button.text = words
 	button.focus_mode = Control.FOCUS_NONE
-	button.add_theme_font_size_override("font_size", BUTTON_FONT)
 	button.add_theme_color_override("font_disabled_color", Color(UiSkin.BUTTON_TEXT, 0.3))
 	button.custom_minimum_size = size
 	button.size = size
