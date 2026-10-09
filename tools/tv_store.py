@@ -723,9 +723,12 @@ def build(size) -> Image.Image:
         x1, bot = x0 + width, top_y - height
         scene.face([(x0, top_y, 0.032), (x1, top_y, 0.032), (x1, bot, 0.032), (x0, bot, 0.032)], (225, 232, 238), texture=sheet, layer=5, emissive=True)
         for hx in ((x0 + x1) / 2,):
-            cup_y = top_y + 0.045
-            scene.box(hx - 0.016, hx + 0.016, cup_y - 0.016, cup_y + 0.016, 0.0, 0.01, (200, 208, 214), layer=5)
-            scene.box(hx - 0.003, hx + 0.003, cup_y - 0.004, cup_y + 0.004, 0.01, 0.036, (170, 176, 184), layer=5)
+            cup_y = top_y + 0.024
+            # The suction cup: a round rubber disc on the glass with a paler dome in the middle.
+            for radius_c, tone, dz in ((0.018, (176, 184, 192), 0.0), (0.012, (214, 222, 230), -0.002)):
+                ring = [(hx + radius_c * math.sin(math.radians(t)), cup_y + radius_c * math.cos(math.radians(t)), dz) for t in range(0, 360, 20)]
+                scene.face(ring, tone, layer=5)
+            scene.box(hx - 0.003, hx + 0.003, cup_y - 0.004, cup_y + 0.004, 0.0, 0.036, (170, 176, 184), layer=5)
             scene.box(hx - 0.003, hx + 0.003, top_y - 0.012, cup_y + 0.004, 0.030, 0.036, (170, 176, 184), layer=5)
 
     # ---- the wooden pole at the kerb in front of the neighbouring shop, with its shadow
