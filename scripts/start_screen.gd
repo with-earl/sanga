@@ -4,7 +4,7 @@ extends Control
 ##
 ## On the left, one card to continue the run in progress. A thin line divides it from the three
 ## story cards on the right, under "Select your starting point": Tokhang, Kumpisal and Padala, each
-## with its place, the time it happens and who the player is there. The cards are upright, 3:4,
+## with its place and who the player is there. The cards are upright, 3:4,
 ## like the covers of three small books.
 ##
 ## The first run of a save always begins at the market, so until it is finished the other two
@@ -32,14 +32,14 @@ const TITLE_SIZE := 34
 const SMALL_SIZE := 17
 const HEADING_SIZE := 24
 const FADE_SECONDS := 0.25
-## Each story's card: the picture on it, the time it happens, and who the player is and where.
+## Each story's card: the picture on it, and who the player is and where. No time is shown.
 const STORIES := [
 	{"story": "tokhang", "image": "res://assets/backgrounds/public_market.png",
-		"when": "Linggo ng hapon", "who": "Peter · ang palengke"},
+		"who": "Peter · ang palengke"},
 	{"story": "kumpisal", "image": "res://assets/backgrounds/church_nave.png",
-		"when": "Sabado ng hapon", "who": "Eli · ang simbahan"},
+		"who": "Eli · ang simbahan"},
 	{"story": "padala", "image": "res://assets/backgrounds/apartment_room.png",
-		"when": "Sabado ng gabi", "who": "Mercy · ang kwarto"},
+		"who": "Mercy · ang kwarto"},
 ]
 const CONTINUE_TITLE := "Continue"
 const NO_RUN := "No run in progress"
@@ -131,7 +131,7 @@ func _story_card(info: Dictionary, at: Vector2) -> Button:
 	# The first run always begins at the market.
 	var open_now := story == "tokhang" or GameState.has_finished_first_run()
 	var bottom := str(info["who"]) if open_now else LOCKED
-	var card := _card(at, str(info["image"]), StoryDirector.story_title(story), str(info["when"]), bottom, open_now)
+	var card := _card(at, str(info["image"]), StoryDirector.story_title(story), "", bottom, open_now)
 	card.pressed.connect(_pick.bind(story))
 	return card
 

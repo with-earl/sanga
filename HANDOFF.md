@@ -171,7 +171,7 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 - **No story-time caption:** the small "Linggo ng hapon" at the top left of the Tokhang intro's first frame
   was removed; no story shows a time caption now. The "Flashback" and "Father Eli" captions (not times)
-  stay. The times still appear on the start screen's story cards and in the prologue's spoken line.
+  stay. The start screen's story cards no longer show a time either (they show the title and "who · where"); the times remain only in the prologue's spoken line.
 - **Story Mode and Shift Mode (branch claude/story-shift-modes):** the main screen is now Story Mode,
   Shift Mode and Quit, with the buttons lowered. Each mode has its own three slots (`GameState.mode`;
   story saves stay `slot_N.json`, shift saves are `shift_N.json`). Story Mode is the fixed run from the
