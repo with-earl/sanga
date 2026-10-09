@@ -169,6 +169,9 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **TV shop cards:** the HouseCredit promo and the BCash / Loro payment signs are now small horizontal
+  acrylic cards hung inside the shop from suction-cup hooks, in a row high on the glass above the sets so
+  the news stays the focus. `tools/tv_store.py` (`acrylic_card`).
 - **TV shop glass copy:** the HouseCredit offer is now one tall promo notice (0% interest, up to 12 months,
   no down payment, valid ID, fine print); beside it a "Tanggap dito ang:" strip with BCash (blue) and Loro
   (black, green) stickers, each with a QR and a line of Filipino copy. `tools/tv_store.py` (`build`).

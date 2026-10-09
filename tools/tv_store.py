@@ -670,45 +670,63 @@ def build(size) -> Image.Image:
     scene.face([(door_x0 + 0.1, 0.004, -0.15), (door_x1 - 0.1, 0.004, -0.15), (door_x1 - 0.1, 0.004, -0.75), (door_x0 + 0.1, 0.004, -0.75)], (40, 40, 44), texture=mat, layer=1)
     scene.face([(gx0, gy1, -0.01), (gx1, gy1, -0.01), (gx1, 0.0, -0.01), (gx0, 0.0, -0.01)], (255, 255, 255),
                texture=glass_layer(1700, 700), layer=5, emissive=True)
-    # The HouseCredit instalment promo: one tall notice with a red header, the offer, the terms and the fine print.
-    red, ink, cream = (190, 24, 30, 255), (30, 30, 40, 255), (250, 245, 220, 255)
-    notice = Image.new("RGBA", (320, 700), cream)
-    nd = ImageDraw.Draw(notice)
-    nd.rectangle((0, 0, 320, 150), fill=red)
-    _fit(nd, (160, 62), "HouseCredit", 280, 52, (255, 255, 255, 255))
-    _fit(nd, (160, 116), "AVAILABLE DITO", 280, 28, (255, 232, 200, 255), FONT_BOLD)
-    _fit(nd, (160, 245), "0%", 260, 150, red)
-    _fit(nd, (160, 345), "INTEREST", 280, 44, ink)
-    _fit(nd, (160, 392), "INSTALLMENT", 280, 36, ink, FONT_BOLD)
-    nd.rectangle((30, 425, 290, 428), fill=ink)
-    _fit(nd, (160, 468), "hanggang", 200, 26, ink, FONT_BOLD)
-    _fit(nd, (160, 528), "12 BUWAN", 280, 56, red)
-    nd.rounded_rectangle((24, 574, 296, 624), radius=10, fill=ink)
-    _fit(nd, (160, 599), "WALANG DOWN PAYMENT", 250, 22, (255, 255, 255, 255), FONT_BOLD)
-    _fit(nd, (160, 650), "Valid ID lang. Approve agad!", 290, 22, ink, FONT_BOLD)
-    _fit(nd, (160, 681), "*Subject to credit approval. T&C apply.", 300, 14, (90, 90, 96, 255), FONT_BOLD)
-    scene.face([(1.2, 2.3, -0.015), (1.52, 2.3, -0.015), (1.52, 1.6, -0.015), (1.2, 1.6, -0.015)], (250, 245, 220), texture=notice, layer=5, emissive=True)
+    # Horizontal acrylic cards hung inside the shop from suction-cup hooks on the glass: the HouseCredit
+    # promo and the two e-wallet cards, small and high so the sets and the news stay the focus.
+    def acrylic_card(print_img: Image.Image, pad: int = 16) -> Image.Image:
+        """The printed card set into a clear acrylic sheet: a pale translucent border with a bright
+        bevelled edge and two hanging holes at the top corners."""
+        pw, ph = print_img.size
+        sheet = Image.new("RGBA", (pw + pad * 2, ph + pad * 2), (0, 0, 0, 0))
+        sd = ImageDraw.Draw(sheet)
+        sd.rounded_rectangle((0, 0, sheet.width - 1, sheet.height - 1), radius=pad, fill=(235, 242, 248, 120))
+        sd.rounded_rectangle((0, 0, sheet.width - 1, sheet.height - 1), radius=pad, outline=(255, 255, 255, 235), width=3)
+        sd.rounded_rectangle((5, 5, sheet.width - 6, sheet.height - 6), radius=pad - 3, outline=(190, 205, 220, 150), width=2)
+        sheet.alpha_composite(print_img, (pad, pad))
+        for hx in (pad + 4, sheet.width - pad - 4):
+            sd.ellipse((hx - 6, 5, hx + 6, 17), fill=(120, 130, 140, 200), outline=(255, 255, 255, 255))
+        return sheet
 
-    # "We accept" strip and the two e-wallet stickers, stacked beside the promo notice.
-    head = Image.new("RGBA", (360, 70), (30, 30, 40, 255))
-    _fit(ImageDraw.Draw(head), (180, 35), "TANGGAP DITO ANG:", 320, 34, (255, 255, 255, 255))
-    scene.face([(0.82, 2.3, -0.015), (1.16, 2.3, -0.015), (1.16, 2.2, -0.015), (0.82, 2.2, -0.015)], (30, 30, 40), texture=head, layer=5, emissive=True)
-    rows = [("BCash", "I-scan ang QR, bayad agad", (24, 84, 200), (255, 255, 255), 2.17),
-            ("Loro", "Loro Pay, tanggap dito", (12, 12, 14), (60, 220, 100), 1.93)]
-    rng_qr = np.random.default_rng(5)
-    for brand, line, bg, fg, y_top in rows:
-        tag = Image.new("RGBA", (360, 210), bg + (255,))
-        td = ImageDraw.Draw(tag)
-        _fit(td, (130, 78), brand, 230, 104, fg + (255,))
-        _fit(td, (180, 150), line, 320, 28, fg + (255,), FONT_BOLD)
-        # A little QR square in the corner.
-        td.rectangle((256, 14, 346, 104), fill=fg + (255,))
+    red, ink, cream = (190, 24, 30, 255), (30, 30, 40, 255), (250, 245, 220, 255)
+    promo = Image.new("RGBA", (500, 250), cream)
+    pd = ImageDraw.Draw(promo)
+    pd.rectangle((0, 0, 190, 250), fill=red)
+    _fit(pd, (95, 100), "HouseCredit", 170, 40, (255, 255, 255, 255))
+    _fit(pd, (95, 150), "AVAILABLE DITO", 170, 22, (255, 232, 200, 255), FONT_BOLD)
+    _fit(pd, (345, 62), "0% INTEREST", 280, 50, red)
+    _fit(pd, (345, 112), "INSTALLMENT", 280, 34, ink, FONT_BOLD)
+    _fit(pd, (345, 150), "hanggang 12 buwan", 280, 28, ink, FONT_BOLD)
+    pd.rectangle((215, 176, 480, 178), fill=ink)
+    _fit(pd, (345, 200), "Walang down payment", 270, 24, ink, FONT_BOLD)
+    _fit(pd, (345, 224), "Valid ID lang. Approve agad!", 270, 18, ink, FONT_BOLD)
+    _fit(pd, (345, 242), "*Subject to credit approval. T&C apply.", 270, 11, (90, 90, 96, 255), FONT_BOLD)
+
+    def wallet(brand: str, line: str, bg, fg) -> Image.Image:
+        img = Image.new("RGBA", (360, 170), bg + (255,))
+        d2 = ImageDraw.Draw(img)
+        _fit(d2, (120, 70), brand, 220, 92, fg + (255,))
+        _fit(d2, (180, 140), line, 330, 26, fg + (255,), FONT_BOLD)
+        d2.rectangle((262, 14, 342, 94), fill=fg + (255,))
+        qr = np.random.default_rng(len(brand))
         for qx in range(8):
             for qy in range(8):
-                if rng_qr.random() < 0.5:
-                    td.rectangle((260 + qx * 11, 18 + qy * 11, 268 + qx * 11, 26 + qy * 11), fill=bg + (255,))
-        td.rectangle((8, 8, 351, 201), outline=fg + (255,), width=3)
-        scene.face([(0.82, y_top, -0.015), (1.16, y_top, -0.015), (1.16, y_top - 0.2, -0.015), (0.82, y_top - 0.2, -0.015)], bg, texture=tag, layer=5, emissive=True)
+                if qr.random() < 0.5:
+                    d2.rectangle((265 + qx * 9.5, 17 + qy * 9.5, 272 + qx * 9.5, 24 + qy * 9.5), fill=bg + (255,))
+        return img
+
+    cards = [(wallet("BCash", "I-scan ang QR, bayad agad", (24, 84, 200), (255, 255, 255)), 0.52, 0.26),
+             (wallet("Loro", "Loro Pay, tanggap dito", (12, 12, 14), (60, 220, 100)), 0.84, 0.26),
+             (promo, 1.16, 0.36)]
+    top_y = 2.38
+    for img, x0, width in cards:
+        sheet = acrylic_card(img)
+        height = width * sheet.height / sheet.width
+        x1, bot = x0 + width, top_y - height
+        scene.face([(x0, top_y, 0.032), (x1, top_y, 0.032), (x1, bot, 0.032), (x0, bot, 0.032)], (225, 232, 238), texture=sheet, layer=5, emissive=True)
+        for hx in (x0 + width * 0.05, x1 - width * 0.05):
+            cup_y = top_y + 0.045
+            scene.box(hx - 0.016, hx + 0.016, cup_y - 0.016, cup_y + 0.016, 0.0, 0.01, (200, 208, 214), layer=5)
+            scene.box(hx - 0.003, hx + 0.003, cup_y - 0.004, cup_y + 0.004, 0.01, 0.036, (170, 176, 184), layer=5)
+            scene.box(hx - 0.003, hx + 0.003, top_y - 0.012, cup_y + 0.004, 0.030, 0.036, (170, 176, 184), layer=5)
 
     # ---- the wooden pole at the kerb in front of the neighbouring shop, with its shadow
     pole_x, pole_z = 1.72, -0.42
