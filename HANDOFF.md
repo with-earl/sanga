@@ -173,7 +173,7 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   `bike_parts.py` shapes (glossy pink helmet with a rubber rim, a stripe and a shine; a nylon jacket with
   creases and a reflective band; shoulders and arms; the pink backpack with straps, a zip and side pockets),
   lights him with the sun, a cool bounce from the shop's screens and a warm fill, and softens him a little
-  (lens blur) over the sharp shop. This replaces the flat 2D sprite of `rider_back.py` (kept in the repo, now
+  (lens blur) over the sharp shop. He stands at (0.56, -0.8): nearer the camera and at the left edge, as before. This replaces the flat 2D sprite of `rider_back.py` (kept in the repo, now
   unused). Frame 1 (the skyway) was left as it was; the denim leg, boot and jacket detail added to
   `bike_parts.py` also show there when they are in view.
 - **Shift Mode carousel (branch claude/shift-carousel, from your sketch):** Story Mode is now Slot -> Load /
