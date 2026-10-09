@@ -75,7 +75,7 @@ name from `PLACEHOLDERS.txt` so the tool never draws over it.
 | --- | --- |
 | `tokhang_skyway.png` | Intro frame 1: Peter on his scooter on the skyway, seen low from the side, Manila ahead (`tools/intro_frames.py`) |
 | `tokhang_tv_news.png` | Intro frame 2: TV news report about Tokhang |
-| `tokhang_market_arrival.png` | Intro frame 3: over Peter's left shoulder as he rolls into the market street (`tools/intro_frames.py`) |
+| `tokhang_market_arrival.png` | Intro frame 3: the scooter parked at the market, his helmet hung on the left mirror (`tools/intro_frames.py`) |
 | `tokhang_peter_holding.png`, `tokhang_peter_shot.png` | Peter with the toy gun, and the shooting |
 | `tokhang_gwen_holding.png`, `tokhang_gwen_shot.png` | Gwen with the toy gun, and the shooting |
 | `tokhang_kulas_runs.png`, `tokhang_kulas_shot.png` | Kulas running, and the shooting |

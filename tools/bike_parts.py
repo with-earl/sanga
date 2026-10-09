@@ -237,7 +237,7 @@ def steering(scene, layer=6, glass=None, cluster=None, phone=None):
     ends, switch pods, brake hose, mirrors on stalks, dashboard housing, and (optionally) phone."""
     # Headlight with a lit lens, indicators, and the apron below it.
     ellipsoid(scene, (0, 1.03, -0.3), (0.14, 0.1, 0.1), PINK, layer - 2, n=22, m=12, e=0.8)
-    ellipsoid(scene, (0, 1.03, -0.205), (0.1, 0.075, 0.03), (255, 244, 214), layer - 2, n=18, m=8, emissive=True)
+    ellipsoid(scene, (0, 1.03, -0.205), (0.1, 0.075, 0.03), (226, 232, 236), layer - 2, n=18, m=8)   # the lens, off in daylight
     for sgn in (-1, 1):
         ellipsoid(scene, (sgn * 0.16, 0.99, -0.32), (0.032, 0.026, 0.04), (255, 160, 40), layer - 2, n=10, m=6)
     rings = [ring_points((0, y, z), (1, 0, 0), (0, 0, 1), rx, rz, 20, 0.75) for y, z, rx, rz in
@@ -364,21 +364,7 @@ def rider(scene, layer=7, left_only=False):
         curve_tube(scene, strap, 0.014, (18, 18, 20), layer + 2, 8)
     # Helmet: a glossy pink shell, a pale racing stripe, a black rubber rim and a rear vent.
     head = (0, 1.66, back(1.66) - 0.01)
-    def helmet_shade(k, i):
-        # Painted on the shell so each mark stays on its own side: a stripe over the top, a dark visor at
-        # the front, a white decal at each side and a vent at the back.
-        if i in (0, 1, 13, 14, 27) and 2 <= k <= 11 and not (i in (0, 14) and 6 <= k <= 9):
-            return (255, 238, 247)
-        if 6 <= i <= 9 and 7 <= k <= 8:
-            return (22, 26, 40)
-        if i in (0, 14) and 6 <= k <= 9:
-            return (255, 238, 247)
-        if i in (20, 21, 22) and 7 <= k <= 8:
-            return (40, 20, 30)
-        return None
-
-    ellipsoid(scene, head, (0.158, 0.172, 0.19), PINK, layer + 2, n=28, m=16, e=0.95, shade=helmet_shade)
-    ellipsoid(scene, (0, 1.545, back(1.545) - 0.02), (0.152, 0.02, 0.172), (20, 20, 22), layer + 2, n=28, m=4, e=0.9)   # the rubber rim at the bottom edge
+    helmet(scene, head, layer + 2, visor_i=7, back_y=back(1.545) - 0.02)
     # Arms: shoulder joints, sleeves with elbow bends and a reflective cuff, and gloves on the grips.
     for sgn in (-1, 1):
         shoulder = (sgn * 0.255, 1.36, back(1.36) + 0.0)
@@ -393,6 +379,48 @@ def rider(scene, layer=7, left_only=False):
         glove(scene, sgn, layer + 2)
     rider_leg(scene, -1, layer)
     rider_leg(scene, 1, layer)
+
+
+def helmet(scene, head, layer, visor_i=7, back_y=None):
+    """The pink helmet: a glossy shell with a pale stripe, a dark visor on one side (index `visor_i` of the
+    28 ring points: 7 faces +z, 21 faces -z), a decal at each ear, a vent opposite the visor and a black
+    rubber rim round the bottom edge. Marks are painted on the shell so each stays on its own side."""
+    n = 28
+    vent_i = (visor_i + 14) % n
+
+    def near(i, centre, spread):
+        return abs((i - centre + n // 2) % n - n // 2) <= spread
+
+    def helmet_shade(k, i):
+        if near(i, 0, 0) or near(i, 14, 0):
+            if 6 <= k <= 9:
+                return (255, 238, 247)
+        if near(i, visor_i, 2) and 6 <= k <= 9 and not (near(i, visor_i, 2) and k in (6, 9) and not near(i, visor_i, 1)):
+            return (22, 26, 40) if k != 6 else (60, 70, 96)   # a dark visor with a lighter glint along its top edge
+        if near(i, vent_i, 1) and 7 <= k <= 8:
+            return (40, 20, 30)
+        if (near(i, visor_i - 7 + 14, 0) or near(i, visor_i - 7, 0) or near(i, visor_i - 7 + 1, 0)) and 2 <= k <= 11:
+            return (255, 238, 247)   # the stripe over the top
+        return None
+
+    hx, hy, hz = head
+    ellipsoid(scene, head, (0.158, 0.172, 0.19), PINK, layer, n=n, m=16, e=0.95, shade=helmet_shade)
+    ellipsoid(scene, (hx, hy - 0.115, hz - 0.01), (0.152, 0.02, 0.172), (20, 20, 22), layer, n=n, m=4, e=0.9)   # the rubber rim at the bottom edge
+    front = 1 if visor_i == 7 else -1
+    ellipsoid(scene, (hx, hy - 0.09, hz + front * 0.15), (0.095, 0.07, 0.07), PINK, layer, n=18, m=8, e=0.85)   # the chin guard
+
+
+def hanging_helmet(scene, loop, layer=8):
+    """The helmet hung on the mirror by its straps: a loop of strap round the stalk, two straps down to the
+    shell, a small buckle, the visor turned towards the camera behind the bike."""
+    lx, ly, lz = loop
+    head = (lx - 0.1, ly - 0.3, lz - 0.02)
+    helmet(scene, head, layer, visor_i=21)
+    for sgn in (-1, 1):
+        top = (lx, ly, lz)
+        side = (head[0] + sgn * 0.14, head[1] + 0.02, head[2] - 0.02)
+        curve_tube(scene, bezier(top, ((top[0] + side[0]) / 2, (top[1] + side[1]) / 2 + 0.03, top[2] - 0.02), side, 6), 0.007, (24, 24, 28), layer, 6)
+    ellipsoid(scene, (lx, ly - 0.02, lz - 0.01), (0.014, 0.014, 0.014), (200, 204, 210), layer, n=8, m=4)   # the buckle on the stalk
 
 
 def glove(scene, sgn, layer):

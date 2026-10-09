@@ -4,10 +4,10 @@
   Frame 1, the skyway: a low shot from the side as Peter rides his pink scooter along the elevated
   expressway at speed (the road streaks towards the vanishing point, the bike stays sharp), a green
   exit gantry and far traffic ahead, a hazy Manila beyond the barrier with a Gothic church spire.
-  Frame 3, the market: a chase view from above and behind Peter's left shoulder as he rolls into the
-  palengke street: his helmet and backpack, his hand on the grip, the dashboard and the phone on the
-  handlebar, then a crowded palengke: vendors and shoppers, stalls of fish, vegetables, meat, fruit, rice and isaw,
-  tarpaulin roofs, wires, a parked jeepney and a banner over the far entrance, all glowing in low sunlight.
+  Frame 3, the market: the scooter parked at the edge of a crowded palengke in daylight, seen from waist
+  level; Peter is gone from the picture and his pink helmet hangs from the left mirror. Vendors and shoppers,
+  stalls of fish, vegetables, meat, fruit, rice and isaw, tarpaulin roofs, wires, shafts of sun and a banner
+  over the far entrance. No lamp is on.
 
 The scooter and Peter are built by bike_parts.py, the market's stalls, people and tarps by market_parts.py. In each picture the bike is drawn in a pass of its own
 over the background, so the background can be softened (speed in frame 1, shallow focus in frame 3).
@@ -602,8 +602,8 @@ def market_fill(env, k):
 
 def build_market(size):
     w, h = size
-    cam_x, cam_y, cam_z = -0.8, 1.02, -2.05
-    camera = s3.Camera((cam_x, cam_y, cam_z), 12.0, 10.0, 72.0, size)
+    cam_x, cam_y, cam_z = -0.95, 0.95, -1.45
+    camera = s3.Camera((cam_x, cam_y, cam_z), 22.0, 9.0, 72.0, size)
     vp = camera.project((cam_x, cam_y, 100000.0))
     horizon_y, vp_x = int(vp[1]), int(vp[0])
     k = w / 1672.0
@@ -670,11 +670,6 @@ def build_market(size):
             pts = [camera.project((x, 0.0, z))[:2] for x, z in ((xa, z0 - 1.6), (xb, z0 - 1.6), (xb, z1 - 1.0), (xa, z1 - 1.0))]
             shadows.append(pts)
     bg = shade_polygons(bg, shadows, 0.74, 10 * k)
-    for bz in range(3, 38, 3):
-        for bx in (-2.3, 2.3):
-            sx, sy, sz = camera.project((bx, 2.75, bz))
-            if 0 < sx < w and 0 < sy < h:
-                bg = s3.add_glow(bg, (sx, sy), (255, 214, 140), max(60 * k * 6 / max(sz, 1.0), 6), 0.5)
     bg = light_shafts(bg, k, ((vp_x + 140 * k, 90 * k, 34), (vp_x + 420 * k, 60 * k, 26), (vp_x - 30 * k, 70 * k, 24), (vp_x + 760 * k, 120 * k, 22)))
     bg = depth_of_field(bg, env.depth, k)
 
@@ -685,7 +680,7 @@ def build_market(size):
     bp.wheel(chase, 0.0, -1.25, side=1, front=False)
     bp.scooter_body(chase, show_leg=False)
     bp.steering(chase, 6, cluster=cluster_texture(), phone=phone_texture())
-    bp.rider(chase)
+    bp.hanging_helmet(chase, (-0.42, 1.43, -0.55))
     out = chase.render(bg)
     return out
 
