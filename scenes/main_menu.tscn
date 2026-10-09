@@ -28,22 +28,21 @@ grow_vertical = 0
 theme_override_constants/separation = 12
 alignment = 2
 
-[node name="ContinueButton" type="Button" parent="Buttons"]
+[node name="StoryButton" type="Button" parent="Buttons"]
 unique_name_in_owner = true
-visible = false
 custom_minimum_size = Vector2(300, 52)
 layout_mode = 2
 theme_type_variation = &"TextButton"
-text = "Continue"
+text = "Story Mode"
 alignment = 2
 focus_mode = 0
 
-[node name="NewButton" type="Button" parent="Buttons" unique_id=1318555377]
+[node name="ShiftButton" type="Button" parent="Buttons" unique_id=1318555377]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(300, 52)
 layout_mode = 2
 theme_type_variation = &"TextButton"
-text = "New Game"
+text = "Shift Mode"
 alignment = 2
 focus_mode = 0
 

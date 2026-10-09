@@ -1,23 +1,22 @@
 class_name SaveSlots
 extends Control
-## The screen that lists a game's save slots, for Continue and for New Game.
+## The screen that lists the save slots of the game mode in use (Story Mode or Shift Mode, each with
+## its own three).
 ##
 ## A compact, left-aligned list with one row for each slot. Each row has a small 4:3 picture of the
 ## place the save stopped in, and beside it the slot's name, where the story is up to and when it
 ## was saved, and how far the player has come. Tapping a row selects it. In the empty space at the
-## right, two buttons act on the selected slot, bottom-aligned with Back: Load (or "Save here" for
-## a new game) and Delete. Loading, replacing and deleting each ask first, in a small window with
-## the note "Tap outside to close" right under it.
+## right, two buttons act on the selected slot, bottom-aligned with Back: "Load" for a save or "New
+## game" for an empty slot, and Delete. Loading and deleting each ask first, in a small window with
+## a Cancel choice, so it closes only by its own buttons (no tapping outside).
 ##
-## An empty slot looks like a void: grey, faint and flat, with no picture. In the Continue list it
-## cannot be selected; in the New Game list it can.
+## An empty slot looks like a void: grey, faint and flat, with no picture. It can be selected, to
+## start a new game in it.
 
-## What choosing a slot does: open it (Continue), or start a new game in it (New Game).
-enum Mode { LOAD, NEW }
-
-## Emitted with the slot the player confirmed (an empty one, or one they agreed to replace, for New Game).
+## Emitted with the slot the player confirmed: a save to open, or an empty slot to start a new game in
+## (the main screen tells them apart with GameState.has_slot).
 signal picked(slot: int)
-## Emitted when the player goes back, or when the last save is deleted.
+## Emitted when the player goes back.
 signal closed
 
 const MONTHS := ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -34,14 +33,15 @@ const TITLE_SIZE := 30
 const NAME_SIZE := 24
 const LINE_SIZE := 18
 const SMALL_SIZE := 15
-const BUTTON_FONT := 26
 const RADIUS := 12
 ## Back, Load and Delete are all this tall, so their bottoms line up exactly. The two actions sit in
 ## the empty space at the right of the list.
-const BUTTON_HEIGHT := 46.0
+const BUTTON_HEIGHT := 52.0
 const BUTTON_GAP := 8.0
-const ACTION_WIDTH := 240.0
-const ACTION_CENTER_X := 930.0
+## The two actions are the main screen's buttons in size and place: 300 x 52, centred on the logo's
+## line, 258 px in from the right edge.
+const ACTION_WIDTH := 300.0
+const ACTION_CENTER_X := 1280.0 - 258.0
 const DIM := Color(0.035, 0.02, 0.03, 0.9)
 const PLATE := Color(0.09, 0.05, 0.065, 0.82)
 const PLATE_SELECTED := Color(0.17, 0.1, 0.12, 0.92)
@@ -52,16 +52,13 @@ const VOID_PLATE := Color(0.55, 0.55, 0.58, 0.1)
 const VOID_LINE := Color(0.75, 0.75, 0.78, 0.2)
 const VOID_TEXT := Color(0.72, 0.72, 0.75, 0.5)
 const FADE_SECONDS := 0.2
-const CONTINUE_TITLE := "Choose a save"
-const NEW_TITLE := "Save progress to which slot?"
 const BACK := "‹  Back"
 const LOAD := "Load"
-const SAVE_HERE := "Save here"
+const NEW_GAME := "New game"
 const DELETE := "Delete"
 const EMPTY := "Empty slot"
 const FALLBACK_PICTURE := "res://assets/backgrounds/main_screen.png"
 
-var _mode := Mode.LOAD
 ## The question being asked (load, replace or delete), while it shows.
 var _confirm: Control
 ## The slot that is selected, or -1 for none, and each row's parts so a selection can light it up.
@@ -71,12 +68,11 @@ var _load_button: Button
 var _delete_button: Button
 
 
-## Opens the list in `mode`. A Continue list starts with the most recent save selected.
-func open(mode: Mode) -> void:
-	_mode = mode
+## Opens the list for the game mode in use (GameState.mode), with the most recent save selected.
+func open() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	_selected = GameState.latest_slot() if mode == Mode.LOAD else -1
+	_selected = GameState.latest_slot()
 	_build()
 	modulate.a = 0.0
 	create_tween().tween_property(self, "modulate:a", 1.0, FADE_SECONDS)
@@ -122,7 +118,9 @@ static func where(info: Dictionary) -> String:
 	var stories: Array = StoryDirector.TIMELINES.get(info["timeline"], [])
 	if str(info["timeline"]) != "" and int(info["chapter"]) < stories.size():
 		return StoryDirector.story_title(stories[int(info["chapter"])])
-	return "New story" if int(info["runs_finished"]) == 0 else "Ready for a new run"
+	if GameState.mode == GameState.MODE_SHIFT:
+		return "Choose a starting point"
+	return "New story" if int(info["runs_finished"]) == 0 else "Story complete"
 
 
 func _build() -> void:
@@ -132,15 +130,18 @@ func _build() -> void:
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(dim)
 	var title := Label.new()
-	title.text = CONTINUE_TITLE if _mode == Mode.LOAD else NEW_TITLE
+	title.text = "Story Mode" if GameState.mode == GameState.MODE_STORY else "Shift Mode"
 	UiSkin.style_label(title, TITLE_SIZE)
 	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	title.position = Vector2(LEFT, TITLE_TOP)
+	# The whole group (title, rows, buttons) is centred up and down on the screen.
+	var list_bottom := TOP + GameState.SLOT_COUNT * (ROW_SIZE.y + ROW_GAP) + 16.0 + BUTTON_HEIGHT
+	var shift := (ScreenFit.DESIGN_SIZE.y - (list_bottom - TITLE_TOP)) / 2.0 - TITLE_TOP
+	title.position = Vector2(LEFT, TITLE_TOP + shift)
 	add_child(title)
 	for slot in GameState.SLOT_COUNT:
-		_add_row(slot, Vector2(LEFT, TOP + slot * (ROW_SIZE.y + ROW_GAP)))
+		_add_row(slot, Vector2(LEFT, TOP + shift + slot * (ROW_SIZE.y + ROW_GAP)))
 	# Back, Load and Delete share one bottom edge, a little under the list.
-	var bottom := TOP + GameState.SLOT_COUNT * (ROW_SIZE.y + ROW_GAP) + 16.0 + BUTTON_HEIGHT
+	var bottom := list_bottom + shift
 	var back_button := _button(BACK, Vector2(150, BUTTON_HEIGHT))
 	back_button.position = Vector2(LEFT - 14.0, bottom - BUTTON_HEIGHT)
 	back_button.pressed.connect(back)
@@ -150,7 +151,7 @@ func _build() -> void:
 	_delete_button.position = Vector2(action_left, bottom - BUTTON_HEIGHT)
 	_delete_button.pressed.connect(_ask_delete)
 	add_child(_delete_button)
-	_load_button = _button(LOAD if _mode == Mode.LOAD else SAVE_HERE, Vector2(ACTION_WIDTH, BUTTON_HEIGHT))
+	_load_button = _button(LOAD, Vector2(ACTION_WIDTH, BUTTON_HEIGHT))
 	_load_button.position = Vector2(action_left, bottom - 2.0 * BUTTON_HEIGHT - BUTTON_GAP)
 	_load_button.pressed.connect(_ask_load)
 	add_child(_load_button)
@@ -163,7 +164,6 @@ func _button(words: String, size: Vector2) -> Button:
 	button.theme_type_variation = &"TextButton"
 	button.text = words
 	button.focus_mode = Control.FOCUS_NONE
-	button.add_theme_font_size_override("font_size", BUTTON_FONT)
 	button.add_theme_color_override("font_disabled_color", Color(UiSkin.BUTTON_TEXT, 0.3))
 	button.custom_minimum_size = size
 	button.size = size
@@ -182,17 +182,14 @@ func _add_row(slot: int, at: Vector2) -> void:
 	row.custom_minimum_size = ROW_SIZE
 	for style in ["normal", "hover", "pressed", "disabled", "focus", "hover_pressed"]:
 		row.add_theme_stylebox_override(style, StyleBoxEmpty.new())
-	# In the Continue list an empty slot cannot be picked; in the New Game list it can.
-	var usable := filled or _mode == Mode.NEW
-	row.disabled = not usable
+	row.disabled = false
 	var plate := Panel.new()
 	plate.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(plate)
 	row.add_child(_thumbnail(info, filled))
 	row.add_child(_words(slot, info, filled))
-	if usable:
-		UiSkin.add_press_bounce(row)
+	UiSkin.add_press_bounce(row)
 	row.pressed.connect(_select.bind(slot))
 	add_child(row)
 	_rows.append({"slot": slot, "filled": filled, "plate": plate})
@@ -216,12 +213,13 @@ func _refresh() -> void:
 		elif filled:
 			style = _rounded(PLATE, 1, LINE)
 		elif chosen:
-			# An empty slot picked in the New Game list: still a void, but with a gold edge.
+			# An empty slot that is picked: still a void, but with a gold edge.
 			style = _rounded(VOID_PLATE, 2, SELECTED_LINE)
 		plate.add_theme_stylebox_override("panel", style)
 	var has_selection := _selected >= 0
 	var selected_filled := has_selection and GameState.has_slot(_selected)
 	_load_button.disabled = not has_selection
+	_load_button.text = LOAD if selected_filled else NEW_GAME
 	_delete_button.disabled = not selected_filled
 
 
@@ -318,16 +316,13 @@ func _rounded(fill: Color, border_width: int, border: Color) -> StyleBoxFlat:
 	return box
 
 
-## Load (or Save here) was pressed: ask first. A filled slot asks before a new game replaces it.
+## Load (or New game) was pressed. A save asks first; an empty slot just starts.
 func _ask_load() -> void:
 	if _selected < 0:
 		return
 	var slot := _selected
-	var number := slot + 1
-	if _mode == Mode.LOAD:
-		_ask("Load Slot %d?" % number, "Continue where this save left off.", "Load", func() -> void: picked.emit(slot))
-	elif GameState.has_slot(slot):
-		_ask("Replace Slot %d?" % number, "The save already in this slot will be lost.", "Replace", func() -> void: picked.emit(slot))
+	if GameState.has_slot(slot):
+		_ask("Load Slot %d?" % (slot + 1), "Continue where this save left off.", "Load", func() -> void: picked.emit(slot))
 	else:
 		picked.emit(slot)
 
@@ -345,16 +340,11 @@ func _delete(slot: int) -> void:
 	_selected = -1
 	for child in get_children():
 		child.queue_free()
-	# With no saves left there is nothing to continue.
-	if _mode == Mode.LOAD and GameState.latest_slot() < 0:
-		closed.emit()
-		queue_free()
-		return
 	_build.call_deferred()
 
 
-## A small window with a question and two plain choices, and the note under it that tapping outside
-## closes it.
+## A small window with a question and two plain choices. It has a Cancel choice, so tapping outside
+## does nothing: it closes only from its own buttons (and the back button).
 func _ask(question: String, note: String, yes_text: String, yes: Callable) -> void:
 	_close_confirm()
 	_confirm = Control.new()
@@ -363,9 +353,6 @@ func _ask(question: String, note: String, yes_text: String, yes: Callable) -> vo
 	var outside := ColorRect.new()
 	outside.color = Color(0, 0, 0, 0.5)
 	outside.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	outside.gui_input.connect(func(event: InputEvent) -> void:
-		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-			_close_confirm())
 	_confirm.add_child(outside)
 	var panel := VBoxContainer.new()
 	panel.add_theme_constant_override("separation", 6)
@@ -385,12 +372,10 @@ func _ask(question: String, note: String, yes_text: String, yes: Callable) -> vo
 		button.pressed.connect(choice[1])
 		panel.add_child(button)
 	_confirm.add_child(panel)
-	var window := SoftWindow.behind(panel, SoftWindow.Look.WINDOW, Vector2(40, 24))
+	SoftWindow.behind(panel, SoftWindow.Look.WINDOW, Vector2(40, 24))
 	add_child(_confirm)
 	panel.reset_size()
 	panel.position = (ScreenFit.DESIGN_SIZE - panel.get_combined_minimum_size()) / 2.0
-	# The note sits right under the window the player is looking at.
-	UiSkin.add_close_hint(_confirm, Color(1.0, 0.953, 0.839, 0.85), Color(0.165, 0.086, 0.031, 1), window)
 
 
 func _close_confirm() -> void:
