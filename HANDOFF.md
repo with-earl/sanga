@@ -169,6 +169,13 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **Peter in intro frame 1 has depth now:** the camera sits a little farther back and higher (about 1.2 m
+  from the wheel, pitched up) so his denim leg, boot, jacket sleeve and glove are in view. His parts are built
+  in `tools/bike_parts.py` with `tube_along` (limbs through several points with their own radii: knee swell,
+  ankle taper) and `fabric` shading (grain, creases at the knee and ankle, a stitched seam, a turn-up cuff,
+  a boot with toe cap, welt, heel and laces; a nylon jacket with a reflective band, a ribbed hem and elastic
+  cuffs). Two soft fill lights light him from the road side, and the overall motion blur is lighter (0.006)
+  so he stays crisp. The 3D rider is built in frame 1 only.
 - **Shift Mode carousel (branch claude/shift-carousel, from your sketch):** Story Mode is now Slot -> Load /
   Delete (no Continue-only screen). Shift Mode is a story carousel (`scripts/start_screen.gd`: middle card in
   front, side cards smaller and dimmed; swipe or tap to move, tap the middle to choose, dots below, heading

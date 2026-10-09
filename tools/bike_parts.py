@@ -317,19 +317,77 @@ def scooter_body(scene, show_leg=True, layer=5):
         rider_leg(scene, 1, layer + 2)
 
 
+def _tone(color, factor):
+    return tuple(int(max(0, min(255, c * factor))) for c in color)
+
+
+def fabric(base, seed=1, grain=0.05, creases=(), crease_depth=0.2, stripes=(), stripe_color=None, panel=None):
+    """A shading function for `loft`: the base colour with a little grain from quad to quad, darker bands
+    where the cloth creases (`creases` lists ring rows k), light thin lines (`stripes` lists columns i)
+    for seams or reflective tape, and `panel` (a dict column -> factor) for darker side panels."""
+    rng = np.random.default_rng(seed)
+    noise = rng.normal(0, grain, (64, 64))
+
+    def shade(k, i):
+        f = 1.0 + float(noise[k % 64, i % 64])
+        if k in creases:
+            f -= crease_depth * (1.0 if (i * 7 + k) % 3 else 0.5)
+        if k - 1 in creases or k + 1 in creases:
+            f -= crease_depth * 0.35
+        if panel and i in panel:
+            f *= panel[i]
+        color = _tone(base, f)
+        if i in stripes and stripe_color is not None:
+            color = stripe_color
+        return color
+
+    return shade
+
+
+def tube_along(scene, points, radii, color, layer, n=18, e=0.9, squash=1.0, shade=None, caps=(True, True)):
+    """A smooth limb or sleeve through several points, with its own radius at each (so a knee swells and an ankle
+    narrows), skinned in one piece. `squash` flattens its cross-section a little (a thigh is wider than deep)."""
+    rings = []
+    pts = [np.array(p, float) for p in points]
+    for idx, centre in enumerate(pts):
+        if idx == 0:
+            d = pts[1] - pts[0]
+        elif idx == len(pts) - 1:
+            d = pts[-1] - pts[-2]
+        else:
+            d = pts[idx + 1] - pts[idx - 1]
+        d = d / np.linalg.norm(d)
+        up = np.array([0.0, 1.0, 0.0]) if abs(d[1]) < 0.9 else np.array([1.0, 0.0, 0.0])
+        u = np.cross(d, up)
+        u /= np.linalg.norm(u)
+        v = np.cross(d, u)
+        rings.append(ring_points(centre, u, v, radii[idx], radii[idx] * squash, n, e))
+    loft(scene, rings, color, layer, caps=caps, shade=shade)
+
+
 def rider_leg(scene, sgn, layer):
-    """Peter's leg: jeans thigh and shin, a knee, and a boot with a sole, laces and a heel."""
+    """Peter's leg: jeans from hip to ankle, drawn through a swelling at the knee with creases behind it and
+    stacked at the ankle, a stitched outer seam, a rolled turn-up cuff, and a boot with a rounded toe cap, a
+    darker sole, a heel, a welt line and crossed laces."""
     x = sgn * 0.2
-    hip, knee, ankle = (x - sgn * 0.02, 0.96, -1.06), (x, 1.0, -0.64), (x, 0.47, -0.7)
-    limb(scene, hip, knee, 0.088, 0.066, JEANS, layer, n=16)
-    joint(scene, knee, 0.068, JEANS, layer, 14, 8)
-    limb(scene, knee, ankle, 0.064, 0.048, JEANS, layer, n=16)
-    # The boot: a rounded shoe with a darker sole and a pale lace strip.
-    ellipsoid(scene, (x, 0.4, -0.76), (0.065, 0.06, 0.15), BOOT, layer, n=16, m=10, e=0.85)
-    ellipsoid(scene, (x, 0.35, -0.78), (0.07, 0.025, 0.16), (14, 14, 16), layer, n=16, m=6, e=0.7)
-    for lz in np.arange(-0.69, -0.86, -0.035):
-        scene.face([(x - 0.02, 0.455, lz), (x + 0.02, 0.455, lz), (x + 0.02, 0.455, lz - 0.012), (x - 0.02, 0.455, lz - 0.012)], (200, 200, 204), layer=layer + 1, two_sided=True)
-    limb(scene, (x, 0.5, -0.7), (x, 0.44, -0.71), 0.052, 0.058, (36, 36, 40), layer, n=14, bulge=1.0)   # the boot cuff
+    hip, thigh, knee, shin, ankle = (x - sgn * 0.02, 0.97, -1.08), (x - sgn * 0.005, 0.99, -0.88), (x, 1.0, -0.66), (x, 0.74, -0.68), (x, 0.5, -0.71)
+    denim = fabric(JEANS, seed=5 if sgn > 0 else 6, grain=0.045, creases=(2, 4, 7), crease_depth=0.22, stripes=(3,), stripe_color=(150, 176, 214))
+    tube_along(scene, [hip, thigh, knee, (x, 0.86, -0.67), shin, ankle], [0.093, 0.087, 0.07, 0.066, 0.056, 0.052], JEANS, layer, n=18, squash=0.92, shade=denim, caps=(True, False))
+    joint(scene, knee, 0.074, _tone(JEANS, 1.1), layer, 14, 8)
+    # The turn-up cuff: a paler band that is a little wider than the leg.
+    tube_along(scene, [(x, 0.54, -0.705), (x, 0.47, -0.715)], [0.061, 0.063], (120, 142, 188), layer, n=18, shade=fabric((120, 142, 188), seed=9, grain=0.04), caps=(False, False))
+    # The boot: leather with a toe cap, a heel block, a sole with a lighter welt, a tongue and laces.
+    leather = fabric(BOOT, seed=11, grain=0.05, creases=(4,), crease_depth=0.12)
+    ellipsoid(scene, (x, 0.405, -0.765), (0.068, 0.058, 0.155), BOOT, layer, n=18, m=10, e=0.82, shade=leather)
+    ellipsoid(scene, (x, 0.385, -0.84), (0.062, 0.05, 0.075), _tone(BOOT, 1.25), layer, n=14, m=8, e=0.8)   # the toe cap, a little glossier
+    ellipsoid(scene, (x, 0.345, -0.775), (0.074, 0.022, 0.165), (10, 10, 12), layer, n=18, m=6, e=0.7)       # the sole
+    ellipsoid(scene, (x, 0.357, -0.775), (0.076, 0.006, 0.168), (90, 78, 66), layer, n=18, m=4, e=0.7)       # the welt
+    ellipsoid(scene, (x, 0.34, -0.665), (0.06, 0.03, 0.04), (12, 12, 14), layer, n=12, m=6, e=0.8)           # the heel
+    ellipsoid(scene, (x, 0.5, -0.715), (0.045, 0.04, 0.03), _tone(BOOT, 1.4), layer + 1, n=10, m=5)         # the tongue
+    for li, lz in enumerate(np.arange(-0.73, -0.86, -0.028)):
+        flip = 1 if li % 2 == 0 else -1
+        scene.face([(x - 0.032, 0.46 - 0.002 * li, lz), (x + 0.032, 0.46 - 0.002 * li, lz - 0.01 * flip), (x + 0.032, 0.462 - 0.002 * li, lz - 0.014), (x - 0.032, 0.462 - 0.002 * li, lz - 0.004)],
+                   (214, 214, 218), layer=layer + 1, two_sided=True)
 
 
 # ---------------------------------------------------------------- Peter, seen from behind and above
@@ -341,20 +399,22 @@ def rider(scene, layer=7, left_only=False):
     lean = 0.16   # how far the chest leans forward per metre of height
     def back(y):
         return -1.0 + lean * (y - 0.95)
-    # Torso: a V-tapered jacket, wider at the shoulders, with collar and hem.
-    stations = ((0.93, 0.19, 0.13), (1.06, 0.2, 0.14), (1.2, 0.225, 0.15), (1.33, 0.255, 0.145), (1.41, 0.235, 0.12), (1.45, 0.13, 0.1))
+    # Torso: a V-tapered nylon jacket with a zip down the back seam, a reflective band, a ribbed hem and
+    # a collar, creased where it bunches at the waist.
+    stations = ((0.9, 0.2, 0.135), (0.95, 0.205, 0.138), (1.06, 0.2, 0.14), (1.2, 0.225, 0.15), (1.33, 0.255, 0.145), (1.41, 0.235, 0.12), (1.45, 0.13, 0.1))
     rings = [ring_points((0, y, back(y)), (1, 0, 0), (0, 0, 1), rx, rz, 24, 0.85) for y, rx, rz in stations]
+    nylon = fabric(JACKET, seed=21, grain=0.035, creases=(1, 2), crease_depth=0.25, stripes=(0, 12), stripe_color=(70, 70, 78), panel={5: 0.82, 6: 0.82, 17: 0.82, 18: 0.82})
 
     def shade(k, i):
-        if k == 1:   # a reflective band round the lower back
-            return (196, 200, 206)
-        if k == 0 and i % 3 == 0:
-            return (18, 18, 20)
-        return None
+        if k == 3 and i % 24 != 99:   # a reflective band round the back
+            return (206, 210, 216) if i % 2 == 0 else (178, 182, 190)
+        if k == 0:
+            return _tone(JACKET, 1.5) if i % 2 == 0 else _tone(JACKET, 1.2)   # the ribbed hem
+        return nylon(k, i)
 
     loft(scene, rings, JACKET, layer, caps=(True, False), shade=shade)
     # The collar and the neck.
-    limb(scene, (0, 1.44, back(1.44)), (0, 1.52, back(1.52) - 0.01), 0.08, 0.07, (32, 32, 36), layer, n=18)
+    limb(scene, (0, 1.44, back(1.44)), (0, 1.52, back(1.52) - 0.01), 0.08, 0.07, _tone(JACKET, 1.4), layer, n=18)
     limb(scene, (0, 1.5, back(1.5)), (0, 1.56, back(1.56) - 0.01), 0.052, 0.05, SKIN, layer, n=14)
     # Helmet: a glossy pink shell, a pale racing stripe, a black rubber rim and a rear vent.
     head = (0, 1.66, back(1.66) - 0.01)
@@ -364,12 +424,15 @@ def rider(scene, layer=7, left_only=False):
         shoulder = (sgn * 0.255, 1.36, back(1.36) + 0.0)
         elbow = (sgn * 0.37, 1.12, -0.9)
         wrist = (sgn * 0.435, 1.225, -0.72)
-        joint(scene, shoulder, 0.07, JACKET, layer + 1, 14, 8)
-        limb(scene, shoulder, elbow, 0.064, 0.052, JACKET, layer + 1, n=16)
-        joint(scene, elbow, 0.052, JACKET, layer + 1, 12, 8)
-        limb(scene, elbow, wrist, 0.05, 0.04, JACKET, layer + 1, n=16)
-        cuff_a = np.array(elbow) + (np.array(wrist) - np.array(elbow)) * 0.82
-        limb(scene, cuff_a, wrist, 0.043, 0.043, (206, 210, 216), layer + 1, n=16, bulge=1.0)
+        joint(scene, shoulder, 0.075, JACKET, layer + 1, 16, 8)
+        sleeve = fabric(JACKET, seed=31 + sgn, grain=0.035, creases=(2, 3), crease_depth=0.26, stripes=(5,), stripe_color=(190, 194, 200))
+        mid_up = tuple((np.array(shoulder) + np.array(elbow)) / 2.0 + np.array([0.012 * sgn, 0.0, 0.0]))
+        mid_lo = tuple((np.array(elbow) + np.array(wrist)) / 2.0 + np.array([0.01 * sgn, 0.012, 0.0]))
+        tube_along(scene, [shoulder, mid_up, elbow, mid_lo, tuple(np.array(elbow) + (np.array(wrist) - np.array(elbow)) * 0.8)],
+                   [0.066, 0.062, 0.056, 0.05, 0.043], JACKET, layer + 1, n=16, shade=sleeve, caps=(False, False))
+        joint(scene, elbow, 0.058, _tone(JACKET, 1.05), layer + 1, 12, 8)
+        cuff_a = np.array(elbow) + (np.array(wrist) - np.array(elbow)) * 0.78
+        tube_along(scene, [tuple(cuff_a), wrist], [0.046, 0.044], (30, 30, 34), layer + 1, n=16, shade=fabric((30, 30, 34), seed=41, grain=0.05, stripes=(0, 8), stripe_color=(206, 210, 216)), caps=(False, True))   # an elastic cuff with a reflective tape
         glove(scene, sgn, layer + 2)
     rider_leg(scene, -1, layer)
     rider_leg(scene, 1, layer)
