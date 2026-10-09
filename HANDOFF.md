@@ -169,6 +169,11 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **THE PLAN IS FROZEN: read `docs/FINAL_PLAN.md` first.** The contest mechanic is **Pananda** (bookmark
+  your ending, cut a red thread of cause and effect in the past, and see whether the ending survives:
+  Same / Changed / Erased, with a few anchored moments). It builds on the recap threads
+  (`story/threads.json`). Four authored cuts, milestones M0-M8, and a list of what is out of scope. Do not add
+  features that are not in that file; new ideas go under "Later". The memory (Alaala) rules stay as they are.
 - **Shift Mode carousel (branch claude/shift-carousel, from your sketch):** Story Mode is now Slot -> Load /
   Delete (no Continue-only screen). Shift Mode is a story carousel (`scripts/start_screen.gd`: middle card in
   front, side cards smaller and dimmed; swipe or tap to move, tap the middle to choose, dots below, heading
