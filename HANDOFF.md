@@ -169,6 +169,9 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **Dev tools: Unlock Shift Mode:** a "Game Modes" section in the Developer Tools window has an "Unlock
+  Shift Mode" row (`DevTools._unlock_shift_mode`): it marks Story Mode finished on the device and clears the
+  main screen's padlock at once. There is no "lock again" row.
 - **Engine sounds in the Tokhang intro:** `tools/compose_sounds.py` now also makes `engine_ride.wav` (a small
   single-cylinder bike at cruising speed with wind, a seamless 4 s loop) and `engine_off.wav` (a key click,
   the engine stumbling down and a few cooling ticks, 2.4 s). A cutscene step can say `"sound": "engine_ride"`

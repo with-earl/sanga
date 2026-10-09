@@ -79,7 +79,7 @@ picture. Delete the temporary script afterwards. The `--headless` runs print RID
   `Sfx.VOLUME_DB` (-10 dB).
 - **Debug-only features** are gated by `OS.is_debug_build()`, for example "Skip story (debug)".
   The "Developer tools" window (`scripts/dev_tools.gd`, points in `scripts/dev_jump.gd`, plus
-  the endings) opens from the terminal icon beside the gear, on the main screen and in every
+  the endings, "Unlock Shift Mode" and the memories) opens from the terminal icon beside the gear, on the main screen and in every
   place. It shows in every build during development (`DevTools.SHOW_IN_ALL_BUILDS`); set it to
   false before release. It follows Apple's design language in black, white and greys: a rounded
   sheet with "Developer Tools" and "Done", grouped rounded lists with dividers and chevrons, grey

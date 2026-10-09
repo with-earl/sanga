@@ -49,6 +49,8 @@ const ENDINGS := [
 ## The Alaala (memories) a save holds open new choices. These rows give or take them all at once,
 ## to test those choices without dying first.
 const MEMORIES_TITLE := "Memories"
+## Rows for the game modes: opening Shift Mode without having finished Story Mode first.
+const MODES_TITLE := "Game Modes"
 ## The footnote under the lists.
 const FOOTNOTE := "This build is still in development, so some parts may use placeholder art or text."
 
@@ -141,6 +143,9 @@ func _build_lists() -> ScrollContainer:
 	for ending in ENDINGS:
 		endings.append([str(ending[0]), _show_ending.bind(str(ending[1]), ending[2])])
 	_add_section(sections, ENDINGS_TITLE, endings)
+	_add_section(sections, MODES_TITLE, [
+		["Unlock Shift Mode", _unlock_shift_mode],
+	])
 	_add_section(sections, MEMORIES_TITLE, [
 		["Remember All Memories", _set_all_memories.bind(true)],
 		["Forget All Memories", _set_all_memories.bind(false)],
@@ -295,6 +300,16 @@ func _set_all_memories(remember: bool) -> void:
 		for item in Alaala.all():
 			GameState.alaala.append(str(item.get("id", "")))
 	GameState.save_current(true)
+	close()
+
+
+## Opens Shift Mode for this device, as if Story Mode had been finished, and refreshes the main screen's
+## padlock when that is where the window was opened.
+func _unlock_shift_mode() -> void:
+	Settings.mark_story_finished()
+	var screen := get_tree().current_scene
+	if screen != null and screen.has_method("_refresh_shift_lock"):
+		screen.call("_refresh_shift_lock")
 	close()
 
 
