@@ -11,10 +11,17 @@ signal saved(noticed: bool)
 
 const SLOT_COUNT := 3
 const SAVE_DIR := "user://saves"
+## The two ways to play, each with its own three save slots. Story Mode is the one fixed run, from the
+## market; Shift Mode opens when it has been finished, and begins a run at any of the three stories.
+const MODE_STORY := "story"
+const MODE_SHIFT := "shift"
 const SAVE_VERSION := 2
 const START_LOCATION := "public_market"
 
 var current_slot := -1
+## Which game mode the slots in use belong to: MODE_STORY or MODE_SHIFT. Set by the main screen before a
+## slot list opens; the slot functions below all read and write that mode's own files.
+var mode := MODE_STORY
 var location := START_LOCATION
 var flags: Dictionary = {}
 var decisions: Array = []
@@ -98,8 +105,27 @@ func _reset() -> void:
 	changed_since_checkpoint = false
 
 
+## True once the fixed first run is behind the player: this save has finished a run, or it is a Shift
+## Mode save (which is only open to someone who has finished the story).
 func has_finished_first_run() -> bool:
-	return runs_finished > 0
+	return runs_finished > 0 or mode == MODE_SHIFT
+
+
+## Whether Shift Mode is open: Story Mode was finished on this device, in any of its slots.
+func story_finished() -> bool:
+	if Settings.story_finished:
+		return true
+	var previous := mode
+	mode = MODE_STORY
+	var found := false
+	for slot in SLOT_COUNT:
+		var info := slot_summary(slot)
+		if info["exists"] and int(info["runs_finished"]) > 0:
+			found = true
+	mode = previous
+	if found:
+		Settings.mark_story_finished()
+	return found
 
 
 func is_run_in_progress() -> bool:
@@ -368,8 +394,9 @@ func latest_slot() -> int:
 	return best
 
 
+## Story Mode's saves keep their old names (slot_0.json), Shift Mode's have their own (shift_0.json).
 func slot_path(slot: int) -> String:
-	return "%s/slot_%d.json" % [SAVE_DIR, slot]
+	return "%s/%s_%d.json" % [SAVE_DIR, "slot" if mode == MODE_STORY else "shift", slot]
 
 
 func _is_valid_slot(slot: int) -> bool:

@@ -62,6 +62,8 @@ const NUDGE_SECONDS := 0.35
 @onready var _location_title: Label = %LocationTitle
 
 var _tween: Tween
+## The "Tap outside to close" note under the window. It is hidden while the Yes/No question shows.
+var _close_hint: Label
 ## The settings window is a dark brushed-steel plate with a rivet in each corner, like the gear
 ## that opens it. The picture is stretched from its middle, so its corners stay sharp.
 var _panel_style := StyleBoxTexture.new()
@@ -81,7 +83,7 @@ func _ready() -> void:
 	_menu_icon.pressed.connect(open)
 	# No close button: tapping outside closes the window, and a note under it says so.
 	_close_button.visible = false
-	UiSkin.add_close_hint(_modal, Color(1.0, 0.953, 0.839, 0.85), Color(0.165, 0.086, 0.031, 1), _panel)
+	_close_hint = UiSkin.add_close_hint(_modal, Color(1.0, 0.953, 0.839, 0.85), Color(0.165, 0.086, 0.031, 1), _panel)
 	_dim.gui_input.connect(_on_dim_input)
 	_sound_toggle.toggled.connect(_switch_volume.bind(Settings.set_sound_volume))
 	_music_toggle.toggled.connect(_switch_volume.bind(Settings.set_music_volume))
@@ -271,8 +273,11 @@ func close() -> void:
 	_modal.visible = false
 
 
-## Taps on the dimmed area outside the panel close the menu.
+## Taps on the dimmed area outside the panel close the menu, except while the Yes/No question shows:
+## a window with a negative choice closes only from its own buttons.
 func _on_dim_input(event: InputEvent) -> void:
+	if _confirm_view.visible:
+		return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		close()
 
@@ -281,6 +286,8 @@ func _on_dim_input(event: InputEvent) -> void:
 func _show_confirm(asking: bool) -> void:
 	_confirm_view.visible = asking
 	_main_view.visible = not asking
+	if _close_hint != null:
+		_close_hint.visible = not asking
 
 
 func _sync_from_settings() -> void:

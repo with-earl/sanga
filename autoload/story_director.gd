@@ -130,6 +130,8 @@ func end_run(ending_id: String, title: String, line: String, lead_in: Array = []
 	GameState.record_reality("%s:%s" % [GameState.timeline, "+".join(PackedStringArray(last_outcomes))])
 	GameState.run_outcomes = []
 	GameState.runs_finished += 1
+	if GameState.mode == GameState.MODE_STORY:
+		Settings.mark_story_finished()
 	GameState.timeline = ""
 	GameState.chapter = 0
 	GameState.location = "main_menu"

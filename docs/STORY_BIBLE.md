@@ -185,15 +185,22 @@ In Tokhang the water gun is offered either by memory 1 or, with no memory, by Ku
 ## 6. Prologue: the voice and the start screen
 
 The first run starts cold in the market, with no hint of what comes after it (New Game always
-starts at the market). Every run after it begins on the **start screen**, which replaces the old
-"answer as the priest" menu. Three upright 3:4 cards:
+starts at the market).
+
+**Two game modes**, chosen on the main screen, each with its own three save slots. **Story Mode** is the
+fixed first run, tapped through from the market to the end; its save carries on where it stopped, and says
+"Story complete" once finished. **Shift Mode** is locked ("Shift Mode · locked", and a message says to finish
+Story Mode) until any Story Mode save has finished its run; the unlock is kept on the device, so deleting the
+finished save does not lock it again. Opening a Shift Mode save shows the **start screen**, which replaces the
+old "answer as the priest" menu, with all three starting points open (a Shift Mode save counts as past the
+first run). Three upright 3:4 cards:
 
 | Card | Opens |
 |---|---|
 | **Continue** | The save as it stands (a run in progress, or the next run). |
 | **Tokhang** | Under the heading "Select your starting point": the run begins at the market. |
-| **Kumpisal** | The run begins at the church. Closed until the first run is finished. |
-| **Padala** | The run begins in the room. Closed until the first run is finished. |
+| **Kumpisal** | The run begins at the church. |
+| **Padala** | The run begins in the room. |
 
 After a pick, the prologue plays. Black screen. The confessional's small door, a grille
 (`prologue_booth.png`). Text only, no name plate. Two opening lines, the same every time:

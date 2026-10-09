@@ -172,6 +172,16 @@ func _test_save_roundtrip() -> void:
 	_check(state.delete_slot(slot), "delete_slot returns true")
 	_check(not state.has_slot(slot), "slot is gone after delete")
 	_check(not state.load_slot(99), "invalid slot is rejected")
+	# Story Mode and Shift Mode keep separate slots: a save in one is not in the other.
+	state.mode = state.MODE_SHIFT
+	_check(not state.has_slot(slot), "shift slot starts empty")
+	_check(state.save_to_slot(slot), "shift save written")
+	state.mode = state.MODE_STORY
+	_check(not state.has_slot(slot), "a shift save is not a story save")
+	state.mode = state.MODE_SHIFT
+	_check(state.has_finished_first_run(), "shift mode counts as past the first run")
+	_check(state.delete_slot(slot), "shift slot deleted")
+	state.mode = state.MODE_STORY
 	state.current_slot = -1
 
 

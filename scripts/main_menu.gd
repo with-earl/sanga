@@ -1,23 +1,25 @@
 extends Control
-## Main screen: Continue (when there is a save), New Game and Quit. Continue and New Game open the
-## list of saves over everything (see SaveSlots), and opening a save shows its start screen (see
-## StartScreen). The Quit question and short messages swap in for the buttons, in the same spot.
-## Anything that would lose progress asks first and says so.
+## Main screen: Story Mode, Shift Mode and Quit. Each mode has its own three save slots, listed over
+## everything when the mode is chosen (see SaveSlots): an empty slot starts a new game, a save is
+## opened. Story Mode is the one fixed run, from the market. Shift Mode, which stays locked until
+## Story Mode has been finished, opens a save's start screen (see StartScreen) to begin a run at any
+## of the three stories. The Quit question and short messages swap in for the buttons, in the same
+## spot. Anything that would lose progress asks first and says so.
 
 const ROW_SIZE := Vector2(300, 52)
 ## Where the lists sit, in the screen's own terms: their centre line is the logo's (the logo is part
 ## of the main screen's picture, centred about 258 px from the right edge), and their top is just
 ## under it (344 px from the top of a 720 px screen).
 const MENU_CENTER_FROM_RIGHT := -258.0
-const MENU_TOP_FROM_BOTTOM := -376.0
+const MENU_TOP_FROM_BOTTOM := -296.0
 ## The least room kept between a list and the screen's right and bottom edges.
 const MENU_EDGE_MARGIN := Vector2(40.0, 24.0)
 
 @onready var _menu: Control = $Buttons
 @onready var _quit_confirm: Control = %QuitConfirm
 @onready var _save_panel: VBoxContainer = %SavePanel
-@onready var _continue_button: Button = %ContinueButton
-@onready var _new_button: Button = %NewButton
+@onready var _story_button: Button = %StoryButton
+@onready var _shift_button: Button = %ShiftButton
 @onready var _quit_button: Button = %QuitButton
 @onready var _yes_button: Button = %YesButton
 @onready var _no_button: Button = %NoButton
@@ -32,9 +34,9 @@ var _slots: SaveSlots
 
 
 func _ready() -> void:
-	_continue_button.visible = GameState.latest_slot() >= 0
-	_continue_button.pressed.connect(_open_slots.bind(SaveSlots.Mode.LOAD))
-	_new_button.pressed.connect(_open_slots.bind(SaveSlots.Mode.NEW))
+	_story_button.pressed.connect(_open_slots.bind(GameState.MODE_STORY))
+	_shift_button.pressed.connect(_shift_pressed)
+	_refresh_shift_lock()
 	_quit_button.pressed.connect(_show_quit_confirm.bind(true))
 	# A web page cannot close itself, so the browser build has no Quit.
 	_quit_button.visible = not OS.has_feature("web")
@@ -83,37 +85,56 @@ func _put_on_window(panel: VBoxContainer) -> void:
 	hug.call()
 
 
+## Shift Mode looks dimmed and says "locked" until Story Mode has been finished; tapping it then
+## says what to do.
+func _refresh_shift_lock() -> void:
+	var open := GameState.story_finished()
+	_shift_button.text = "Shift Mode" if open else "Shift Mode  ·  locked"
+	_shift_button.modulate.a = 1.0 if open else 0.5
+
+
+func _shift_pressed() -> void:
+	if GameState.story_finished():
+		_open_slots(GameState.MODE_SHIFT)
+	else:
+		_show_message("Finish Story Mode to open Shift Mode")
+
+
 ## The question takes the place of the three menu buttons, in the same spot.
 func _show_quit_confirm(asking: bool) -> void:
 	_quit_confirm.visible = asking
 	_menu.visible = not asking
 
 
-## Continue and New Game both open the list of saves (see SaveSlots). Continue's list opens the
-## slot that is chosen; New Game's starts a new game in it.
-func _open_slots(mode: SaveSlots.Mode) -> void:
+## A mode was chosen: list that mode's three save slots (see SaveSlots). Tapping an empty slot starts
+## a new game in it; a save opens.
+func _open_slots(game_mode: String) -> void:
+	GameState.mode = game_mode
 	# The list covers the screen, so the main words step aside rather than show through it.
 	_menu.visible = false
 	_slots = SaveSlots.new()
 	add_child(_slots)
-	_slots.open(mode)
-	_slots.picked.connect(_slot_picked.bind(mode))
+	_slots.open()
+	_slots.picked.connect(_slot_picked)
 	_slots.closed.connect(_slots_closed)
 
 
-func _slot_picked(slot: int, mode: SaveSlots.Mode) -> void:
-	if mode == SaveSlots.Mode.LOAD:
+func _slot_picked(slot: int) -> void:
+	if GameState.has_slot(slot):
 		_open_save(slot)
-	else:
-		# The first run of a save always begins at the market.
-		GameState.new_game(slot)
+		return
+	GameState.new_game(slot)
+	if GameState.mode == GameState.MODE_STORY:
+		# The story always begins at the market.
 		StoryDirector.begin_with("tokhang")
+	else:
+		_show_start_screen(slot)
 
 
 func _slots_closed() -> void:
 	_slots = null
 	_menu.visible = true
-	_continue_button.visible = GameState.latest_slot() >= 0
+	_refresh_shift_lock()
 
 
 func _show_main() -> void:
@@ -122,16 +143,38 @@ func _show_main() -> void:
 	_menu.visible = true
 
 
-## Opening a save shows its start screen (see StartScreen): continue the run in progress, or begin
+## Opening a save. In Story Mode the run in progress carries on, or the finished story says so. In
+## Shift Mode the save's start screen opens (see StartScreen): continue the run in progress, or begin
 ## a new run at one of the three stories. The save list stays underneath, to come back to.
 func _open_save(slot: int) -> void:
 	if not GameState.load_slot(slot):
+		_close_slots()
 		_show_message("That save can’t be opened")
 		return
+	if GameState.mode == GameState.MODE_SHIFT:
+		_show_start_screen(slot)
+	elif GameState.is_run_in_progress():
+		StoryDirector.resume()
+	elif GameState.runs_finished > 0:
+		_close_slots()
+		_refresh_shift_lock()
+		_show_message("Story complete. Shift Mode is open.")
+	else:
+		StoryDirector.begin_with("tokhang")
+
+
+func _show_start_screen(slot: int) -> void:
 	_start_screen = StartScreen.new()
 	add_child(_start_screen)
 	_start_screen.open(slot, SaveSlots.describe(slot))
 	_start_screen.closed.connect(func() -> void: _start_screen = null)
+
+
+## Takes the save list away, for a message that has to show on the main screen itself.
+func _close_slots() -> void:
+	if _slots != null:
+		_slots.queue_free()
+		_slots = null
 
 
 func _show_message(text: String) -> void:

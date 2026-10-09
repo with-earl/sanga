@@ -22,6 +22,9 @@ var sound_volume := DEFAULT_VOLUME
 var music_volume := DEFAULT_VOLUME
 var vibration := true
 var content_warning_seen := false
+## Set once Story Mode has been finished, which opens Shift Mode. Kept here, not in a save slot, so
+## deleting the finished save does not lock Shift Mode again.
+var story_finished := false
 
 
 func _ready() -> void:
@@ -62,12 +65,20 @@ func set_music_volume(value: float) -> void:
 	_apply_volume(MUSIC_BUS, music_volume)
 
 
+## Remembers that Story Mode was finished, which opens Shift Mode.
+func mark_story_finished() -> void:
+	if not story_finished:
+		story_finished = true
+		save()
+
+
 func save() -> void:
 	var config := ConfigFile.new()
 	config.set_value("audio", "sound", sound_volume)
 	config.set_value("audio", "music", music_volume)
 	config.set_value("device", "vibration", vibration)
 	config.set_value("device", "content_warning_seen", content_warning_seen)
+	config.set_value("device", "story_finished", story_finished)
 	config.save(SETTINGS_PATH)
 
 
@@ -82,6 +93,7 @@ func load_settings() -> void:
 	set_music_volume(_read_volume(config, "music"))
 	vibration = config.get_value("device", "vibration", true) == true
 	content_warning_seen = config.get_value("device", "content_warning_seen", false) == true
+	story_finished = config.get_value("device", "story_finished", false) == true
 
 
 func _read_volume(config: ConfigFile, key: String) -> float:

@@ -169,6 +169,15 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **Story Mode and Shift Mode (branch claude/story-shift-modes):** the main screen is now Story Mode,
+  Shift Mode and Quit, with the buttons lowered. Each mode has its own three slots (`GameState.mode`;
+  story saves stay `slot_N.json`, shift saves are `shift_N.json`). Story Mode is the fixed run from the
+  market (a new slot starts it, a save resumes it, a finished one says "Story complete"). Shift Mode is
+  dimmed and says "locked" until Story Mode is finished (`Settings.story_finished`, set at the end of a
+  story-mode run, also found from old saves); a Shift Mode save opens the start screen with all three
+  starting points open. The slot list is one list per mode: tap a slot, then Load or New game (empty) /
+  Delete. Windows with a negative choice (the slot confirm, the start-over question, the settings window's
+  main-menu Yes/No) no longer close on a tap outside and show no "Tap outside to close" note.
 - **No cutscene zooms:** every cutscene picture now holds still. The slow push-in (`ZOOM_TO` in
   `autoload/cutscene.gd`) only plays for a step that sets `"zoom": true`; none do.
 - **Tokhang intro is three frames (branch claude/tokhang-intro-frames):** 1 `tokhang_skyway.png` (the camera
