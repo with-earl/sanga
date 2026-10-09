@@ -297,9 +297,9 @@ def vehicle_rear(w, h, body, stripe, seed):
 
 def build_skyway(size):
     w, h = size
-    cam_x, cam_z = 1.3, -1.75
-    camera = s3.Camera((cam_x, 0.34, cam_z), -31.0, 19.0, 68.0, size)
-    vp = camera.project((cam_x, 0.34, 100000.0))
+    cam_x, cam_z = 0.8, -0.85
+    camera = s3.Camera((cam_x, 0.3, cam_z), -33.0, 10.0, 74.0, size)
+    vp = camera.project((cam_x, 0.3, 100000.0))
     horizon_y, vp_x = int(vp[1]), int(vp[0])
 
     # ---- the backdrop: sky, clouds, Manila, and plain road colour below the horizon
@@ -310,10 +310,10 @@ def build_skyway(size):
     ground = np.zeros_like(arr)
     ys = np.arange(h, dtype=np.float32)
     t = np.clip((ys - horizon_y) / max(h - horizon_y, 1), 0, 1) ** 0.6
-    for c, (far_c, near_c) in enumerate(((176, 70), (166, 70), (156, 76))):
+    for c, (far_c, near_c) in enumerate(((176, 84), (166, 84), (156, 90))):
         ground[:, :, c] = (far_c + (near_c - far_c) * t)[:, None]
     mask = (ys >= horizon_y + 160)[:, None, None].astype(np.float32)   # only well below the horizon; the roofs sit above
-    blend = np.clip((ys - horizon_y - 120) / 90.0, 0, 1)[:, None, None]
+    blend = np.clip((ys - horizon_y - 44 * w / 1672) / (40 * w / 1672), 0, 1)[:, None, None]
     arr = arr * (1 - blend) + ground * blend
     back = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8)).convert("RGBA")
 
@@ -327,7 +327,7 @@ def build_skyway(size):
     for si in range(len(xs_edges) - 1):
         xa, xb = xs_edges[si], xs_edges[si + 1]
         z_start = -3.0
-        while z_start < 400 and min(camera.view((x, 0.0, z_start))[2] for x in (xa, xb)) < 0.15:
+        while z_start < 400 and min(camera.view((x, 0.0, z_start))[2] for x in (xa, xb)) < 0.3:
             z_start += 0.25
         marks = [z_start] + [z for z in (z_start + 2.0, z_start + 7.0, 14.0, 40.0, 120.0, 400.0) if z > z_start]
         for zi in range(len(marks) - 1):
@@ -405,7 +405,7 @@ def road_strips(env, camera, x0, x1, make_texture, tint=(120, 118, 122), count=1
     for si in range(count):
         xa, xb = xs[si], xs[si + 1]
         z_start = -3.0
-        while z_start < 100 and min(camera.view((x, 0.0, z_start))[2] for x in (xa, xb)) < 0.15:
+        while z_start < 100 and min(camera.view((x, 0.0, z_start))[2] for x in (xa, xb)) < 0.3:
             z_start += 0.25
         marks = [z_start] + [z for z in (z_start + 2.0, z_start + 7.0, 16.0, 40.0, 100.0) if z > z_start]
         for zi in range(len(marks) - 1):
