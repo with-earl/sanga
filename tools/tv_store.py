@@ -3,8 +3,9 @@ front window, over the shoulder of a delivery rider who watches the news.
 
 Built in 3D with scene3d.py so it has a true camera angle, perspective and light:
 - the rider stands near the glass in the foreground, seen from behind, so the picture is taken over his
-  shoulder (drawn by rider_back.py, not from any
-  character art in the game);
+  shoulder: a real 3D figure (peter_bust, built from bike_parts.py: glossy helmet, nylon jacket, arms and
+  the pink backpack with straps), lit by the sun and the shop's screens and a little out of focus, not from
+  any character art in the game;
 - the shop inside is lit by ceiling lights: three shelves, each a row of five identical tube sets
   standing side by side with a clear gap between them, all turned to the drug-war news;
 - the glass is drawn as a see-through sheet that holds the sky, the buildings across the street and
@@ -23,7 +24,7 @@ import numpy as np
 from scipy.ndimage import gaussian_filter
 from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 
-import rider_back
+import bike_parts as bp
 import scene3d as s3
 import street_scene
 from street_scene import noise, stained
@@ -741,7 +742,7 @@ def build(size) -> Image.Image:
                (0, 0, 0), texture=pole_shadow, layer=1)
 
     # ---- the rider's shadow, thrown towards the shop, away from the sun
-    rider_x, rider_z = 0.75, -1.0
+    rider_x, rider_z = 0.72, -0.72
     shadow = Image.new("RGBA", (160, 520), (0, 0, 0, 0))
     sd = ImageDraw.Draw(shadow)
     sd.ellipse((58, 460, 102, 510), fill=(8, 8, 14, 190))
@@ -769,29 +770,73 @@ def build(size) -> Image.Image:
         wd.line(pts, fill=(18, 18, 22, 235), width=max(int(w / 420), 2), joint="curve")
     canvas.alpha_composite(wires.filter(ImageFilter.GaussianBlur(0.9)))
 
-    # ---- the rider, seen from behind, so near the camera that only his head, shoulders and chest are
-    # in the picture: the sprite is pasted with whatever falls outside the frame cut off.
-    foot = camera.project((rider_x, 0.0, rider_z))
-    scale = camera.pixels_for(1.75, foot[2]) / rider_back.HEIGHT
-    sprite = rider_back.rider_back(scale)
-    px = np.asarray(sprite).astype(np.float32)
-    ramp = np.linspace(0.0, 1.0, sprite.width)[None, :]
-    px[..., :3] *= (0.94 + 0.12 * ramp)[..., None]   # a little more sun on the side nearest the shop
-    px[..., 2] += (1 - ramp) * 10                      # a cool bounce from the shop's screens on the other side
-    sprite = Image.fromarray(np.clip(px, 0, 255).astype(np.uint8), "RGBA")
-    left, top = int(foot[0] - sprite.width / 2), int(foot[1] - sprite.height)
-    x0, y0 = max(left, 0), max(top, 0)
-    x1, y1 = min(left + sprite.width, w), min(top + sprite.height, h)
-    if x1 > x0 and y1 > y0:
-        near = sprite.crop((x0 - left, y0 - top, x1 - left, y1 - top))
-        # Out of focus: he is much closer than the shop, so the lens softens him (premultiplied, so no dark fringe).
-        a = np.asarray(near).astype(np.float32)
-        a[..., :3] *= a[..., 3:4] / 255.0
-        a = np.stack([gaussian_filter(a[..., i], 7.0) for i in range(4)], axis=-1)
-        a[..., :3] = a[..., :3] / np.maximum(a[..., 3:4] / 255.0, 1e-3)
-        near = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), "RGBA")
-        canvas.alpha_composite(near, (x0, y0))
+    # ---- the rider, seen from behind, so near the camera that only his head, shoulders and chest are in the
+    # picture. He is a real 3D figure (helmet, neck, jacket, arms, backpack) lit like the street, drawn in a pass
+    # of its own so the lens can soften him without softening the shop.
+    figure = peter_bust(camera, size, rider_x, rider_z)
+    canvas.alpha_composite(figure)
     return canvas
+
+
+def peter_bust(camera, size, rx, rz) -> Image.Image:
+    """Peter standing at (rx, rz) with his back to the camera, as a transparent picture: a glossy pink helmet
+    (a stripe, vent and rubber rim), a neck, a black nylon jacket with creases and a reflective band, sloping
+    shoulders and arms, and the pink delivery backpack with its straps, a zip, a reflective patch and side pockets.
+    He is a little out of focus because he is much nearer than the shop."""
+    figure = s3.Scene(camera, ambient=(96, 98, 112), sky_dir=(-0.3, 1.0, -0.4))
+    figure.light((-2.2, 3.4, -2.6), SUN, 30.0, reach=14.0)                 # the sun, high on his left and a little behind the camera
+    figure.light((rx + 0.2, 1.5, rz + 2.4), (165, 188, 255), 2.2, reach=7.0)   # a cool bounce off the shop's screens
+    figure.light((rx - 1.2, 2.2, rz - 0.8), (255, 240, 224), 1.6, reach=6.0)   # a soft warm fill from the left
+    figure.track_depth(size)
+    pink, pink_dark, jacket = bp.PINK, bp.PINK_DARK, (28, 28, 33)
+    # Jacket: a V-tapered torso that leans a touch forward, with creases at the waist and a ribbed hem.
+    stations = ((0.86, 0.2, 0.135), (0.94, 0.205, 0.138), (1.08, 0.2, 0.14), (1.22, 0.225, 0.15), (1.34, 0.255, 0.145), (1.42, 0.24, 0.12), (1.47, 0.13, 0.1))
+    rings = [bp.ring_points((rx, y, rz + 0.05 * (y - 0.86)), (1, 0, 0), (0, 0, 1), sx, sz, 26, 0.85) for y, sx, sz in stations]
+    nylon = bp.fabric(jacket, seed=21, grain=0.04, creases=(1, 2), crease_depth=0.25, stripes=(0, 13), stripe_color=(70, 70, 78), panel={6: 0.82, 7: 0.82, 19: 0.82, 20: 0.82})
+
+    def shade(k, i):
+        if k == 3 and 8 < i < 18:   # the reflective band across his back, between the straps
+            return (206, 210, 216) if i % 2 == 0 else (172, 176, 186)
+        if k == 0:
+            return bp._tone(jacket, 1.5) if i % 2 == 0 else bp._tone(jacket, 1.2)
+        return nylon(k, i)
+
+    bp.loft(figure, rings, jacket, 3, caps=(True, False), shade=shade)
+    # Collar, neck and shoulders.
+    bp.limb(figure, (rx, 1.45, rz + 0.03), (rx, 1.53, rz + 0.03), 0.082, 0.072, bp._tone(jacket, 1.4), 3, n=20)
+    bp.limb(figure, (rx, 1.51, rz + 0.03), (rx, 1.59, rz + 0.035), 0.053, 0.05, bp.SKIN, 3, n=16)
+    for sgn in (-1, 1):
+        shoulder = (rx + sgn * 0.255, 1.37, rz + 0.04)
+        elbow = (rx + sgn * 0.3, 1.1, rz + 0.1)
+        bp.joint(figure, shoulder, 0.08, jacket, 4, 16, 8)
+        sleeve = bp.fabric(jacket, seed=31 + sgn, grain=0.04, creases=(2, 3), crease_depth=0.25)
+        bp.tube_along(figure, [shoulder, (rx + sgn * 0.28, 1.24, rz + 0.07), elbow], [0.07, 0.065, 0.058], jacket, 4, n=16, shade=sleeve, caps=(False, False))
+    # Helmet: glossy pink, a pale stripe over the top, a vent at the back, a rubber rim; the visor faces the shop.
+    bp.helmet(figure, (rx, 1.67, rz + 0.03), 5, visor_i=7)
+    # The glossy shine on the shell where the sun hits it.
+    bp.ellipsoid(figure, (rx - 0.075, 1.77, rz - 0.07), (0.045, 0.028, 0.03), (255, 236, 246), 5, n=10, m=6, emissive=True)
+    # The delivery backpack on his back, towards the camera: a rounded pink box, a lid seam, a reflective patch,
+    # a zip, side pockets and two black straps up over his shoulders.
+    bag_c = (rx, 1.2, rz - 0.2)
+    lid = lambda k, i: bp.PINK_DARK if k == 5 else ((255, 232, 243) if (k in (8, 9) and 4 < i < 12) else None)
+    bp.ellipsoid(figure, bag_c, (0.2, 0.22, 0.14), pink, 6, n=36, m=22, e=0.55, shade=lid)
+    for sgn in (-1, 1):
+        bp.ellipsoid(figure, (rx + sgn * 0.205, 1.1, rz - 0.18), (0.045, 0.1, 0.1), pink_dark, 6, n=14, m=8, e=0.5)   # a side pocket
+        strap = bp.bezier((rx + sgn * 0.15, 1.5, rz + 0.05), (rx + sgn * 0.19, 1.42, rz - 0.1), (rx + sgn * 0.17, 1.25, rz - 0.18), 8)
+        bp.curve_tube(figure, strap, 0.016, (16, 16, 18), 7, 8)
+    bp.curve_tube(figure, [(rx, 1.4, rz - 0.345), (rx, 1.2, rz - 0.355), (rx, 1.0, rz - 0.345)], 0.008, (30, 30, 34), 7, 6)   # the zip
+    bp.ellipsoid(figure, (rx, 1.17, rz - 0.35), (0.016, 0.03, 0.01), (210, 214, 220), 7, n=8, m=4)                     # its pull
+    black = Image.new("RGBA", size, (0, 0, 0, 255))
+    rendered = figure.render(black)
+    mask = np.isfinite(figure.depth).astype(np.float32)
+    # Soft edges and a little lens blur: premultiplied so the dark edge does not fringe.
+    rgb = np.asarray(rendered.convert("RGB")).astype(np.float32) * mask[..., None]
+    blur = size[0] / 300.0
+    rgb = np.stack([gaussian_filter(rgb[..., i], blur) for i in range(3)], axis=-1)
+    alpha = gaussian_filter(mask, blur)
+    colour = rgb / np.maximum(alpha[..., None], 1e-3)
+    out = np.dstack([np.clip(colour, 0, 255), np.clip(alpha, 0, 1) * 255]).astype(np.uint8)
+    return Image.fromarray(out, "RGBA")
 
 
 def finish_day(canvas: Image.Image) -> Image.Image:

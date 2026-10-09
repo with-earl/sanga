@@ -431,9 +431,9 @@ def vehicle_rear(w, h, body, stripe, seed):
 
 def build_skyway(size):
     w, h = size
-    cam_x, cam_z = 0.82, -0.92
-    camera = s3.Camera((cam_x, 0.28, cam_z), -37.0, 15.0, 74.0, size)
-    vp = camera.project((cam_x, 0.28, 100000.0))
+    cam_x, cam_z = 0.62, -0.62
+    camera = s3.Camera((cam_x, 0.27, cam_z), -40.0, 8.0, 72.0, size)
+    vp = camera.project((cam_x, 0.27, 100000.0))
     horizon_y, vp_x = int(vp[1]), int(vp[0])
 
     # ---- the backdrop: sky, clouds, Manila, and plain road colour below the horizon
@@ -521,9 +521,6 @@ def build_skyway(size):
     wheel_pass = s3.Scene(camera, ambient=(150, 156, 174))
     wheel_pass.light((-700, 900, -900), (255, 226, 184), 1.15e6)
     wheel_pass.light((900, 400, -500), (255, 232, 214), 5.0e5)
-    # Soft low fill from the road side so Peter's denim, jacket and boot show their shape and folds, not a dark blob.
-    wheel_pass.light((2.6, 0.9, -1.5), (255, 236, 214), 2.4)
-    wheel_pass.light((1.6, 2.4, -0.6), (230, 238, 255), 1.8)   # a cooler light from the sky side so the black body keeps its shape
     bp.wheel(wheel_pass, 0.0, 0.0, side=1)
     bp.wheel(wheel_pass, 0.0, -1.25, side=1, front=False)
     bp.scooter_body(wheel_pass, show_leg=False)
@@ -536,7 +533,7 @@ def build_skyway(size):
     sando_bag(wheel_pass, bag_at, 205, 4.0, scale=0.85)
     out = wheel_pass.render(scene_bg)
     # Slight motion blur over everything, streaking away from the vanishing point: the bike is moving fast.
-    return radial_blur(out, (vp_x, horizon_y), 0.006, 10, 0.12)
+    return radial_blur(out, (vp_x, horizon_y), 0.016, 12, 0.08)
 
 
 def draw_skyway(size=SIZE):

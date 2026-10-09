@@ -454,8 +454,6 @@ def helmet(scene, head, layer, visor_i=7, back_y=None):
                 return (255, 238, 247)
         if near(i, visor_i, 2) and 6 <= k <= 9 and not (near(i, visor_i, 2) and k in (6, 9) and not near(i, visor_i, 1)):
             return (22, 26, 40) if k != 6 else (60, 70, 96)   # a dark visor with a lighter glint along its top edge
-        if near(i, vent_i, 1) and 7 <= k <= 8:
-            return (40, 20, 30)
         if (near(i, visor_i - 7 + 14, 0) or near(i, visor_i - 7, 0) or near(i, visor_i - 7 + 1, 0)) and 2 <= k <= 11:
             return (255, 238, 247)   # the stripe over the top
         return None
