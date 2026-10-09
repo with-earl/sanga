@@ -229,13 +229,17 @@ run reaches it as echoes (marked below).
 
 ### 7.1 Intro
 
-`tokhang_rider.png`
+Three frames, one line of travel: the skyway, the news, the market. They are drawn in 3D from nothing (`tools/intro_frames.py`, `tools/bike_parts.py`, `tools/tv_store.py`); the bike in frames 1 and 3 is the art's delivery motorcycle: black with hot-pink flashes, spoked wheels, a pink top box.
+
+`tokhang_skyway.png` (caption *Linggo ng hapon*): the camera right at the front wheel of the bike on the elevated skyway, a green exit gantry (SAMPALOC / ESPAÑA), hazy Manila ahead with a Gothic church spire among the towers, and rubbish on the road: a crumpled food-delivery flyer lying flat on the tarmac and, near the camera at the bottom right, a white plastic sando bag standing blown open (two handles, side gussets, a red *Salamat po!*): the street is dirty.
 > **Peter:** Huling biyahe na 'to. Birthday ni Ben, bawal akong ma-late.
 
 `tokhang_tv_news.png`
 > **Reporter:** ...tatlo ang patay sa magkakahiwalay na operasyon kagabi dito sa Sampaloc. Nanlaban umano ang mga suspek, ayon sa pulisya.
 > **Reporter:** Kabilang sa mga nasawi ang isang babaeng hindi pa nakikilala. *(echo, flag `run_echo_mercy_ran`)*
 > **Peter:** Nanlaban na naman.
+
+`tokhang_market_arrival.png` (no line, a short hold): the bike parked at the edge of the palengke in clear daylight, seen from waist level beside its left side with Peter out of the picture: his pink helmet hangs by its straps from the left mirror, the dashboard and the phone on the bar (Gwen: *umuwi ka nang maaga*), and beyond it a crowded market of vendors and shoppers, stalls of vegetables, fish, meat, fruit, rice and grilled isaw with price cards and painted boards, tarpaulin roofs and tangled wires. On the left, past the stalls, are the weathered back yard wall of the church with its nave, bell tower and trees. No lamp is on. It cuts straight to the phone call.
 
 ### 7.2 The phone call (branch choice)
 

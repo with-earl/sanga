@@ -169,6 +169,20 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **Tokhang intro is three frames (branch claude/tokhang-intro-frames):** 1 `tokhang_skyway.png` (the camera
+  right at the front wheel on the skyway, Manila ahead, a crumpled delivery flyer lying flat on the road
+  and a detailed white "Salamat po" sando bag at the bottom right as litter; both drawn in 3D, not the apartment
+  room's old flyer art), 2 the TV news, 3 `tokhang_market_arrival.png` (the bike parked at the
+  palengke in daylight at waist level, Peter not in the picture, his pink helmet hung on the left mirror,
+  dashboard and phone showing Gwen's text; a clear blue sky; the church's back yard wall, nave and bell tower
+  on the left beyond the stalls). Both are drawn from nothing in 3D by `tools/intro_frames.py`. The bike
+  (`tools/bike_parts.py`) copies the art in `assets/props/motor.png`: black underbone with hot-pink flashes,
+  wire-spoked wheels, silver engine and exhaust, pink top box on a black rack, black round mirrors; the
+  market (`tools/market_parts.py`) has stalls, vendors, shoppers, tarps, wires, a jeepney and the church
+  (`church_behind`). Frame 3 has no line and holds 3.5 s. Stand-ins, in `PLACEHOLDERS.txt`. Frame 3's
+  camera is at waist level with fog and depth of field (`Scene.fog`, `Scene.track_depth` in `scene3d.py`);
+  it takes about 75 seconds to render; there are no lamps (daylight). The 3D rider (`bike_parts.rider`) is
+  now unused by the two frames but kept.
 - **TV shop cards:** the HouseCredit promo and the BCash / Loro payment signs are now small horizontal
   acrylic cards hung inside the shop from suction-cup hooks, in a row high on the glass above the sets so
   the news stays the focus. `tools/tv_store.py` (`acrylic_card`).

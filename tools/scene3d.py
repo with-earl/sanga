@@ -69,6 +69,13 @@ class Scene:
         self.ambient = np.array(ambient, float) / 255.0
         sky = np.array(sky_dir, float)
         self.sky_dir = sky / np.linalg.norm(sky)
+        self.fog = None      # (colour, density): distant things fade towards the colour, 1 - exp(-density * metres)
+        self.depth = None    # set by track_depth(): metres from the camera for every pixel, filled in by render()
+
+    def track_depth(self, size):
+        """Asks render() to keep a per-pixel distance map in `self.depth` (infinite where nothing was drawn), for
+        depth-of-field and other effects done on the finished picture."""
+        self.depth = np.full((size[1], size[0]), np.inf, np.float32)
 
     def light(self, *args, **kwargs) -> Light:
         light = Light(*args, **kwargs)
@@ -123,6 +130,17 @@ class Scene:
         cy, sy = math.cos(c.yaw), math.sin(c.yaw)
         vx, vz = vx * cy + vz * sy, -vx * sy + vz * cy
         return np.stack([vx, vy, vz], axis=-1)
+
+    def _distance(self, face, box):
+        """How far the face is from the camera, in metres, at every pixel of `box`."""
+        normal, center = self._normal_toward_camera(face)
+        x0, y0, x1, y1 = box
+        ys, xs = np.mgrid[y0:y1, x0:x1].astype(np.float32) + 0.5
+        rays = self._ray(xs, ys)
+        denom = rays @ normal
+        denom = np.where(np.abs(denom) < 1e-6, 1e-6, denom)
+        t = np.dot(center - self.camera.position, normal) / denom
+        return np.abs(t) * np.linalg.norm(rays, axis=-1)
 
     def _light_map(self, face, box):
         """How much light reaches each pixel of a face inside `box`: the sky, plus every lamp, by
@@ -195,6 +213,15 @@ class Scene:
                 # Very bright light rolls off gently instead of turning everything white.
                 light = np.where(light > 0.8, 0.8 + (light - 0.8) / (1.0 + (light - 0.8) * 1.6), light)
                 color = base * light
+            if self.fog is not None or self.depth is not None:
+                dist = self._distance(face, box)
+                if self.fog is not None:
+                    fog_color, density = self.fog
+                    amount = np.clip(1.0 - np.exp(-density * dist), 0, 0.92)[..., None]
+                    color = np.asarray(color) * (1 - amount) + (np.array(fog_color, np.float32) / 255.0) * amount
+                if self.depth is not None:
+                    view = self.depth[box[1]:box[3], box[0]:box[2]]
+                    view[:] = np.where(mask[..., 0] > 0.5, dist, view)
             region = out[box[1]:box[3], box[0]:box[2], :3]
             out[box[1]:box[3], box[0]:box[2], :3] = region * (1 - mask) + np.clip(color, 0, 1) * 255 * mask
             if face["glow"] is not None:

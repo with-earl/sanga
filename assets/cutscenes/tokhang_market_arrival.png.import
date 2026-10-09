@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cv45mtkbnrep8"
-path="res://.godot/imported/tokhang_rider.png-3af1b2bfcdfd4f4a377ca618ec0645dc.ctex"
+uid="uid://dly13t42xs84v"
+path="res://.godot/imported/tokhang_market_arrival.png-bb0c0abf147af5dd2662d31added6d76.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/cutscenes/tokhang_rider.png"
-dest_files=["res://.godot/imported/tokhang_rider.png-3af1b2bfcdfd4f4a377ca618ec0645dc.ctex"]
+source_file="res://assets/cutscenes/tokhang_market_arrival.png"
+dest_files=["res://.godot/imported/tokhang_market_arrival.png-bb0c0abf147af5dd2662d31added6d76.ctex"]
 
 [params]
 
