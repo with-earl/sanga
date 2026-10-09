@@ -12,6 +12,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 import bike_parts as bp
+from bike_parts import ellipsoid, limb
 from tv_store import FONT_BLACK, FONT_BOLD, _fit
 
 SKINS = [(182, 132, 98), (160, 112, 82), (198, 150, 114), (142, 98, 72), (170, 122, 90)]
@@ -286,3 +287,129 @@ def litter(scene, rng, x0, x1, z0, z1, layer=1):
     for _ in range(10):
         lx, lz = rng.uniform(x0, x1), rng.uniform(z0, z1)
         bp.ellipsoid(scene, (lx, 0.04, lz), (0.07, 0.04, 0.06), (236, 236, 232) if rng.random() < 0.6 else (230, 90, 80), layer + 1, n=7, m=4)
+
+
+# ---------------------------------------------------------------- the church behind the left side
+
+
+def church_wall_texture(seed=3):
+    """The weathered plaster back wall of a church yard: cream paint gone grey and streaked by rain, a green
+    band of moss and damp along the bottom, blind arches, a rusty iron gate and a few peeling patches."""
+    from street_scene import noise
+    w, h = 1800, 520
+    blotch = noise(w, h, 90, seed) * 0.55 + noise(w, h, 24, seed + 1) * 0.35
+    streak = noise(w // 24, h, 6, seed + 2)
+    streak = np.asarray(Image.fromarray((streak * 255).astype(np.uint8)).resize((w, h), Image.BICUBIC)).astype(np.float32) / 255
+    base = np.array((224, 210, 178), np.float32)
+    shade = (0.86 + 0.2 * blotch - 0.16 * streak)[..., None]
+    rgb = base[None, None, :] * shade
+    ys = np.arange(h)[:, None]
+    moss = np.clip((ys - h * 0.68) / (h * 0.32), 0, 1) ** 1.3 * (0.5 + 0.5 * noise(w, h, 30, seed + 3))
+    rgb = rgb * (1 - moss[..., None] * 0.55) + np.array((70, 96, 52), np.float32)[None, None, :] * (moss[..., None] * 0.55)
+    img = Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8)).convert("RGBA")
+    d = ImageDraw.Draw(img)
+    for x in range(120, w, 360):   # blind arches
+        d.rounded_rectangle((x, 90, x + 150, 400), radius=75, fill=(176, 160, 130, 255), outline=(150, 134, 108, 255), width=6)
+        d.rounded_rectangle((x + 14, 104, x + 136, 400), radius=60, fill=(190, 174, 144, 255))
+    d.rectangle((1130, 150, 1330, 520), fill=(52, 44, 40, 255))   # the iron gate
+    for gx in range(1138, 1330, 22):
+        d.line((gx, 160, gx, 520), fill=(112, 70, 44, 255), width=6)
+    d.rectangle((1130, 150, 1330, 166), fill=(112, 70, 44, 255))
+    rng = np.random.default_rng(seed)
+    for _ in range(14):   # peeling patches
+        px, py = int(rng.integers(0, w)), int(rng.integers(20, 360))
+        d.polygon([(px, py), (px + int(rng.integers(30, 90)), py + int(rng.integers(-10, 20))), (px + int(rng.integers(20, 70)), py + int(rng.integers(30, 80)))], fill=(150, 134, 112, 255))
+    d.rectangle((0, 0, w, 26), fill=(190, 178, 152, 255))   # the coping on top
+    return img
+
+
+def nave_texture():
+    """The east side of the church nave seen over the yard wall: tall pointed windows with dark glass and stone
+    surrounds, buttress lines and a long band of stained plaster."""
+    from street_scene import noise
+    w, h = 1800, 560
+    blotch = noise(w, h, 80, 11) * 0.5 + noise(w, h, 20, 12) * 0.3
+    rgb = np.array((218, 204, 172), np.float32)[None, None, :] * (0.84 + 0.22 * blotch)[..., None]
+    img = Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8)).convert("RGBA")
+    d = ImageDraw.Draw(img)
+    for x in range(100, w, 300):
+        d.polygon([(x, 480), (x, 150), (x + 40, 70), (x + 80, 150), (x + 80, 480)], fill=(70, 90, 120, 255), outline=(236, 228, 206, 255))
+        d.line((x + 40, 70, x + 40, 480), fill=(236, 228, 206, 255), width=5)
+        d.line((x, 270, x + 80, 270), fill=(236, 228, 206, 255), width=5)
+    for x in range(0, w, 300):
+        d.rectangle((x, 0, x + 18, h), fill=(190, 176, 146, 255))
+    return img
+
+
+def tower_texture():
+    """A bell tower: stained plaster, a belfry with three arched openings and a dark bell inside, a round clock."""
+    from street_scene import noise
+    w, h = 600, 1500
+    blotch = noise(w, h, 70, 21) * 0.5 + noise(w, h, 18, 22) * 0.3
+    rgb = np.array((226, 212, 180), np.float32)[None, None, :] * (0.84 + 0.22 * blotch)[..., None]
+    img = Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8)).convert("RGBA")
+    d = ImageDraw.Draw(img)
+    for x in (110, 260, 410):
+        d.rounded_rectangle((x, 160, x + 90, 420), radius=45, fill=(46, 40, 38, 255), outline=(244, 236, 214, 255), width=8)
+    d.ellipse((260, 270, 340, 350), fill=(120, 90, 40, 255))   # a bell glimpsed through the middle arch
+    d.ellipse((220, 560, 380, 720), fill=(244, 240, 228, 255), outline=(60, 54, 48, 255), width=8)   # the clock
+    d.line((300, 640, 300, 590), fill=(30, 30, 34, 255), width=7)
+    d.line((300, 640, 340, 650), fill=(30, 30, 34, 255), width=7)
+    for y in (480, 800, 1100, 1400):
+        d.rectangle((0, y, w, y + 14), fill=(196, 182, 152, 255))
+    d.rectangle((0, 0, w, 40), fill=(196, 182, 152, 255))
+    return img
+
+
+def church_behind(scene, x_wall=-4.5, layer=1):
+    """The back of a church above the left yard wall: the long nave with its pitched roof, a bell tower with a
+    pointed roof and a cross, two buttressed wall ends, and a couple of old trees spilling over the wall."""
+    # The wall itself: five metres of plaster with a coping and buttresses.
+    scene.face([(x_wall, 5.2, 90.0), (x_wall, 5.2, -12.0), (x_wall, 0.0, -12.0), (x_wall, 0.0, 90.0)], (214, 200, 170),
+               texture=None, layer=layer, two_sided=True)
+    zc = -12.0
+    seed = 3
+    while zc < 90:
+        scene.face([(x_wall + 0.002, 5.2, zc + 12.0), (x_wall + 0.002, 5.2, zc), (x_wall + 0.002, 0.0, zc), (x_wall + 0.002, 0.0, zc + 12.0)], (214, 200, 170),
+                   texture=church_wall_texture(seed), layer=layer + 1, two_sided=True)
+        zc += 12.0
+        seed += 1
+    scene.box(x_wall - 0.5, x_wall, 5.2, 5.35, -12.0, 90.0, (190, 178, 152), layer=layer + 1)   # coping
+    for bz in np.arange(-10.0, 88.0, 6.0):   # buttresses
+        scene.box(x_wall - 0.55, x_wall, 0.0, 5.4, bz, bz + 0.7, (206, 192, 162), layer=layer + 1)
+        scene.box(x_wall - 0.55, x_wall, 5.4, 5.55, bz - 0.04, bz + 0.74, (186, 174, 148), layer=layer + 1)
+    # The nave: a long wall with tall windows, then a pitched roof of rusty red tiles.
+    nx = x_wall - 1.2
+    scene.face([(nx, 8.4, 70.0), (nx, 8.4, 6.0), (nx, 0.0, 6.0), (nx, 0.0, 70.0)], (218, 204, 172), texture=None, layer=layer, two_sided=True)
+    zc = 6.0
+    while zc < 70:
+        scene.face([(nx + 0.002, 8.4, zc + 16.0), (nx + 0.002, 8.4, zc), (nx + 0.002, 0.0, zc), (nx + 0.002, 0.0, zc + 16.0)], (218, 204, 172), texture=nave_texture(), layer=layer + 1, two_sided=True)
+        zc += 16.0
+    scene.face([(nx, 8.4, 70.0), (nx, 8.4, 6.0), (nx - 4.0, 11.0, 6.0), (nx - 4.0, 11.0, 70.0)], (150, 70, 52), layer=layer + 1, two_sided=True)
+    scene.face([(nx - 4.0, 11.0, 70.0), (nx - 4.0, 11.0, 6.0), (nx - 8.0, 8.4, 6.0), (nx - 8.0, 8.4, 70.0)], (130, 60, 46), layer=layer, two_sided=True)
+    for rz in np.arange(6.0, 70.0, 1.1):   # tile courses
+        scene.face([(nx, 8.4, rz), (nx, 8.4, rz + 0.06), (nx - 4.0, 11.0, rz + 0.06), (nx - 4.0, 11.0, rz)], (116, 52, 40), layer=layer + 2, two_sided=True)
+    # The bell tower and its pointed roof, with a cross.
+    tx0, tx1, tz0, tz1 = nx - 3.0, nx + 0.2, 20.0, 24.6
+    scene.face([(tx1, 17.0, tz1), (tx1, 17.0, tz0), (tx1, 0.0, tz0), (tx1, 0.0, tz1)], (226, 212, 180), texture=tower_texture(), layer=layer + 3, two_sided=True)
+    scene.face([(tx1, 17.0, tz0), (tx0, 17.0, tz0), (tx0, 0.0, tz0), (tx1, 0.0, tz0)], (214, 200, 170), layer=layer + 2, two_sided=True)
+    apex = ((tx0 + tx1) / 2, 24.0, (tz0 + tz1) / 2)
+    for corner_a, corner_b in (((tx1, 17.0, tz1), (tx1, 17.0, tz0)), ((tx1, 17.0, tz0), (tx0, 17.0, tz0)), ((tx0, 17.0, tz0), (tx0, 17.0, tz1)), ((tx0, 17.0, tz1), (tx1, 17.0, tz1))):
+        scene.face([corner_a, corner_b, apex], (120, 66, 54), layer=layer + 3, two_sided=True)
+    limb(scene, apex, (apex[0], apex[1] + 1.6, apex[2]), 0.1, 0.1, (60, 56, 52), layer + 3, n=6, bulge=1.0)
+    limb(scene, (apex[0], apex[1] + 1.2, apex[2] - 0.45), (apex[0], apex[1] + 1.2, apex[2] + 0.45), 0.09, 0.09, (60, 56, 52), layer + 3, n=6, bulge=1.0)
+    # Two old trees leaning over the wall, one in flower.
+    for tz, flower in ((13.0, False), (36.0, True), (62.0, False)):
+        tx = x_wall - 2.4
+        limb(scene, (tx, 0.0, tz), (tx, 5.2, tz), 0.5, 0.35, (96, 74, 54), layer + 3, n=10)
+        for k in range(6):
+            ang = k * 1.05
+            cx = tx + 1.4 * math.cos(ang) + 0.8
+            cz = tz + 1.4 * math.sin(ang)
+            ellipsoid(scene, (cx, 6.4 + 0.5 * math.sin(k), cz), (1.6, 1.2, 1.6), (62, 120, 58) if not flower else (84, 132, 66), layer + 3, n=10, m=6)
+        if flower:
+            for k in range(30):
+                ang = k * 2.4
+                ellipsoid(scene, (tx + 0.8 + 2.2 * math.cos(ang) * (0.4 + 0.6 * (k % 3) / 2), 5.4 + (k % 5) * 0.4, tz + 2.2 * math.sin(ang)), (0.22, 0.2, 0.22), (226, 60, 130), layer + 4, n=6, m=4)
+
+

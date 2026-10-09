@@ -1,7 +1,7 @@
 """The first and third pictures of the Tokhang intro, drawn from nothing in 3D like the TV news scene
 (tv_store.py): no game art is used.
 
-  Frame 1, the skyway: a low shot from the side as Peter rides his pink scooter along the elevated
+  Frame 1, the skyway: a low shot right at the front wheel of Peter's delivery bike on the elevated
   expressway at speed (the road streaks towards the vanishing point, the bike stays sharp), a green
   exit gantry and far traffic ahead, a hazy Manila beyond the barrier with a Gothic church spire.
   Frame 3, the market: the scooter parked at the edge of a crowded palengke in daylight, seen from waist
@@ -149,16 +149,24 @@ def clouds(img, horizon_y, seed, amount=0.55, tint=(255, 250, 240), shade=(176, 
 
 
 def cluster_texture():
-    """The scooter's little dashboard: speed, fuel, clock."""
-    img = Image.new("RGBA", (400, 200), (10, 14, 20, 255))
+    """The bike's little dashboard as in the art: a round analogue speedometer with a red needle, a small fuel
+    gauge and two indicator lights, on a black face."""
+    img = Image.new("RGBA", (400, 200), (14, 14, 18, 255))
     d = ImageDraw.Draw(img)
-    _fit(d, (150, 92), "48", 200, 120, (214, 244, 255, 255))
-    _fit(d, (150, 160), "km/h", 140, 40, (140, 190, 220, 255), FONT_BOLD)
-    d.rectangle((290, 40, 380, 62), outline=(214, 244, 255, 255), width=3)
-    d.rectangle((294, 44, 350, 58), fill=(255, 190, 60, 255))
-    _fit(d, (335, 110), "3:42", 100, 44, (214, 244, 255, 255), FONT_BOLD)
-    d.ellipse((300, 140, 316, 156), fill=(70, 220, 110, 255))
-    d.ellipse((330, 140, 346, 156), fill=(70, 220, 110, 255))
+    d.ellipse((24, 14, 184, 174), fill=(236, 236, 230, 255), outline=(150, 150, 150, 255), width=5)
+    for k in range(13):
+        ang = math.radians(215 - k * 20)
+        r0, r1 = 62 if k % 2 == 0 else 68, 74
+        cx0, cy0 = 104, 94
+        d.line((cx0 + r0 * math.cos(ang), cy0 - r0 * math.sin(ang), cx0 + r1 * math.cos(ang), cy0 - r1 * math.sin(ang)), fill=(30, 30, 36, 255), width=3)
+    d.line((104, 94, 104 + 58 * math.cos(math.radians(100)), 94 - 58 * math.sin(math.radians(100))), fill=(214, 40, 40, 255), width=5)
+    d.ellipse((96, 86, 112, 102), fill=(40, 40, 44, 255))
+    _fit(d, (104, 140), "km/h", 70, 22, (60, 60, 66, 255), FONT_BOLD)
+    d.ellipse((214, 30, 334, 150), fill=(236, 236, 230, 255), outline=(150, 150, 150, 255), width=4)
+    d.line((274, 90, 274 + 36 * math.cos(math.radians(60)), 90 - 36 * math.sin(math.radians(60))), fill=(214, 40, 40, 255), width=4)
+    _fit(d, (274, 128), "F      E", 90, 18, (60, 60, 66, 255), FONT_BOLD)
+    d.ellipse((350, 40, 372, 62), fill=(70, 220, 110, 255))
+    d.ellipse((350, 86, 372, 108), fill=(255, 160, 40, 255))
     return img
 
 
@@ -179,6 +187,103 @@ def phone_texture():
     _fit(d, (90, 318), "ETA 3:55 PM", 150, 22, (255, 255, 255, 255), FONT_BOLD)
     return img
 
+
+
+# ---------------------------------------------------------------- street litter caught in the wind
+
+
+def _rot(p, yaw, pitch, roll):
+    """Turns a local point: roll about z, then pitch about x, then yaw about y (degrees)."""
+    x, y, z = p
+    r, q, a = math.radians(roll), math.radians(pitch), math.radians(yaw)
+    x, y = x * math.cos(r) - y * math.sin(r), x * math.sin(r) + y * math.cos(r)
+    y, z = y * math.cos(q) - z * math.sin(q), y * math.sin(q) + z * math.cos(q)
+    x, z = x * math.cos(a) + z * math.sin(a), -x * math.sin(a) + z * math.cos(a)
+    return (x, y, z)
+
+
+def world_at(scene, sx, sy, dist):
+    """The world point `dist` metres from the camera along the ray through picture position (sx, sy)."""
+    ray = scene._ray(np.array([[sx]], np.float32), np.array([[sy]], np.float32))[0, 0]
+    ray = ray / np.linalg.norm(ray)
+    return tuple(scene.camera.position + ray * dist)
+
+
+def flyer_texture():
+    """The food delivery flyer from the game's art, redrawn: a hot-pink header, cream card, black serif words."""
+    img = Image.new("RGBA", (660, 440), (246, 240, 226, 255))
+    d = ImageDraw.Draw(img)
+    d.rectangle((0, 0, 660, 150), fill=(236, 40, 130, 255))
+    _fit(d, (330, 78), "DELIVERY", 560, 110, (255, 250, 244, 255))
+    _fit(d, (60, 240), "Food orders", 520, 70, (48, 36, 30, 255), FONT_BOLD, "lm")
+    _fit(d, (60, 340), "0917 000 0000", 540, 76, (48, 36, 30, 255), FONT_BOLD, "lm")
+    return img
+
+
+def crumpled_flyer(scene, centre, yaw, pitch, roll, w=0.34, h=0.23, seed=2, layer=9):
+    """The flyer tumbling in the wind: a grid of small flat pieces pushed in and out so it is creased and
+    folded at a corner, each piece carrying its own part of the printed card."""
+    rng = np.random.default_rng(seed)
+    tex = flyer_texture()
+    nx, ny = 9, 6
+    z = rng.normal(0, 0.012, (ny + 1, nx + 1))
+    z += 0.02 * np.sin(np.linspace(0, 3.4, nx + 1))[None, :] + 0.015 * np.cos(np.linspace(0, 2.4, ny + 1))[:, None]
+    pts = np.zeros((ny + 1, nx + 1, 3))
+    for j in range(ny + 1):
+        for i in range(nx + 1):
+            u, v = i / nx, j / ny
+            lx, ly, lz = (u - 0.5) * w, (0.5 - v) * h, z[j, i]
+            if u > 0.8 and v < 0.25:   # a dog-eared corner folded forward
+                lz += 0.045 * (u - 0.8) / 0.2 * (0.25 - v) / 0.25
+                lx -= 0.018 * (u - 0.8) / 0.2
+            p = _rot((lx, ly, lz), yaw, pitch, roll)
+            pts[j, i] = (centre[0] + p[0], centre[1] + p[1], centre[2] + p[2])
+    tw, th = tex.size
+    for j in range(ny):
+        for i in range(nx):
+            piece = tex.crop((int(i * tw / nx), int(j * th / ny), int((i + 1) * tw / nx), int((j + 1) * th / ny)))
+            scene.face([pts[j, i], pts[j, i + 1], pts[j + 1, i + 1], pts[j + 1, i]], (240, 236, 224), texture=piece, layer=layer, two_sided=True)
+
+
+def sando_bag(scene, centre, yaw, pitch, roll, scale=1.0, seed=4, layer=9):
+    """A white plastic sando bag blown open by the wind: a puffed, creased sack with gussets, a gathered neck, two
+    thin handle loops and a little red 'Salamat po' on its front. Slightly crumpled and translucent-looking."""
+    rng = np.random.default_rng(seed)
+
+    def T(p):
+        q = _rot((p[0] * scale, p[1] * scale, p[2] * scale), yaw, pitch, roll)
+        return (centre[0] + q[0], centre[1] + q[1], centre[2] + q[2])
+
+    rows, cols = 9, 16
+    rings = []
+    for r in range(rows + 1):
+        t = r / rows
+        y = (t - 0.5) * 0.46
+        puff = math.sin(math.pi * min(t * 1.05, 1.0)) ** 0.7 * 0.9 + 0.1
+        rx = 0.115 * (0.6 + 0.4 * puff) * (1 - 0.8 * max(t - 0.72, 0) / 0.28)
+        rz = 0.045 * (0.4 + 0.6 * puff) * (1 - 0.85 * max(t - 0.72, 0) / 0.28)
+        ring = []
+        for c in range(cols):
+            a = 2 * math.pi * c / cols
+            crease = 1 + 0.07 * rng.normal() * (0.4 + 0.6 * (1 - t))
+            ring.append(T((rx * math.cos(a) * crease, y + 0.012 * rng.normal(), rz * math.sin(a) * crease)))
+        rings.append(ring)
+    n = cols
+    for r in range(rows):
+        for c in range(n):
+            quad = [rings[r][c], rings[r][(c + 1) % n], rings[r + 1][(c + 1) % n], rings[r + 1][c]]
+            tone = 236 + int(rng.integers(-14, 10))
+            scene.face(quad, (tone, tone, min(tone + 4, 250)), layer=layer, two_sided=True)
+    top = T((0.0, 0.21, 0.0))
+    for sgn in (-1, 1):   # the two handle loops
+        loop = [T((sgn * 0.035, 0.2, 0)), T((sgn * 0.09, 0.3, 0.02)), T((sgn * 0.05, 0.4, 0.0)), T((0.0, 0.36, -0.01)), T((sgn * 0.01, 0.26, 0.0))]
+        bp.curve_tube(scene, loop, 0.007 * scale, (240, 240, 244), layer, 5)
+    # The red words on the front, printed on a clear sheet so the creased bag shows through round them.
+    words = Image.new("RGBA", (400, 160), (0, 0, 0, 0))
+    wd = ImageDraw.Draw(words)
+    _fit(wd, (200, 56), "SALAMAT", 360, 70, (206, 36, 40, 255))
+    _fit(wd, (200, 118), "PO!", 220, 50, (206, 36, 40, 255))
+    scene.face([T((-0.11, 0.07, -0.062)), T((0.11, 0.07, -0.062)), T((0.11, -0.04, -0.062)), T((-0.11, -0.04, -0.062))], (240, 240, 244), texture=words, layer=layer + 1, two_sided=True)
 
 
 # ---------------------------------------------------------------- frame 1: the skyway
@@ -386,11 +491,15 @@ def build_skyway(size):
 
     wheel_pass = s3.Scene(camera, ambient=(150, 156, 174))
     wheel_pass.light((-700, 900, -900), (255, 226, 184), 1.15e6)
+    wheel_pass.light((900, 400, -500), (255, 232, 214), 5.0e5)   # a cooler light from the sky side so the black body keeps its shape
     bp.wheel(wheel_pass, 0.0, 0.0, side=1)
     bp.wheel(wheel_pass, 0.0, -1.25, side=1, front=False)
     bp.scooter_body(wheel_pass, show_leg=False)
     bp.steering(wheel_pass, 6)
     bp.rider(wheel_pass)
+    # Rubbish in the wind: a crumpled delivery flyer and a white sando bag tumbling past the camera.
+    crumpled_flyer(wheel_pass, world_at(wheel_pass, w * 0.6, h * 0.36, 1.7), -38, 10, -15, w=0.40, h=0.27)
+    sando_bag(wheel_pass, world_at(wheel_pass, w * 0.85, h * 0.25, 2.1), 24, -10, 22, scale=1.25)
     return wheel_pass.render(scene_bg)
 
 
@@ -402,7 +511,7 @@ def draw_skyway(size=SIZE):
 # ---------------------------------------------------------------- frame 3: the market
 
 
-def depth_of_field(img, depth, k, focus=(3.0, 7.0), far=(9.0, 22.0), mid_blur=2.0, far_blur=5.5):
+def depth_of_field(img, depth, k, focus=(4.0, 9.0), far=(12.0, 30.0), mid_blur=1.2, far_blur=3.6):
     """Softens the picture by distance with a depth map: sharp near the lens, a little soft in the middle
     distance, soft far away (and the sky, which has no depth, as far as it gets)."""
     def ramp(lo, hi):
@@ -539,7 +648,7 @@ def market_fill(env, k):
     rng = np.random.default_rng(31)
     street_x1 = 4.4
     # Walls behind the stalls.
-    env.face([(-4.5, 4.4, 80), (-4.5, 4.4, -12.0), (-4.5, 0.0, -12.0), (-4.5, 0.0, 80)], (170, 150, 128), texture=concrete(900, 400, 55, (176, 160, 140)), layer=1, two_sided=True)
+    mp.church_behind(env, -4.5)
     z = -12.0
     for i in range(16):
         env.face([(street_x1 + 0.1, 5.4, z + 6.0), (street_x1 + 0.1, 5.4, z), (street_x1 + 0.1, 0.0, z), (street_x1 + 0.1, 0.0, z + 6.0)], (200, 190, 170),
@@ -609,8 +718,8 @@ def build_market(size):
     k = w / 1672.0
 
     # ---- the backdrop: a hot, hazy sky with the afternoon sun low at the end of the street, and a crowd
-    back = sky_gradient(size, horizon_y, (110, 162, 214), (190, 212, 224), (240, 224, 196))
-    back = clouds(back, horizon_y, 23, 0.4)
+    back = sky_gradient(size, horizon_y, (88, 142, 212), (160, 196, 232), (230, 224, 206))
+    back = clouds(back, horizon_y, 11, 0.5)
     arr = np.asarray(back.convert("RGB")).astype(np.float32)
     ground = np.zeros_like(arr)
     ys = np.arange(h, dtype=np.float32)
@@ -632,17 +741,16 @@ def build_market(size):
         cd.ellipse((px - bw / 2, py - bh, px + bw / 2, py), fill=palette[int(rng.integers(0, len(palette)))] + (230,))
         cd.ellipse((px - bw / 3, py - bh - bw * 0.5, px + bw / 3, py - bh + bw * 0.4), fill=(112, 80, 62, 235))
     back.alpha_composite(crowd.filter(ImageFilter.GaussianBlur(3 * k)))
-    back = s3.add_glow(back, (vp_x, horizon_y - 40 * k), (255, 214, 140), w * 0.22, 0.8)
 
     # ---- the street
-    env = s3.Scene(camera, ambient=(150, 146, 156))
-    env.light((500, 520, 1400), (255, 214, 156), 1.2e6)
-    env.fog = ((238, 214, 178), 0.03)
+    env = s3.Scene(camera, ambient=(138, 140, 150))
+    env.light((500, 520, 1400), (255, 226, 190), 0.55e6)
+    env.fog = ((206, 214, 224), 0.018)
     env.track_depth(size)
     # Coloured light bouncing under the tarpaulins: blue, orange, green and red washes along the aisle.
     for li, lz in enumerate(range(3, 40, 4)):
         tone = [(120, 160, 255), (255, 170, 80), (130, 220, 140), (255, 120, 110)][li % 4]
-        env.light((-1.1 if li % 2 == 0 else 1.1, 2.9, lz), tone, 3.2, 6.0)
+        env.light((-1.1 if li % 2 == 0 else 1.1, 2.9, lz), tone, 1.2, 5.0)
     street_x0, street_x1 = -4.4, 4.4
     road_strips(env, camera, street_x0, street_x1, lambda i: concrete(300, 300, 30 + i, (178, 170, 158)))
     for gx in (-3.4, 3.1):   # gutters along both sides
@@ -670,12 +778,11 @@ def build_market(size):
             pts = [camera.project((x, 0.0, z))[:2] for x, z in ((xa, z0 - 1.6), (xb, z0 - 1.6), (xb, z1 - 1.0), (xa, z1 - 1.0))]
             shadows.append(pts)
     bg = shade_polygons(bg, shadows, 0.74, 10 * k)
-    bg = light_shafts(bg, k, ((vp_x + 140 * k, 90 * k, 34), (vp_x + 420 * k, 60 * k, 26), (vp_x - 30 * k, 70 * k, 24), (vp_x + 760 * k, 120 * k, 22)))
     bg = depth_of_field(bg, env.depth, k)
 
-    chase = s3.Scene(camera, ambient=(176, 170, 180))
-    chase.light((500, 520, 1400), (255, 214, 156), 1.2e6)
-    chase.light((-600, 900, -1200), (255, 238, 220), 6.0e5)   # soft light from behind and to the left
+    chase = s3.Scene(camera, ambient=(150, 152, 162))
+    chase.light((500, 520, 1400), (255, 226, 190), 0.55e6)
+    chase.light((-600, 900, -1200), (255, 238, 220), 3.5e5)   # soft light from behind and to the left
     bp.wheel(chase, 0.0, 0.0, side=1)
     bp.wheel(chase, 0.0, -1.25, side=1, front=False)
     bp.scooter_body(chase, show_leg=False)
@@ -686,7 +793,7 @@ def build_market(size):
 
 
 def draw_market(size=SIZE):
-    return finish(build_market(size), bloom_from=190)
+    return finish(build_market(size), bloom_from=235)
 
 
 if __name__ == "__main__":

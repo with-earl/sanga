@@ -15,8 +15,8 @@ from PIL import Image, ImageDraw, ImageFilter
 
 import scene3d as s3  # noqa: F401  (kept so the module can be tried on its own)
 
-PINK = (232, 70, 140)
-PINK_DARK = (190, 48, 112)
+PINK = (240, 44, 140)
+PINK_DARK = (196, 30, 110)
 JEANS, BOOT, JACKET = (46, 56, 92), (22, 22, 24), (26, 26, 30)
 SKIN = (176, 126, 98)
 SILVER, RUBBER = (200, 204, 210), (26, 26, 29)
@@ -131,151 +131,126 @@ def lens_texture():
 
 
 def wheel(scene, cx, cz, side=1, n=72, front=True):
-    """The front wheel standing at (cx, cz): a tyre with a ribbed tread, a black twin-spoke alloy rim with
-    silver edges, a drilled disc, red caliper and hose on the right-hand side, the fork with rubber
-    boots and chrome tubes, and the pink mudguard. `side` is +1 when the camera is on the right of the bike
-    and -1 on the left, so the near face is drawn over the far one."""
+    """A wire-spoked wheel standing at (cx, cz) like the delivery bike's: a black tyre with a ribbed tread, a
+    chrome rim crossed by thin silver spokes, a silver drum hub; the front one has black telescopic forks, a
+    black mudguard and a brake cable, the rear one has a chain sprocket (see rear_end). `side` is +1 when
+    the camera is on the right of the bike and -1 on the left, so the near face is drawn over the far one."""
     R = WHEEL_R
     near, far = 3, 1
 
     def P(lx, ly, lz):
         return (cx + lx, R + ly, cz + lz)
 
-    def ring(r0, lx0, r1, lx1, color, layer, alt=None, count=n):
-        for i in range(count):
-            t0, t1 = 2 * math.pi * i / count, 2 * math.pi * (i + 1) / count
-            pts = [P(lx0, r0 * math.cos(t0), r0 * math.sin(t0)), P(lx0, r0 * math.cos(t1), r0 * math.sin(t1)),
-                   P(lx1, r1 * math.cos(t1), r1 * math.sin(t1)), P(lx1, r1 * math.cos(t0), r1 * math.sin(t0))]
-            c = color if alt is None or i % alt[0] else alt[1]
-            scene.face(pts, c, layer=layer, two_sided=True)
+    def ring_(r0, lx0, r1, lx1, color, layer, alt=None, count=n):
+        ring(scene, P, r0, lx0, r1, lx1, color, layer, count, alt)
 
-    rubber, groove = (36, 36, 39), (22, 22, 24)
+    rubber, groove = (34, 34, 37), (20, 20, 22)
     for sgn in (1, -1):
         layer = near if sgn == side else far
-        # Tread: blocks that alternate across the crown, rounded shoulders, then the sidewall.
-        ring(0.31, sgn * 0.0, 0.31, sgn * 0.03, groove, 2, alt=(3, (50, 50, 54)))
-        ring(0.31, sgn * 0.03, 0.305, sgn * 0.046, groove, 2, alt=(2, (46, 46, 50)))
-        ring(0.305, sgn * 0.046, 0.296, sgn * 0.054, rubber, 2)
-        ring(0.296, sgn * 0.054, 0.27, sgn * 0.058, rubber, layer)
-        ring(0.27, sgn * 0.058, 0.215, sgn * 0.05, (40, 40, 44), layer)
-        ring(0.26, sgn * 0.0585, 0.252, sgn * 0.0575, (92, 92, 96), layer)   # the printed ring on the sidewall
-        ring(0.215, sgn * 0.05, 0.2, sgn * 0.05, (34, 34, 38), layer)
-        ring(0.2, sgn * 0.05, 0.19, sgn * 0.044, (206, 210, 216), layer)   # the machined rim lip
-        ring(0.196, sgn * 0.044, 0.196, 0.0, (74, 76, 82), far)            # the barrel inside the rim
-    # Twin-spoke alloy: five pairs of spokes that flare at the rim, black with a silver edge.
+        # Tread blocks across the crown, shoulders, and a tall sidewall like a small-wheel underbone.
+        ring_(0.31, sgn * 0.0, 0.31, sgn * 0.03, groove, 2, alt=(3, (50, 50, 54)))
+        ring_(0.31, sgn * 0.03, 0.305, sgn * 0.044, groove, 2, alt=(2, (46, 46, 50)))
+        ring_(0.305, sgn * 0.044, 0.292, sgn * 0.05, rubber, 2)
+        ring_(0.292, sgn * 0.05, 0.215, sgn * 0.04, (38, 38, 42), layer)
+        ring_(0.262, sgn * 0.0505, 0.254, sgn * 0.0495, (90, 90, 96), layer)   # the printed ring on the sidewall
+        ring_(0.215, sgn * 0.04, 0.2, sgn * 0.034, (28, 28, 32), layer)
+        ring_(0.2, sgn * 0.034, 0.186, sgn * 0.0, (218, 222, 228), layer)      # the chrome rim
+    ring_(0.19, -0.034, 0.19, 0.034, (96, 98, 104), far)   # the barrel inside the rim
+    # Wire spokes: thirty-six on each side, running from the hub flange to the rim in a cross-lacing.
     for sgn in (1, -1):
         layer = near if sgn == side else far
-        for k in range(5):
-            phi = 2 * math.pi * k / 5 + 0.3
-            for off in (-0.1, 0.1):
-                for width_in, width_out, tone, dz in ((0.2, 0.17, (34, 34, 40), 0.034), (0.07, 0.06, (178, 182, 190), 0.038)):
-                    pts = [P(sgn * dz, r * math.cos(phi + off * (1 - 0.35 * (r - 0.05) / 0.14) + s * wd), r * math.sin(phi + off * (1 - 0.35 * (r - 0.05) / 0.14) + s * wd))
-                           for r, wd, s in ((0.05, width_in * 0.5, -1), (0.19, width_out * 0.5, -1), (0.19, width_out * 0.5, 1), (0.05, width_in * 0.5, 1))]
-                    scene.face(pts, tone, layer=layer, two_sided=True)
-        ring(0.052, sgn * 0.044, 0.026, sgn * 0.05, (200, 204, 210), layer, count=20)
-        ring(0.026, sgn * 0.05, 0.0, sgn * 0.052, (150, 154, 160), layer, count=20)
+        for k in range(36):
+            a_hub = 2 * math.pi * k / 36
+            a_rim = a_hub + (0.34 if k % 2 == 0 else -0.34)
+            hub = P(sgn * 0.042, 0.052 * math.cos(a_hub), 0.052 * math.sin(a_hub))
+            rim = P(sgn * 0.004, 0.188 * math.cos(a_rim), 0.188 * math.sin(a_rim))
+            limb(scene, hub, rim, 0.0045, 0.0045, (206, 210, 216), layer, n=4, bulge=1.0, caps=False)
+    # The hub: a silver drum with cooling fins and a dark brake plate (front), or a plain drum (rear).
+    hub_rings = [ring_points(P(lx, 0, 0), (0, 1, 0), (0, 0, 1), r, r, 20, 1.0) for lx, r in ((-0.05, 0.05), (-0.045, 0.082), (0.045, 0.082), (0.05, 0.05))]
+    loft(scene, hub_rings, (176, 180, 186), near, caps=(True, True))
+    for fx in (-0.03, -0.015, 0.0, 0.015, 0.03):
+        loft(scene, [ring_points(P(fx, 0, 0), (0, 1, 0), (0, 0, 1), 0.086, 0.086, 20), ring_points(P(fx + 0.006, 0, 0), (0, 1, 0), (0, 0, 1), 0.086, 0.086, 20)], (130, 134, 140), near, caps=(False, False))
     if not front:
         rear_end(scene, P, side, near, far)
         return
-    # The valve stem on the rim.
-    limb(scene, P(side * 0.046, 0.185 * math.cos(0.9), 0.185 * math.sin(0.9)), P(side * 0.07, 0.15 * math.cos(0.9), 0.15 * math.sin(0.9)), 0.006, 0.005, (190, 194, 200), near + 1, n=6)
-    # The disc on the right: a ring with a hub carrier and drilled holes.
-    disc_layer = near if side == 1 else far
-    ring(0.155, 0.024, 0.088, 0.024, (186, 190, 198), disc_layer, alt=(1, (176, 180, 188)), count=60)
-    ring(0.088, 0.024, 0.052, 0.027, (54, 54, 60), disc_layer, count=24)
-    for i in range(12):
-        t = 2 * math.pi * i / 12
-        for rr in (0.108, 0.136):
-            hole = [P(0.0245, rr * math.cos(t + dt) + dy, rr * math.sin(t + dt) + dz) for dt, dy, dz in ((0, 0, 0), (0.07, 0, 0), (0.07, 0.006, 0.006), (0, 0.006, 0.006))]
-            scene.face(hole, (60, 60, 66), layer=disc_layer, two_sided=True)
-    # Caliper, bolts, and the brake hose running up the fork.
-    caliper = [(0.012, -0.034, -0.16), (0.05, -0.034, -0.16), (0.05, 0.05, -0.16), (0.012, 0.05, -0.16)]
-    ellipsoid(scene, P(0.034, 0.008, -0.125), (0.026, 0.044, 0.04), (156, 28, 32), disc_layer + 1, n=14, m=8, e=0.7)
-    joint(scene, P(0.057, 0.03, -0.14), 0.007, (200, 204, 210), disc_layer + 1, 8, 4)
-    joint(scene, P(0.057, -0.012, -0.14), 0.007, (200, 204, 210), disc_layer + 1, 8, 4)
-    # The fork: rubber boots over polished stanchions, black sliders, a fork crown, the axle.
+    # The valve stem.
+    limb(scene, P(side * 0.01, 0.186 * math.cos(0.9), 0.186 * math.sin(0.9)), P(side * 0.03, 0.15 * math.cos(0.9), 0.15 * math.sin(0.9)), 0.005, 0.004, (190, 194, 200), near + 1, n=6)
+    # Telescopic forks: silver sliders from the axle, black upper tubes into the headstock; a brake arm and axle.
     for sgn in (1, -1):
         layer = near + 1 if sgn == side else far
-        axle_end = P(sgn * 0.088, 0, 0)
-        lower_top = P(sgn * 0.088, 0.22, -0.1)
-        boot_top = P(sgn * 0.088, 0.42, -0.2)
-        crown = P(sgn * 0.088, 0.78, -0.37)
-        limb(scene, axle_end, lower_top, 0.034, 0.032, (24, 24, 28), layer, n=14)
-        limb(scene, lower_top, boot_top, 0.026, 0.03, (206, 210, 216), layer, n=14)   # the chrome stanchion
-        for i in range(6):   # rubber bellows
-            t0, t1 = 0.12 + 0.13 * i, 0.12 + 0.13 * (i + 0.6)
-            a = np.array(lower_top) + (np.array(boot_top) - np.array(lower_top)) * 0.0
-            q0 = np.array(boot_top) + (np.array(crown) - np.array(boot_top)) * t0
-            q1 = np.array(boot_top) + (np.array(crown) - np.array(boot_top)) * t1
-            limb(scene, q0, q1, 0.036, 0.036, (20, 20, 23), layer, n=14, bulge=1.1)
-            q2 = np.array(boot_top) + (np.array(crown) - np.array(boot_top)) * (t1 + 0.012)
-            limb(scene, q1, q2, 0.032, 0.032, (36, 36, 40), layer, n=14, bulge=1.0)
-    limb(scene, P(-0.13, 0, 0), P(0.13, 0, 0), 0.016, 0.016, (120, 124, 130), near + 1, n=10)
-    joint(scene, P(side * 0.125, 0.0, 0.0), 0.024, (176, 180, 186), near + 1, 12, 6)
-    # The mudguard: a smooth pink arc over the tyre with flanges and a raised rib.
+        axle = P(sgn * 0.07, 0, 0)
+        mid = P(sgn * 0.07, 0.34, -0.15)
+        top = P(sgn * 0.08, 0.8, -0.37)
+        limb(scene, axle, mid, 0.034, 0.03, (192, 196, 202), layer, n=14)
+        limb(scene, mid, top, 0.028, 0.034, (22, 22, 26), layer, n=14)
+        joint(scene, mid, 0.034, (160, 164, 170), layer, 12, 6)
+    limb(scene, P(-0.1, 0, 0), P(0.1, 0, 0), 0.016, 0.016, (150, 154, 160), near + 1, n=10)
+    joint(scene, P(side * 0.105, 0.0, 0.0), 0.022, (186, 190, 196), near + 1, 12, 6)
+    limb(scene, P(0.052, 0.0, 0.0), P(0.07, 0.07, -0.14), 0.01, 0.01, (150, 154, 160), near + 1, n=6)   # the brake arm
+    cable = bezier((0.4, 1.2, -0.52), (0.34, 0.8, -0.3), P(0.06, 0.05, -0.06), 12)
+    curve_tube(scene, cable, 0.0045, (16, 16, 18), near, 5)
+    # The mudguard: black and glossy with a silver stay.
     steps = 36
     for i in range(steps):
         t0, t1 = -0.95 + 2.25 * i / steps, -0.95 + 2.25 * (i + 1) / steps
         r = 0.338 + 0.012 * math.sin(math.pi * i / steps)
-        sheet = [P(-0.075, r * math.cos(t0), r * math.sin(t0)), P(0.075, r * math.cos(t0), r * math.sin(t0)),
-                 P(0.075, r * math.cos(t1), r * math.sin(t1)), P(-0.075, r * math.cos(t1), r * math.sin(t1))]
-        scene.face(sheet, PINK, layer=near + 1, two_sided=True)
-        rib = [P(-0.012, (r + 0.004) * math.cos(t0), (r + 0.004) * math.sin(t0)), P(0.012, (r + 0.004) * math.cos(t0), (r + 0.004) * math.sin(t0)),
-               P(0.012, (r + 0.004) * math.cos(t1), (r + 0.004) * math.sin(t1)), P(-0.012, (r + 0.004) * math.cos(t1), (r + 0.004) * math.sin(t1))]
-        scene.face(rib, (255, 186, 220), layer=near + 1, two_sided=True)
+        sheet = [P(-0.07, r * math.cos(t0), r * math.sin(t0)), P(0.07, r * math.cos(t0), r * math.sin(t0)),
+                 P(0.07, r * math.cos(t1), r * math.sin(t1)), P(-0.07, r * math.cos(t1), r * math.sin(t1))]
+        scene.face(sheet, (26, 26, 30), layer=near + 1, two_sided=True)
+        rib = [P(-0.01, (r + 0.004) * math.cos(t0), (r + 0.004) * math.sin(t0)), P(0.01, (r + 0.004) * math.cos(t0), (r + 0.004) * math.sin(t0)),
+               P(0.01, (r + 0.004) * math.cos(t1), (r + 0.004) * math.sin(t1)), P(-0.01, (r + 0.004) * math.cos(t1), (r + 0.004) * math.sin(t1))]
+        scene.face(rib, (70, 70, 78), layer=near + 1, two_sided=True)
         for sgn in (1, -1):
-            flange = [P(sgn * 0.075, r * math.cos(t0), r * math.sin(t0)), P(sgn * 0.075, r * math.cos(t1), r * math.sin(t1)),
-                      P(sgn * 0.075, (r - 0.034) * math.cos(t1), (r - 0.034) * math.sin(t1)), P(sgn * 0.075, (r - 0.034) * math.cos(t0), (r - 0.034) * math.sin(t0))]
-            scene.face(flange, PINK_DARK, layer=near + 1 if sgn == side else far, two_sided=True)
+            flange = [P(sgn * 0.07, r * math.cos(t0), r * math.sin(t0)), P(sgn * 0.07, r * math.cos(t1), r * math.sin(t1)),
+                      P(sgn * 0.07, (r - 0.03) * math.cos(t1), (r - 0.03) * math.sin(t1)), P(sgn * 0.07, (r - 0.03) * math.cos(t0), (r - 0.03) * math.sin(t0))]
+            scene.face(flange, (20, 20, 24), layer=near + 1 if sgn == side else far, two_sided=True)
 
 
 # ---------------------------------------------------------------- steering and the front of the body
 
 
 def steering(scene, layer=6, glass=None, cluster=None, phone=None):
-    """The handlebar end: the pink headlight and cowl, stem, swept bar with ribbed grips, levers with ball
-    ends, switch pods, brake hose, mirrors on stalks, dashboard housing, and (optionally) phone."""
-    # Headlight with a lit lens, indicators, and the apron below it.
-    ellipsoid(scene, (0, 1.03, -0.3), (0.14, 0.1, 0.1), PINK, layer - 2, n=22, m=12, e=0.8)
+    """The handlebar end of the delivery bike: a black headlight cowl with a clear lens and orange indicators,
+    a black legshield with a pink flash, a stem, a swept black bar with ribbed grips, silver levers, black
+    switch gear, round black mirrors on stalks, the speedometer pod, and (optionally) a phone on the bar."""
+    ellipsoid(scene, (0, 1.03, -0.3), (0.14, 0.1, 0.1), (24, 24, 28), layer - 2, n=22, m=12, e=0.8)
     ellipsoid(scene, (0, 1.03, -0.205), (0.1, 0.075, 0.03), (226, 232, 236), layer - 2, n=18, m=8)   # the lens, off in daylight
     for sgn in (-1, 1):
-        ellipsoid(scene, (sgn * 0.16, 0.99, -0.32), (0.032, 0.026, 0.04), (255, 160, 40), layer - 2, n=10, m=6)
+        ellipsoid(scene, (sgn * 0.17, 0.99, -0.32), (0.034, 0.026, 0.04), (255, 150, 30), layer - 2, n=10, m=6)   # indicators
     rings = [ring_points((0, y, z), (1, 0, 0), (0, 0, 1), rx, rz, 20, 0.75) for y, z, rx, rz in
              ((1.0, -0.42, 0.14, 0.1), (0.8, -0.46, 0.17, 0.09), (0.58, -0.52, 0.19, 0.075), (0.38, -0.56, 0.21, 0.07))]
-    loft(scene, rings, PINK, layer - 3, caps=(False, False))
-    # Stem, fork crown plate, bar clamp.
-    limb(scene, (0, 1.06, -0.36), (0, 1.2, -0.47), 0.034, 0.03, (62, 62, 68), layer - 1, n=14)
-    ellipsoid(scene, (0, 1.2, -0.47), (0.07, 0.03, 0.05), (36, 36, 40), layer, n=14, m=6)
-    # The bar: swept back, slightly bent where it meets the grips.
+    loft(scene, rings, (24, 24, 28), layer - 3, caps=(False, False))
+    for sgn in (-1, 1):   # a hot-pink flash on each side of the legshield
+        flash = [(-0.44, 0.98), (-0.5, 0.88), (-0.47, 0.8), (-0.54, 0.68), (-0.5, 0.64), (-0.56, 0.5), (-0.51, 0.62), (-0.52, 0.7), (-0.46, 0.76), (-0.47, 0.86)]
+        scene.face([(sgn * 0.168, y, z) for z, y in flash], PINK, layer=layer - 2, two_sided=True)
+    limb(scene, (0, 1.06, -0.36), (0, 1.2, -0.47), 0.036, 0.032, (30, 30, 34), layer - 1, n=14)
+    ellipsoid(scene, (0, 1.2, -0.47), (0.08, 0.03, 0.05), (28, 28, 32), layer, n=14, m=6)
+    # The bar: black, swept back, with ribbed grips and a ball-ended silver lever on each side.
     for sgn in (-1, 1):
-        limb(scene, (0, 1.205, -0.47), (sgn * 0.3, 1.235, -0.6), 0.013, 0.012, SILVER, layer, n=10)
-        limb(scene, (sgn * 0.3, 1.235, -0.6), (sgn * 0.37, 1.238, -0.665), 0.012, 0.012, SILVER, layer, n=10)
-        for gi in range(7):   # ribbed rubber grip
+        limb(scene, (0, 1.205, -0.47), (sgn * 0.3, 1.235, -0.6), 0.015, 0.014, (22, 22, 26), layer, n=10)
+        limb(scene, (sgn * 0.3, 1.235, -0.6), (sgn * 0.37, 1.238, -0.665), 0.014, 0.014, (22, 22, 26), layer, n=10)
+        for gi in range(7):
             t0, t1 = gi / 7, (gi + 1) / 7
             p0 = (sgn * (0.37 + 0.07 * t0), 1.238, -0.665 - 0.03 * t0)
             p1 = (sgn * (0.37 + 0.07 * t1), 1.238, -0.665 - 0.03 * t1)
-            limb(scene, p0, p1, 0.021 if gi % 2 == 0 else 0.018, 0.021 if gi % 2 == 0 else 0.018, RUBBER if gi % 2 == 0 else (40, 40, 44), layer, n=12, bulge=1.0)
-        joint(scene, (sgn * 0.445, 1.238, -0.7), 0.02, (22, 22, 26), layer, 10, 5)   # the bar end
-        # Switch pod with little buttons, and the brake lever with a ball end.
-        ellipsoid(scene, (sgn * 0.27, 1.225, -0.605), (0.04, 0.026, 0.035), (22, 22, 26), layer, n=14, m=6, e=0.7)
+            limb(scene, p0, p1, 0.022 if gi % 2 == 0 else 0.019, 0.022 if gi % 2 == 0 else 0.019, (16, 16, 18) if gi % 2 == 0 else (34, 34, 38), layer, n=12, bulge=1.0)
+        joint(scene, (sgn * 0.445, 1.238, -0.7), 0.021, (16, 16, 18), layer, 10, 5)
+        ellipsoid(scene, (sgn * 0.27, 1.225, -0.605), (0.045, 0.028, 0.038), (20, 20, 24), layer, n=14, m=6, e=0.7)   # switch gear
         for bi, bc in enumerate(((60, 200, 90), (230, 60, 50), (240, 200, 60))):
-            joint(scene, (sgn * (0.255 + 0.015 * bi), 1.248, -0.58), 0.006, bc, layer + 1, 6, 3)
+            joint(scene, (sgn * (0.255 + 0.015 * bi), 1.25, -0.58), 0.006, bc, layer + 1, 6, 3)
         lever = bezier((sgn * 0.345, 1.222, -0.63), (sgn * 0.4, 1.19, -0.57), (sgn * 0.405, 1.2, -0.5), 6)
         curve_tube(scene, lever, 0.007, (206, 210, 216), layer, 6)
         joint(scene, lever[-1], 0.011, (206, 210, 216), layer, 8, 4)
-        # Mirror stalk, housing and glass.
-        stalk = bezier((sgn * 0.3, 1.25, -0.62), (sgn * 0.36, 1.4, -0.6), (sgn * 0.44, 1.45, -0.54), 6)
-        curve_tube(scene, stalk, 0.008, (120, 124, 130), layer, 6)
-        ellipsoid(scene, (sgn * 0.46, 1.47, -0.52), (0.08, 0.052, 0.022), (24, 24, 28), layer, n=18, m=8, e=0.7)
-        scene.face([(sgn * 0.46 - 0.068, 1.49, -0.538), (sgn * 0.46 + 0.068, 1.49, -0.538), (sgn * 0.46 + 0.068, 1.445, -0.538), (sgn * 0.46 - 0.068, 1.445, -0.538)],
+        # A black mirror on a curved black stalk, glass in a rounded housing.
+        stalk = bezier((sgn * 0.3, 1.25, -0.62), (sgn * 0.34, 1.42, -0.6), (sgn * 0.42, 1.5, -0.54), 6)
+        curve_tube(scene, stalk, 0.009, (22, 22, 26), layer, 6)
+        ellipsoid(scene, (sgn * 0.44, 1.53, -0.52), (0.075, 0.062, 0.024), (24, 24, 28), layer, n=18, m=8, e=0.7)
+        scene.face([(sgn * 0.44 - 0.063, 1.55, -0.54), (sgn * 0.44 + 0.063, 1.55, -0.54), (sgn * 0.44 + 0.063, 1.5, -0.54), (sgn * 0.44 - 0.063, 1.5, -0.54)],
                    (150, 190, 226), texture=glass or mirror_texture(), layer=layer + 1, two_sided=True, emissive=True)
-    # The brake hose from the right lever down to the caliper.
-    hose = bezier((0.4, 1.2, -0.52), (0.36, 0.8, -0.36), (0.07, 0.4, -0.1), 14)
-    curve_tube(scene, hose, 0.0065, (16, 16, 18), layer - 1, 6)
-    # The dashboard housing on the stem, with its screen facing the rider.
-    ellipsoid(scene, (0, 1.265, -0.43), (0.125, 0.045, 0.07), (24, 24, 28), layer, n=22, m=8, e=0.55)
+    # The speedometer pod on the headstock, its dial facing the rider.
+    ellipsoid(scene, (0, 1.265, -0.43), (0.125, 0.05, 0.075), (22, 22, 26), layer, n=22, m=8, e=0.55)
     if cluster is not None:
-        scene.face([(-0.105, 1.3, -0.5), (0.105, 1.3, -0.5), (0.105, 1.235, -0.5), (-0.105, 1.235, -0.5)], (10, 14, 20),
+        scene.face([(-0.105, 1.31, -0.5), (0.105, 1.31, -0.5), (0.105, 1.235, -0.5), (-0.105, 1.235, -0.5)], (10, 14, 20),
                    texture=cluster, layer=layer + 1, two_sided=True, emissive=True)
     if phone is not None:
         limb(scene, (-0.2, 1.215, -0.55), (-0.215, 1.255, -0.55), 0.008, 0.008, (30, 30, 34), layer, n=8)
@@ -285,33 +260,59 @@ def steering(scene, layer=6, glass=None, cluster=None, phone=None):
 
 
 def scooter_body(scene, show_leg=True, layer=5):
-    """The body behind the front wheel: a smooth floorboard with a rubber mat and chrome edges, a rounded pink
-    body shell with a pale stripe and a dark skirt, the seat with stitching, and (when asked) Peter's right
-    leg with its boot, as seen from the right side."""
-    # Floorboard: a flat tray with a ribbed mat and chrome lip.
-    mat = [(-0.21, 0.31, -0.5), (0.21, 0.31, -0.5), (0.21, 0.31, -1.2), (-0.21, 0.31, -1.2)]
-    scene.face(mat, (44, 44, 48), layer=layer, two_sided=True)
-    for gz in np.arange(-0.52, -1.18, -0.06):
-        scene.face([(-0.18, 0.312, gz), (0.18, 0.312, gz), (0.18, 0.312, gz - 0.018), (-0.18, 0.312, gz - 0.018)], (28, 28, 32), layer=layer, two_sided=True)
-    # The body shell: rings along the bike, a rounded pink belly with a swelling at the seat.
-    stations = ((-0.5, 0.5, 0.17, 0.17), (-0.7, 0.52, 0.19, 0.19), (-0.95, 0.55, 0.2, 0.2), (-1.2, 0.57, 0.19, 0.2), (-1.42, 0.6, 0.15, 0.17))
+    """The body of the delivery bike, as in the art: a black underbone with hot-pink flashes along the flanks and
+    legshield, a rubber floor with a silver footrest, a silver engine and chain, a long black seat, a black rack,
+    the pink top box with black straps and trim, a red tail light with orange indicators, a black number plate,
+    and a silver exhaust. When asked, Peter's right leg and boot as seen from the right."""
+    near = layer
+    # The step-through floor with a rubber mat, and the footrest peg on the right.
+    scene.face([(-0.17, 0.31, -0.5), (0.17, 0.31, -0.5), (0.17, 0.31, -0.82), (-0.17, 0.31, -0.82)], (30, 30, 34), layer=near, two_sided=True)
+    for gz in np.arange(-0.52, -0.8, -0.05):
+        scene.face([(-0.15, 0.312, gz), (0.15, 0.312, gz), (0.15, 0.312, gz - 0.016), (-0.15, 0.312, gz - 0.016)], (18, 18, 22), layer=near, two_sided=True)
+    limb(scene, (0.1, 0.34, -0.8), (0.22, 0.34, -0.8), 0.012, 0.012, (180, 184, 190), near + 1, n=8)
+    # The flanks: a black shell (fuel tank cover and tail) with a long hot-pink flash on each side.
+    stations = ((-0.62, 0.5, 0.15, 0.15), (-0.85, 0.53, 0.18, 0.18), (-1.1, 0.56, 0.19, 0.19), (-1.35, 0.6, 0.17, 0.17), (-1.62, 0.66, 0.12, 0.15), (-1.8, 0.72, 0.08, 0.1))
     rings = [ring_points((0, y, z), (1, 0, 0), (0, 1, 0), rx, ry, 22, 0.75) for z, y, rx, ry in stations]
-
-    def shade(k, i):
-        # A pale stripe along the flank and a dark skirt under it.
-        ang = i / 22
-        if 0.0 <= ang < 0.05 or ang > 0.96:
-            return (255, 236, 246)
-        if 0.62 < ang < 0.9:
-            return (42, 42, 46)
-        return None
-
-    loft(scene, rings, PINK, layer, caps=(False, False), shade=shade)
-    # The seat: a rounded black cushion with a stitched edge.
-    seat_rings = [ring_points((0, 0.89 + dy, z), (1, 0, 0), (0, 1, 0), rx, ry, 20, 0.6)
-                  for z, rx, ry, dy in ((-0.86, 0.1, 0.03, -0.115), (-1.0, 0.13, 0.04, -0.105), (-1.25, 0.14, 0.045, -0.1), (-1.46, 0.11, 0.03, -0.105))]
-    loft(scene, seat_rings, (28, 28, 32), layer + 1, caps=(True, True),
-         shade=lambda k, i: (66, 66, 72) if i in (4, 5, 15, 16) else None)
+    loft(scene, rings, (24, 24, 28), near, caps=(False, False))
+    for sgn in (-1, 1):
+        flash = [(-0.78, 0.5), (-0.95, 0.66), (-1.12, 0.62), (-1.3, 0.72), (-1.55, 0.74), (-1.3, 0.68), (-1.15, 0.58), (-0.96, 0.58)]
+        scene.face([(sgn * 0.199, y, z) for z, y in flash], PINK, layer=near + 1, two_sided=True)
+        flash2 = [(-0.72, 0.43), (-0.8, 0.55), (-0.9, 0.5), (-1.0, 0.5), (-0.9, 0.44)]
+        scene.face([(sgn * 0.196, y, z) for z, y in flash2], PINK, layer=near + 1, two_sided=True)
+    # The engine: a silver crankcase cover with a finned cylinder, a kick lever and a drive chain to the rear wheel.
+    ellipsoid(scene, (0.12, 0.36, -0.95), (0.05, 0.1, 0.1), (178, 182, 188), near + 1, n=20, m=8, e=0.8)
+    ellipsoid(scene, (0.13, 0.36, -0.95), (0.025, 0.06, 0.06), (120, 124, 130), near + 1, n=14, m=6)
+    ellipsoid(scene, (0.0, 0.42, -0.82), (0.1, 0.1, 0.11), (60, 62, 68), near, n=14, m=6, e=0.8)
+    for fi in range(5):
+        ellipsoid(scene, (0.0, 0.5 + 0.02 * fi, -0.8 - 0.01 * fi), (0.1, 0.008, 0.1), (150, 154, 160), near + 1, n=14, m=3, e=0.8)
+    limb(scene, (0.18, 0.28, -0.98), (0.2, 0.27, -1.05), 0.012, 0.012, (170, 174, 180), near + 1, n=6)
+    limb(scene, (0.15, 0.4, -0.98), (0.15, 0.38, -1.25), 0.012, 0.012, (30, 30, 34), near + 1, n=6)   # chain guard
+    limb(scene, (0.15, 0.31, -0.98), (0.15, 0.255, -1.25), 0.012, 0.012, (30, 30, 34), near + 1, n=6)
+    # The seat: long, flat and black with a pale stitched edge.
+    seat_rings = [ring_points((0, 0.8 + dy, z), (1, 0, 0), (0, 1, 0), rx, ry, 20, 0.6)
+                  for z, rx, ry, dy in ((-0.84, 0.1, 0.03, 0.0), (-0.95, 0.13, 0.04, 0.01), (-1.2, 0.145, 0.045, 0.015), (-1.5, 0.12, 0.035, 0.0), (-1.62, 0.08, 0.03, -0.01))]
+    loft(scene, seat_rings, (26, 26, 30), near + 1, caps=(True, True), shade=lambda k, i: (54, 54, 60) if i in (4, 5, 15, 16) else None)
+    # The rack and the pink top box, with black straps, trim and silver buckles.
+    for sgn in (-1, 1):
+        limb(scene, (sgn * 0.19, 0.93, -1.2), (sgn * 0.19, 0.93, -1.95), 0.014, 0.014, (22, 22, 26), near + 1, n=8, bulge=1.0)
+        limb(scene, (sgn * 0.19, 0.93, -1.2), (sgn * 0.12, 0.74, -1.55), 0.012, 0.012, (22, 22, 26), near + 1, n=8, bulge=1.0)
+    for rz in (-1.25, -1.5, -1.75, -1.95):
+        limb(scene, (-0.19, 0.93, rz), (0.19, 0.93, rz), 0.012, 0.012, (22, 22, 26), near + 1, n=8, bulge=1.0)
+    box_c = (0, 1.14, -1.58)
+    ellipsoid(scene, box_c, (0.23, 0.2, 0.36), PINK, near + 1, n=28, m=14, e=0.3,
+              shade=lambda k, i: (20, 20, 24) if k in (4, 5) else None)
+    for sgn in (-1, 1):
+        for bz in (-1.4, -1.76):
+            scene.face([(sgn * 0.232, 1.34, bz - 0.025), (sgn * 0.232, 1.34, bz + 0.025), (sgn * 0.232, 0.95, bz + 0.025), (sgn * 0.232, 0.95, bz - 0.025)], (22, 22, 26), layer=near + 2, two_sided=True)
+            scene.box(sgn * 0.232 - 0.006, sgn * 0.232 + 0.006, 1.13, 1.2, bz - 0.02, bz + 0.02, (200, 204, 210), layer=near + 2)
+    # The back: tail light, orange indicators, a black number plate and the silver exhaust.
+    ellipsoid(scene, (0, 0.78, -1.9), (0.1, 0.045, 0.03), (214, 36, 40), near + 1, n=14, m=6, e=0.7)
+    for sgn in (-1, 1):
+        ellipsoid(scene, (sgn * 0.17, 0.77, -1.88), (0.04, 0.03, 0.03), (255, 150, 30), near + 1, n=10, m=5)
+    scene.face([(-0.1, 0.7, -1.93), (0.1, 0.7, -1.93), (0.1, 0.52, -1.93), (-0.1, 0.52, -1.93)], (22, 22, 26), layer=near + 1, two_sided=True)
+    scene.face([(-0.09, 0.69, -1.935), (0.09, 0.69, -1.935), (0.09, 0.61, -1.935), (-0.09, 0.61, -1.935)], (240, 240, 232), layer=near + 2, two_sided=True)
+    limb(scene, (0.2, 0.3, -1.0), (0.2, 0.34, -1.78), 0.045, 0.05, (176, 180, 186), near + 1, n=14)
+    ellipsoid(scene, (0.2, 0.34, -1.82), (0.05, 0.05, 0.05), (28, 28, 32), near + 1, n=12, m=6)
     if show_leg:
         rider_leg(scene, 1, layer + 2)
 
@@ -335,11 +336,11 @@ def rider_leg(scene, sgn, layer):
 
 def rider(scene, layer=7, left_only=False):
     """Peter seated on the scooter: pink helmet with a stripe and a rubber rim, black jacket with reflective
-    bands, the pink delivery backpack, the arms reaching the grips in gloves, the legs and boots. Built for a
+    bands, the arms reaching the grips in gloves, the legs and boots. Built for a
     camera behind him and to his left."""
     lean = 0.16   # how far the chest leans forward per metre of height
     def back(y):
-        return -1.12 + lean * (y - 0.95)
+        return -1.0 + lean * (y - 0.95)
     # Torso: a V-tapered jacket, wider at the shoulders, with collar and hem.
     stations = ((0.93, 0.19, 0.13), (1.06, 0.2, 0.14), (1.2, 0.225, 0.15), (1.33, 0.255, 0.145), (1.41, 0.235, 0.12), (1.45, 0.13, 0.1))
     rings = [ring_points((0, y, back(y)), (1, 0, 0), (0, 0, 1), rx, rz, 24, 0.85) for y, rx, rz in stations]
@@ -355,13 +356,6 @@ def rider(scene, layer=7, left_only=False):
     # The collar and the neck.
     limb(scene, (0, 1.44, back(1.44)), (0, 1.52, back(1.52) - 0.01), 0.08, 0.07, (32, 32, 36), layer, n=18)
     limb(scene, (0, 1.5, back(1.5)), (0, 1.56, back(1.56) - 0.01), 0.052, 0.05, SKIN, layer, n=14)
-    # The delivery backpack: a rounded pink box with a darker lid line, reflective patch and straps.
-    bag_c = (0, 1.2, back(1.2) - 0.21)
-    ellipsoid(scene, bag_c, (0.2, 0.215, 0.15), PINK, layer + 1, n=26, m=14, e=0.42,
-              shade=lambda k, i: (255, 236, 246) if k in (7, 8) and 14 < i < 24 else (PINK_DARK if k == 4 else None))
-    for sgn in (-1, 1):
-        strap = bezier((sgn * 0.17, 1.43, back(1.43) - 0.02), (sgn * 0.2, 1.3, back(1.3) - 0.07), (sgn * 0.19, 1.14, back(1.14) - 0.1), 8)
-        curve_tube(scene, strap, 0.014, (18, 18, 20), layer + 2, 8)
     # Helmet: a glossy pink shell, a pale racing stripe, a black rubber rim and a rear vent.
     head = (0, 1.66, back(1.66) - 0.01)
     helmet(scene, head, layer + 2, visor_i=7, back_y=back(1.545) - 0.02)
@@ -436,34 +430,35 @@ def glove(scene, sgn, layer):
 
 
 def rear_end(scene, P, side, near, far):
-    """What the rear wheel needs instead of a fork: a drum cover, a swingarm, a shock with a spring, a black
-    mudguard over the back of the tyre, a tail light."""
-    R = WHEEL_R
+    """What the rear wheel needs: a chain sprocket, a black swingarm, a shock with a silver spring, and a black
+    mudguard over the back of the tyre."""
     for sgn in (1, -1):
         layer = near if sgn == side else far
         ring(scene, P, 0.15, sgn * 0.046, 0.05, sgn * 0.06, (150, 154, 160), layer, 40)
+    # The sprocket on the right, with a dark toothed edge.
+    ring(scene, P, 0.085, 0.06, 0.07, 0.062, (40, 40, 46), near if side == 1 else far, 24, alt=(2, (90, 94, 100)))
     limb(scene, P(side * 0.1, 0, 0), P(side * 0.1, 0.05, 0.6), 0.04, 0.05, (26, 26, 30), near + 1, n=12)   # swingarm
-    top = P(side * 0.13, 0.2, 0.16)
-    bottom = P(side * 0.13, 0.02, 0.0)
+    top = P(side * 0.13, 0.32, 0.12)
+    bottom = P(side * 0.13, 0.02, -0.03)
     limb(scene, bottom, top, 0.014, 0.014, (190, 194, 200), near + 1, n=8)
-    for i in range(7):   # the spring round the shock
-        t0, t1 = i / 7, (i + 0.6) / 7
-        a = np.array(bottom) + (np.array(top) - np.array(bottom)) * t0
-        b = np.array(bottom) + (np.array(top) - np.array(bottom)) * t1
-        limb(scene, a, b, 0.03, 0.03, (214, 40, 46), near + 1, n=10, bulge=1.0)
+    for i in range(8):   # the spring round the shock
+        t0, t1 = i / 8, (i + 0.6) / 8
+        a_ = np.array(bottom) + (np.array(top) - np.array(bottom)) * t0
+        b_ = np.array(bottom) + (np.array(top) - np.array(bottom)) * t1
+        limb(scene, a_, b_, 0.03, 0.03, (206, 210, 216), near + 1, n=10, bulge=1.0)
     steps = 26
     for i in range(steps):
         t0, t1 = -1.5 + 1.75 * i / steps, -1.5 + 1.75 * (i + 1) / steps
         r = 0.345
         sheet = [P(-0.07, r * math.cos(t0), r * math.sin(t0)), P(0.07, r * math.cos(t0), r * math.sin(t0)),
                  P(0.07, r * math.cos(t1), r * math.sin(t1)), P(-0.07, r * math.cos(t1), r * math.sin(t1))]
-        scene.face(sheet, (30, 30, 34), layer=near + 1, two_sided=True)
-    ellipsoid(scene, P(0, 0.12, -0.38), (0.07, 0.025, 0.02), (214, 30, 36), near + 2, n=14, m=6, e=0.6)   # tail light
+        scene.face(sheet, (24, 24, 28), layer=near + 1, two_sided=True)
 
 
-def ring(scene, P, r0, lx0, r1, lx1, color, layer, count=40):
+def ring(scene, P, r0, lx0, r1, lx1, color, layer, count=40, alt=None):
     for i in range(count):
         t0, t1 = 2 * math.pi * i / count, 2 * math.pi * (i + 1) / count
         pts = [P(lx0, r0 * math.cos(t0), r0 * math.sin(t0)), P(lx0, r0 * math.cos(t1), r0 * math.sin(t1)),
                P(lx1, r1 * math.cos(t1), r1 * math.sin(t1)), P(lx1, r1 * math.cos(t0), r1 * math.sin(t0))]
-        scene.face(pts, color, layer=layer, two_sided=True)
+        c = color if alt is None or i % alt[0] else alt[1]
+        scene.face(pts, c, layer=layer, two_sided=True)
