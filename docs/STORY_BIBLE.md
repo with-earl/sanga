@@ -229,7 +229,7 @@ run reaches it as echoes (marked below).
 
 ### 7.1 Intro
 
-Three frames, one line of travel (each held still: `"zoom": false`, no slow push-in): the skyway, the news, the market. They are drawn in 3D from nothing (`tools/intro_frames.py`, `tools/bike_parts.py`, `tools/tv_store.py`); the bike in frames 1 and 3 is the art's delivery motorcycle: black with hot-pink flashes, spoked wheels, a pink top box.
+Three frames, one line of travel: the skyway, the news, the market. They are drawn in 3D from nothing (`tools/intro_frames.py`, `tools/bike_parts.py`, `tools/tv_store.py`); the bike in frames 1 and 3 is the art's delivery motorcycle: black with hot-pink flashes, spoked wheels, a pink top box.
 
 `tokhang_skyway.png` (caption *Linggo ng hapon*): the camera right at the front wheel of the bike on the elevated skyway, a green exit gantry (SAMPALOC / ESPAÑA), hazy Manila ahead with a Gothic church spire among the towers, and rubbish on the road: a crumpled food-delivery flyer lying flat on the tarmac and, near the camera at the bottom right, a white plastic sando bag standing blown open (two handles, side gussets, a red *Salamat po!*): the street is dirty.
 > **Peter:** Huling biyahe na 'to. Birthday ni Ben, bawal akong ma-late.

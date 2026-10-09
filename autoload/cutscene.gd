@@ -7,7 +7,7 @@ extends CanvasLayer
 ##   {"image": path, "hold": seconds}                             a picture on its own
 ##   {"image": path, "gunshot": true, ...}                        with a flash, shake and buzz
 ##   {"image": path, "caption": "Flashback", ...}                 with a small caption
-##   {"image": path, "zoom": false, ...}                          held still, without the slow push-in
+##   {"image": path, "zoom": true, ...}                           with a slow push-in (pictures hold still otherwise)
 ##   {"card": "Peter", "line": "Namatay si Peter."}                     a title card on black
 ##   {"image": path, "choose": ["Run", "Ride Jeep"]}              a picture with a choice;
 ##                                                                the answer is in `last_choice`
@@ -159,7 +159,7 @@ func _play_picture(data: Dictionary) -> Array:
 	var next_steps: Array = []
 	var hold: float = float(data.get("hold", DEFAULT_HOLD))
 	var zoom: Tween = null
-	if data.get("zoom", true):
+	if data.get("zoom", false):
 		zoom = create_tween()
 		zoom.tween_property(_picture, "scale", Vector2.ONE * ZOOM_TO, maxf(hold, 4.0) + 6.0)
 	if data.has("caption"):
