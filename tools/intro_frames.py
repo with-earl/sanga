@@ -220,14 +220,14 @@ def flyer_texture():
     return img
 
 
-def crumpled_flyer(scene, centre, yaw, pitch, roll, w=0.34, h=0.23, seed=2, layer=9):
+def crumpled_flyer(scene, centre, yaw, pitch, roll, w=0.34, h=0.23, seed=2, layer=9, mirror=False):
     """The flyer tumbling in the wind: a grid of small flat pieces pushed in and out so it is creased and
     folded at a corner, each piece carrying its own part of the printed card."""
     rng = np.random.default_rng(seed)
-    tex = flyer_texture()
+    tex = flyer_texture().transpose(Image.FLIP_LEFT_RIGHT) if mirror else flyer_texture()
     nx, ny = 9, 6
-    z = rng.normal(0, 0.012, (ny + 1, nx + 1))
-    z += 0.02 * np.sin(np.linspace(0, 3.4, nx + 1))[None, :] + 0.015 * np.cos(np.linspace(0, 2.4, ny + 1))[:, None]
+    z = rng.normal(0, 0.005, (ny + 1, nx + 1))
+    z += 0.008 * np.sin(np.linspace(0, 3.4, nx + 1))[None, :] + 0.006 * np.cos(np.linspace(0, 2.4, ny + 1))[:, None]
     pts = np.zeros((ny + 1, nx + 1, 3))
     for j in range(ny + 1):
         for i in range(nx + 1):
@@ -245,45 +245,74 @@ def crumpled_flyer(scene, centre, yaw, pitch, roll, w=0.34, h=0.23, seed=2, laye
             scene.face([pts[j, i], pts[j, i + 1], pts[j + 1, i + 1], pts[j + 1, i]], (240, 236, 224), texture=piece, layer=layer, two_sided=True)
 
 
-def sando_bag(scene, centre, yaw, pitch, roll, scale=1.0, seed=4, layer=9):
-    """A white plastic sando bag blown open by the wind: a puffed, creased sack with gussets, a gathered neck, two
-    thin handle loops and a little red 'Salamat po' on its front. Slightly crumpled and translucent-looking."""
+def ground_at(scene, sx, sy):
+    """Where the ray through picture position (sx, sy) meets the road (y = 0)."""
+    ray = scene._ray(np.array([[sx]], np.float32), np.array([[sy]], np.float32))[0, 0]
+    t = -scene.camera.position[1] / ray[1]
+    return tuple(scene.camera.position + ray * t)
+
+
+def sando_bag(scene, base, yaw, tilt=0.0, scale=1.0, seed=4, layer=9):
+    """A white plastic sando (T-shirt) bag standing on the road, slightly blown open. Structure: a front and a
+    back panel with wrinkles, folded-in side gussets, a flat creased bottom seam, a U-shaped cut-out at the top
+    that leaves two shoulder strips, and two thin handle loops rising from those strips. The front carries a red
+    'SALAMAT PO!' and a thin red stripe; the plastic is a little see-through at the folds."""
     rng = np.random.default_rng(seed)
+    W, H, D = 0.17, 0.46, 0.065   # half width, height, half depth of the open bag
 
-    def T(p):
-        q = _rot((p[0] * scale, p[1] * scale, p[2] * scale), yaw, pitch, roll)
-        return (centre[0] + q[0], centre[1] + q[1], centre[2] + q[2])
+    def T(x, y, z):
+        q = _rot((x * scale, y * scale, z * scale), yaw, tilt, 0)
+        return (base[0] + q[0], base[1] + q[1] + 0.004, base[2] + q[2])
 
-    rows, cols = 9, 16
-    rings = []
-    for r in range(rows + 1):
-        t = r / rows
-        y = (t - 0.5) * 0.46
-        puff = math.sin(math.pi * min(t * 1.05, 1.0)) ** 0.7 * 0.9 + 0.1
-        rx = 0.115 * (0.6 + 0.4 * puff) * (1 - 0.8 * max(t - 0.72, 0) / 0.28)
-        rz = 0.045 * (0.4 + 0.6 * puff) * (1 - 0.85 * max(t - 0.72, 0) / 0.28)
-        ring = []
-        for c in range(cols):
-            a = 2 * math.pi * c / cols
-            crease = 1 + 0.07 * rng.normal() * (0.4 + 0.6 * (1 - t))
-            ring.append(T((rx * math.cos(a) * crease, y + 0.012 * rng.normal(), rz * math.sin(a) * crease)))
-        rings.append(ring)
-    n = cols
-    for r in range(rows):
-        for c in range(n):
-            quad = [rings[r][c], rings[r][(c + 1) % n], rings[r + 1][(c + 1) % n], rings[r + 1][c]]
-            tone = 236 + int(rng.integers(-14, 10))
-            scene.face(quad, (tone, tone, min(tone + 4, 250)), layer=layer, two_sided=True)
-    top = T((0.0, 0.21, 0.0))
-    for sgn in (-1, 1):   # the two handle loops
-        loop = [T((sgn * 0.035, 0.2, 0)), T((sgn * 0.09, 0.3, 0.02)), T((sgn * 0.05, 0.4, 0.0)), T((0.0, 0.36, -0.01)), T((sgn * 0.01, 0.26, 0.0))]
-        bp.curve_tube(scene, loop, 0.007 * scale, (240, 240, 244), layer, 5)
-    # The red words on the front, printed on a clear sheet so the creased bag shows through round them.
-    words = Image.new("RGBA", (400, 160), (0, 0, 0, 0))
+    def top_of(u):   # the notch: the middle of the top edge is cut down between the two shoulder strips
+        a = abs(u)
+        return 1.0 if a > 0.5 else 1.0 - 0.3 * math.cos(math.pi * a / 1.0) ** 2 * (1 if a < 0.5 else 0)
+
+    nu, nv = 14, 12
+    wr = rng.normal(0, 1, (nv + 1, nu + 1))
+    words = Image.new("RGBA", (600, 700), (240, 242, 246, 70))
     wd = ImageDraw.Draw(words)
-    _fit(wd, (200, 56), "SALAMAT", 360, 70, (206, 36, 40, 255))
-    _fit(wd, (200, 118), "PO!", 220, 50, (206, 36, 40, 255))
-    scene.face([T((-0.11, 0.07, -0.062)), T((0.11, 0.07, -0.062)), T((0.11, -0.04, -0.062)), T((-0.11, -0.04, -0.062))], (240, 240, 244), texture=words, layer=layer + 1, two_sided=True)
+    wd.rectangle((0, 60, 600, 76), fill=(206, 36, 40, 235))
+    _fit(wd, (300, 300), "SALAMAT", 520, 150, (206, 36, 40, 255))
+    _fit(wd, (300, 440), "PO!", 300, 150, (206, 36, 40, 255))
+    _fit(wd, (300, 560), "Maraming salamat", 480, 44, (206, 36, 40, 255), FONT_BOLD)
+    words = words.transpose(Image.FLIP_LEFT_RIGHT)   # the panel is seen from behind its winding, so the print is laid mirrored
+    for face_i, sgn in enumerate((1, -1)):
+        grid = np.zeros((nv + 1, nu + 1, 3))
+        for j in range(nv + 1):
+            v = j / nv
+            for i in range(nu + 1):
+                u = i / nu * 2 - 1
+                height = top_of(u)
+                y = v * H * height
+                belly = math.sin(math.pi * min(v * 0.92 + 0.04, 1)) ** 0.6
+                fold = 1 - 0.55 * max(abs(u) - 0.75, 0) / 0.25   # the gussets pull the sides in
+                z = sgn * (D * belly * (0.55 + 0.45 * fold) + 0.006 * wr[j, i] * (0.4 + 0.6 * (1 - v)))
+                x = u * W * (0.86 + 0.14 * belly) + 0.004 * wr[j, i]
+                grid[j, i] = T(x, y, z)
+        for j in range(nv):
+            for i in range(nu):
+                quad = [grid[j + 1, i], grid[j + 1, i + 1], grid[j, i + 1], grid[j, i]] if sgn > 0 else [grid[j + 1, i + 1], grid[j + 1, i], grid[j, i], grid[j, i + 1]]
+                tone = 238 + int(rng.integers(-10, 8))
+                if sgn > 0 and nu * 0.06 < i < nu * 0.94 and nv * 0.1 < j < nv * 0.9 and abs(i / nu * 2 - 1) < 0.75:
+                    piece = words.crop((int(i * 600 / nu), int((nv - 1 - j) * 700 / nv), int((i + 1) * 600 / nu), int((nv - j) * 700 / nv)))
+                    scene.face(quad, (tone, tone, tone + 4), texture=piece, layer=layer, two_sided=True)
+                else:
+                    scene.face(quad, (tone, tone, min(tone + 5, 252)), layer=layer, two_sided=True)
+    # Side gussets: the folded-in sides joining front to back, with a visible crease line.
+    for sx in (-1, 1):
+        for j in range(nv):
+            v0, v1 = j / nv, (j + 1) / nv
+            pts = [T(sx * W * 0.8, v0 * H, 0.0), T(sx * W * 0.8, v1 * H, 0.0), T(sx * W, v1 * H, D * 0.6 * math.sin(math.pi * v1)), T(sx * W, v0 * H, D * 0.6 * math.sin(math.pi * v0))]
+            scene.face(pts, (226, 228, 232), layer=layer, two_sided=True)
+    # The flat bottom seam, a little crinkled.
+    scene.face([T(-W * 0.86, 0, -D * 0.2), T(W * 0.86, 0, -D * 0.2), T(W * 0.86, 0.003, D * 0.2), T(-W * 0.86, 0.003, D * 0.2)], (222, 224, 228), layer=layer, two_sided=True)
+    # Two handle loops: a thin strip rises from each shoulder, arches over and falls to the other side of the bag.
+    for sx in (-1, 1):
+        x0 = sx * W * 0.76
+        arch = [T(x0 + sx * 0.02, H * 0.99, 0.0), T(x0 + sx * 0.035, H * 1.1, 0.0), T(x0 * 0.5, H * 1.3, 0.01), T(x0 * 0.1, H * 1.36, 0.0), T(x0 * 0.0 - sx * 0.01, H * 1.2, 0.02)]
+        bp.curve_tube(scene, arch, 0.009 * scale, (242, 243, 248), layer, 5)
+        bp.curve_tube(scene, [T(x0 + sx * 0.02, H * 0.99, 0.0), T(x0 - sx * 0.02, H * 0.96, 0.0)], 0.013 * scale, (236, 238, 242), layer, 5)
 
 
 # ---------------------------------------------------------------- frame 1: the skyway
@@ -497,9 +526,11 @@ def build_skyway(size):
     bp.scooter_body(wheel_pass, show_leg=False)
     bp.steering(wheel_pass, 6)
     bp.rider(wheel_pass)
-    # Rubbish in the wind: a crumpled delivery flyer and a white sando bag tumbling past the camera.
-    crumpled_flyer(wheel_pass, world_at(wheel_pass, w * 0.6, h * 0.36, 1.7), -38, 10, -15, w=0.40, h=0.27)
-    sando_bag(wheel_pass, world_at(wheel_pass, w * 0.85, h * 0.25, 2.1), 24, -10, 22, scale=1.25)
+    # Rubbish on the road: a crumpled delivery flyer lying flat and a white sando bag near the camera at the bottom right.
+    flyer_at = ground_at(wheel_pass, w * 0.67, h * 0.87)
+    crumpled_flyer(wheel_pass, (flyer_at[0], 0.02, flyer_at[2]), 200, -90, 0, w=0.5, h=0.34, seed=6, mirror=True)
+    bag_at = ground_at(wheel_pass, w * 0.9, h * 0.8)
+    sando_bag(wheel_pass, bag_at, 205, 4.0, scale=0.85)
     return wheel_pass.render(scene_bg)
 
 

@@ -170,8 +170,9 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 ## Where we stopped
 
 - **Tokhang intro is three frames (branch claude/tokhang-intro-frames):** 1 `tokhang_skyway.png` (the camera
-  right at the front wheel on the skyway, Manila ahead, a crumpled delivery flyer and a white "Salamat po"
-  sando bag blowing past as litter), 2 the TV news, 3 `tokhang_market_arrival.png` (the bike parked at the
+  right at the front wheel on the skyway, Manila ahead, a crumpled delivery flyer lying flat on the road
+  and a detailed white "Salamat po" sando bag at the bottom right as litter; both drawn in 3D, not the apartment
+  room's old flyer art), 2 the TV news, 3 `tokhang_market_arrival.png` (the bike parked at the
   palengke in daylight at waist level, Peter not in the picture, his pink helmet hung on the left mirror,
   dashboard and phone showing Gwen's text; a clear blue sky; the church's back yard wall, nave and bell tower
   on the left beyond the stalls). Both are drawn from nothing in 3D by `tools/intro_frames.py`. The bike
