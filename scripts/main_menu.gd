@@ -232,24 +232,21 @@ func _show_main() -> void:
 	_menu.visible = true
 
 
-## Opening a save. In Story Mode the run in progress carries on, or the finished story says so. In
-## Shift Mode the save's start screen opens (see StartScreen): continue the run in progress, or begin
-## a new run at one of the three stories. The save list stays underneath, to come back to.
+## Opening a save shows its start screen (see StartScreen). Story Mode's has only a Continue card
+## (the run in progress, or "Story complete"); Shift Mode's also asks where to begin a new run, with
+## the three story cards. The save list stays underneath, to come back to.
 func _open_save(slot: int) -> void:
 	if not GameState.load_slot(slot):
 		_close_slots()
 		_show_message("That save can’t be opened")
 		return
-	if GameState.mode == GameState.MODE_SHIFT:
-		_show_start_screen(slot)
-	elif GameState.is_run_in_progress():
-		StoryDirector.resume()
-	elif GameState.runs_finished > 0:
-		_close_slots()
-		_refresh_shift_lock()
-		_show_message("Story complete. Shift Mode is open.")
-	else:
+	# A Story Mode save that never began a run (or was left between runs unfinished) simply begins.
+	if GameState.mode == GameState.MODE_STORY and not GameState.is_run_in_progress() and GameState.runs_finished == 0:
 		StoryDirector.begin_with("tokhang")
+		return
+	# Both modes open the save's start screen: Story Mode's has only the Continue card, Shift Mode's
+	# adds the three starting points.
+	_show_start_screen(slot)
 
 
 func _show_start_screen(slot: int) -> void:

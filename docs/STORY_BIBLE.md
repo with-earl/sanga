@@ -188,8 +188,8 @@ The first run starts cold in the market, with no hint of what comes after it (Ne
 starts at the market).
 
 **Two game modes**, chosen on the main screen, each with its own three save slots. **Story Mode** is the
-fixed first run, tapped through from the market to the end; its save carries on where it stopped, and says
-"Story complete" once finished. **Shift Mode** is locked (a padlock before its name, and tapping it says to finish
+fixed first run, tapped through from the market to the end; opening its save shows only a **Continue** card,
+which carries on where it stopped and reads "Story complete" (closed) once finished. **Shift Mode** is locked (a padlock before its name, and tapping it says to finish
 Story Mode) until any Story Mode save has finished its run; the unlock is kept on the device, so deleting the
 finished save does not lock it again. Opening a Shift Mode save shows the **start screen**, which replaces the
 old "answer as the priest" menu, with all three starting points open (a Shift Mode save counts as past the

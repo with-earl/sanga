@@ -1,6 +1,7 @@
 class_name StartScreen
 extends Control
-## The screen a save opens on: carry on, or begin a new run somewhere else.
+## The screen a save opens on. A Story Mode save shows only the Continue card, centred. A Shift Mode
+## save shows carry on, or begin a new run somewhere else:
 ##
 ## On the left, one card to continue the run in progress. A thin line divides it from the three
 ## story cards on the right, under "Select your starting point": Tokhang, Kumpisal and Padala, each
@@ -43,6 +44,7 @@ const STORIES := [
 ]
 const CONTINUE_TITLE := "Continue"
 const NO_RUN := "No run in progress"
+const STORY_DONE := "Story complete"
 const HEADING := "Select your starting point"
 const LOCKED := "Opens after run 1"
 const BACK := "‹  Back"
@@ -57,6 +59,7 @@ var _confirm: Control
 ## Opens the screen for the save in `slot` (already loaded). `description` names the save, for
 ## example "Slot 1 · Kumpisal · Oct 4, 7:23 PM".
 func open(slot: int, description: String) -> void:
+	var shift := GameState.mode == GameState.MODE_SHIFT
 	_slot = slot
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -65,6 +68,12 @@ func open(slot: int, description: String) -> void:
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(dim)
 	_add_top_bar(description)
+	if not shift:
+		# Story Mode: one card, in the middle.
+		add_child(_continue_card(Vector2((ScreenFit.DESIGN_SIZE.x - CARD_SIZE.x) / 2.0, CARDS_TOP)))
+		modulate.a = 0.0
+		create_tween().tween_property(self, "modulate:a", 1.0, FADE_SECONDS)
+		return
 	var total := CARD_SIZE.x * 4.0 + CARD_GAP * 2.0 + DIVIDER_SPACE * 2.0
 	var left := (ScreenFit.DESIGN_SIZE.x - total) / 2.0
 	add_child(_continue_card(Vector2(left, CARDS_TOP)))
@@ -114,6 +123,8 @@ func _continue_card(at: Vector2) -> Button:
 	var in_progress := GameState.is_run_in_progress()
 	var image := "res://assets/backgrounds/main_screen.png"
 	var detail := NO_RUN
+	if GameState.mode == GameState.MODE_STORY and not in_progress and GameState.runs_finished > 0:
+		detail = STORY_DONE
 	if in_progress:
 		var place := "res://assets/backgrounds/%s.png" % GameState.location
 		if ResourceLoader.exists(place):

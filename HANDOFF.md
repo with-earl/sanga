@@ -169,6 +169,9 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **Start screens per mode:** opening a Story Mode save shows only the Continue card (centred; "Story
+  complete" and disabled once the story is finished); opening a Shift Mode save shows the Continue card plus
+  the three story cards under "Select your starting point". A Story Mode save with no run yet just begins.
 - **No story-time caption:** the small "Linggo ng hapon" at the top left of the Tokhang intro's first frame
   was removed; no story shows a time caption now. The "Flashback" and "Father Eli" captions (not times)
   stay. The start screen's story cards no longer show a time either (they show the title and "who · where"); the times remain only in the prologue's spoken line.
