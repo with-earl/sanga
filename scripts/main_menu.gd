@@ -9,6 +9,11 @@ extends Control
 const ROW_SIZE := Vector2(300, 52)
 ## The padlock shown before "Shift Mode" while it is locked.
 const LOCK_ICON := "res://assets/ui/lock.png"
+## What tapping the locked Shift Mode says, as a note at the bottom centre that fades by itself.
+const UNLOCK_NOTE := "Finish Story Mode to unlock Shift Mode"
+const TOAST_FADE_IN := 0.2
+const TOAST_HOLD := 2.2
+const TOAST_FADE_OUT := 0.5
 ## Where the lists sit, in the screen's own terms: their centre line is the logo's (the logo is part
 ## of the main screen's picture, centred about 258 px from the right edge), and their top is just
 ## under it (344 px from the top of a 720 px screen).
@@ -33,6 +38,9 @@ var _back_action := Callable()
 ## A save's start screen, and the list of saves, while they are open.
 var _start_screen: StartScreen
 var _slots: SaveSlots
+## The bottom-centre note and its fade (see _toast).
+var _toast_label: Label
+var _toast_tween: Tween
 
 
 func _ready() -> void:
@@ -108,7 +116,7 @@ func _refresh_shift_lock() -> void:
 	var font := _shift_button.get_theme_font("font", "Button")
 	var font_size := _shift_button.get_theme_font_size("font_size", "Button")
 	var text_width := font.get_string_size(_shift_button.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-	icon.position = Vector2((ROW_SIZE.x - text_width) / 2.0 - icon.size.x - 12.0, (ROW_SIZE.y - icon.size.y) / 2.0)
+	icon.position = Vector2((ROW_SIZE.x - text_width) / 2.0 - icon.size.x - 4.0, (ROW_SIZE.y - icon.size.y) / 2.0)
 	_shift_button.add_child(icon)
 
 
@@ -116,7 +124,31 @@ func _shift_pressed() -> void:
 	if GameState.story_finished():
 		_open_slots(GameState.MODE_SHIFT)
 	else:
-		_show_message("Finish Story Mode\nto unlock Shift Mode")
+		_toast(UNLOCK_NOTE)
+
+
+## A short note at the bottom centre of the screen: it fades in, stays a moment and fades out by itself.
+func _toast(words: String) -> void:
+	if _toast_label == null:
+		_toast_label = Label.new()
+		_toast_label.theme_type_variation = &"HudBody"
+		_toast_label.add_theme_font_size_override("font_size", 28)
+		_toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_toast_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+		_toast_label.offset_left = -400.0
+		_toast_label.offset_right = 400.0
+		_toast_label.offset_top = -76.0
+		_toast_label.offset_bottom = -36.0
+		_toast_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_toast_label.modulate.a = 0.0
+		add_child(_toast_label)
+	_toast_label.text = words
+	if _toast_tween != null and _toast_tween.is_valid():
+		_toast_tween.kill()
+	_toast_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_toast_tween.tween_property(_toast_label, "modulate:a", 1.0, TOAST_FADE_IN)
+	_toast_tween.tween_interval(TOAST_HOLD)
+	_toast_tween.tween_property(_toast_label, "modulate:a", 0.0, TOAST_FADE_OUT)
 
 
 ## The question takes the place of the three menu buttons, in the same spot.

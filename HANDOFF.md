@@ -173,7 +173,7 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   Shift Mode and Quit, with the buttons lowered. Each mode has its own three slots (`GameState.mode`;
   story saves stay `slot_N.json`, shift saves are `shift_N.json`). Story Mode is the fixed run from the
   market (a new slot starts it, a save resumes it, a finished one says "Story complete"). Shift Mode is
-  dimmed with a padlock (`assets/ui/lock.png`) before its name until Story Mode is finished; tapping it says "Finish Story Mode to unlock Shift Mode" (`Settings.story_finished`, set at the end of a
+  dimmed with a padlock (`assets/ui/lock.png`) before its name until Story Mode is finished; tapping it shows a toast at the bottom centre, "Finish Story Mode to unlock Shift Mode", that fades by itself (`Settings.story_finished`, set at the end of a
   story-mode run, also found from old saves); a Shift Mode save opens the start screen with all three
   starting points open. The slot list is one list per mode, centred up and down on the screen, with its Load / New game and
   Delete buttons the main screen's size (300 x 52) on the same centre line as the main buttons: tap a slot,
