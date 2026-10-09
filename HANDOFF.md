@@ -175,7 +175,11 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
   handlebar dashboard and phone showing Gwen's text). Both new frames are drawn from nothing in 3D by
   `tools/intro_frames.py`; the scooter, wheels and Peter are lofted shapes in `tools/bike_parts.py`
   (`loft`, `ellipsoid`, `limb`; no game art). `tokhang_rider.png` and its drawing function are gone. Frame 3
-  has no line and holds 3.5 s. Stand-ins, listed in `PLACEHOLDERS.txt`. Each renders in about 15 seconds.
+  has no line and holds 3.5 s. Stand-ins, listed in `PLACEHOLDERS.txt`. Frame 1's camera is close to the wheels
+  (rear wheel, body, Peter all in view); frame 3's is close behind Peter and the street is a full palengke
+  filled by `tools/market_parts.py` (vendors and shoppers, veg/fish/meat/fruit/rice/isaw stalls with price
+  cards and sign boards, tarpaulin roofs, tangled wires, a parked jeepney, crates and litter). Frame 3 takes
+  about 40 seconds to render.
 - **TV shop cards:** the HouseCredit promo and the BCash / Loro payment signs are now small horizontal
   acrylic cards hung inside the shop from suction-cup hooks, in a row high on the glass above the sets so
   the news stays the focus. `tools/tv_store.py` (`acrylic_card`).

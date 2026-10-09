@@ -6,10 +6,10 @@
   exit gantry and far traffic ahead, a hazy Manila beyond the barrier with a Gothic church spire.
   Frame 3, the market: a chase view from above and behind Peter's left shoulder as he rolls into the
   palengke street: his helmet and backpack, his hand on the grip, the dashboard and the phone on the
-  handlebar, then bunting, striped umbrellas over the stalls and a banner over the entrance, all glowing
-  in low sunlight.
+  handlebar, then a crowded palengke: vendors and shoppers, stalls of fish, vegetables, meat, fruit, rice and isaw,
+  tarpaulin roofs, wires, a parked jeepney and a banner over the far entrance, all glowing in low sunlight.
 
-The scooter and Peter are built by bike_parts.py. In each picture the bike is drawn in a pass of its own
+The scooter and Peter are built by bike_parts.py, the market's stalls, people and tarps by market_parts.py. In each picture the bike is drawn in a pass of its own
 over the background, so the background can be softened (speed in frame 1, shallow focus in frame 3).
 
 Run: python tools/intro_frames.py skyway|market [out.png] [width height]
@@ -24,6 +24,7 @@ from PIL import Image, ImageDraw, ImageFilter
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import bike_parts as bp  # noqa: E402
+import market_parts as mp  # noqa: E402
 import scene3d as s3  # noqa: E402
 from street_scene import noise  # noqa: E402
 from tv_store import FONT_BLACK, FONT_BOLD, _fit  # noqa: E402
@@ -296,9 +297,9 @@ def vehicle_rear(w, h, body, stripe, seed):
 
 def build_skyway(size):
     w, h = size
-    cam_x, cam_z = 1.8, -2.4
-    camera = s3.Camera((cam_x, 0.42, cam_z), -27.0, 8.0, 58.0, size)
-    vp = camera.project((cam_x, 0.42, 100000.0))
+    cam_x, cam_z = 1.3, -1.75
+    camera = s3.Camera((cam_x, 0.34, cam_z), -31.0, 19.0, 68.0, size)
+    vp = camera.project((cam_x, 0.34, 100000.0))
     horizon_y, vp_x = int(vp[1]), int(vp[0])
 
     # ---- the backdrop: sky, clouds, Manila, and plain road colour below the horizon
@@ -476,10 +477,86 @@ def entrance_banner_texture():
     return img
 
 
+STALL_KINDS = ["veg", "fish", "fruit", "meat", "rice", "veg", "cooked", "fish", "fruit", "veg", "meat", "rice"]
+BOARDS = {
+    "veg": (("GULAY", "Sariwa! Mura!"), (40, 130, 70), (255, 250, 220)),
+    "fish": (("ISDA", "Bagong huli  •  ₱180/kilo"), (30, 100, 170), (255, 255, 255)),
+    "fruit": (("PRUTAS", "Saging  •  Mangga  •  Pakwan"), (232, 160, 40), (60, 20, 10)),
+    "meat": (("KARNE", "Baboy  •  Baka  •  Manok"), (190, 36, 44), (255, 244, 220)),
+    "rice": (("BIGAS", "Dinorado ₱56  •  Sinandomeng ₱48"), (236, 220, 170), (110, 40, 20)),
+    "cooked": (("ISAW • BETAMAX", "₱10 isa"), (60, 60, 66), (255, 214, 70)),
+}
+STALL_BUILD = {"veg": mp.veg_stall, "fish": mp.fish_stall, "fruit": mp.fruit_stall, "meat": mp.meat_stall, "rice": mp.rice_stall, "cooked": mp.cooked_stall}
+
+
+def market_fill(env, k):
+    """Everything that makes the street a palengke: a row of stalls on each side with their goods, sign boards,
+    vendors and shoppers, tarpaulin roofs, tangled wires, a parked jeepney, plastic crates and litter."""
+    rng = np.random.default_rng(31)
+    street_x1 = 4.4
+    # Walls behind the stalls.
+    env.face([(-4.5, 4.4, 80), (-4.5, 4.4, 2.0), (-4.5, 0.0, 2.0), (-4.5, 0.0, 80)], (170, 150, 128), texture=concrete(900, 400, 55, (176, 160, 140)), layer=1, two_sided=True)
+    z = 2.0
+    for i in range(12):
+        env.face([(street_x1 + 0.1, 5.4, z + 6.0), (street_x1 + 0.1, 5.4, z), (street_x1 + 0.1, 0.0, z), (street_x1 + 0.1, 0.0, z + 6.0)], (200, 190, 170),
+                 texture=shop_front_texture(i), layer=1, two_sided=True)
+        z += 6.0
+    # The stalls, left and right, in blocks with gaps for the cross lanes.
+    blocks = [(2.6, 5.2), (6.0, 9.0), (9.8, 12.4), (13.2, 16.6), (17.4, 20.0), (20.8, 24.0), (24.8, 27.6), (28.4, 31.8), (32.6, 35.4)]
+    for bi, (z0, z1) in enumerate(blocks):
+        for side in (-1, 1):
+            kind = STALL_KINDS[(bi * 2 + (0 if side < 0 else 1)) % len(STALL_KINDS)]
+            if side < 0:
+                x0, x1 = -3.9, -2.45
+            else:
+                x0, x1 = 2.45, 3.9
+            STALL_BUILD[kind](env, x0, x1, z0, z1, rng)
+            (name, line), bg_col, fg = BOARDS[kind]
+            bx = x1 if side < 0 else x0
+            tex = mp.sign_board((name, line), bg_col, fg)
+            env.face([(bx, 2.6, z0 + 0.05), (bx, 2.6, z1 - 0.05), (bx, 2.15, z1 - 0.05), (bx, 2.15, z0 + 0.05)], bg_col, texture=tex, layer=5, two_sided=True)
+            for pz in (z0 + 0.05, z1 - 0.05):
+                bp.limb(env, (bx + side * 0.05, 0.0, pz), (bx + side * 0.05, 3.2, pz), 0.07, 0.07, (140, 108, 78), 4, n=8)
+            # Hand-lettered price cards in front of the goods.
+            if kind in ("veg", "fruit", "fish"):
+                for pi, texts in enumerate(((("KAMATIS", "₱80"), ("TALONG", "₱70")) if kind == "veg" else ((("SAGING", "₱60"), ("MANGGA", "₱120")) if kind == "fruit" else (("BANGUS", "₱180"), ("TILAPIA", "₱140"))))):
+                    pz = z0 + 0.4 + pi * (z1 - z0 - 0.8)
+                    env.face([(bx - side * 0.0, 1.0, pz - 0.14), (bx - side * 0.0, 1.0, pz + 0.14), (bx - side * 0.0, 0.84, pz + 0.14), (bx - side * 0.0, 0.84, pz - 0.14)], (250, 248, 238),
+                             texture=mp.price_card(texts), layer=5, two_sided=True)
+            # A vendor behind each table, and sometimes a customer at the front.
+            vx = x0 + 0.15 if side < 0 else x1 - 0.15
+            mp.person(env, vx - side * 0.5, (z0 + z1) / 2 - 0.2, 90 * side * -1, rng, 1.6, 3, "vendor", False)
+            if rng.random() < 0.8:
+                mp.person(env, side * 1.75, (z0 + z1) / 2 + rng.uniform(-0.6, 0.6), -90 * side * -1 + 180 * (1 if side > 0 else 0), rng, 1.62, 3, "shopper", False)
+        # Tarpaulin roofs over each block, one colour per stall, a little apart so light and wires show.
+        tarp_colors = [((40, 96, 190), (40, 96, 190)), ((238, 142, 48), (238, 142, 48)), ((62, 150, 92), (62, 150, 92)), ((226, 56, 54), (244, 240, 232)), ((246, 214, 70), (246, 214, 70))]
+        for side in (-1, 1):
+            c0, c1 = tarp_colors[(bi + (0 if side < 0 else 2)) % len(tarp_colors)]
+            xa, xb = (-4.3, -1.2) if side < 0 else (1.2, 4.3)
+            mp.tarp(env, xa, xb, z0 - 0.3, z1 + 0.3, 3.5 + 0.1 * (bi % 3), c0, 6, 0.28, (c0, c1) if c0 != c1 else None)
+    # Shoppers and workers in the aisle itself, a boy with a sack, a parked jeepney, wires and clutter.
+    walkers = [(0.95, 3.4, 0), (-1.1, 5.4, 180), (1.15, 7.6, 180), (-0.95, 10.2, 0), (0.9, 12.8, 180), (-1.2, 14.6, 0), (1.0, 17.2, 0), (-0.9, 19.8, 180),
+               (1.2, 22.4, 180), (-1.1, 25.0, 0), (0.95, 28.0, 180), (-0.9, 30.4, 0), (0.3, 34.0, 180), (-0.4, 37.0, 0)]
+    for wx, wz, wy in walkers:
+        mp.person(env, wx, wz, wy, rng, rng.uniform(1.5, 1.72), 4, "shopper", True)
+    mp.boy_with_sack(env, -1.3, 4.4, 0, rng, 4)
+    mp.jeepney(env, 1.9, 36.0, 41.0)
+    for wz in (6.0, 13.0, 21.0, 29.0):
+        mp.wire_bundle(env, -4.4, 4.4, wz, 4.7, 0.5, 6, rng)
+    for wz in (4.0, 11.0, 19.0, 27.0, 35.0):   # stacks of plastic crates in the aisle edge
+        for ci in range(3):
+            col = [(214, 60, 56), (50, 110, 190), (240, 200, 60)][ci]
+            env.box(-2.35, -2.0, ci * 0.28, ci * 0.28 + 0.26, wz, wz + 0.45, col, layer=3)
+    mp.litter(env, rng, -2.2, 2.2, 1.5, 36.0)
+    tube(env, (-4.3, 0.0, 41.0), (-4.3, 6.6, 41.0), 0.22, (120, 96, 70), 4, 8)
+    tube(env, (4.3, 0.0, 41.0), (4.3, 6.6, 41.0), 0.22, (120, 96, 70), 4, 8)
+    env.face([(-4.2, 6.3, 40.9), (4.2, 6.3, 40.9), (4.2, 4.7, 40.9), (-4.2, 4.7, 40.9)], (196, 34, 40), texture=entrance_banner_texture(), layer=5, two_sided=True)
+
+
 def build_market(size):
     w, h = size
-    cam_x, cam_y, cam_z = -0.7, 1.82, -1.72
-    camera = s3.Camera((cam_x, cam_y, cam_z), 23.0, -17.0, 70.0, size)
+    cam_x, cam_y, cam_z = -0.62, 1.8, -1.78
+    camera = s3.Camera((cam_x, cam_y, cam_z), 21.0, -16.0, 66.0, size)
     vp = camera.project((cam_x, cam_y, 100000.0))
     horizon_y, vp_x = int(vp[1]), int(vp[0])
     k = w / 1672.0
@@ -513,7 +590,7 @@ def build_market(size):
     # ---- the street
     env = s3.Scene(camera, ambient=(150, 146, 156))
     env.light((500, 520, 1400), (255, 214, 156), 1.2e6)
-    street_x0, street_x1 = -3.4, 3.5
+    street_x0, street_x1 = -4.4, 4.4
     road_strips(env, camera, street_x0, street_x1, lambda i: concrete(300, 300, 30 + i, (178, 170, 158)))
     for gx in (-3.4, 3.1):   # gutters along both sides
         env.face([(gx - 0.18, 0.004, 120), (gx + 0.18, 0.004, 120), (gx + 0.18, 0.004, 1.0), (gx - 0.18, 0.004, 1.0)], (104, 98, 92), layer=1, two_sided=True)
@@ -531,35 +608,7 @@ def build_market(size):
         px_, pz_ = -math.sin(ang) * wd / 2, math.cos(ang) * wd / 2
         tone = [(78, 150, 70), (112, 170, 70), (214, 160, 60), (190, 60, 46)][int(lrng.integers(0, 4))]
         env.face([(lx - dx, 0.007, lz - dz), (lx + px_, 0.007, lz + pz_), (lx + dx, 0.007, lz + dz), (lx - px_, 0.007, lz - pz_)], tone, layer=1, two_sided=True)
-    # The shophouses on the right, six metres a building, and a long wall behind the stalls on the left.
-    z = 2.0
-    for i in range(10):
-        length = 6.0
-        env.face([(street_x1 + 0.1, 5.4, z + length), (street_x1 + 0.1, 5.4, z), (street_x1 + 0.1, 0.0, z), (street_x1 + 0.1, 0.0, z + length)], (200, 190, 170),
-                 texture=shop_front_texture(i), layer=2, two_sided=True)
-        env.face([(street_x1 + 0.1, 5.4, z + length), (street_x1 + 0.1, 5.4, z), (street_x1 + 0.9, 5.2, z), (street_x1 + 0.9, 5.2, z + length)], (150, 70, 52), layer=2, two_sided=True)
-        z += length
-    env.face([(-3.9, 4.0, 100), (-3.9, 4.0, 2.0), (-3.9, 0.0, 2.0), (-3.9, 0.0, 100)], (170, 150, 128), texture=concrete(900, 400, 55, (176, 160, 140)), layer=1, two_sided=True)
-    # The stalls on the left: a table of goods and a striped umbrella each.
-    umbrella_colors = [((210, 52, 52), (250, 236, 220)), ((40, 100, 190), (250, 236, 220)), ((240, 190, 50), (250, 236, 220)), ((60, 150, 90), (250, 236, 220))]
-    goods = [(214, 56, 46), (86, 170, 84), (240, 164, 50), (236, 206, 70), (150, 90, 160), (230, 230, 220)]
-    srng = np.random.default_rng(4)
-    for si, zi in enumerate(np.arange(5.0, 52.0, 3.9)):
-        env.box(-3.7, -2.5, 0.0, 0.78, zi, zi + 2.7, (150, 112, 76), layer=2)
-        env.box(-3.7, -2.5, 0.78, 0.82, zi - 0.03, zi + 2.73, (214, 196, 160), layer=2)
-        for _ in range(7):
-            gx = srng.uniform(-3.6, -2.7)
-            gz = srng.uniform(zi + 0.1, zi + 2.3)
-            gh = srng.uniform(0.12, 0.34)
-            env.box(gx, gx + 0.34, 0.82, 0.82 + gh, gz, gz + 0.38, goods[int(srng.integers(0, len(goods)))], layer=3)
-        umbrella(env, -3.1, zi + 1.35, 1.7, 2.3, 2.95, umbrella_colors[si % 4], layer=4)
-    # Bunting over the street and the banner over the entrance beyond.
-    flag_colors = [(210, 52, 52), (240, 196, 54), (50, 110, 196), (76, 160, 96), (250, 244, 232)]
-    for bz, seed in ((6.0, 1), (12.0, 2), (18.0, 3), (23.0, 4)):
-        bunting(env, bz, -3.5, 3.5, 4.3, 0.55, 26, flag_colors, seed)
-    tube(env, (-3.7, 0.0, 26.0), (-3.7, 6.6, 26.0), 0.22, (120, 96, 70), 4, 6)
-    tube(env, (3.5, 0.0, 26.0), (3.5, 6.6, 26.0), 0.22, (120, 96, 70), 4, 6)
-    env.face([(-3.6, 6.3, 25.9), (3.4, 6.3, 25.9), (3.4, 4.7, 25.9), (-3.6, 4.7, 25.9)], (196, 34, 40), texture=entrance_banner_texture(), layer=5, two_sided=True)
+    market_fill(env, k)
     bg = env.render(back)
     # Shallow focus: everything past the wheel goes soft, the street's sun glare blooms.
     bg = bg.filter(ImageFilter.GaussianBlur(3.2 * k))

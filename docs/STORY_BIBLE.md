@@ -239,7 +239,7 @@ Three frames, one line of travel: the skyway, the news, the market. They are dra
 > **Reporter:** Kabilang sa mga nasawi ang isang babaeng hindi pa nakikilala. *(echo, flag `run_echo_mercy_ran`)*
 > **Peter:** Nanlaban na naman.
 
-`tokhang_market_arrival.png` (no line, a short hold): a chase view from above and behind his left shoulder as he rolls into the palengke street: his helmet and backpack, his left hand on the grip, the dashboard (48 km/h) and the phone on the bar (Gwen: *umuwi ka nang maaga*), the street ahead with bunting, striped umbrellas, shophouses and a PALENGKE banner, the sun low at the end. It cuts straight to the phone call.
+`tokhang_market_arrival.png` (no line, a short hold): a chase view from above and behind his left shoulder as he rolls into the palengke street: his helmet and backpack, his left hand on the grip, the dashboard (48 km/h) and the phone on the bar (Gwen: *umuwi ka nang maaga*), a crowded palengke ahead: vendors and shoppers, stalls of vegetables, fish, meat, fruit, rice and grilled isaw with price cards and painted boards, tarpaulin roofs, tangled wires, a parked jeepney and a PALENGKE banner, the sun low at the end. It cuts straight to the phone call.
 
 ### 7.2 The phone call (branch choice)
 

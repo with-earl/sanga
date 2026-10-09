@@ -369,7 +369,7 @@ def rider(scene, layer=7, left_only=False):
         # the front, a white decal at each side and a vent at the back.
         if i in (0, 1, 13, 14, 27) and 2 <= k <= 11 and not (i in (0, 14) and 6 <= k <= 9):
             return (255, 238, 247)
-        if 4 <= i <= 10 and 6 <= k <= 9:
+        if 6 <= i <= 9 and 7 <= k <= 8:
             return (22, 26, 40)
         if i in (0, 14) and 6 <= k <= 9:
             return (255, 238, 247)
