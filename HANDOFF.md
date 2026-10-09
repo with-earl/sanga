@@ -169,6 +169,8 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **No push-in on the Tokhang intro:** a cutscene step can set `"zoom": false` (`autoload/cutscene.gd`) to
+  stay still; the three intro frames use it. Other cutscenes still zoom slowly.
 - **Tokhang intro is three frames (branch claude/tokhang-intro-frames):** 1 `tokhang_skyway.png` (the camera
   right at the front wheel on the skyway, Manila ahead, a crumpled delivery flyer lying flat on the road
   and a detailed white "Salamat po" sando bag at the bottom right as litter; both drawn in 3D, not the apartment

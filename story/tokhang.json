@@ -3,6 +3,7 @@
 	"intro": [
 		{
 			"image": "res://assets/cutscenes/tokhang_skyway.png",
+			"zoom": false,
 			"caption": "Linggo ng hapon",
 			"lines": [
 				{
@@ -13,6 +14,7 @@
 		},
 		{
 			"image": "res://assets/cutscenes/tokhang_tv_news.png",
+			"zoom": false,
 			"lines": [
 				{
 					"speaker": "Reporter",
@@ -32,6 +34,7 @@
 		},
 		{
 			"image": "res://assets/cutscenes/tokhang_market_arrival.png",
+			"zoom": false,
 			"hold": 3.5
 		}
 	],
