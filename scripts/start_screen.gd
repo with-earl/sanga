@@ -1,99 +1,118 @@
 class_name StartScreen
 extends Control
-## The screen a save opens on: carry on, or begin a new run somewhere else.
+## Shift Mode's first screen: a carousel of the three stories, "Select a starting point".
 ##
-## On the left, one card to continue the run in progress. A thin line divides it from the three
-## story cards on the right, under "Select your starting point": Tokhang, Kumpisal and Padala, each
-## with its place, the time it happens and who the player is there. The cards are upright, 3:4,
-## like the covers of three small books.
-##
-## The first run of a save always begins at the market, so until it is finished the other two
-## stories stay closed, and say when they open. Beginning a new run while one is in progress asks
-## first, because that run's progress is lost.
+## The story in the middle is in front and full size; the other two sit behind it on either side,
+## smaller and dimmed, partly hidden. Swipe sideways, or tap a side card, to bring another to the
+## middle; tap the middle card to choose it (the main screen then lists that story's three save
+## slots). A small round button in the corner of the middle card flips it over to a short summary of
+## the story that gives nothing away; tapping the button, or the card, flips it back.
 
+## Emitted with "tokhang", "kumpisal" or "padala" when the middle card is chosen.
+signal picked(story: String)
 ## Emitted when the player goes back to the main screen.
 signal closed
 
-## The size of every card (3:4), the room between the story cards, and the room on each side of
-## the line between Continue and the stories.
-const CARD_SIZE := Vector2(216, 288)
-const CARD_GAP := 22.0
-const DIVIDER_SPACE := 36.0
+## The middle card's size (3:4), the smaller size of the cards behind it, and how far to each side
+## they sit from the centre line.
+const CARD_SIZE := Vector2(264, 352)
+const SIDE_SCALE := 0.8
+const SIDE_OFFSET := 184.0
+const SIDE_ALPHA := 0.55
+const CARD_TOP := 150.0
 const CARD_RADIUS := 14
-## Where the cards' top edge sits, and the heading above them.
-const CARDS_TOP := 236.0
-const HEADING_GAP := 46.0
 const DIM := Color(0.035, 0.02, 0.03, 0.94)
-const LINE := Color(1.0, 0.953, 0.839, 0.32)
 const BORDER := Color(1.0, 0.953, 0.839, 0.7)
 const SHADE := Color(0.05, 0.025, 0.035, 0.92)
-const CLOSED_SHADE := Color(0.03, 0.02, 0.03, 0.8)
+const BACK_FILL := Color(0.09, 0.05, 0.065, 0.97)
+const GOLD := Color(0.851, 0.643, 0.255, 0.95)
 const TITLE_SIZE := 34
 const SMALL_SIZE := 17
-const HEADING_SIZE := 24
+const SUMMARY_SIZE := 17
+const HEADING_SIZE := 26
 const FADE_SECONDS := 0.25
-## Each story's card: the picture on it, the time it happens, and who the player is and where.
-const STORIES := [
-	{"story": "tokhang", "image": "res://assets/backgrounds/public_market.png",
-		"when": "Linggo ng hapon", "who": "Peter · ang palengke"},
-	{"story": "kumpisal", "image": "res://assets/backgrounds/church_nave.png",
-		"when": "Sabado ng hapon", "who": "Eli · ang simbahan"},
-	{"story": "padala", "image": "res://assets/backgrounds/apartment_room.png",
-		"when": "Sabado ng gabi", "who": "Mercy · ang kwarto"},
-]
-const CONTINUE_TITLE := "Continue"
-const NO_RUN := "No run in progress"
-const HEADING := "Select your starting point"
-const LOCKED := "Opens after run 1"
+const SLIDE_SECONDS := 0.28
+const FLIP_SECONDS := 0.16
+## A sideways drag shorter than this is a tap.
+const SWIPE_PIXELS := 56.0
+const HEADING := "Select a starting point"
 const BACK := "‹  Back"
-const CONFIRM_TITLE := "Start a new run?"
-const CONFIRM_NOTE := "Your current progress in Slot %d will be lost."
+## Each story's card: the picture on it, who the player is and where, and a summary for the back of the
+## card. The summaries set the scene and never say what happens.
+const STORIES := [
+	{"story": "tokhang", "image": "res://assets/backgrounds/public_market.png", "who": "Peter · ang palengke",
+		"summary": "A delivery rider has one errand left before his son's birthday: a toy from the market. The street is busier than it should be, and everyone seems to be watching someone."},
+	{"story": "kumpisal", "image": "res://assets/backgrounds/church_nave.png", "who": "Eli · ang simbahan",
+		"summary": "A parish priest hears confessions until the church closes. One voice behind the grille keeps him there longer than he meant to stay."},
+	{"story": "padala", "image": "res://assets/backgrounds/apartment_room.png", "who": "Mercy · ang kwarto",
+		"summary": "A girl waits in a locked room for a call. A package, a phone and a stranger's promise will decide how the night goes, and who she can trust."},
+]
 
-var _slot := 0
-## The question asked before a new run replaces the one in progress, while it shows.
-var _confirm: Control
+## Which story is in the middle, and each card's parts.
+var _index := 0
+var _cards: Array = []
+var _heading: Label
+var _dots: Array = []
+## While a drag that began on a card is moving, and whether it already moved the carousel (so the tap
+## that ends it does not also choose or flip anything).
+var _press_x := -1.0
+var _swiped := false
+var _busy := false
 
 
-## Opens the screen for the save in `slot` (already loaded). `description` names the save, for
-## example "Slot 1 · Kumpisal · Oct 4, 7:23 PM".
-func open(slot: int, description: String) -> void:
-	_slot = slot
+## Opens the carousel with the first story in the middle.
+func open() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var dim := ColorRect.new()
 	dim.color = DIM
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(dim)
-	_add_top_bar(description)
-	var total := CARD_SIZE.x * 4.0 + CARD_GAP * 2.0 + DIVIDER_SPACE * 2.0
-	var left := (ScreenFit.DESIGN_SIZE.x - total) / 2.0
-	add_child(_continue_card(Vector2(left, CARDS_TOP)))
-	var line := ColorRect.new()
-	line.color = LINE
-	line.position = Vector2(left + CARD_SIZE.x + DIVIDER_SPACE, CARDS_TOP - HEADING_GAP)
-	line.size = Vector2(1, CARD_SIZE.y + HEADING_GAP)
-	add_child(line)
-	var stories_left := left + CARD_SIZE.x + DIVIDER_SPACE * 2.0 + 1.0
-	var heading := _text(HEADING, HEADING_SIZE, true)
-	heading.position = Vector2(stories_left, CARDS_TOP - HEADING_GAP)
-	add_child(heading)
+	_add_top_bar()
 	for index in STORIES.size():
-		var at := Vector2(stories_left + index * (CARD_SIZE.x + CARD_GAP), CARDS_TOP)
-		add_child(_story_card(STORIES[index], at))
+		_cards.append(_make_card(STORIES[index], index))
+	_heading = _text(HEADING, HEADING_SIZE, true)
+	_heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_heading.position = Vector2(0, CARD_TOP + CARD_SIZE.y + 38.0)
+	_heading.size = Vector2(ScreenFit.DESIGN_SIZE.x, 36)
+	add_child(_heading)
+	for index in STORIES.size():
+		var dot := ColorRect.new()
+		dot.size = Vector2(10, 10)
+		dot.position = Vector2(ScreenFit.DESIGN_SIZE.x / 2.0 + (index - 1) * 24.0 - 5.0, CARD_TOP + CARD_SIZE.y + 92.0)
+		dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(dot)
+		_dots.append(dot)
+	_arrange(false)
 	modulate.a = 0.0
 	create_tween().tween_property(self, "modulate:a", 1.0, FADE_SECONDS)
 
 
-## Steps back one level: closes the question if it is open, otherwise the screen.
+## Steps back one level.
 func back() -> void:
-	if _confirm != null:
-		_close_confirm()
-	else:
-		closed.emit()
-		queue_free()
+	closed.emit()
+	queue_free()
 
 
-func _add_top_bar(description: String) -> void:
+## The raw sideways drag: it moves the carousel, and marks itself so the tap it ends is ignored.
+func _input(event: InputEvent) -> void:
+	if not is_visible_in_tree():
+		return
+	if event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
+		var press := event as InputEventMouseButton
+		if press.pressed:
+			_press_x = press.position.x
+			_swiped = false
+		else:
+			if _press_x >= 0.0 and not _busy:
+				var moved := press.position.x - _press_x
+				if absf(moved) >= SWIPE_PIXELS:
+					_swiped = true
+					_move(-1 if moved > 0.0 else 1)
+			_press_x = -1.0
+
+
+func _add_top_bar() -> void:
 	var back_button := Button.new()
 	back_button.theme_type_variation = &"TextButton"
 	back_button.text = BACK
@@ -102,52 +121,53 @@ func _add_top_bar(description: String) -> void:
 	back_button.position = Vector2(180, 26)
 	back_button.pressed.connect(back)
 	add_child(back_button)
-	var title := _text(description, SMALL_SIZE + 3, false)
+	var title := _text("Shift Mode", SMALL_SIZE + 5, true)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.position = Vector2(0, 40)
-	title.size = Vector2(ScreenFit.DESIGN_SIZE.x, 30)
+	title.position = Vector2(0, 36)
+	title.size = Vector2(ScreenFit.DESIGN_SIZE.x, 36)
 	add_child(title)
 
 
-## The Continue card shows the place the run stopped in, or says there is nothing to continue.
-func _continue_card(at: Vector2) -> Button:
-	var in_progress := GameState.is_run_in_progress()
-	var image := "res://assets/backgrounds/main_screen.png"
-	var detail := NO_RUN
-	if in_progress:
-		var place := "res://assets/backgrounds/%s.png" % GameState.location
-		if ResourceLoader.exists(place):
-			image = place
-		var stories: Array = StoryDirector.TIMELINES.get(GameState.timeline, [])
-		detail = "%s · %d of %d" % [StoryDirector.story_title(StoryDirector.current_story()), GameState.chapter + 1, stories.size()]
-	var card := _card(at, image, CONTINUE_TITLE, "", detail, in_progress)
-	if in_progress:
-		card.pressed.connect(func() -> void: StoryDirector.resume())
-	return card
-
-
-func _story_card(info: Dictionary, at: Vector2) -> Button:
+## One carousel card: a holder (so the whole card can flip), with the front (a button), the back
+## (the summary) and the round button that turns it.
+func _make_card(info: Dictionary, index: int) -> Dictionary:
+	var holder := Control.new()
+	holder.size = CARD_SIZE
+	holder.pivot_offset = CARD_SIZE / 2.0
+	holder.mouse_filter = Control.MOUSE_FILTER_PASS
 	var story := str(info["story"])
-	# The first run always begins at the market.
-	var open_now := story == "tokhang" or GameState.has_finished_first_run()
-	var bottom := str(info["who"]) if open_now else LOCKED
-	var card := _card(at, str(info["image"]), StoryDirector.story_title(story), str(info["when"]), bottom, open_now)
-	card.pressed.connect(_pick.bind(story))
-	return card
+	var front := _front(info)
+	front.pressed.connect(_card_pressed.bind(index))
+	holder.add_child(front)
+	var back_face := _back(info)
+	back_face.visible = false
+	holder.add_child(back_face)
+	var flip := Button.new()
+	flip.focus_mode = Control.FOCUS_NONE
+	flip.size = Vector2(46, 46)
+	flip.position = Vector2(CARD_SIZE.x - 46.0 - 10.0, 10.0)
+	for style in ["normal", "hover", "pressed", "disabled", "focus", "hover_pressed"]:
+		flip.add_theme_stylebox_override(style, _circle(style == "pressed" or style == "hover_pressed"))
+	flip.text = "i"
+	flip.add_theme_font_size_override("font_size", 28)
+	flip.add_theme_color_override("font_color", UiSkin.BUTTON_TEXT)
+	flip.add_theme_color_override("font_hover_color", UiSkin.BUTTON_TEXT)
+	flip.add_theme_color_override("font_pressed_color", GOLD)
+	flip.pressed.connect(_flip_pressed.bind(index))
+	holder.add_child(flip)
+	add_child(holder)
+	return {"story": story, "holder": holder, "front": front, "back": back_face, "flip": flip, "flipped": false}
 
 
-## One upright card: the picture, cropped to fill it, darkening towards the bottom, a small line at
-## the top, the title and a line under it, and a thin cream border. A closed card is dimmed.
-func _card(at: Vector2, image: String, title: String, top_line: String, bottom_line: String, enabled: bool) -> Button:
+## The face of a card: the picture cropped to fill it, darkening towards the bottom, the title and
+## who the player is, and a thin cream border.
+func _front(info: Dictionary) -> Button:
 	var card := Button.new()
-	# Its own look, not the game's default button window.
 	card.theme_type_variation = &"StartCard"
 	card.flat = true
 	card.focus_mode = Control.FOCUS_NONE
-	card.position = at
 	card.size = CARD_SIZE
 	card.custom_minimum_size = CARD_SIZE
-	card.disabled = not enabled
 	for style in ["normal", "hover", "pressed", "disabled", "focus", "hover_pressed"]:
 		card.add_theme_stylebox_override(style, StyleBoxEmpty.new())
 	var mask := Panel.new()
@@ -157,7 +177,7 @@ func _card(at: Vector2, image: String, title: String, top_line: String, bottom_l
 	mask.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(mask)
 	var picture := TextureRect.new()
-	picture.texture = load(image) as Texture2D
+	picture.texture = load(str(info["image"])) as Texture2D
 	picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	picture.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -176,16 +196,6 @@ func _card(at: Vector2, image: String, title: String, top_line: String, bottom_l
 	fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	mask.add_child(fade)
-	if not enabled:
-		var shade := ColorRect.new()
-		shade.color = CLOSED_SHADE
-		shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		mask.add_child(shade)
-	if top_line != "":
-		var top := _text(top_line, SMALL_SIZE, false)
-		top.position = Vector2(16, 14)
-		mask.add_child(top)
 	var words := VBoxContainer.new()
 	words.add_theme_constant_override("separation", 2)
 	words.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -197,10 +207,10 @@ func _card(at: Vector2, image: String, title: String, top_line: String, bottom_l
 	words.offset_bottom = -16
 	words.alignment = BoxContainer.ALIGNMENT_END
 	var name_label := Label.new()
-	name_label.text = title
+	name_label.text = StoryDirector.story_title(str(info["story"]))
 	UiSkin.style_label(name_label, TITLE_SIZE)
 	words.add_child(name_label)
-	var line := _text(bottom_line, SMALL_SIZE, false)
+	var line := _text(str(info["who"]), SMALL_SIZE, false)
 	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	line.custom_minimum_size.x = CARD_SIZE.x - 32
 	words.add_child(line)
@@ -209,11 +219,138 @@ func _card(at: Vector2, image: String, title: String, top_line: String, bottom_l
 	border.add_theme_stylebox_override("panel", _rounded(Color(0, 0, 0, 0), 2))
 	border.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	border.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	border.modulate.a = 1.0 if enabled else 0.4
 	card.add_child(border)
-	if enabled:
-		UiSkin.add_press_bounce(card)
 	return card
+
+
+## The back of a card: the story's name, who and where, a thin gold line and its short summary.
+func _back(info: Dictionary) -> Button:
+	var card := Button.new()
+	card.focus_mode = Control.FOCUS_NONE
+	card.size = CARD_SIZE
+	card.custom_minimum_size = CARD_SIZE
+	var plate := _rounded(BACK_FILL, 2)
+	plate.border_color = GOLD
+	for style in ["normal", "hover", "pressed", "disabled", "focus", "hover_pressed"]:
+		card.add_theme_stylebox_override(style, plate)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 10)
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	column.offset_left = 20
+	column.offset_right = -20
+	column.offset_top = 22
+	column.offset_bottom = -20
+	var name_label := Label.new()
+	name_label.text = StoryDirector.story_title(str(info["story"]))
+	UiSkin.style_label(name_label, TITLE_SIZE - 2)
+	column.add_child(name_label)
+	var who := _text(str(info["who"]), SMALL_SIZE, false)
+	who.modulate.a = 0.8
+	column.add_child(who)
+	var rule := ColorRect.new()
+	rule.color = GOLD
+	rule.custom_minimum_size = Vector2(0, 2)
+	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_child(rule)
+	var summary := _text(str(info["summary"]), SUMMARY_SIZE, false)
+	summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	summary.custom_minimum_size.x = CARD_SIZE.x - 40
+	column.add_child(summary)
+	card.add_child(column)
+	card.pressed.connect(func() -> void: _flip(_index))
+	return card
+
+
+## Brings card `index` to the middle, or (when the drag was a swipe) does nothing.
+func _card_pressed(index: int) -> void:
+	if _swiped or _busy:
+		_swiped = false
+		return
+	if index == _index:
+		picked.emit(str(_cards[index]["story"]))
+	else:
+		_go_to(index)
+
+
+func _flip_pressed(index: int) -> void:
+	if _swiped or _busy:
+		_swiped = false
+		return
+	if index != _index:
+		_go_to(index)
+		return
+	_flip(index)
+
+
+## Turns the middle card over to its other face and back, squeezing it flat for a moment.
+func _flip(index: int) -> void:
+	if _busy:
+		return
+	_busy = true
+	var card: Dictionary = _cards[index]
+	var holder: Control = card["holder"]
+	var tween := create_tween()
+	tween.tween_property(holder, "scale:x", 0.0, FLIP_SECONDS)
+	tween.tween_callback(func() -> void:
+		card["flipped"] = not card["flipped"]
+		(card["front"] as Control).visible = not card["flipped"]
+		(card["back"] as Control).visible = card["flipped"])
+	tween.tween_property(holder, "scale:x", 1.0, FLIP_SECONDS)
+	tween.finished.connect(func() -> void: _busy = false)
+
+
+func _move(step: int) -> void:
+	var target := clampi(_index + step, 0, STORIES.size() - 1)
+	if target != _index:
+		_go_to(target)
+
+
+func _go_to(index: int) -> void:
+	# The card that leaves the middle turns back to its face.
+	var leaving: Dictionary = _cards[_index]
+	if leaving["flipped"]:
+		leaving["flipped"] = false
+		(leaving["front"] as Control).visible = true
+		(leaving["back"] as Control).visible = false
+	_index = index
+	_arrange(true)
+
+
+## Puts every card where it belongs for the middle one: full size in front, the others smaller, dimmed
+## and tucked behind it; the round button shows on the middle card only.
+func _arrange(animated: bool) -> void:
+	var centre_x := ScreenFit.DESIGN_SIZE.x / 2.0
+	for index in _cards.size():
+		var holder: Control = _cards[index]["holder"]
+		var offset := index - _index
+		var scale_to := 1.0 if offset == 0 else SIDE_SCALE
+		var centre := Vector2(centre_x + offset * SIDE_OFFSET, CARD_TOP + CARD_SIZE.y / 2.0)
+		var position_to := centre - CARD_SIZE / 2.0
+		var alpha := 1.0 if offset == 0 else SIDE_ALPHA
+		holder.z_index = 10 - absi(offset)
+		(_cards[index]["flip"] as Control).visible = offset == 0
+		if animated:
+			var tween := create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+			tween.tween_property(holder, "position", position_to, SLIDE_SECONDS)
+			tween.tween_property(holder, "scale", Vector2.ONE * scale_to, SLIDE_SECONDS)
+			tween.tween_property(holder, "modulate:a", alpha, SLIDE_SECONDS)
+		else:
+			holder.position = position_to
+			holder.scale = Vector2.ONE * scale_to
+			holder.modulate.a = alpha
+	for index in _dots.size():
+		(_dots[index] as ColorRect).color = GOLD if index == _index else Color(1.0, 0.953, 0.839, 0.3)
+
+
+func _circle(pressed: bool) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(0.05, 0.03, 0.04, 0.82) if not pressed else Color(0.2, 0.12, 0.08, 0.92)
+	box.set_corner_radius_all(23)
+	box.set_border_width_all(2)
+	box.border_color = BORDER
+	box.anti_aliasing = true
+	return box
 
 
 func _rounded(fill: Color, border_width: int) -> StyleBoxFlat:
@@ -239,47 +376,3 @@ func _text(words: String, font_size: int, heading: bool) -> Label:
 		label.add_theme_color_override("font_outline_color", UiSkin.BUTTON_OUTLINE)
 		label.add_theme_constant_override("outline_size", 4)
 	return label
-
-
-## A story card was picked: begin there, asking first if that ends a run in progress.
-func _pick(story: String) -> void:
-	if not GameState.is_run_in_progress():
-		StoryDirector.begin_with(story)
-		return
-	_confirm = Control.new()
-	_confirm.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_confirm.mouse_filter = Control.MOUSE_FILTER_STOP
-	var dim := ColorRect.new()
-	dim.color = Color(0, 0, 0, 0.45)
-	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_confirm.add_child(dim)
-	var panel := VBoxContainer.new()
-	panel.add_theme_constant_override("separation", 6)
-	panel.custom_minimum_size = Vector2(420, 0)
-	var question := _text(CONFIRM_TITLE, HEADING_SIZE, false)
-	question.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	panel.add_child(question)
-	var note := _text(CONFIRM_NOTE % (_slot + 1), SMALL_SIZE + 2, false)
-	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	note.modulate.a = 0.85
-	panel.add_child(note)
-	for row in [["Start Over", func() -> void: StoryDirector.begin_with(story)], ["Cancel", _close_confirm]]:
-		var button := Button.new()
-		button.theme_type_variation = &"TextButton"
-		button.text = str(row[0])
-		button.focus_mode = Control.FOCUS_NONE
-		button.custom_minimum_size = Vector2(300, 52)
-		button.pressed.connect(row[1])
-		panel.add_child(button)
-	_confirm.add_child(panel)
-	SoftWindow.behind(panel, SoftWindow.Look.WINDOW, Vector2(40, 24))
-	panel.reset_size()
-	panel.position = (ScreenFit.DESIGN_SIZE - panel.get_combined_minimum_size()) / 2.0
-	add_child(_confirm)
-
-
-func _close_confirm() -> void:
-	if _confirm != null:
-		_confirm.queue_free()
-		_confirm = null

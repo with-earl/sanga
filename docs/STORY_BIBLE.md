@@ -187,18 +187,19 @@ In Tokhang the water gun is offered either by memory 1 or, with no memory, by Ku
 The first run starts cold in the market, with no hint of what comes after it (New Game always
 starts at the market).
 
-**Two game modes**, chosen on the main screen, each with its own three save slots. **Story Mode** is the
-fixed first run, tapped through from the market to the end; its save carries on where it stopped, and says
-"Story complete" once finished. **Shift Mode** is locked (a padlock before its name, and tapping it says to finish
-Story Mode) until any Story Mode save has finished its run; the unlock is kept on the device, so deleting the
-finished save does not lock it again. Opening a Shift Mode save shows the **start screen**, which replaces the
-old "answer as the priest" menu, with all three starting points open (a Shift Mode save counts as past the
-first run). Three upright 3:4 cards:
+**Two game modes**, chosen on the main screen. **Story Mode** is the fixed first run, tapped through from
+the market to the end: three save slots, and a slot goes straight to Load or Delete (an empty one starts the
+story; a finished one says "Story complete"). **Shift Mode** is locked (a padlock before its name, and
+tapping it says to finish Story Mode) until any Story Mode save has finished its run; the unlock is kept on
+the device, so deleting the finished save does not lock it again. Shift Mode opens on a **story carousel**,
+"Select a starting point": Tokhang, Kumpisal and Padala as upright 3:4 cards, the middle one in front, the
+others smaller and dimmed behind it. A small round **i** button on the middle card flips it to a short
+summary of the story that gives nothing away (set-up only, no events). Choosing a card lists **that story's
+own three slots** (nine Shift Mode saves in all); a Shift Mode save counts as past the first run. Each card:
 
 | Card | Opens |
 |---|---|
-| **Continue** | The save as it stands (a run in progress, or the next run). |
-| **Tokhang** | Under the heading "Select your starting point": the run begins at the market. |
+| **Tokhang** | The run begins at the market. |
 | **Kumpisal** | The run begins at the church. |
 | **Padala** | The run begins in the room. |
 
@@ -238,7 +239,7 @@ run reaches it as echoes (marked below).
 
 Three frames, one line of travel: the skyway, the news, the market. They are drawn in 3D from nothing (`tools/intro_frames.py`, `tools/bike_parts.py`, `tools/tv_store.py`); the bike in frames 1 and 3 is the art's delivery motorcycle: black with hot-pink flashes, spoked wheels, a pink top box.
 
-`tokhang_skyway.png` (caption *Linggo ng hapon*): the camera right at the front wheel of the bike on the elevated skyway, a green exit gantry (SAMPALOC / ESPAÑA), hazy Manila ahead with a Gothic church spire among the towers, and rubbish on the road: a crumpled food-delivery flyer lying flat on the tarmac and, near the camera at the bottom right, a white plastic sando bag standing blown open (two handles, side gussets, a red *Salamat po!*): the street is dirty.
+`tokhang_skyway.png` (no time caption): the camera right at the front wheel of the bike on the elevated skyway, a green exit gantry (SAMPALOC / ESPAÑA), hazy Manila ahead with a Gothic church spire among the towers, and rubbish on the road: a crumpled food-delivery flyer lying flat on the tarmac and, near the camera at the bottom right, a white plastic sando bag standing blown open (two handles, side gussets, a red *Salamat po!*): the street is dirty.
 > **Peter:** Huling biyahe na 'to. Birthday ni Ben, bawal akong ma-late.
 
 `tokhang_tv_news.png`

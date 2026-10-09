@@ -169,6 +169,19 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **Shift Mode carousel (branch claude/shift-carousel, from your sketch):** Story Mode is now Slot -> Load /
+  Delete (no Continue-only screen). Shift Mode is a story carousel (`scripts/start_screen.gd`: middle card in
+  front, side cards smaller and dimmed; swipe or tap to move, tap the middle to choose, dots below, heading
+  "Select a starting point") -> that story's own three slots (`GameState.shift_story`; files
+  `shift_<story>_<n>.json`) -> Load / Delete. Each card has a round "i" button that flips it to a short
+  no-spoiler summary (`STORIES[...].summary`; written by me, edit freely). There is no Continue card in Shift
+  Mode now: continuing is Load on a slot. Earlier `shift_<n>.json` saves (one set for all stories) are no longer read.
+- **Start screens per mode:** opening a Story Mode save shows only the Continue card (centred; "Story
+  complete" and disabled once the story is finished); opening a Shift Mode save shows the Continue card plus
+  the three story cards under "Select your starting point". A Story Mode save with no run yet just begins.
+- **No story-time caption:** the small "Linggo ng hapon" at the top left of the Tokhang intro's first frame
+  was removed; no story shows a time caption now. The "Flashback" and "Father Eli" captions (not times)
+  stay. The start screen's story cards no longer show a time either (they show the title and "who · where"); the times remain only in the prologue's spoken line.
 - **Story Mode and Shift Mode (branch claude/story-shift-modes):** the main screen is now Story Mode,
   Shift Mode and Quit, with the buttons lowered. Each mode has its own three slots (`GameState.mode`;
   story saves stay `slot_N.json`, shift saves are `shift_N.json`). Story Mode is the fixed run from the

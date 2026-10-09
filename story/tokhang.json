@@ -3,7 +3,6 @@
 	"intro": [
 		{
 			"image": "res://assets/cutscenes/tokhang_skyway.png",
-			"caption": "Linggo ng hapon",
 			"lines": [
 				{
 					"speaker": "Peter",

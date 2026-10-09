@@ -119,7 +119,7 @@ static func where(info: Dictionary) -> String:
 	if str(info["timeline"]) != "" and int(info["chapter"]) < stories.size():
 		return StoryDirector.story_title(stories[int(info["chapter"])])
 	if GameState.mode == GameState.MODE_SHIFT:
-		return "Choose a starting point"
+		return "Ready for a new run"
 	return "New story" if int(info["runs_finished"]) == 0 else "Story complete"
 
 
@@ -130,7 +130,7 @@ func _build() -> void:
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(dim)
 	var title := Label.new()
-	title.text = "Story Mode" if GameState.mode == GameState.MODE_STORY else "Shift Mode"
+	title.text = "Story Mode" if GameState.mode == GameState.MODE_STORY else "Shift Mode  ·  %s" % StoryDirector.story_title(GameState.shift_story)
 	UiSkin.style_label(title, TITLE_SIZE)
 	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	# The whole group (title, rows, buttons) is centred up and down on the screen.
