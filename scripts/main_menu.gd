@@ -14,6 +14,8 @@ const UNLOCK_NOTE := "Finish Story Mode to unlock Shift Mode"
 const TOAST_FADE_IN := 0.2
 const TOAST_HOLD := 2.2
 const TOAST_FADE_OUT := 0.5
+## Room kept between the toast and the bottom edge of the screen.
+const TOAST_BOTTOM_GAP := 44.0
 ## Where the lists sit, in the screen's own terms: their centre line is the logo's (the logo is part
 ## of the main screen's picture, centred about 258 px from the right edge), and their top is just
 ## under it (344 px from the top of a 720 px screen).
@@ -39,7 +41,7 @@ var _back_action := Callable()
 var _start_screen: StartScreen
 var _slots: SaveSlots
 ## The bottom-centre note and its fade (see _toast).
-var _toast_label: Label
+var _toast_label: Control
 var _toast_tween: Tween
 
 
@@ -100,7 +102,7 @@ func _put_on_window(panel: VBoxContainer) -> void:
 func _refresh_shift_lock() -> void:
 	var open := GameState.story_finished()
 	_shift_button.text = "Shift Mode"
-	_shift_button.modulate.a = 1.0 if open else 0.6
+	_shift_button.modulate.a = 1.0
 	var old := _shift_button.get_node_or_null("Lock")
 	if old != null:
 		old.queue_free()
@@ -116,7 +118,7 @@ func _refresh_shift_lock() -> void:
 	var font := _shift_button.get_theme_font("font", "Button")
 	var font_size := _shift_button.get_theme_font_size("font_size", "Button")
 	var text_width := font.get_string_size(_shift_button.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-	icon.position = Vector2((ROW_SIZE.x - text_width) / 2.0 - icon.size.x - 8.0, (ROW_SIZE.y - icon.size.y) / 2.0)
+	icon.position = Vector2((ROW_SIZE.x - text_width) / 2.0 - icon.size.x - 14.0, (ROW_SIZE.y - icon.size.y) / 2.0)
 	_shift_button.add_child(icon)
 
 
@@ -127,28 +129,61 @@ func _shift_pressed() -> void:
 		_toast(UNLOCK_NOTE)
 
 
-## A short note at the bottom centre of the screen: it fades in, stays a moment and fades out by itself.
+## A short note at the bottom centre of the screen, on a small rounded plate with a padlock: it rises
+## and fades in, stays a moment and fades out by itself.
 func _toast(words: String) -> void:
-	if _toast_label == null:
-		_toast_label = Label.new()
-		_toast_label.theme_type_variation = &"HudBody"
-		_toast_label.add_theme_font_size_override("font_size", 28)
-		_toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		_toast_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-		_toast_label.offset_left = -400.0
-		_toast_label.offset_right = 400.0
-		_toast_label.offset_top = -76.0
-		_toast_label.offset_bottom = -36.0
-		_toast_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_toast_label.modulate.a = 0.0
-		add_child(_toast_label)
-	_toast_label.text = words
+	if _toast_label != null:
+		_toast_label.queue_free()
+	var plate := PanelContainer.new()
+	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.09, 0.05, 0.065, 0.9)
+	style.set_corner_radius_all(18)
+	style.set_border_width_all(2)
+	style.border_color = Color(0.851, 0.643, 0.255, 0.9)
+	style.content_margin_left = 22
+	style.content_margin_right = 26
+	style.content_margin_top = 12
+	style.content_margin_bottom = 12
+	style.shadow_color = Color(0, 0, 0, 0.45)
+	style.shadow_size = 10
+	style.anti_aliasing = true
+	plate.add_theme_stylebox_override("panel", style)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	plate.add_child(row)
+	var icon := TextureRect.new()
+	icon.texture = load(LOCK_ICON) as Texture2D
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.custom_minimum_size = Vector2(32, 32)
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(icon)
+	var label := Label.new()
+	label.text = words
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.add_theme_font_size_override("font_size", 26)
+	label.add_theme_color_override("font_color", UiSkin.BUTTON_TEXT)
+	label.add_theme_color_override("font_outline_color", UiSkin.BUTTON_OUTLINE)
+	label.add_theme_constant_override("outline_size", 4)
+	row.add_child(label)
+	plate.modulate.a = 0.0
+	add_child(plate)
+	_toast_label = plate
+	# Centred along the bottom, a little above the edge.
+	plate.reset_size()
+	var rest := Vector2((ScreenFit.DESIGN_SIZE.x - plate.size.x) / 2.0, ScreenFit.DESIGN_SIZE.y - plate.size.y - TOAST_BOTTOM_GAP)
+	plate.position = rest + Vector2(0, 14)
 	if _toast_tween != null and _toast_tween.is_valid():
 		_toast_tween.kill()
-	_toast_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_toast_tween.tween_property(_toast_label, "modulate:a", 1.0, TOAST_FADE_IN)
-	_toast_tween.tween_interval(TOAST_HOLD)
-	_toast_tween.tween_property(_toast_label, "modulate:a", 0.0, TOAST_FADE_OUT)
+	_toast_tween = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_toast_tween.set_parallel(true)
+	_toast_tween.tween_property(plate, "modulate:a", 1.0, TOAST_FADE_IN)
+	_toast_tween.tween_property(plate, "position", rest, TOAST_FADE_IN)
+	_toast_tween.chain().tween_interval(TOAST_HOLD)
+	_toast_tween.chain().tween_property(plate, "modulate:a", 0.0, TOAST_FADE_OUT)
 
 
 ## The question takes the place of the three menu buttons, in the same spot.
