@@ -716,7 +716,7 @@ def build(size) -> Image.Image:
     cards = [(wallet("BCash", "I-scan ang QR, bayad agad", (24, 84, 200), (255, 255, 255)), 0.52, 0.26),
              (wallet("Loro", "Loro Pay, tanggap dito", (12, 12, 14), (60, 220, 100)), 0.84, 0.26),
              (promo, 1.16, 0.36)]
-    top_y = 2.38
+    top_y = 2.18
     for img, x0, width in cards:
         sheet = acrylic_card(img)
         height = width * sheet.height / sheet.width
