@@ -8,8 +8,10 @@ police car, so they have a true camera angle, perspective and light.
   Father Eli in an inmate's orange shirt, facing us.
 - padala_jeep.png: inside a jeepney at night, from the back: red vinyl benches, chrome handrails,
   a painted ceiling, the city's lights streaking past the open windows, and Mercy on the bench.
-- tokhang_tv_news.png: a dark room at night lit only by an old television, showing the news: a
-  street under police lights and a red news bar, "OPERASYON: 3 PATAY".
+- tokhang_tv_news.png: over a delivery rider's shoulder, a television shop in daylight seen through its
+  front window: rows of identical tube sets all showing the drug-war news, glass with reflections and
+  sun glare, a thick wooden pole covered in posters, blurred shops on both sides. Drawn by tv_store.py,
+  with the rider from rider_back.py (new art, not the game's Peter).
 - prologue_booth.png: inside the confessional, on the priest's side: dark wood, and through the
   lattice screen a faint candle glow and the shape of someone kneeling close.
 - padala_luggage.png / padala_luggage_closed.png: a hard suitcase on the apartment floor, open and
@@ -315,52 +317,11 @@ def padala_jeep(size, mercy: Image.Image) -> Image.Image:
 # ---------------------------------------------------------------- the news on television
 
 
-def news_frame(w: int, h: int) -> Image.Image:
-    """The broadcast: the street under police lights (from street_scene), a red bar with the
-    headline, and a small LIVE tag."""
-    import street_scene
-    street = street_scene.draw((w * 2, h * 2), car_at=(1.6, 0.0, 12.0), car_yaw=-20.0).resize((w, h), Image.LANCZOS)
-    d = ImageDraw.Draw(street)
-    bar = int(h * 0.16)
-    d.rectangle((0, h - bar - int(h * 0.06), w, h - int(h * 0.06)), fill=(176, 22, 30, 255))
-    d.rectangle((0, h - int(h * 0.06), w, h), fill=(16, 18, 40, 255))
-    font = ImageFont.truetype(FONT_BLACK, int(bar * 0.5))
-    d.text((int(w * 0.04), h - bar - int(h * 0.06) + int(bar * 0.22)), "OPERASYON: 3 PATAY", font=font, fill=(255, 255, 255, 255))
-    small = ImageFont.truetype(FONT_BLACK, int(h * 0.05))
-    d.rectangle((int(w * 0.04), int(h * 0.05), int(w * 0.17), int(h * 0.12)), fill=(200, 20, 30, 255))
-    d.text((int(w * 0.055), int(h * 0.055)), "LIVE", font=small, fill=(255, 255, 255, 255))
-    # Scan lines, like an old set.
-    lines = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    ld = ImageDraw.Draw(lines)
-    for y in range(0, h, 3):
-        ld.line((0, y, w, y), fill=(0, 0, 0, 46))
-    street.alpha_composite(lines)
-    return street
-
-
 def tokhang_tv_news(size) -> Image.Image:
-    w, h = size
-    camera = s3.Camera((0.0, 1.05, -0.2), 0.0, -6.0, 42.0, size)
-    scene = s3.Scene(camera, ambient=(26, 28, 40), sky_dir=(0.0, 1.0, 0.0))
-    screen_light = (150, 170, 255)
-    # The room: a wall, the floor, a low cabinet with the television on it.
-    wall = noise(900, 500, 60, 21)
-    wall_img = Image.fromarray(np.stack([120 + wall * 20, 150 + wall * 20, 132 + wall * 20], axis=-1).astype(np.uint8)).convert("RGBA")
-    scene.face([(-2.0, 2.6, 2.4), (2.0, 2.6, 2.4), (2.0, 0.0, 2.4), (-2.0, 0.0, 2.4)], (120, 150, 132), texture=wall_img, layer=0)
-    scene.face([(-2.0, 0.0, 2.4), (2.0, 0.0, 2.4), (2.0, 0.0, -0.4), (-2.0, 0.0, -0.4)], (90, 80, 72), layer=0)
-    scene.box(-0.75, 0.75, 0.0, 0.62, 1.9, 2.35, (92, 60, 40), layer=1)
-    # An old set: a deep body, a bevel, and the glowing screen.
-    scene.box(-0.42, 0.42, 0.62, 1.22, 1.95, 2.3, (40, 40, 44), layer=2)
-    scene.face([(-0.34, 1.16, 1.948), (0.34, 1.16, 1.948), (0.34, 0.68, 1.948), (-0.34, 0.68, 1.948)], (200, 200, 220),
-               texture=news_frame(640, 452), layer=3, emissive=True)
-    scene.box(-0.3, 0.3, 1.22, 1.24, 2.05, 2.25, (30, 30, 32), layer=2)
-    scene.light((0.0, 0.92, 1.6), screen_light, 1.6)
-    scene.light((0.0, 0.92, 1.7), (255, 80, 90), 0.5)
-    canvas = Image.new("RGBA", size, (8, 8, 12, 255))
-    canvas = scene.render(canvas)
-    centre = camera.project((0.0, 0.92, 1.95))[:2]
-    canvas = s3.add_glow(canvas, centre, screen_light, w / 4, 0.25)
-    return finish(canvas)
+    """The news scene: over a delivery rider's shoulder, a television shop in daylight seen through
+    its window, showing the drug-war news (see tv_store.py)."""
+    import tv_store
+    return tv_store.draw(size)
 
 
 # ---------------------------------------------------------------- the confessional

@@ -36,6 +36,7 @@ tokhang_kulas_runs.png
 tokhang_kulas_shot.png
 tokhang_peter_holding.png
 tokhang_peter_shot.png
+tokhang_rider.png
 tokhang_safe_home.png
 tokhang_safe_market.png
 tokhang_trade.png
