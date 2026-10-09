@@ -520,7 +520,7 @@ def build_skyway(size):
 
     wheel_pass = s3.Scene(camera, ambient=(150, 156, 174))
     wheel_pass.light((-700, 900, -900), (255, 226, 184), 1.15e6)
-    wheel_pass.light((900, 400, -500), (255, 232, 214), 5.0e5)   # a cooler light from the sky side so the black body keeps its shape
+    wheel_pass.light((900, 400, -500), (255, 232, 214), 5.0e5)
     bp.wheel(wheel_pass, 0.0, 0.0, side=1)
     bp.wheel(wheel_pass, 0.0, -1.25, side=1, front=False)
     bp.scooter_body(wheel_pass, show_leg=False)

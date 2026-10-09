@@ -169,6 +169,19 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **Dev tools: Unlock Shift Mode:** a "Game Modes" section in the Developer Tools window has an "Unlock
+  Shift Mode" row (`DevTools._unlock_shift_mode`): it marks Story Mode finished on the device and clears the
+  main screen's padlock at once. There is no "lock again" row.
+- **Engine sounds in the Tokhang intro:** `tools/compose_sounds.py` now also makes `engine_ride.wav` (a small
+  single-cylinder bike at cruising speed with wind, a seamless 4 s loop) and `engine_off.wav` (a key click,
+  the engine stumbling down and a few cooling ticks, 2.4 s). A cutscene step can say `"sound": "engine_ride"`
+  (`autoload/cutscene.gd`): a looping sound fades in and out with the step, a one-shot just plays; both go
+  on the Sound bus. Frame 1 uses `engine_ride`, frame 3 `engine_off`. Both wavs are imported uncompressed
+  (compress/mode=0) so the loop point is exact. Synthesised, so I could check levels and the loop seam, but
+  not listen: please judge how they sound on a device and say if they need to be quieter, deeper or longer.
+- **Peter in the TV news frame (intro frame 2) is the flat 2D sprite again** (`tools/rider_back.py`, pasted
+  and blurred in `tools/tv_store.py`), as the user asked after trying a 3D figure. The 3D bust
+  (`tv_store.peter_bust`) was removed; it is in the git history (commit d5728fc) if wanted again.
 - **Shift Mode carousel (branch claude/shift-carousel, from your sketch):** Story Mode is now Slot -> Load /
   Delete (no Continue-only screen). Shift Mode is a story carousel (`scripts/start_screen.gd`: middle card in
   front, side cards smaller and dimmed; swipe or tap to move, tap the middle to choose, dots below, heading

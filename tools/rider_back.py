@@ -240,7 +240,7 @@ def rider_back(out_scale: float = 1.0) -> Image.Image:
     handle = _round_rect(254, 322, 346, 346, 10)
     c.alpha_composite(_solid(handle, (20, 20, 25), bulge=8, ambient=0.3, seed=23))
 
-    # ---- the helmet: glossy pink, tipped up and a little left, with a rim, a vent and a sticker
+    # ---- the helmet: glossy pink, tipped up and a little left, with a rim and a vent
     hair = _poly([(246, 196), (354, 196), (346, 258), (254, 258)], smooth=10)
     c.alpha_composite(_solid(hair, HAIR, bulge=18, ambient=0.4, shine=0.12, glossy=6, seed=24, fabric=0.06))
     helmet = _union(_ellipse(300, 116, 112, 116), _round_rect(190, 120, 410, 214, 60))
@@ -259,8 +259,6 @@ def rider_back(out_scale: float = 1.0) -> Image.Image:
     c.alpha_composite(_solid(trim, (30, 12, 24), bulge=6, ambient=0.4, shine=0.2, seed=26))
     vent = _round_rect(272, 34, 332, 138, 16).rotate(5, center=(300 * SUPER, 230 * SUPER), resample=Image.BICUBIC)
     c = _strokes(c, [[(286, 48), (288, 128)], [(302, 44), (304, 132)], [(318, 48), (320, 128)]], (100, 14, 58), 5, 1.4, 0.75, vent)
-    sticker = _ellipse(364, 168, 15, 15)
-    c.alpha_composite(_solid(sticker, (250, 250, 250), bulge=5, ambient=0.8, shine=0.3, seed=27, fabric=0.0))
 
     # ---- finish: a soft warm bounce from the pavement on the lower edge, then down to size
     px = np.asarray(c).astype(np.float32)

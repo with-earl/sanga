@@ -3,6 +3,7 @@
 	"intro": [
 		{
 			"image": "res://assets/cutscenes/tokhang_skyway.png",
+			"sound": "engine_ride",
 			"lines": [
 				{
 					"speaker": "Peter",
@@ -31,6 +32,7 @@
 		},
 		{
 			"image": "res://assets/cutscenes/tokhang_market_arrival.png",
+			"sound": "engine_off",
 			"hold": 3.5
 		}
 	],
