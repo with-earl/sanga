@@ -674,7 +674,7 @@ def build(size) -> Image.Image:
     # promo and the two e-wallet cards, small and high so the sets and the news stay the focus.
     def acrylic_card(print_img: Image.Image, pad: int = 16) -> Image.Image:
         """The printed card set into a clear acrylic sheet: a pale translucent border with a bright
-        bevelled edge and two hanging holes at the top corners."""
+        bevelled edge and one hanging hole at the top centre."""
         pw, ph = print_img.size
         sheet = Image.new("RGBA", (pw + pad * 2, ph + pad * 2), (0, 0, 0, 0))
         sd = ImageDraw.Draw(sheet)
@@ -682,8 +682,8 @@ def build(size) -> Image.Image:
         sd.rounded_rectangle((0, 0, sheet.width - 1, sheet.height - 1), radius=pad, outline=(255, 255, 255, 235), width=3)
         sd.rounded_rectangle((5, 5, sheet.width - 6, sheet.height - 6), radius=pad - 3, outline=(190, 205, 220, 150), width=2)
         sheet.alpha_composite(print_img, (pad, pad))
-        for hx in (pad + 4, sheet.width - pad - 4):
-            sd.ellipse((hx - 6, 5, hx + 6, 17), fill=(120, 130, 140, 200), outline=(255, 255, 255, 255))
+        hx = sheet.width // 2
+        sd.ellipse((hx - 6, 5, hx + 6, 17), fill=(120, 130, 140, 200), outline=(255, 255, 255, 255))
         return sheet
 
     red, ink, cream = (190, 24, 30, 255), (30, 30, 40, 255), (250, 245, 220, 255)
@@ -722,7 +722,7 @@ def build(size) -> Image.Image:
         height = width * sheet.height / sheet.width
         x1, bot = x0 + width, top_y - height
         scene.face([(x0, top_y, 0.032), (x1, top_y, 0.032), (x1, bot, 0.032), (x0, bot, 0.032)], (225, 232, 238), texture=sheet, layer=5, emissive=True)
-        for hx in (x0 + width * 0.05, x1 - width * 0.05):
+        for hx in ((x0 + x1) / 2,):
             cup_y = top_y + 0.045
             scene.box(hx - 0.016, hx + 0.016, cup_y - 0.016, cup_y + 0.016, 0.0, 0.01, (200, 208, 214), layer=5)
             scene.box(hx - 0.003, hx + 0.003, cup_y - 0.004, cup_y + 0.004, 0.01, 0.036, (170, 176, 184), layer=5)
