@@ -229,13 +229,17 @@ run reaches it as echoes (marked below).
 
 ### 7.1 Intro
 
-`tokhang_rider.png`
+Three frames, one line of travel: the skyway, the news, the market. They are drawn in 3D from nothing (`tools/intro_frames.py`, `tools/bike_parts.py`, `tools/tv_store.py`); the same pink-fendered scooter and the same Peter (pink helmet, black jacket, pink backpack) are in frames 1 and 3.
+
+`tokhang_skyway.png` (caption *Linggo ng hapon*): a low shot from the side as Peter rides the elevated skyway: front wheel, scooter and rider, a green exit gantry (SAMPALOC / ESPAÑA), hazy Manila ahead with a Gothic church spire among the towers.
 > **Peter:** Huling biyahe na 'to. Birthday ni Ben, bawal akong ma-late.
 
 `tokhang_tv_news.png`
 > **Reporter:** ...tatlo ang patay sa magkakahiwalay na operasyon kagabi dito sa Sampaloc. Nanlaban umano ang mga suspek, ayon sa pulisya.
 > **Reporter:** Kabilang sa mga nasawi ang isang babaeng hindi pa nakikilala. *(echo, flag `run_echo_mercy_ran`)*
 > **Peter:** Nanlaban na naman.
+
+`tokhang_market_arrival.png` (no line, a short hold): a chase view from above and behind his left shoulder as he rolls into the palengke street: his helmet and backpack, his left hand on the grip, the dashboard (48 km/h) and the phone on the bar (Gwen: *umuwi ka nang maaga*), the street ahead with bunting, striped umbrellas, shophouses and a PALENGKE banner, the sun low at the end. It cuts straight to the phone call.
 
 ### 7.2 The phone call (branch choice)
 

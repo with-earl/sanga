@@ -2,7 +2,8 @@
 	"_comment": "Tokhang, Sunday afternoon, see docs/STORY_BIBLE.md section 7. One version for every run. It is the latest story in time, so what was played before it in this run can reach it: Gwen's confession (an echo on the phone), Peter seen at Father Eli's door the night before (an echo, and the scene at the altar before the shooting), Mercy shot running (on the news), and Kulas alive (he warns the buyer, which offers the water gun without the memory). A story played before its causes shows only what is true in every version of the past. The first run offers two ways to say yes (both send Peter): the choice is real for the recap, and the spine stays fixed.",
 	"intro": [
 		{
-			"image": "res://assets/cutscenes/tokhang_rider.png",
+			"image": "res://assets/cutscenes/tokhang_skyway.png",
+			"caption": "Linggo ng hapon",
 			"lines": [
 				{
 					"speaker": "Peter",
@@ -28,6 +29,10 @@
 					"text": "Nanlaban na naman."
 				}
 			]
+		},
+		{
+			"image": "res://assets/cutscenes/tokhang_market_arrival.png",
+			"hold": 3.5
 		}
 	],
 	"phone": [

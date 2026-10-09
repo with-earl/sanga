@@ -67,15 +67,15 @@ and `_2`, `_3` and so on for other expressions. `_2` is the sad expression, show
 
 ## assets/cutscenes/
 
-Full-screen pictures for cutscenes (16:9, 1672 x 941 or larger). Every one except `tokhang_rider.png`
-and `padala_bath.png` is a stand-in that `tools/draw_placeholders.py` composes from the game's own art
+Full-screen pictures for cutscenes (16:9, 1672 x 941 or larger). Every one except `padala_bath.png` is a stand-in that `tools/draw_placeholders.py` composes from the game's own art
 (listed in `PLACEHOLDERS.txt`). Replace it with the real picture under the same filename, and remove its
 name from `PLACEHOLDERS.txt` so the tool never draws over it.
 
 | File | Shows |
 | --- | --- |
-| `tokhang_rider.png` | Peter with his scooter (made from the raw character sheets) |
-| `tokhang_tv_news.png` | TV news report about Tokhang |
+| `tokhang_skyway.png` | Intro frame 1: Peter on his scooter on the skyway, seen low from the side, Manila ahead (`tools/intro_frames.py`) |
+| `tokhang_tv_news.png` | Intro frame 2: TV news report about Tokhang |
+| `tokhang_market_arrival.png` | Intro frame 3: over Peter's left shoulder as he rolls into the market street (`tools/intro_frames.py`) |
 | `tokhang_peter_holding.png`, `tokhang_peter_shot.png` | Peter with the toy gun, and the shooting |
 | `tokhang_gwen_holding.png`, `tokhang_gwen_shot.png` | Gwen with the toy gun, and the shooting |
 | `tokhang_kulas_runs.png`, `tokhang_kulas_shot.png` | Kulas running, and the shooting |

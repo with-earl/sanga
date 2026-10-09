@@ -21,7 +21,8 @@ import numpy as np
 from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import object_scenes  # noqa: E402  (beside this file)
+import intro_frames  # noqa: E402  (beside this file)
+import object_scenes  # noqa: E402
 import street_scene  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -234,15 +235,6 @@ def frame_around(inner: Image.Image, box, outer: Image.Image, border=(18, 16, 18
 
 
 # ---------------------------------------------------------------- the shots
-
-
-def tokhang_rider() -> Image.Image:
-    """The opening picture: Peter, the rider, with his motorbike, on the blurred market behind
-    him. He is the same drawing as in the dialogue and in every other scene."""
-    c = background("public_market", blur=9)
-    place(c, person("peter", True), 0.3, 1.03, 0.84)
-    place(c, prop("motor"), 0.7, 1.0, 0.5)
-    return vignette(grade(c, 1.0, 1.05), 0.35)
 
 
 def shot_market_holding(buyer: str) -> Image.Image:
@@ -559,8 +551,9 @@ def true_morning_mercy() -> Image.Image:
 
 
 SHOTS = {
-    "tokhang_rider.png": tokhang_rider,
+    "tokhang_skyway.png": lambda: intro_frames.draw_skyway(SIZE),
     "tokhang_tv_news.png": lambda: object_scenes.tokhang_tv_news(SIZE),
+    "tokhang_market_arrival.png": lambda: intro_frames.draw_market(SIZE),
     "tokhang_peter_holding.png": lambda: shot_market_holding("peter"),
     "tokhang_peter_shot.png": lambda: shot_market_down("peter"),
     "tokhang_gwen_holding.png": lambda: shot_market_holding("gwen"),

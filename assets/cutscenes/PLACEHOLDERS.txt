@@ -34,11 +34,12 @@ tokhang_gwen_holding.png
 tokhang_gwen_shot.png
 tokhang_kulas_runs.png
 tokhang_kulas_shot.png
+tokhang_market_arrival.png
 tokhang_peter_holding.png
 tokhang_peter_shot.png
-tokhang_rider.png
 tokhang_safe_home.png
 tokhang_safe_market.png
+tokhang_skyway.png
 tokhang_trade.png
 tokhang_tv_news.png
 true_morning_batista.png

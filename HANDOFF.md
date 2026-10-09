@@ -169,6 +169,13 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **Tokhang intro is three frames (branch claude/tokhang-intro-frames):** 1 `tokhang_skyway.png` (low side
+  shot of Peter riding the pink scooter on the skyway, exit gantry, hazy Manila with a church spire), 2 the TV
+  news, 3 `tokhang_market_arrival.png` (a chase view over Peter's left shoulder into the palengke street,
+  handlebar dashboard and phone showing Gwen's text). Both new frames are drawn from nothing in 3D by
+  `tools/intro_frames.py`; the scooter, wheels and Peter are lofted shapes in `tools/bike_parts.py`
+  (`loft`, `ellipsoid`, `limb`; no game art). `tokhang_rider.png` and its drawing function are gone. Frame 3
+  has no line and holds 3.5 s. Stand-ins, listed in `PLACEHOLDERS.txt`. Each renders in about 15 seconds.
 - **TV shop cards:** the HouseCredit promo and the BCash / Loro payment signs are now small horizontal
   acrylic cards hung inside the shop from suction-cup hooks, in a row high on the glass above the sets so
   the news stays the focus. `tools/tv_store.py` (`acrylic_card`).
