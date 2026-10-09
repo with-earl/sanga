@@ -169,13 +169,9 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
-- **Peter in the TV news frame (intro frame 2) is a 3D figure now:** `tv_store.peter_bust` builds him from
-  `bike_parts.py` shapes (glossy pink helmet with a rubber rim, a stripe and a shine; a nylon jacket with
-  creases and a reflective band; shoulders and arms; the pink backpack with straps, a zip and side pockets),
-  lights him with the sun, a cool bounce from the shop's screens and a warm fill, and softens him a little
-  (lens blur) over the sharp shop. He stands at (0.56, -0.8): nearer the camera and at the left edge, as before. This replaces the flat 2D sprite of `rider_back.py` (kept in the repo, now
-  unused). Frame 1 (the skyway) was left as it was; the denim leg, boot and jacket detail added to
-  `bike_parts.py` also show there when they are in view.
+- **Peter in the TV news frame (intro frame 2) is the flat 2D sprite again** (`tools/rider_back.py`, pasted
+  and blurred in `tools/tv_store.py`), as the user asked after trying a 3D figure. The 3D bust
+  (`tv_store.peter_bust`) was removed; it is in the git history (commit d5728fc) if wanted again.
 - **Shift Mode carousel (branch claude/shift-carousel, from your sketch):** Story Mode is now Slot -> Load /
   Delete (no Continue-only screen). Shift Mode is a story carousel (`scripts/start_screen.gd`: middle card in
   front, side cards smaller and dimmed; swipe or tap to move, tap the middle to choose, dots below, heading
