@@ -11,6 +11,9 @@ const ROW_SIZE := Vector2(300, 52)
 const LOCK_ICON := "res://assets/ui/lock.png"
 ## What tapping the locked Shift Mode says, as a note at the bottom centre that fades by itself.
 const UNLOCK_NOTE := "Finish Story Mode to unlock Shift Mode"
+## The room between the padlock and the words on the Shift Mode button, and the button looks it restyles.
+const LOCK_GAP := 14.0
+const LOCK_STYLES := ["normal", "hover", "pressed", "disabled", "focus", "hover_pressed"]
 const TOAST_FADE_IN := 0.2
 const TOAST_HOLD := 2.2
 const TOAST_FADE_OUT := 0.5
@@ -106,19 +109,27 @@ func _refresh_shift_lock() -> void:
 	var old := _shift_button.get_node_or_null("Lock")
 	if old != null:
 		old.queue_free()
+	for state in LOCK_STYLES:
+		_shift_button.remove_theme_stylebox_override(state)
 	if open:
 		return
-	# The padlock sits just before the centred words, so the whole line stays centred on the logo's axis.
+	# The padlock and the words are centred as one line on the logo's axis: the words are pushed right by
+	# half the padlock and its gap, and the padlock goes just before them.
 	var icon := TextureRect.new()
 	icon.name = "Lock"
 	icon.texture = load(LOCK_ICON) as Texture2D
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.size = Vector2(34, 34)
+	var lead := icon.size.x + LOCK_GAP
+	for state in LOCK_STYLES:
+		var box := _shift_button.get_theme_stylebox(state).duplicate() as StyleBox
+		box.content_margin_left = lead
+		_shift_button.add_theme_stylebox_override(state, box)
 	var font := _shift_button.get_theme_font("font", "Button")
 	var font_size := _shift_button.get_theme_font_size("font_size", "Button")
 	var text_width := font.get_string_size(_shift_button.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-	icon.position = Vector2((ROW_SIZE.x - text_width) / 2.0 - icon.size.x - 14.0, (ROW_SIZE.y - icon.size.y) / 2.0)
+	icon.position = Vector2((ROW_SIZE.x - (lead + text_width)) / 2.0, (ROW_SIZE.y - icon.size.y) / 2.0)
 	_shift_button.add_child(icon)
 
 
