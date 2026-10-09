@@ -116,7 +116,7 @@ func _refresh_shift_lock() -> void:
 	var font := _shift_button.get_theme_font("font", "Button")
 	var font_size := _shift_button.get_theme_font_size("font_size", "Button")
 	var text_width := font.get_string_size(_shift_button.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-	icon.position = Vector2((ROW_SIZE.x - text_width) / 2.0 - icon.size.x - 4.0, (ROW_SIZE.y - icon.size.y) / 2.0)
+	icon.position = Vector2((ROW_SIZE.x - text_width) / 2.0 - icon.size.x - 8.0, (ROW_SIZE.y - icon.size.y) / 2.0)
 	_shift_button.add_child(icon)
 
 
