@@ -527,9 +527,9 @@ def build_skyway(size):
     bp.steering(wheel_pass, 6)
     bp.rider(wheel_pass)
     # Rubbish on the road: a crumpled delivery flyer lying flat and a white sando bag near the camera at the bottom right.
-    flyer_at = ground_at(wheel_pass, w * 0.67, h * 0.87)
+    flyer_at = ground_at(wheel_pass, w * 0.66, h * 0.8)
     crumpled_flyer(wheel_pass, (flyer_at[0], 0.02, flyer_at[2]), 200, -90, 0, w=0.5, h=0.34, seed=6, mirror=True)
-    bag_at = ground_at(wheel_pass, w * 0.9, h * 0.8)
+    bag_at = ground_at(wheel_pass, w * 0.89, h * 0.73)
     sando_bag(wheel_pass, bag_at, 205, 4.0, scale=0.85)
     return wheel_pass.render(scene_bg)
 
