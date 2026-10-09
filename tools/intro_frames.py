@@ -531,7 +531,9 @@ def build_skyway(size):
     crumpled_flyer(wheel_pass, (flyer_at[0], 0.02, flyer_at[2]), 200, -90, 0, w=0.5, h=0.34, seed=6, mirror=True)
     bag_at = ground_at(wheel_pass, w * 0.89, h * 0.73)
     sando_bag(wheel_pass, bag_at, 205, 4.0, scale=0.85)
-    return wheel_pass.render(scene_bg)
+    out = wheel_pass.render(scene_bg)
+    # Slight motion blur over everything, streaking away from the vanishing point: the bike is moving fast.
+    return radial_blur(out, (vp_x, horizon_y), 0.016, 12, 0.08)
 
 
 def draw_skyway(size=SIZE):
