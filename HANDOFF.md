@@ -169,6 +169,25 @@ Each is a tagged release on `main`. `git log --oneline` and `git tag -l` show th
 
 ## Where we stopped
 
+- **TV shop cards:** the HouseCredit promo and the BCash / Loro payment signs are now small horizontal
+  acrylic cards hung inside the shop from suction-cup hooks, in a row high on the glass above the sets so
+  the news stays the focus. `tools/tv_store.py` (`acrylic_card`).
+- **TV shop glass copy:** the HouseCredit offer is now one tall promo notice (0% interest, up to 12 months,
+  no down payment, valid ID, fine print); beside it a "Tanggap dito ang:" strip with BCash (blue) and Loro
+  (black, green) stickers, each with a QR and a line of Filipino copy. `tools/tv_store.py` (`build`).
+- **TV news pole and glass:** the pole is thinner (radius 0.22); its posters are septic siphoning, job
+  hiring (call Gloria), election, drug watchlist, police and food delivery flyers (`poster_image`). Three
+  payment stickers sit beside the 0% promo notice: BCash (blue), HouseCredit (red), Loro (black, green text).
+- **TV news pole:** the pole now stands right at the shop front (x 1.72, z -0.42) so nearly all of its
+  width shows, round and covered in posters.
+- **TV news scene, nearer (same branch):** camera moved to z -1.45 so the shop fills the picture, Peter is
+  nearer still (z -1.0) and blurred, the pole has 56 facets so it reads round.
+- **TV news scene, focus shot (same branch):** Peter is pushed to the left edge as a shoulder view and
+  blurred (gaussian, premultiplied) so the lens focuses on the news; two shelves of three bigger sets
+  (`crt_set(..., k=1.5)`) instead of three rows of five.
+- **TV news scene, super close (branch claude/tv-store-closeup, on claude/tv-store-shoulder):** the camera
+  is right at the glass; the rider is seen from head to chest only, large at the left; the tube sets, the
+  double door with its OPEN sign and the posted pole fill the rest. `tools/tv_store.py` (`build`).
 - **TV news scene, over the shoulder (branch claude/tv-store-shoulder, on claude/tv-store):** the picture
   is taken over the rider's shoulder, with him standing near the glass at the left so the news is clear;
   a thick wooden pole pasted with posters at the right; three rows of five identical tube sets side by

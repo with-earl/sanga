@@ -135,8 +135,8 @@ def _curve(p0, p1, p2, n=14):
              (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t * t * p2[1]) for t in [i / n for i in range(n + 1)]]
 
 
-def rider_back() -> Image.Image:
-    """The rider, 600 x 1400, transparent around him, feet at the bottom. About 800 px to the
+def rider_back(out_scale: float = 1.0) -> Image.Image:
+    """The rider, 600 x 1400 (times `out_scale`), transparent around him, feet at the bottom. About 800 px to the
     metre, so he stands 1.75 m tall. Weight on his left leg, one hand in a pocket, head tipped up
     and a little to the left, towards the screens."""
     c = _canvas()
@@ -268,7 +268,7 @@ def rider_back() -> Image.Image:
     bounce = np.clip((ys - 0.76) / 0.24, 0, 1) * 0.12
     px[..., :3] = px[..., :3] * (1 + bounce[..., None] * np.array([1.0, 0.7, 0.4]))
     out = Image.fromarray(np.clip(px, 0, 255).astype(np.uint8), "RGBA")
-    return out.resize((WIDTH, HEIGHT), Image.LANCZOS)
+    return out.resize((int(WIDTH * out_scale), int(HEIGHT * out_scale)), Image.LANCZOS)
 
 
 if __name__ == "__main__":
